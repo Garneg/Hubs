@@ -1,4 +1,6 @@
 # Hubs
+[Documentation](https://github.com/Garneg/Hubs-docs)
+
 Unofficial mobile client for [Habr](https://habr.com), made to lern Android Jetpack Compose framework and Kotlin
 
 #### Libraries used:
@@ -8,3 +10,4 @@ Unofficial mobile client for [Habr](https://habr.com), made to lern Android Jetp
 - Coil (Compose and Gif)
 - Jsoup
 - AndroidX browser (for custom tabs)
+
