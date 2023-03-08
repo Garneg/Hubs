@@ -55,7 +55,6 @@ fun UserScreen(
     onCommentsClicked: (postId: Int) -> Unit = { }
 ) {
     var viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
-
     var pagerState = rememberPagerState()
 
     Scaffold(
