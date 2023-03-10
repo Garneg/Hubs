@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
                                         )
                                             navController.navigate("article/$it")
                                     },
-                                    onGoToCommentsClicked = {
+                                    onCommentsClicked = {
                                         navController.navigate("comments/$it")
                                     },
                                     onUserClicked = {

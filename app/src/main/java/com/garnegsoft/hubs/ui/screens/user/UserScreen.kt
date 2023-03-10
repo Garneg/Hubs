@@ -25,6 +25,7 @@ import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.user.User
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
@@ -54,8 +55,8 @@ fun UserScreen(
     onUserClicked: (alias: String) -> Unit,
     onCommentsClicked: (postId: Int) -> Unit = { }
 ) {
-    var viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
-    var pagerState = rememberPagerState()
+    val viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
+    val pagerState = rememberPagerState()
 
     Scaffold(
         topBar = {
@@ -70,14 +71,13 @@ fun UserScreen(
                 actions = {
                     val context = LocalContext.current
                     IconButton(onClick = {
-                        var sendIntent = Intent()
-                        sendIntent.setAction(Intent.ACTION_SEND)
+                        val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
                             Intent.EXTRA_TEXT,
                             "https://habr.com/ru/users/${user.alias}/"
                         )
                         sendIntent.setType("text/plain")
-                        var shareIntent = Intent.createChooser(sendIntent, null)
+                        val shareIntent = Intent.createChooser(sendIntent, null)
                         context.startActivity(shareIntent)
                     }) {
                         Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
@@ -86,13 +86,13 @@ fun UserScreen(
             )
         }
     ) {
-        var tabs = listOf<String>(
+        val tabs = listOf<String>(
             "Профиль",
-            "Публикации ${if (user.articlesCount > 0) user.articlesCount else ""}",
-            "Комментарии ${if (user.commentsCount > 0) user.commentsCount else ""}",
-            "Закладки ${if (user.favoritesCount > 0) user.favoritesCount else ""}",
-            "Подписчики ${if (user.followersCount > 0) user.followersCount else ""}",
-            "Подписки ${if (user.followsCount > 0) user.followsCount else ""}"
+            "Публикации${if (user.articlesCount > 0) " " + formatLongNumbers(user.articlesCount) else ""}",
+            "Комментарии${if (user.commentsCount > 0) " " + formatLongNumbers(user.commentsCount) else ""}",
+            "Закладки${if (user.favoritesCount > 0) " " + formatLongNumbers(user.favoritesCount) else ""}",
+            "Подписчики${if (user.followersCount > 0) " " + formatLongNumbers(user.followersCount) else ""}",
+            "Подписки${if (user.followsCount > 0) " " + formatLongNumbers(user.followsCount) else ""}"
         )
         Column(modifier = Modifier.padding(it)) {
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)

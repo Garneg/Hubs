@@ -1,12 +1,14 @@
 package com.garnegsoft.hubs.ui.screens.hub
 
 import ArticlesListController
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
@@ -14,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -82,7 +85,21 @@ fun HubScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
                     }
-
+                },
+                actions = {
+                    val context = LocalContext.current
+                    IconButton(onClick = {
+                        val sendIntent = Intent(Intent.ACTION_SEND)
+                        sendIntent.putExtra(
+                            Intent.EXTRA_TEXT,
+                            "https://habr.com/ru/hub/${alias}/"
+                        )
+                        sendIntent.setType("text/plain")
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
+                    }) {
+                        Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
+                    }
                 }
             )
         }) {

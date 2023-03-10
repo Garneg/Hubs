@@ -29,7 +29,7 @@ fun HubCard(
     onClick: () -> Unit = { },
     indicator: @Composable (hub: HubSnippet) -> Unit = {
         Text(
-            String.format("%.1f", hub.statistics.rating),
+            text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
             fontWeight = FontWeight.W400,
             color = Color(0xFFF555D7)
         )

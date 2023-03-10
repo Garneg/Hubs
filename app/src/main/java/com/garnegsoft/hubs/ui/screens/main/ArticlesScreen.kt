@@ -53,7 +53,7 @@ fun ArticlesScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
     onArticleClicked: (articleId: Int) -> Unit,
     onSearchClicked: () -> Unit,
-    onGoToCommentsClicked: (articleId: Int) -> Unit,
+    onCommentsClicked: (articleId: Int) -> Unit,
     onUserClicked: (alias: String) -> Unit,
     onCompanyClicked: (alias: String) -> Unit,
     onHubClicked: (alias: String) -> Unit
@@ -121,9 +121,6 @@ fun ArticlesScreen(
                         var isRefreshing by rememberSaveable { mutableStateOf(false) }
                         var swipestate = rememberSwipeRefreshState(isRefreshing = isRefreshing)
                         var pageNumber = rememberSaveable { mutableStateOf(1) }
-                        LaunchedEffect(key1 = articles?.list?.first(), block = {
-                            articlesLazyListState.scrollToItem(0)
-                        })
 
                         SwipeRefresh(
                             state = swipestate,
@@ -146,6 +143,8 @@ fun ArticlesScreen(
                                     if (newArticlesList != null) {
                                         viewModel.articles.postValue(newArticlesList)
                                     }
+                                    delay(400)
+                                    articlesLazyListState.scrollToItem(0)
                                     swipestate.isRefreshing = false
                                 }
                             }) {
@@ -177,7 +176,7 @@ fun ArticlesScreen(
                                     ArticleCard(
                                         article = it,
                                         onClick = { onArticleClicked(it.id) },
-                                        onCommentsClick = { onGoToCommentsClicked(it.id) },
+                                        onCommentsClick = { onCommentsClicked(it.id) },
                                         onAuthorClick = { onUserClicked(it.author!!.alias) }
                                     )
                                 }
@@ -229,6 +228,8 @@ fun ArticlesScreen(
                                     if (newArticlesList != null) {
                                         viewModel.news.postValue(newArticlesList)
                                     }
+                                    delay(400)
+                                    newsLazyListState.scrollToItem(0)
                                     swipestate.isRefreshing = false
 
                                 }
@@ -264,7 +265,7 @@ fun ArticlesScreen(
                                     ArticleCard(
                                         article = it,
                                         onClick = { onArticleClicked(it.id) },
-                                        onCommentsClick = { onGoToCommentsClicked(it.id) }
+                                        onCommentsClick = { onCommentsClicked(it.id) }
                                     )
                                 }
                             } else {

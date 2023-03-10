@@ -74,6 +74,7 @@ fun CompanyScreen(
     val followers by viewModel.followers.observeAsState()
     Scaffold(
         topBar = {
+            val context = LocalContext.current
             TopAppBar(
                 title = { Text("Компания") },
                 navigationIcon = {
@@ -82,7 +83,13 @@ fun CompanyScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = {
+                        val intent = Intent(Intent.ACTION_SEND)
+                        intent.putExtra(Intent.EXTRA_TEXT, "https://habr.com/ru/company/$alias/blog")
+                        intent.setType("text/plain")
+                        val chooser = Intent.createChooser(intent, null)
+                        context.startActivity(chooser)
+                    }) {
                         Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
                     }
                 }
