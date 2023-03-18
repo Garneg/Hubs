@@ -80,7 +80,7 @@ data class CompanyRef (
     var titleHtml: String,
     var descriptionHtml: String? = null,
     var imageUrl: String?,
-//    ral relatedData: Any? = null,
+//    val relatedData: Any? = null,
     var statistics: CompaniesStatistics,
     var commonHubs: List<CommonHub>
 )

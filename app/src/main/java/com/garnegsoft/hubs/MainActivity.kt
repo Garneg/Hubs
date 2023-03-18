@@ -198,14 +198,6 @@ class MainActivity : ComponentActivity() {
         }
 
         Log.e("ExternalLink", intent.data.toString())
-        var context = this
-        onBackPressedDispatcher.addCallback {
-            Toast.makeText(
-                context,
-                "Want to escape?",
-                Toast.LENGTH_SHORT
-            ).show()
-        }
     }
 
 }

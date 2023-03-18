@@ -92,7 +92,7 @@ fun HubScreen(
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
                             Intent.EXTRA_TEXT,
-                            "https://habr.com/ru/hub/${alias}/"
+                            "${viewModel.hub.value?.title} — https://habr.com/ru/hub/${alias}/"
                         )
                         sendIntent.setType("text/plain")
                         val shareIntent = Intent.createChooser(sendIntent, null)

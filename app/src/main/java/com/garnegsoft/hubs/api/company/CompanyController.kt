@@ -63,7 +63,7 @@ class CompanyController {
         var imageUrl: String?,
         var titleHtml: String,
         var descriptionHtml: String?,
-//  var al relatedData: Any? = null,
+        var relatedData: RelatedData? = null,
         var statistics: CompanyStatistics,
         var foundationDate: FoundationDate?,
         var location: Location,
@@ -76,6 +76,9 @@ class CompanyController {
 //  var al aDeskSettings: Any? = null,
         var careerAlias: String?
     ) {
+
+        @Serializable
+        data class RelatedData(var isSubscribed: Boolean)
 
         @Serializable
         data class Contact(

@@ -74,7 +74,10 @@ fun UserScreen(
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
                             Intent.EXTRA_TEXT,
-                            "https://habr.com/ru/users/${user.alias}/"
+                            if (user.fullname != null)
+                                "${user.fullname} — https://habr.com/ru/users/${user.alias}/"
+                        else
+                            "${user.alias} — https://habr.com/ru/users/${user.alias}/"
                         )
                         sendIntent.setType("text/plain")
                         val shareIntent = Intent.createChooser(sendIntent, null)

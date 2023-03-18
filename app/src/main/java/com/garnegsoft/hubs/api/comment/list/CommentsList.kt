@@ -161,20 +161,15 @@ class CommentsListController {
             //ral timeEditAllowedTill: Any? = null,
             var children: ArrayList<String>,
             //val vote: Vote? = null,
-            /**
-             * poor
-             */
             var post: Post? = null,
             var isPinned: Boolean
         ) {
-
             @Serializable
             data class Post(
                 var id: Int,
                 var title: String,
                 var commentsCount: Int,
                 var postType: String,
-
                 )
 
             @Serializable
@@ -182,9 +177,7 @@ class CommentsListController {
                 var id: String? = null,
                 var alias: String? = null,
                 var fullname: String? = null,
-
                 var avatarUrl: String? = null,
-
                 var speciality: String? = null
             )
 

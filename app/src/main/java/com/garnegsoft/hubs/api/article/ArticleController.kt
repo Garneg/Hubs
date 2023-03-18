@@ -188,9 +188,7 @@ class ArticleController {
         var timePublished: String,
         var isCorporative: Boolean,
         var lang: String,
-
         var titleHtml: String,
-
         var leadData: ArticleLeadData,
         var editorVersion: String,
         var postType: String,
@@ -200,12 +198,10 @@ class ArticleController {
         var hubs: List<ArticleHub>,
         var flows: List<ArticleFlow>? = null,
         var relatedData: ArticleRelatedData?,
-
         var textHtml: String,
-
         var tags: List<ArticleTag>? = null,
         var metadata: ArticleMetadata? = null,
-        //var polls: List<Any?>,
+        var polls: List<Poll>,
         var commentsEnabled: Boolean,
         var rulesRemindEnabled: Boolean?,
         var votesEnabled: Boolean?,
@@ -220,7 +216,7 @@ class ArticleController {
     ) {
 
         @Serializable
-         data class ArticleAuthor(
+        data class ArticleAuthor(
             var id: String,
             var alias: String,
             var fullname: String? = null,
@@ -230,7 +226,6 @@ class ArticleController {
             var relatedData: AuthorRelatedData?,
             var speciality: String?
         )
-
 
         @Serializable
         data class AuthorRelatedData(
@@ -346,6 +341,29 @@ class ArticleController {
         @Serializable
         data class ArticleTag(
             var titleHtml: String
+        )
+
+        @Serializable
+        data class Poll (
+            var id: String,
+            var timeElapsed: String? = null,
+            var answersType: String,
+            var votesCount: Long,
+            var passCount: Long,
+            var textHtml: String,
+            var relatedData: RelatedData? = null,
+            var variants: List<Variant>
+        ){
+            @Serializable
+            data class RelatedData(var canVote: Boolean)
+        }
+        @Serializable
+        data class Variant (
+            var id: String,
+            var textHtml: String,
+            var votesCount: Long,
+            var percent: Double,
+            var selected: Boolean
         )
     }
 

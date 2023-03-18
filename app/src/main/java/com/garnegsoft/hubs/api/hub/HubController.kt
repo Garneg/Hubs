@@ -7,7 +7,7 @@ import kotlinx.serialization.json.decodeFromJsonElement
 
 
 class HubController {
-    companion object{
+    companion object {
         private fun getProfile(path: String, args: Map<String, String>? = null): HubProfile? {
             var response = HabrApi.get(path, args)
 
@@ -34,7 +34,6 @@ class HubController {
                     alias = it.alias,
                     title = it.titleHtml,
                     description = it.descriptionHtml,
-                    fullDescription = it.fullDescriptionHtml,
                     avatarUrl = it.imageUrl,
                     statistics = Hub.Statistics(
                         subscribersCount = it.statistics.subscribersCount,
@@ -59,11 +58,13 @@ data class HubProfile (
     val fullDescriptionHtml: String,
     var imageUrl: String,
     var statistics: Statistics,
-    var keywords: List<String>,
     var flow: Flow,
-    var isProfiled: Boolean
-)
-
+    var isProfiled: Boolean,
+    var relatedData: RelatedData?
+) {
+    @Serializable
+    data class RelatedData(var isSubscribed: Boolean)
+}
 @Serializable
 data class Flow (
     var id: String,

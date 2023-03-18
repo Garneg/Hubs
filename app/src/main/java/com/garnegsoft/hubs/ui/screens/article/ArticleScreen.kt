@@ -94,18 +94,10 @@ fun ArticleScreen(
                         var sendIntent = Intent()
                         sendIntent.setAction(Intent.ACTION_SEND)
 
-                        if (article.isCorporative) {
-                            sendIntent.putExtra(
-                                Intent.EXTRA_TEXT,
-                                "https://habr.com/ru/post/${article.id}/"
-                            )
-                        } else {
-                            sendIntent.putExtra(
-                                Intent.EXTRA_TEXT,
-                                "https://habr.com/ru/post/${article.id}/"
-                            )
-
-                        }
+                        sendIntent.putExtra(
+                            Intent.EXTRA_TEXT,
+                            "${article.title} — https://habr.com/ru/post/${article.id}/"
+                        )
                         sendIntent.setType("text/plain")
                         var shareIntent = Intent.createChooser(sendIntent, null)
                         context.startActivity(shareIntent)

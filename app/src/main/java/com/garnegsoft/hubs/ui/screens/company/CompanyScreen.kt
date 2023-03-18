@@ -85,7 +85,7 @@ fun CompanyScreen(
                 actions = {
                     IconButton(onClick = {
                         val intent = Intent(Intent.ACTION_SEND)
-                        intent.putExtra(Intent.EXTRA_TEXT, "https://habr.com/ru/company/$alias/blog")
+                        intent.putExtra(Intent.EXTRA_TEXT, "Блог ${companyProfile?.title} — https://habr.com/ru/company/$alias/blog")
                         intent.setType("text/plain")
                         val chooser = Intent.createChooser(intent, null)
                         context.startActivity(chooser)

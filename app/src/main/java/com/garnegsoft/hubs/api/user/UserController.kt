@@ -79,14 +79,13 @@ class UserController {
 data class UserProfileData (
     var alias: String,
     var fullname: String?,
-
     var avatarUrl: String? = null,
     var speciality: String?,
     var gender: String,
     var rating: Float,
     var ratingPos: Int? = null,
     var scoreStats: ScoreStats,
-//  var al relatedData: Any? = null,
+    var relatedData: RelatedData? = null,
     var followStats: FollowStats,
     var lastActivityDateTime: String?,
     var registerDateTime: String,
@@ -96,7 +95,10 @@ data class UserProfileData (
     var counterStats: CounterStats,
     var isReadonly: Boolean,
     var canBeInvited: Boolean
-)
+){
+    @Serializable
+    data class RelatedData(var isSubscribed: Boolean)
+}
 
 @Serializable
 data class CounterStats (
