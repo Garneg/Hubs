@@ -74,8 +74,9 @@ class CommentsListController {
                     deleted = true,
                     message = comment.message,
                     score = comment.score,
-                    isAuthor = comment.isPostAuthor,
-                    parentCommentId = comment.parentId?.toInt()
+                    isArticleAuthor = comment.isPostAuthor,
+                    parentCommentId = comment.parentId?.toInt(),
+                    edited = comment.timeChanged != null
                 )
             }
             return Comment(
@@ -91,8 +92,9 @@ class CommentsListController {
                 deleted = false,
                 message = comment.message,
                 score = comment.score,
-                isAuthor = comment.isPostAuthor,
-                parentCommentId = comment.parentId?.toInt()
+                isArticleAuthor = comment.isPostAuthor,
+                parentCommentId = comment.parentId?.toInt(),
+                edited = comment.timeChanged != null
             )
         }
 

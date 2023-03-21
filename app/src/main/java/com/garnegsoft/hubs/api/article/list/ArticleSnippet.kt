@@ -80,7 +80,18 @@ data class ArticleSnippet(
      */
     val format: ArticleFormat?,
 
+    /**
+     * Time to read article
+     */
     val readingTime: Int,
 
-    val complexity: PostComplexity
+    /**
+     * Complexity of the article
+     */
+    val complexity: PostComplexity,
+
+    /**
+     * Data related to app user
+     */
+    val relatedData: Article.RelatedData?
 ) : HabrSnippet

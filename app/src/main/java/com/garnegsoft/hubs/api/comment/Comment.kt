@@ -12,5 +12,6 @@ class Comment (
     val children: MutableList<Comment>,
     val deleted: Boolean = false,
     val author: Article.Author,
-    val isAuthor: Boolean,
+    val isArticleAuthor: Boolean,
+    val edited: Boolean
 )

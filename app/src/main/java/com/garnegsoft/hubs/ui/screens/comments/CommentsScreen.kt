@@ -60,7 +60,7 @@ fun CommentItem(
             .padding(8.dp)
     ) {
         Row(
-            modifier = if (comment.isAuthor) Modifier
+            modifier = if (comment.isArticleAuthor) Modifier
                 .fillMaxWidth()
                 .clip(
                     RoundedCornerShape(8.dp)

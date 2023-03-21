@@ -1,6 +1,7 @@
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.screens.article.parseElement
@@ -74,14 +75,22 @@ class ArticleController {
                             commentsCount = it.statistics.commentsCount.toString(),
                             favoritesCount = it.statistics.favoritesCount.toString(),
                             readingCount = it.statistics.readingCount.toString(),
-                            score = it.statistics.score
+                            score = it.statistics.score,
+                            votesCountMinus = it.statistics.votesCountMinus,
+                            votesCountPlus = it.statistics.votesCountPlus
                         ),
                         imageUrl = it.leadData.imageUrl,
                         format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
                         textSnippet = it.leadData.textHtml,
                         hubs = listOf(),
                         complexity = PostComplexity.fromString(it.complexity),
-                        readingTime = it.readingTime
+                        readingTime = it.readingTime,
+                        relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
+                            bookmarked = it.bookmarked,
+                            canVote = it.canVote,
+                            canVoteMinus = it.canVoteMinus,
+                            canVotePlus = it.canVotePlus
+                        ) }
                     ),
                     editorVersion = EditorVersion.fromString(it.editorVersion),
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
@@ -89,7 +98,9 @@ class ArticleController {
                         commentsCount = it.statistics.commentsCount.toString(),
                         favoritesCount = it.statistics.favoritesCount.toString(),
                         readingCount = it.statistics.readingCount.toString(),
-                        score = it.statistics.score
+                        score = it.statistics.score,
+                        votesCountMinus = it.statistics.votesCountMinus,
+                        votesCountPlus = it.statistics.votesCountPlus
                     ),
                     //TODO
                     hubs = it.hubs.run {
@@ -118,7 +129,13 @@ class ArticleController {
                         it.metadata!!.mainImageUrl
                     ) else null,
                     complexity = PostComplexity.fromString(it.complexity),
-                    readingTime = it.readingTime
+                    readingTime = it.readingTime,
+                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
+                        bookmarked = it.bookmarked,
+                        canVote = it.canVote,
+                        canVoteMinus = it.canVoteMinus,
+                        canVotePlus = it.canVotePlus
+                    ) }
                 )
             }
             return result
@@ -128,7 +145,7 @@ class ArticleController {
             path: String,
             args: Map<String, String>? = null
         ): ArticleSnippet? {
-            var raw = this.getArticle(path, args)
+            val raw = this.getArticle(path, args)
 
             var result: ArticleSnippet? = null
 
@@ -154,7 +171,9 @@ class ArticleController {
                         commentsCount = it.statistics.commentsCount.toString(),
                         favoritesCount = it.statistics.favoritesCount.toString(),
                         readingCount = it.statistics.readingCount.toString(),
-                        score = it.statistics.score
+                        score = it.statistics.score,
+                        votesCountMinus = it.statistics.votesCountMinus,
+                        votesCountPlus = it.statistics.votesCountPlus
                     ),
                     imageUrl = it.leadData.imageUrl,
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
@@ -174,7 +193,13 @@ class ArticleController {
                         hubs
                     },
                     complexity = PostComplexity.fromString(it.complexity),
-                    readingTime = it.readingTime
+                    readingTime = it.readingTime,
+                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
+                        bookmarked = it.bookmarked,
+                        canVote = it.canVote,
+                        canVoteMinus = it.canVoteMinus,
+                        canVotePlus = it.canVotePlus
+                    ) }
                 )
             }
 
@@ -333,9 +358,9 @@ class ArticleController {
             var favoritesCount: Int,
             var readingCount: Int,
             var score: Int,
-            var votesCount: Int?,
-            var votesCountPlus: Int?,
-            var votesCountMinus: Int?
+            var votesCount: Int,
+            var votesCountPlus: Int,
+            var votesCountMinus: Int
         )
 
         @Serializable

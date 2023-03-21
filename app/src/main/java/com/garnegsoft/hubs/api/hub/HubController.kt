@@ -41,7 +41,8 @@ class HubController {
                         rating = it.statistics.rating,
                         postsCount = it.statistics.postsCount
                     ),
-                    isProfiled = it.isProfiled
+                    isProfiled = it.isProfiled,
+                    relatedData = it.relatedData?.let { Hub.RelatedData(it.isSubscribed) }
                 )
             }
 

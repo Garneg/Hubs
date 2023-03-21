@@ -80,10 +80,15 @@ fun UserCard(
         }
         Spacer(modifier = Modifier.width(style.padding.calculateStartPadding(LayoutDirection.Ltr)))
         Column(modifier = Modifier.weight(1f)) {
-            Text(text = user.alias, style = style.aliasTextStyle)
-            if (style.showSpeciality) {
-                user.speciality?.let {
+            Text(
+                modifier = Modifier.offset(0.dp, -4.dp),
+                text = user.alias,
+                style = style.aliasTextStyle
+            )
+            if (style.showSpeciality && user.speciality != null) {
+                user.speciality.let {
                     Text(
+                        modifier = Modifier.offset(0.dp, -4.dp),
                         text = it,
                         style = style.specialityTextStyle,
                         maxLines = 1,

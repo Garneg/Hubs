@@ -6,7 +6,8 @@ class Hub(
     val description: String,
     val avatarUrl: String,
     val statistics: Statistics,
-    val isProfiled: Boolean
+    val isProfiled: Boolean,
+    val relatedData: RelatedData?
 ){
     data class Statistics(
         val subscribersCount: Int,
@@ -15,4 +16,7 @@ class Hub(
         val postsCount: Int
     )
 
+    data class RelatedData(
+        val isSubscribed: Boolean
+    )
 }

@@ -195,20 +195,24 @@ internal fun UserProfilePage(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = if (user.ratingPosition == null) "Не участвует" else user.ratingPosition.toString() + "-й",
-                        textAlign = TextAlign.Right
+                        textAlign = TextAlign.End
                     )
                 }
-//            Box(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(16.dp)
-//            ) {
-//                Text(text = "Откуда")
-//                Text(
-//                    modifier = Modifier.align(Alignment.CenterEnd),
-//                    text = "Москва, Россия"
-//                )
-//            }
+                if (user.location != null){
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(text = "Откуда", modifier = Modifier.weight(1f))
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = user.location,
+                            textAlign = TextAlign.End
+                        )
+                    }
+                }
+
                 if (user.birthday != null) {
                     Row(
                         modifier = Modifier
@@ -219,7 +223,7 @@ internal fun UserProfilePage(
                         Text(
                             modifier = Modifier.weight(1f),
                             text = user.birthday,
-                            textAlign = TextAlign.Right
+                            textAlign = TextAlign.End
                         )
                     }
                 }
@@ -232,7 +236,7 @@ internal fun UserProfilePage(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = user.registrationDate,
-                        textAlign = TextAlign.Right
+                        textAlign = TextAlign.End
                     )
                 }
                 if (user.lastActivityDate != null) {
@@ -245,7 +249,7 @@ internal fun UserProfilePage(
                         Text(
                             modifier = Modifier.weight(1f),
                             text = user.lastActivityDate,
-                            textAlign = TextAlign.Right
+                            textAlign = TextAlign.End
                         )
                     }
                 }

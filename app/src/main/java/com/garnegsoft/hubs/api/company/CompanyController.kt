@@ -51,7 +51,8 @@ class CompanyController {
                         postsCount = it.statistics.postsCount,
                         newsCount = it.statistics.newsCount,
                         employees = it.statistics.employeesCount
-                    )
+                    ),
+                    relatedData = it.relatedData?.let { Company.RelatedData(it.isSubscribed) }
                 )
             }
             return result

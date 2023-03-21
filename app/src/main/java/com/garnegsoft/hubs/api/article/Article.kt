@@ -51,7 +51,9 @@ class Article(
 
     val readingTime: Int,
 
-    val complexity: PostComplexity
+    val complexity: PostComplexity,
+
+    val relatedData: RelatedData?
 
 ) {
 
@@ -105,10 +107,19 @@ class Article(
         val commentsCount: String,
         val favoritesCount: String,
         val readingCount: String,
-        val score: Int
+        val score: Int,
+        val votesCountPlus: Int,
+        val votesCountMinus: Int
     )
 
     data class Metadata(
         val mainImageUrl: String?
+    )
+
+    class RelatedData(
+        bookmarked: Boolean,
+        canVote: Boolean,
+        canVotePlus: Boolean,
+        canVoteMinus: Boolean
     )
 }

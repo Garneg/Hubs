@@ -1,5 +1,6 @@
 import android.util.Log
 import com.garnegsoft.hubs.api.*
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.formatTime
@@ -132,12 +133,20 @@ class ArticlesListController {
                                     score = it.statistics.score,
                                     readingCount = formatLongNumbers(it.statistics.readingCount),
                                     commentsCount = it.statistics.commentsCount.toString(),
-                                    favoritesCount = it.statistics.favoritesCount.toString()
+                                    favoritesCount = it.statistics.favoritesCount.toString(),
+                                    votesCountMinus = it.statistics.votesCountMinus,
+                                    votesCountPlus = it.statistics.votesCountPlus
                                 ),
                                 imageUrl = it.leadData.imageUrl,
                                 textSnippet = it.leadData.textHtml,
                                 complexity = PostComplexity.fromString(it.complexity),
-                                readingTime = it.readingTime
+                                readingTime = it.readingTime,
+                                relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
+                                    bookmarked = it.bookmarked,
+                                    canVote = it.canVote,
+                                    canVoteMinus = it.canVoteMinus,
+                                    canVotePlus = it.canVotePlus
+                                ) }
                             )
                         )
                     }
@@ -197,8 +206,31 @@ class ArticlesListController {
         var tags: ArrayList<ArticlesListTag>? = null,
         var format: String?,
         var readingTime: Int,
-        var complexity: String?
+        var complexity: String?,
+        var relatedData: RelatedData?
     )
+
+    @Serializable
+    data class RelatedData(
+        var unreadCommentsCount: Int?,
+        var vote: RelatedDataVote,
+        var bookmarked: Boolean,
+        var canComment: Boolean,
+        var canEdit: Boolean,
+        var canVote: Boolean,
+        var canViewVotes: Boolean,
+        var canVotePlus: Boolean,
+        var canVoteMinus: Boolean,
+        var canModerateComments: Boolean,
+        var trackerSubscribed: Boolean,
+        var emailSubscribed: Boolean
+    ){
+        @Serializable
+        data class RelatedDataVote(
+            var value: String? = null,
+            var voteTimeExpired: String
+        )
+    }
 
     @Serializable
     data class ArticlesListAuthor(
@@ -252,7 +284,10 @@ class ArticlesListController {
         var commentsCount: Int,
         var favoritesCount: Int,
         var readingCount: Int,
-        var score: Int
+        var score: Int,
+        var votesCountPlus: Int,
+        var votesCountMinus: Int,
+        var votesCount: Int
     )
 
     @Serializable

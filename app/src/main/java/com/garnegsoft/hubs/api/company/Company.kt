@@ -13,7 +13,7 @@ class Company(
     val habrCareerAlias: String?,
     val location: String,
     val statistics: Statistics,
-
+    val relatedData: RelatedData?
 ) {
     class Statistics(
         val subscribersCount: Int,
@@ -22,4 +22,6 @@ class Company(
         val newsCount: Int,
         val employees: Int,
     )
+
+    class RelatedData(val isSubscribed: Boolean)
 }
