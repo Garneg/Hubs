@@ -59,7 +59,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val obossanyFlow = authDataStore.data.map { it.get(DataStoreKeys.Auth.Cookies) ?: "" }
-        var cookies = ""
+        var cookies: String
         runBlocking { cookies = obossanyFlow.first() }
 
         if (cookies == "") {
@@ -90,13 +90,8 @@ class MainActivity : ComponentActivity() {
                     navController = navController,
                     startDestination = "articles",
                     builder = {
+
                         composable("articles") {
-
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-
                                 ArticlesScreen(
                                     viewModelStoreOwner = it,
                                     onSearchClicked = { navController.navigate("search") },
@@ -120,8 +115,6 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate("hub/$it")
                                     }
                                 )
-                            }
-
                         }
                         composable("article/{id}") {
 

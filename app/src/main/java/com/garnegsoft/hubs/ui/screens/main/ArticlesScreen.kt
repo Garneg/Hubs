@@ -12,6 +12,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -48,7 +51,7 @@ class ArticlesScreenViewModel : ViewModel() {
 
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ArticlesScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
@@ -119,37 +122,35 @@ fun ArticlesScreen(
                         val articles by viewModel.articles.observeAsState()
 
                         var updateFeedCoroutineScope = rememberCoroutineScope()
-                        var isRefreshing by rememberSaveable { mutableStateOf(false) }
-                        var swipestate = rememberSwipeRefreshState(isRefreshing = isRefreshing)
                         var pageNumber = rememberSaveable { mutableStateOf(1) }
 
-                        SwipeRefresh(
-                            state = swipestate,
-                            indicator = { state, offset ->
-                                SwipeRefreshIndicator(
-                                    state = state,
-                                    refreshTriggerDistance = 50.dp,
-                                    contentColor = SecondaryColor,
-                                )
-                            },
-                            onRefresh = {
-                                updateFeedCoroutineScope.launch(Dispatchers.IO) {
-                                    swipestate.isRefreshing = true
-                                    pageNumber.value = 1
-                                    var newArticlesList =
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf("sort" to "rating")
-                                        )
-                                    if (newArticlesList != null) {
-                                        viewModel.articles.postValue(newArticlesList)
-                                    }
-                                    delay(400)
+                        if (articles != null) {
 
-                                    swipestate.isRefreshing = false
-                                }
-                            }) {
-                            if (articles != null) {
+                            var refreshing by remember { mutableStateOf(false) }
+                            val refreshingState = rememberPullRefreshState(
+                                refreshing = refreshing,
+                                onRefresh = {
+                                    updateFeedCoroutineScope.launch(Dispatchers.IO) {
+                                        refreshing = true
+                                        pageNumber.value = 1
+                                        var newArticlesList =
+                                            ArticlesListController.getArticlesSnippets(
+                                                "articles",
+                                                mapOf("sort" to "rating")
+                                            )
+                                        if (newArticlesList != null) {
+                                            viewModel.articles.postValue(newArticlesList)
+                                        }
+                                        delay(400)
+
+                                        refreshing = false
+                                    }
+                                })
+                            Box(
+                                modifier = Modifier.pullRefresh(
+                                    state = refreshingState
+                                )
+                            ) {
                                 PagedHabrSnippetsColumn(
                                     data = articles!!,
                                     lazyListState = articlesLazyListState,
@@ -181,71 +182,67 @@ fun ArticlesScreen(
                                         onAuthorClick = { onUserClicked(it.author!!.alias) }
                                     )
                                 }
-                            } else {
-                                LaunchedEffect(key1 = Unit) {
-                                    launch(Dispatchers.IO) {
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf("sort" to "rating")
-                                        )?.let {
-                                            viewModel.articles.postValue(it)
-                                        }
-
+                                PullRefreshIndicator(
+                                    refreshing = refreshing,
+                                    state = refreshingState,
+                                    modifier = Modifier.align(Alignment.TopCenter),
+                                    contentColor = SecondaryColor
+                                )
+                            }
+                        } else {
+                            LaunchedEffect(key1 = Unit) {
+                                launch(Dispatchers.IO) {
+                                    ArticlesListController.getArticlesSnippets(
+                                        "articles",
+                                        mapOf("sort" to "rating")
+                                    )?.let {
+                                        viewModel.articles.postValue(it)
                                     }
+
                                 }
                             }
-
                         }
+
 
                     }
                     // news
                     1 -> {
                         val newsList by viewModel.news.observeAsState()
-
+                        var pageNumber = rememberSaveable { mutableStateOf(1) }
                         var updateFeedCoroutineScope = rememberCoroutineScope()
                         var isRefreshing by rememberSaveable { mutableStateOf(false) }
-                        var swipestate = rememberSwipeRefreshState(isRefreshing = isRefreshing)
-                        var pageNumber by rememberSaveable { mutableStateOf(1) }
-
-
-                        SwipeRefresh(
-                            state = swipestate,
-                            indicator = { state, offset ->
-                                SwipeRefreshIndicator(
-                                    state = state,
-                                    refreshTriggerDistance = 50.dp,
-                                    contentColor = SecondaryColor,
-                                )
-                            },
-                            onRefresh = {
-                                updateFeedCoroutineScope.launch(Dispatchers.IO) {
-                                    swipestate.isRefreshing = true
-                                    pageNumber = 1
-                                    var newArticlesList =
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf("sort" to "rating", "news" to "true")
-                                        )
-                                    if (newArticlesList != null) {
-                                        viewModel.news.postValue(newArticlesList)
-                                    }
-                                    //delay(400)
-                                    //newsLazyListState.scrollToItem(0)
-                                    swipestate.isRefreshing = false
-
+                        var swipestate = rememberPullRefreshState(
+                            refreshing = isRefreshing,
+                            onRefresh = { updateFeedCoroutineScope.launch(Dispatchers.IO) {
+                                isRefreshing = true
+                                pageNumber.value = 1
+                                var newArticlesList =
+                                    ArticlesListController.getArticlesSnippets(
+                                        "articles",
+                                        mapOf("sort" to "rating", "news" to "true")
+                                    )
+                                if (newArticlesList != null) {
+                                    viewModel.news.postValue(newArticlesList)
                                 }
-                            }) {
+                                //delay(400)
+                                //newsLazyListState.scrollToItem(0)
+                                isRefreshing = false
+
+                            } })
+
+
+                        Box(
+                            modifier = Modifier.pullRefresh(
+                                state = swipestate)
+                        ){
 
                             if (newsList != null) {
-                                LazyHabrSnippetsColumn(
+                                PagedHabrSnippetsColumn(
                                     data = newsList!!,
+                                    page = pageNumber,
                                     lazyListState = newsLazyListState,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    contentPadding = PaddingValues(8.dp),
-                                    onScrollEnd = {
+                                    onNextPageLoad = {
                                         updateFeedCoroutineScope.launch(Dispatchers.IO) {
-                                            pageNumber++
 
                                             ArticlesListController
                                                 .getArticlesSnippets(
@@ -253,7 +250,7 @@ fun ArticlesScreen(
                                                     mapOf(
                                                         "sort" to "rating",
                                                         "news" to "true",
-                                                        "page" to pageNumber.toString()
+                                                        "page" to it.toString()
                                                     )
                                                 )?.let {
                                                     viewModel.news.postValue(newsList!! + it)
@@ -270,6 +267,10 @@ fun ArticlesScreen(
                                         onAuthorClick = { onUserClicked(it.author!!.alias) }
                                     )
                                 }
+                                PullRefreshIndicator(
+                                    modifier = Modifier.align(Alignment.TopCenter),
+                                    contentColor = SecondaryColor,
+                                    refreshing = isRefreshing, state = swipestate)
                             } else {
                                 LaunchedEffect(key1 = Unit) {
                                     launch(Dispatchers.IO) {
@@ -403,7 +404,8 @@ fun MainMenuButton() {
     IconButton(onClick = { expanded = true }) {
         Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
     }
-    DropdownMenu(expanded = expanded,
+    DropdownMenu(
+        expanded = expanded,
         onDismissRequest = { expanded = false },
         modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
     ) {
@@ -440,8 +442,12 @@ fun MainMenuButton() {
         Row(modifier = Modifier
             .clickable { }
             .padding(12.dp)
-            ) {
-            Icon(imageVector = Icons.Outlined.Info, contentDescription = "", modifier = Modifier.size(24.dp))
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Info,
+                contentDescription = "",
+                modifier = Modifier.size(24.dp)
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Text("О приложении")
             Spacer(modifier = Modifier.width(12.dp))
@@ -474,9 +480,11 @@ fun MenuItem(
     icon: @Composable () -> Unit,
     onClick: () -> Unit
 ) {
-    Row(modifier = Modifier
-        .clickable(onClick = onClick)
-        .padding(12.dp)) {
+    Row(
+        modifier = Modifier
+            .clickable(onClick = onClick)
+            .padding(12.dp)
+    ) {
         icon()
         Spacer(modifier = Modifier.width(12.dp))
         Text(title)
