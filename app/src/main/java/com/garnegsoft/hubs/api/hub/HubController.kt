@@ -50,6 +50,7 @@ class HubController {
 
         /**
          * Subscribe/unsubscribe to hub.
+         * @return subscription status
          * @throws UnsupportedOperationException
          */
         fun subscription(alias: String): Boolean {

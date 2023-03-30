@@ -6,8 +6,7 @@ import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.utils.formatBirthdate
 import com.garnegsoft.hubs.api.utils.formatTime
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.*
 
 class UserController {
     companion object {
@@ -97,6 +96,20 @@ class UserController {
             }
 
             return result
+        }
+
+        /**
+         * Subscribe/unsubscribe to user.
+         * @return subscription status
+         * @throws UnsupportedOperationException TODO: check subscription to user itself
+         */
+        fun subscription(alias: String): Boolean {
+            val response = HabrApi.post("users/$alias/following/toggle")
+            response.body?.string()?.let {
+                return Json.parseToJsonElement(it).jsonObject["isSubscribed"]?.jsonPrimitive!!.boolean
+            }
+            throw UnsupportedOperationException("User is not authorized")
+
         }
     }
 
