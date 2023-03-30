@@ -10,7 +10,8 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,7 +25,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.Company
+import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @Composable
 fun CompanyProfile(
@@ -111,6 +115,36 @@ fun CompanyProfile(
                             textAlign = TextAlign.Center
                         )
                     }
+                company.relatedData?.let{
+                    var isSubscribed by rememberSaveable {
+                        mutableStateOf(it.isSubscribed)
+                    }
+                    val subscriptionScope = rememberCoroutineScope()
+                    Box(modifier = Modifier
+                        .padding(8.dp)
+                        .height(45.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (isSubscribed) Color(0xFF4CB025) else Color.Transparent)
+                        .border(
+                            width = 1.dp,
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (isSubscribed) Color.Transparent else Color(0xFF4CB025)
+                        )
+                        .clickable {
+                            subscriptionScope.launch(Dispatchers.IO) {
+                                isSubscribed = !isSubscribed
+                                isSubscribed = CompanyController.subscription(company.alias)
+                            }
+                        }
+                    ){
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            text = if (isSubscribed) "Вы подписаны" else "Подписаться",
+                            color = if (isSubscribed) Color.White else Color(0xFF4CB025)
+                        )
+                    }
+                }
             }
 
             Column(
@@ -197,7 +231,14 @@ fun CompanyProfile(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(topStart = 9.dp, topEnd = 9.dp, bottomStart = 18.dp, bottomEnd = 18.dp))
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = 9.dp,
+                                    topEnd = 9.dp,
+                                    bottomStart = 18.dp,
+                                    bottomEnd = 18.dp
+                                )
+                            )
                             .clickable {
                                 context.startActivity(
                                     Intent(

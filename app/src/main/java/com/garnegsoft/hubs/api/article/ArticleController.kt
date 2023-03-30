@@ -1,7 +1,6 @@
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
-import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.screens.article.parseElement
@@ -87,7 +86,6 @@ class ArticleController {
                         readingTime = it.readingTime,
                         relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
                             bookmarked = it.bookmarked,
-                            canVote = it.canVote,
                             canVoteMinus = it.canVoteMinus,
                             canVotePlus = it.canVotePlus
                         ) }
@@ -132,7 +130,6 @@ class ArticleController {
                     readingTime = it.readingTime,
                     relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
                         bookmarked = it.bookmarked,
-                        canVote = it.canVote,
                         canVoteMinus = it.canVoteMinus,
                         canVotePlus = it.canVotePlus
                     ) }
@@ -196,7 +193,6 @@ class ArticleController {
                     readingTime = it.readingTime,
                     relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
                         bookmarked = it.bookmarked,
-                        canVote = it.canVote,
                         canVoteMinus = it.canVoteMinus,
                         canVotePlus = it.canVotePlus
                     ) }
@@ -204,6 +200,20 @@ class ArticleController {
             }
 
             return result
+        }
+
+        fun addToBookmarks(id: Int): Boolean {
+            val response = HabrApi.post("articles/$id/bookmarks/add", version = 1)
+            if (response.code != 200)
+                return false
+            return true
+        }
+
+        fun removeFromBookmarks(id: Int): Boolean{
+            val response = HabrApi.post("articles/$id/bookmarks/remove", version = 1)
+            if (response.code != 200)
+                return false
+            return true
         }
     }
 
@@ -337,7 +347,6 @@ class ArticleController {
             var bookmarked: Boolean,
             var canComment: Boolean,
             var canEdit: Boolean,
-            var canVote: Boolean,
             var canViewVotes: Boolean,
             var canVotePlus: Boolean,
             var canVoteMinus: Boolean,

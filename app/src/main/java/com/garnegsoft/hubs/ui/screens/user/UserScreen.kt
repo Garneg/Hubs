@@ -4,6 +4,8 @@ import ArticlesListController
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -27,9 +29,6 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -44,7 +43,8 @@ class UserScreenViewModel : ViewModel() {
 }
 
 // TODO: remove default actions for navigation events
-@OptIn(ExperimentalPagerApi::class)
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UserScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
@@ -101,7 +101,7 @@ fun UserScreen(
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
             HorizontalPager(
                 state = pagerState,
-                count = 6
+                pageCount = 6
             ) { pageIndex ->
                 when (pageIndex) {
                     0 -> {
@@ -216,7 +216,10 @@ fun UserScreen(
                                 ArticleCard(
                                     article = it,
                                     onClick = { onArticleClicked(it.id) },
-                                    onCommentsClick = { onCommentsClicked(it.id) }
+                                    onCommentsClick = { onCommentsClicked(it.id) },
+                                    onAuthorClick = {
+                                        onUserClicked(it.author!!.alias)
+                                    }
                                 )
                             }
                         } else {

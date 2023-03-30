@@ -1,11 +1,8 @@
 package com.garnegsoft.hubs.ui.screens.user
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -169,6 +166,25 @@ internal fun UserProfilePage(
                         Text(text = "Рейтинг", color = Color.Gray)
                     }
                 }
+                user.relatedData?.let{
+                    Box(modifier = Modifier
+                        .padding(8.dp).height(45.dp).fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(if (it.isSubscribed) Color(0xFF4CB025) else Color.Transparent)
+                        .border(width = 1.dp,
+                            shape = RoundedCornerShape(10.dp),
+                            color = if (it.isSubscribed) Color.Transparent else Color(0xFF4CB025)
+                        )
+                        .clickable {  }
+                    ){
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            text = if (it.isSubscribed) "Вы подписаны" else "Подписаться",
+                            color = if (it.isSubscribed) Color.White else Color(0xFF4CB025)
+                        )
+                    }
+                }
+
             }
 
             Column(

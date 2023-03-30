@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.common
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
+import com.garnegsoft.hubs.api.utils.placeholderColor
 
 
 @Composable
@@ -85,13 +87,29 @@ fun CommentCard(
                             .clip(style.avatarShape)
                             .clickable(onClick = onAuthorClick)
                     ) {
-                        AsyncImage(
-                            model = comment.author.avatarUrl,
-                            modifier = Modifier
-                                .size(style.avatarSize)
-                                .clip(style.avatarShape),
-                            contentDescription = ""
-                        )
+                        if (comment.author.avatarUrl != null) {
+                            AsyncImage(
+                                model = comment.author.avatarUrl,
+                                modifier = Modifier
+                                    .size(style.avatarSize)
+                                    .clip(style.avatarShape),
+                                contentDescription = ""
+                            )
+                        } else {
+                            Icon(
+                                modifier = Modifier
+                                    .size(style.avatarSize)
+                                    .border(
+                                        width = 2.dp,
+                                        color = placeholderColor(comment.author.alias),
+                                        shape = style.avatarShape
+                                    )
+                                    .padding(2.dp),
+                                painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                                contentDescription = "",
+                                tint = placeholderColor(comment.author.alias)
+                            )
+                        }
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = comment.author.alias,
@@ -144,7 +162,7 @@ data class CommentCardStyle(
     val shape: Shape = RoundedCornerShape(26.dp),
     val avatarShape: Shape = RoundedCornerShape(8.dp),
     val padding: PaddingValues = PaddingValues(18.dp),
-    val avatarSize: Dp = 40.dp,
+    val avatarSize: Dp = 34.dp,
     val authorAliasTextStyle: TextStyle = TextStyle(fontWeight = FontWeight.W500),
     val messageTextStyle: TextStyle = TextStyle.Default,
     val publishedTimeTextStyle: TextStyle = TextStyle(

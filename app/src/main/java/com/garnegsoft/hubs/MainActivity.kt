@@ -1,11 +1,14 @@
 package com.garnegsoft.hubs
 
 import ArticleController
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
+import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.addCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,10 +16,20 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.datastore.core.DataStore
+import androidx.datastore.core.DataStoreFactory
+import androidx.datastore.dataStore
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.garnegsoft.hubs.api.DataStoreKeys
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.NoConnectionInterceptor
 import com.garnegsoft.hubs.api.user.User
@@ -31,22 +44,41 @@ import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
+import kotlinx.coroutines.runBlocking
+import okhttp3.*
+import okhttp3.internal.notify
+import okhttp3.internal.wait
+import java.lang.Boolean
 
 class MainActivity : ComponentActivity() {
+
+    val authDataStore by preferencesDataStore("auth")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        CookieManager.getInstance().removeAllCookies(null)
-//        registerForActivityResult(LoginActivityResultContract()) {
-//            if (it != null) {
-//                Log.i("LoginEnded", it)
-//            }
-//        }
-//            .launch(Unit)
-        intent.dataString?.let { Log.e("intentData", it) }
+        val obossanyFlow = authDataStore.data.map { it.get(DataStoreKeys.Auth.Cookies) ?: "" }
+        var cookies = ""
+        runBlocking { cookies = obossanyFlow.first() }
 
+        if (cookies == "") {
+            registerForActivityResult(AuthActivityResultContract()) { result ->
+                lifecycle.coroutineScope.launch { authDataStore.edit { it.set(DataStoreKeys.Auth.Cookies, result ?: "") } }
+                cookies = result ?: ""
+            }
+                .launch(Unit)
+        }
+
+        intent.dataString?.let { Log.e("intentData", it) }
         HabrApi.HttpClient = OkHttpClient.Builder()
+            .addInterceptor(Interceptor {
+                val req = it.request()
+                    .newBuilder()
+                    .addHeader("Cookie", cookies)
+                    .build()
+                it.proceed(req)
+            })
             .addInterceptor(NoConnectionInterceptor(this))
             .build()
 
@@ -59,6 +91,7 @@ class MainActivity : ComponentActivity() {
                     startDestination = "articles",
                     builder = {
                         composable("articles") {
+
                             Box(
                                 modifier = Modifier.fillMaxSize(),
                                 contentAlignment = Alignment.Center

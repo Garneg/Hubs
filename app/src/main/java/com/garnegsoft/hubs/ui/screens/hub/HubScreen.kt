@@ -2,7 +2,10 @@ package com.garnegsoft.hubs.ui.screens.hub
 
 import ArticlesListController
 import android.content.Intent
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -13,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -36,9 +40,8 @@ import com.garnegsoft.hubs.api.hub.HubController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -65,7 +68,8 @@ class HubScreenViewModel : ViewModel() {
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
+
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HubScreen(
     alias: String,
@@ -118,7 +122,7 @@ fun HubScreen(
             val companies = viewModel.companies.observeAsState().value
             val pagerState = rememberPagerState()
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
-            HorizontalPager(state = pagerState, count = 4) {
+            HorizontalPager(state = pagerState, pageCount = 4) {
                 when (it) {
                     0 -> {
                         if (viewModel.hub.observeAsState().value != null) {
@@ -215,124 +219,4 @@ fun HubScreen(
 
 }
 
-@Composable
-fun HubProfile(hub: Hub) {
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color.White)
-                .padding(26.dp),
-        ) {
-
-            Row(
-                horizontalArrangement = Arrangement.Center, modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 12.dp)
-            ) {
-                AsyncImage(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    model = hub.avatarUrl,
-                    contentDescription = ""
-                )
-
-            }
-            Text(
-                text = if (hub.isProfiled) hub.title + '*' else hub.title,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.W700,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                color = Color.Gray,
-                text = hub.description,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-
-        }
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(26.dp))
-                .background(Color.White)
-                .padding(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = "Статистика", fontSize = 20.sp, fontWeight = FontWeight.W500)
-            }
-            Divider(modifier = Modifier.padding(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Рейтинг", modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.rating.toString(),
-                    textAlign = TextAlign.Right
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Постов", modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.postsCount.toString(),
-                    textAlign = TextAlign.Right
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Авторов", modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.authorsCount.toString(),
-                    textAlign = TextAlign.Right
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Подписчиков")
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.subscribersCount.toString(),
-                    textAlign = TextAlign.Right
-                )
-            }
-        }
-
-
-    }
-
-}
 

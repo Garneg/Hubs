@@ -2,33 +2,22 @@ package com.garnegsoft.hubs.ui.screens.company
 
 import ArticlesListController
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.Company
@@ -36,14 +25,10 @@ import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.PagedHabrSnippetsColumn
 import com.garnegsoft.hubs.ui.common.UserCard
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -56,7 +41,7 @@ class CompanyScreenViewModel : ViewModel() {
     var employees = MutableLiveData<HabrList<UserSnippet>>()
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CompanyScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
@@ -109,7 +94,7 @@ fun CompanyScreen(
                 )
             }
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
-            HorizontalPager(state = pagerState, count = 5) {
+            HorizontalPager(state = pagerState, pageCount = 5) {
                 when (it) {
                     0 -> {
                         if (companyProfile != null) {

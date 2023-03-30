@@ -2,13 +2,16 @@ package com.garnegsoft.hubs.ui.screens.main
 
 
 import ArticlesListController
+import android.view.MenuItem
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,6 +20,7 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
@@ -32,9 +36,6 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.swiperefresh.*
 import kotlinx.coroutines.*
 
@@ -47,7 +48,7 @@ class ArticlesScreenViewModel : ViewModel() {
 
 }
 
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticlesScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
@@ -80,7 +81,7 @@ fun ArticlesScreen(
                             tint = Color.White
                         )
                     }
-                    //MainMenuButton()
+                    MainMenuButton()
 
                 })
         }
@@ -110,7 +111,7 @@ fun ArticlesScreen(
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
             HorizontalPager(
                 state = pagerState,
-                count = 5
+                pageCount = 5
             ) {
                 when (it) {
                     // all articles
@@ -144,7 +145,7 @@ fun ArticlesScreen(
                                         viewModel.articles.postValue(newArticlesList)
                                     }
                                     delay(400)
-                                    articlesLazyListState.scrollToItem(0)
+
                                     swipestate.isRefreshing = false
                                 }
                             }) {
@@ -228,8 +229,8 @@ fun ArticlesScreen(
                                     if (newArticlesList != null) {
                                         viewModel.news.postValue(newArticlesList)
                                     }
-                                    delay(400)
-                                    newsLazyListState.scrollToItem(0)
+                                    //delay(400)
+                                    //newsLazyListState.scrollToItem(0)
                                     swipestate.isRefreshing = false
 
                                 }
@@ -265,7 +266,8 @@ fun ArticlesScreen(
                                     ArticleCard(
                                         article = it,
                                         onClick = { onArticleClicked(it.id) },
-                                        onCommentsClick = { onCommentsClicked(it.id) }
+                                        onCommentsClick = { onCommentsClicked(it.id) },
+                                        onAuthorClick = { onUserClicked(it.author!!.alias) }
                                     )
                                 }
                             } else {
@@ -390,14 +392,9 @@ fun ArticlesScreen(
                     }
                 }
             }
-
-
         }
     }
-
-
 }
-
 
 
 @Composable
@@ -406,18 +403,85 @@ fun MainMenuButton() {
     IconButton(onClick = { expanded = true }) {
         Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
     }
-    DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-        DropdownMenuItem(onClick = {
-            expanded = false
-        }) {
-            Text("Настройки")
+    DropdownMenu(expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
+    ) {
+        Row(modifier = Modifier
+            .clickable { }
+            .padding(12.dp)) {
+            Icon(imageVector = Icons.Outlined.ExitToApp, contentDescription = "")
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Войти")
+            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.weight(1f))
         }
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-        DropdownMenuItem(onClick = {
-            expanded = false
+        MenuItem(title = "Закладки", icon = {
+            Icon(imageVector = Icons.Outlined.Favorite, contentDescription = "")
         }) {
-            Text(text = "О приложении")
+
         }
+        MenuItem(title = "Диалоги", icon = {
+            Icon(imageVector = Icons.Outlined.Email, contentDescription = "")
+        }) {
+
+        }
+        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+        Row(modifier = Modifier
+            .clickable { }
+            .padding(12.dp)) {
+            Icon(imageVector = Icons.Outlined.Settings, contentDescription = "")
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("Настройки")
+            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.weight(1f))
+        }
+        Row(modifier = Modifier
+            .clickable { }
+            .padding(12.dp)
+            ) {
+            Icon(imageVector = Icons.Outlined.Info, contentDescription = "", modifier = Modifier.size(24.dp))
+            Spacer(modifier = Modifier.width(12.dp))
+            Text("О приложении")
+            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.weight(1f))
+        }
+
+//        DropdownMenuItem(onClick = {
+//            expanded = false
+//        }) {
+//
+//        }
+//        DropdownMenuItem(onClick = {
+//            expanded = false
+//        }) {
+//            Text("Настройки")
+//        }
+//
+//        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+//        DropdownMenuItem(onClick = {
+//            expanded = false
+//        }) {
+//            Text(text = "О приложении")
+//        }
+    }
+}
+
+@Composable
+fun MenuItem(
+    title: String,
+    icon: @Composable () -> Unit,
+    onClick: () -> Unit
+) {
+    Row(modifier = Modifier
+        .clickable(onClick = onClick)
+        .padding(12.dp)) {
+        icon()
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(title)
+        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 

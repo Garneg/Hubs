@@ -1,10 +1,13 @@
 package com.garnegsoft.hubs.ui.screens.search
 
 import ArticlesListController
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -46,9 +49,6 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -118,7 +118,8 @@ class SearchScreenViewModel : ViewModel() {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalPagerApi::class)
+
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SearchScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
@@ -233,7 +234,7 @@ fun SearchScreen(
                 )
 
                 HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
-                HorizontalPager(state = pagerState, count = 4) {
+                HorizontalPager(state = pagerState, pageCount = 4) {
                     when (it) {
                         0 -> {
                             if (articlesList != null) {
@@ -324,9 +325,9 @@ fun SearchScreen(
                 }
 
             }
-            LaunchedEffect(key1 = articlesList?.list?.first()) {
-                lazyListState.scrollToItem(0)
-            }
+//            LaunchedEffect(key1 = articlesList?.list?.first()) {
+//                lazyListState.scrollToItem(0)
+//            }
         }
 
     }

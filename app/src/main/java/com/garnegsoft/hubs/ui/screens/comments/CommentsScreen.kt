@@ -168,7 +168,8 @@ fun CommentsScreen(
                         article = articleSnippet,
                         onClick = onArticleClicked,
                         style = ArticleCardStyle(showImage = false, showTextSnippet = false),
-                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) }
+                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+                        onCommentsClick = {}
                     )
                 }
             }

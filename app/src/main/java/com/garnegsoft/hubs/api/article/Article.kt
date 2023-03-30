@@ -116,10 +116,9 @@ class Article(
         val mainImageUrl: String?
     )
 
-    class RelatedData(
-        bookmarked: Boolean,
-        canVote: Boolean,
-        canVotePlus: Boolean,
-        canVoteMinus: Boolean
+    data class RelatedData(
+        val bookmarked: Boolean,
+        val canVotePlus: Boolean,
+        val canVoteMinus: Boolean
     )
 }

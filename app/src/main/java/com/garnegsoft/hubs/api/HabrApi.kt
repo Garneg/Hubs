@@ -3,10 +3,10 @@ package com.garnegsoft.hubs.api
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.EMPTY_RESPONSE
+import org.jsoup.Jsoup
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -15,8 +15,9 @@ class HabrApi {
 
     companion object {
 
-        private val BaseAddress = "https://habr.com"
+        private const val baseAddress = "https://habr.com"
         lateinit var HttpClient: OkHttpClient
+        private var csrfToken: String? = null
 
         fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
@@ -28,9 +29,45 @@ class HabrApi {
 
             val request = Request
                 .Builder()
-                .url("$BaseAddress/kek/v$version/$path?$paramsString")
+                .url("$baseAddress/kek/v$version/$path?$paramsString")
+//                .addHeader("Cookie", "" +
+//                        "connect_sid=s%3ASTwcR2CDj2UcfLEKd_xwC1mc4UdPZusA.qG0nI%2FsdlOKSXL8bL9Bu6zT2ccmdQIacV9t4QgURR1s")
                 .build()
             return HttpClient.newCall(request).execute()
+        }
+
+        fun post(path: String, args: Map<String, String>? = null, version: Int = 2): Response {
+            val token = getCsrfToken()
+            val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
+            if (args != null){
+                finalArgs.putAll(args)
+            }
+            val paramsString = StringBuilder()
+            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&")})
+            val request = Request
+                .Builder()
+                .post(String().toRequestBody())
+                .url("$baseAddress/kek/v$version/$path?$paramsString")
+                .addHeader("csrf-token", token ?: "")
+                .build()
+            return HttpClient.newCall(request).execute()
+        }
+
+        fun getCsrfToken() : String? {
+            if (csrfToken == null) {
+                var request = Request
+                    .Builder()
+                    .url("$baseAddress/ru/beta")
+                    .build()
+                val response = HttpClient.newCall(request).execute()
+
+                response.body?.string()?.let {
+                    Jsoup.parse(it).getElementsByTag("meta").find { it.attr("name") == "csrf-token" }?.let {
+                        csrfToken = it.attr("content")
+                    }
+                } ?: return null
+            }
+            return csrfToken
         }
 
     }

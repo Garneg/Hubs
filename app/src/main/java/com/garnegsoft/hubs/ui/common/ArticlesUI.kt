@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.common
 
+import ArticleController
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +14,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +39,8 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 /**
@@ -114,7 +118,7 @@ data class ArticleCardStyle(
 )
 
 @Composable
-fun defaultArticleCardStyle() : ArticleCardStyle {
+fun defaultArticleCardStyle(): ArticleCardStyle {
     return ArticleCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
         textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
@@ -124,11 +128,10 @@ fun defaultArticleCardStyle() : ArticleCardStyle {
 @Composable
 fun ArticleCard(
     article: ArticleSnippet,
-    onClick: () -> Unit = { },
-    onAuthorClick: () -> Unit = { },
-    onAddToBookmarksClick: () -> Unit = { },
-    onCommentsClick: () -> Unit = { },
-    style: ArticleCardStyle = defaultArticleCardStyle()
+    onClick: () -> Unit,
+    onAuthorClick: () -> Unit,
+    onCommentsClick: () -> Unit,
+    style: ArticleCardStyle = defaultArticleCardStyle().copy(addToBookmarksButtonEnabled = article.relatedData != null)
 ) {
     Column(
         modifier = Modifier
@@ -243,7 +246,7 @@ fun ArticleCard(
                     modifier = Modifier.size(height = 10.dp, width = 20.dp),
                     painter = painterResource(id = R.drawable.speedmeter_hard),
                     contentDescription = "",
-                    tint = when (article.complexity){
+                    tint = when (article.complexity) {
                         PostComplexity.Low -> Color(0xFF4CBE51)
                         PostComplexity.Medium -> Color(0xFFEEBC25)
                         PostComplexity.High -> Color(0xFFEB3B2E)
@@ -258,7 +261,7 @@ fun ArticleCard(
                         PostComplexity.High -> "Сложный"
                         else -> ""
                     },
-                    color = when (article.complexity){
+                    color = when (article.complexity) {
                         PostComplexity.Low -> Color(0xFF4CBE51)
                         PostComplexity.Medium -> Color(0xFFEEBC25)
                         PostComplexity.High -> Color(0xFFEB3B2E)
@@ -325,8 +328,7 @@ fun ArticleCard(
                     )
                     .fillMaxWidth()
                     .clip(style.innerElementsShape)
-                    .aspectRatio(16f / 9f)
-                    ,
+                    .aspectRatio(16f / 9f),
                 model = article.imageUrl,
                 contentScale = ContentScale.Crop,
                 onState = { state ->
@@ -441,7 +443,13 @@ fun ArticleCard(
                     MutableInteractionSource()
                 )
             }
-
+            val favoriteCoroutineScope = rememberCoroutineScope()
+            var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
+                mutableStateOf(article.relatedData?.bookmarked ?: false)
+            }
+            var addedToBookmarksCount by rememberSaveable(article.statistics.favoritesCount) {
+                mutableStateOf(article.statistics.favoritesCount.toInt())
+            }
             //Added to bookmarks
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -449,9 +457,35 @@ fun ArticleCard(
                     .clickable(
                         interactionSource = addToBookmarksInteractionSource,
                         indication = null,
-                        enabled = style.addToBookmarksButtonEnabled,
-                        onClick = onAddToBookmarksClick
-                    )
+                        enabled = style.addToBookmarksButtonEnabled
+                    ) {
+                        article.relatedData?.let {
+                            favoriteCoroutineScope.launch(Dispatchers.IO) {
+                                if (addedToBookmarks) {
+                                    addedToBookmarks = false
+                                    addedToBookmarksCount--
+                                    addedToBookmarksCount =
+                                        addedToBookmarksCount.coerceAtLeast(0)
+                                    if (!ArticleController.removeFromBookmarks(article.id)) {
+                                        addedToBookmarks = true
+                                        addedToBookmarksCount++
+                                        addedToBookmarksCount =
+                                            addedToBookmarksCount.coerceAtLeast(0)
+                                    }
+
+                                } else {
+                                    addedToBookmarks = true
+                                    addedToBookmarksCount++
+                                    if (!ArticleController.addToBookmarks(article.id)) {
+                                        addedToBookmarks = false
+                                        addedToBookmarksCount--
+                                        addedToBookmarksCount =
+                                            addedToBookmarksCount.coerceAtLeast(0)
+                                    }
+                                }
+                            }
+                        }
+                    }
                     .absolutePadding(
                         top = style.innerPadding.calculateTopPadding(),
                         bottom = style.innerPadding.calculateBottomPadding()
@@ -464,18 +498,50 @@ fun ArticleCard(
                         addToBookmarksInteractionSource,
                         rememberRipple(color = style.rippleColor),
                         enabled = style.addToBookmarksButtonEnabled,
-                        onClick = onAddToBookmarksClick
+                        onClick = {
+                            article.relatedData?.let {
+                                favoriteCoroutineScope.launch(Dispatchers.IO) {
+                                    if (addedToBookmarks) {
+                                        addedToBookmarks = false
+                                        addedToBookmarksCount--
+                                        addedToBookmarksCount =
+                                            addedToBookmarksCount.coerceAtLeast(0)
+                                        if (!ArticleController.removeFromBookmarks(article.id)) {
+                                            addedToBookmarks = true
+                                            addedToBookmarksCount++
+                                            addedToBookmarksCount =
+                                                addedToBookmarksCount.coerceAtLeast(0)
+                                        }
+
+                                    } else {
+                                        addedToBookmarks = true
+                                        addedToBookmarksCount++
+                                        if (!ArticleController.addToBookmarks(article.id)) {
+                                            addedToBookmarks = false
+                                            addedToBookmarksCount--
+                                            addedToBookmarksCount =
+                                                addedToBookmarksCount.coerceAtLeast(0)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     ),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.add_to_bookmarks),
+                    painter = article.relatedData?.let {
+                        if (addedToBookmarks)
+                            painterResource(id = R.drawable.bookmark_filled)
+                        else
+                            null
+                    } ?: painterResource(id = R.drawable.bookmark),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(
-                    text = article.statistics.favoritesCount,
+                    text = addedToBookmarksCount.toString(),
                     style = style.statisticsTextStyle
                 )
             }

@@ -6,6 +6,10 @@ import com.garnegsoft.hubs.api.user.Location
 import com.garnegsoft.hubs.api.utils.formatFoundationDate
 import com.garnegsoft.hubs.api.utils.formatTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.jsoup.Jsoup
 
 class CompanyController {
@@ -56,6 +60,21 @@ class CompanyController {
                 )
             }
             return result
+        }
+
+        /**
+         * Subscribe / unsubscribe to company.
+         * @param alias alias of the company
+         * @return subscription status (subscribed/unsubscribed)
+         * @throws UnsupportedOperationException if request was not succeed (e.g. because user isn't authorized)
+         */
+        fun subscription(alias: String): Boolean {
+            val response = HabrApi.post("companies/$alias/subscription")
+            response.body?.string()?.let {
+                return Json.parseToJsonElement(it).jsonObject["isSubscribed"]?.jsonPrimitive!!.boolean
+            }
+            throw UnsupportedOperationException("User is not authorized")
+
         }
     }
     @Serializable

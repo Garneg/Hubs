@@ -24,14 +24,12 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.*
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -44,9 +42,10 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import coil.compose.AsyncImage
@@ -56,7 +55,11 @@ import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.ui.theme.RatingNegative
+import com.garnegsoft.hubs.ui.theme.RatingPositive
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jsoup.nodes.*
 
 
@@ -120,13 +123,53 @@ fun ArticleScreen(
                         )
                     }
             ) {
+                var showVotesCounter by remember {
+                    mutableStateOf(false)
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .clickable {
+                            showVotesCounter = !showVotesCounter
+                        }
                 ) {
+                    val positionProvider = object : PopupPositionProvider {
+                        override fun calculatePosition(
+                            anchorBounds: IntRect,
+                            windowSize: IntSize,
+                            layoutDirection: LayoutDirection,
+                            popupContentSize: IntSize
+                        ): IntOffset {
+                            return IntOffset(anchorBounds.left, anchorBounds.top - popupContentSize.height - 10)
+                        }
+
+                    }
+                    if (showVotesCounter) {
+                        Popup(
+                            popupPositionProvider = positionProvider,
+                            onDismissRequest = { showVotesCounter = false}
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .shadow(1.5.dp, shape = RoundedCornerShape(8.dp))
+                                    .clip(RoundedCornerShape(8.dp))
+
+                                    .background(MaterialTheme.colors.surface)
+                                    .padding(8.dp)
+                            ) {
+                                Text(
+                                    text = "Всего голосов " +
+                                            "${article.statistics.votesCountMinus + article.statistics.votesCountPlus}: " +
+                                            "￪${article.statistics.votesCountPlus} и " +
+                                            "￬${article.statistics.votesCountMinus}",
+
+                                )
+                            }
+                        }
+                    }
                     Icon(
                         modifier = Modifier.size(18.dp),
                         painter = painterResource(id = R.drawable.rating),
@@ -135,8 +178,16 @@ fun ArticleScreen(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        article.statistics.score.toString(),
-                        color = Color.Gray,
+                        if (article.statistics.score > 0)
+                            "+" + article.statistics.score.toString()
+                        else
+                            article.statistics.score.toString(),
+                        color = if (article.statistics.score > 0)
+                            RatingPositive
+                        else if (article.statistics.score < 0)
+                            RatingNegative
+                        else
+                            Color.Gray,
                         fontWeight = FontWeight.W500
                     )
                 }
@@ -161,22 +212,65 @@ fun ArticleScreen(
                         fontWeight = FontWeight.W500
                     )
                 }
+                var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
+                    mutableStateOf(article.relatedData?.bookmarked ?: false)
+                }
+                var addedToBookmarksCount by rememberSaveable(article.statistics.favoritesCount) {
+                    mutableStateOf(article.statistics.favoritesCount.toInt())
+                }
+                val favoriteCoroutineScope = rememberCoroutineScope()
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .clickable {
+                            article.relatedData?.let {
+                                favoriteCoroutineScope.launch(Dispatchers.IO) {
+                                    if (addedToBookmarks) {
+                                        addedToBookmarks = false
+                                        addedToBookmarksCount--
+                                        addedToBookmarksCount =
+                                            addedToBookmarksCount.coerceAtLeast(0)
+                                        if (!ArticleController.removeFromBookmarks(article.id)) {
+                                            addedToBookmarks = true
+                                            addedToBookmarksCount++
+                                            addedToBookmarksCount =
+                                                addedToBookmarksCount.coerceAtLeast(0)
+                                        }
+
+                                    } else {
+                                        addedToBookmarks = true
+                                        addedToBookmarksCount++
+                                        if (!ArticleController.addToBookmarks(article.id)) {
+                                            addedToBookmarks = false
+                                            addedToBookmarksCount--
+                                            addedToBookmarksCount =
+                                                addedToBookmarksCount.coerceAtLeast(0)
+                                        }
+                                    }
+                                }
+                            }
+                        }
                 ) {
                     Icon(
                         modifier = Modifier.size(18.dp),
-                        painter = painterResource(id = R.drawable.add_to_bookmarks),
+                        painter =
+                        article.relatedData?.let {
+                            if (addedToBookmarks)
+                                painterResource(id = R.drawable.bookmark_filled)
+                            else
+                                null
+                        } ?:
+                        painterResource(id = R.drawable.bookmark),
                         contentDescription = "",
                         tint = Color.Gray
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        article.statistics.favoritesCount,
+                        addedToBookmarksCount.toString(),
                         color = Color.Gray,
                         fontWeight = FontWeight.W500
                     )

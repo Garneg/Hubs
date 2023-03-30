@@ -1,4 +1,5 @@
 import android.util.Log
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
@@ -56,6 +57,8 @@ class ArticlesListController {
                             articleIdsfinal.add(it)
                         } catch (ex: java.lang.Exception) {
                             Log.e("ARTCL_PARS_ERR", "UNABLE TO PARSE ARTICLE")
+                            if (BuildConfig.DEBUG)
+                                throw ex
                         }
                     }
 
@@ -143,7 +146,6 @@ class ArticlesListController {
                                 readingTime = it.readingTime,
                                 relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
                                     bookmarked = it.bookmarked,
-                                    canVote = it.canVote,
                                     canVoteMinus = it.canVoteMinus,
                                     canVotePlus = it.canVotePlus
                                 ) }
@@ -217,13 +219,9 @@ class ArticlesListController {
         var bookmarked: Boolean,
         var canComment: Boolean,
         var canEdit: Boolean,
-        var canVote: Boolean,
         var canViewVotes: Boolean,
         var canVotePlus: Boolean,
-        var canVoteMinus: Boolean,
-        var canModerateComments: Boolean,
-        var trackerSubscribed: Boolean,
-        var emailSubscribed: Boolean
+        var canVoteMinus: Boolean
     ){
         @Serializable
         data class RelatedDataVote(
