@@ -2,14 +2,13 @@ package com.garnegsoft.hubs.api.hub
 
 import com.garnegsoft.hubs.api.HabrApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.*
 
 
 class HubController {
     companion object {
         private fun getProfile(path: String, args: Map<String, String>? = null): HubProfile? {
-            var response = HabrApi.get(path, args)
+            val response = HabrApi.get(path, args)
 
             var profile: HubProfile? = null
 
@@ -49,7 +48,18 @@ class HubController {
             return result
         }
 
+        /**
+         * Subscribe/unsubscribe to hub.
+         * @throws UnsupportedOperationException
+         */
+        fun subscription(alias: String): Boolean {
+            val response = HabrApi.post("hubs/$alias/subscription")
+            response.body?.string()?.let {
+                return Json.parseToJsonElement(it).jsonObject["isSubscribed"]?.jsonPrimitive!!.boolean
+            }
+            throw UnsupportedOperationException("User is not authorized")
 
+        }
     }
 }
 
