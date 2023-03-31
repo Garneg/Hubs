@@ -105,7 +105,7 @@ fun UserScreen(
             ) { pageIndex ->
                 when (pageIndex) {
                     0 -> {
-                        UserProfilePage(user)
+                        UserProfile(user)
                     }
                     1 -> {
                         val articles by viewModel.articles.observeAsState()

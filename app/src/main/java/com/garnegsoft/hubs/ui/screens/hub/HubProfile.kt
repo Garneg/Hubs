@@ -8,6 +8,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,6 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.hub.Hub
+import com.garnegsoft.hubs.api.hub.HubController
+import com.garnegsoft.hubs.ui.theme.RatingNegative
+import com.garnegsoft.hubs.ui.theme.RatingPositive
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -35,7 +43,7 @@ fun HubProfile(hub: Hub) {
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(26.dp))
                 .background(Color.White)
-                .padding(26.dp),
+                .padding(12.dp),
         ) {
 
             Row(
@@ -62,24 +70,54 @@ fun HubProfile(hub: Hub) {
             Text(
                 color = Color.Gray,
                 text = hub.description,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().padding(8.dp),
                 textAlign = TextAlign.Center
             )
-            hub.relatedData?.let{
-                Box(modifier = Modifier
-                    .padding(0.dp).height(45.dp).fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(if (it.isSubscribed) Color(0xFF4CB025) else Color.Transparent)
-                    .border(width = 1.dp,
-                        shape = RoundedCornerShape(10.dp),
-                        color = if (it.isSubscribed) Color.Transparent else Color(0xFF4CB025)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = hub.statistics.rating.toString(),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.W600,
+                        color = Color.Magenta
                     )
-                    .clickable {  }
+                    Text(text = "Рейтинг", color = Color.Gray)
+                }
+            }
+            hub.relatedData?.let{
+                var subscribed by rememberSaveable {
+                    mutableStateOf(it.isSubscribed)
+                }
+                val subscriptionCoroutineScope = rememberCoroutineScope()
+                Box(modifier = Modifier
+                    .padding(8.dp)
+                    .height(45.dp)
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
+                    .border(
+                        width = 1.dp,
+                        shape = RoundedCornerShape(10.dp),
+                        color = if (subscribed) Color.Transparent else Color(0xFF4CB025)
+                    )
+                    .clickable {
+                        subscriptionCoroutineScope.launch(Dispatchers.IO) {
+                            subscribed = !subscribed
+                            subscribed = HubController.subscription(hub.alias)
+                        }
+                    }
                 ){
                     Text(
                         modifier = Modifier.align(Alignment.Center),
-                        text = if (it.isSubscribed) "Вы подписаны" else "Подписаться",
-                        color = if (it.isSubscribed) Color.White else Color(0xFF4CB025)
+                        text = if (subscribed) "Вы подписаны" else "Подписаться",
+                        color = if (subscribed) Color.White else Color(0xFF4CB025)
                     )
                 }
             }
@@ -101,18 +139,6 @@ fun HubProfile(hub: Hub) {
                 Text(text = "Статистика", fontSize = 20.sp, fontWeight = FontWeight.W500)
             }
             Divider(modifier = Modifier.padding(8.dp))
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Рейтинг", modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.rating.toString(),
-                    textAlign = TextAlign.Right
-                )
-            }
 
             Row(
                 modifier = Modifier

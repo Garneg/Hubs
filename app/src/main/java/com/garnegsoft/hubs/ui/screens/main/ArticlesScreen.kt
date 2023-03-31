@@ -39,8 +39,8 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
-import com.google.accompanist.swiperefresh.*
 import kotlinx.coroutines.*
+
 
 class ArticlesScreenViewModel : ViewModel() {
     var articles = MutableLiveData<HabrList<ArticleSnippet>>()
