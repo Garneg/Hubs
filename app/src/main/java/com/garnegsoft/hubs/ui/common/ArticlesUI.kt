@@ -70,8 +70,6 @@ data class ArticleCardStyle(
 
     val snippetMaxLines: Int = 4,
 
-    val statisticsIconsTintColor: Color = textColor,
-
     val rippleColor: Color = textColor,
 
     val imageLoadingIndicatorColor: Color = SecondaryColor,
@@ -83,7 +81,7 @@ data class ArticleCardStyle(
     ),
 
     val snippetTextStyle: TextStyle = TextStyle(
-        color = Color.DarkGray,
+        color = textColor.copy(alpha = 0.75f),
         fontSize = 16.sp,
         fontWeight = FontWeight.W400
     ),
@@ -95,7 +93,7 @@ data class ArticleCardStyle(
     ),
 
     val publishedTimeTextStyle: TextStyle = TextStyle(
-        color = Color.Gray,
+        color = textColor.copy(alpha = 0.75f),
         fontSize = 12.sp,
         fontWeight = FontWeight.W400
     ),
@@ -103,14 +101,16 @@ data class ArticleCardStyle(
     /**
      * Text style of statistics row, note that text color for score indicator won't apply if it is non-zero value (will be red or green)
      */
+    val statisticsColor: Color = textColor.copy(alpha = 0.75f),
+
     val statisticsTextStyle: TextStyle = TextStyle(
-        color = textColor,
+        color = statisticsColor,
         fontSize = 15.sp,
         fontWeight = FontWeight.W400
     ),
 
     val hubsTextStyle: TextStyle = TextStyle(
-        color = Color.Gray,
+        color = textColor.copy(alpha = 0.5f),
         fontSize = 12.sp,
         fontWeight = FontWeight.W600
     )
@@ -121,7 +121,8 @@ data class ArticleCardStyle(
 fun defaultArticleCardStyle(): ArticleCardStyle {
     return ArticleCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
-        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
+        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
+
     )
 }
 
@@ -278,12 +279,12 @@ fun ArticleCard(
                 painter = painterResource(id = R.drawable.clock_icon),
                 modifier = Modifier.size(14.dp),
                 contentDescription = "",
-                tint = Color.DarkGray
+                tint = style.statisticsColor
             )
             Spacer(modifier = Modifier.width(2.dp))
             Text(
                 text = "${article.readingTime} мин",
-                color = Color.DarkGray,
+                color = style.statisticsColor,
                 fontWeight = FontWeight.W500,
                 fontSize = 14.sp
             )
@@ -389,7 +390,8 @@ fun ArticleCard(
                 Icon(
                     painter = painterResource(id = R.drawable.rating),
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(18.dp),
+                    tint = style.statisticsColor
                 )
 
                 Spacer(modifier = Modifier.padding(2.dp))
@@ -430,7 +432,7 @@ fun ArticleCard(
                     painter = painterResource(id = R.drawable.views_icon),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
-                    tint = style.textColor
+                    tint = style.statisticsColor
                 )
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(
@@ -444,10 +446,10 @@ fun ArticleCard(
                 )
             }
             val favoriteCoroutineScope = rememberCoroutineScope()
-            var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
+            var addedToBookmarks by rememberSaveable(article) {
                 mutableStateOf(article.relatedData?.bookmarked ?: false)
             }
-            var addedToBookmarksCount by rememberSaveable(article.statistics.favoritesCount) {
+            var addedToBookmarksCount by rememberSaveable(article) {
                 mutableStateOf(article.statistics.favoritesCount.toInt())
             }
             //Added to bookmarks
@@ -537,7 +539,8 @@ fun ArticleCard(
                             null
                     } ?: painterResource(id = R.drawable.bookmark),
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(18.dp),
+                    tint = style.statisticsColor
                 )
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(
@@ -577,8 +580,8 @@ fun ArticleCard(
                 Icon(
                     painter = painterResource(id = R.drawable.comments_icon),
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-
+                    modifier = Modifier.size(18.dp),
+                    tint = style.statisticsColor
                 )
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(

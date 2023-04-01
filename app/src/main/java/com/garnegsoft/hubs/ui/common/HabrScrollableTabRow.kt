@@ -27,7 +27,7 @@ fun HabrScrollableTabRow(
             Divider()
         },
         backgroundColor = MaterialTheme.colors.surface,
-        contentColor = SecondaryColor
+        contentColor = contentColorFor(backgroundColor = MaterialTheme.colors.primary)
     ) {
         tabs.forEachIndexed { index, s ->
             Tab(

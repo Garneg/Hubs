@@ -79,8 +79,8 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
         return if (!isConnectionOn()) {
             throw NoConnectivityException()
 
-        } else if(!isInternetAvailable()) {
-            throw NoInternetException()
+//        } else if(!isInternetAvailable()) {
+//            throw NoInternetException()
         } else {
             chain.proceed(chain.request())
         }

@@ -129,6 +129,7 @@ fun ArticlesScreen(
                             var refreshing by remember { mutableStateOf(false) }
                             val refreshingState = rememberPullRefreshState(
                                 refreshing = refreshing,
+                                refreshThreshold = 50.dp,
                                 onRefresh = {
                                     updateFeedCoroutineScope.launch(Dispatchers.IO) {
                                         refreshing = true
@@ -213,6 +214,7 @@ fun ArticlesScreen(
                         var isRefreshing by rememberSaveable { mutableStateOf(false) }
                         var swipestate = rememberPullRefreshState(
                             refreshing = isRefreshing,
+                            refreshThreshold = 50.dp,
                             onRefresh = { updateFeedCoroutineScope.launch(Dispatchers.IO) {
                                 isRefreshing = true
                                 pageNumber.value = 1

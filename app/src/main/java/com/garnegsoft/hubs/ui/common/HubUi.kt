@@ -4,7 +4,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.Alignment
@@ -23,10 +25,18 @@ import com.garnegsoft.hubs.api.hub.list.HubSnippet
 
 
 @Composable
+fun defaultHubCardStyle(): HubCardStyle {
+    return HubCardStyle(
+        backgroundColor = MaterialTheme.colors.surface,
+        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
+    )
+}
+
+@Composable
 fun HubCard(
     hub: HubSnippet,
-    style: HubCardStyle = HubCardStyle(),
-    onClick: () -> Unit = { },
+    style: HubCardStyle = defaultHubCardStyle(),
+    onClick: () -> Unit,
     indicator: @Composable (hub: HubSnippet) -> Unit = {
         Text(
             text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
@@ -81,12 +91,13 @@ fun HubCard(
 @Immutable
 data class HubCardStyle(
     val backgroundColor: Color = Color.White,
+    val textColor: Color = Color.Black,
     val titleTextStyle: TextStyle = TextStyle(
-        color = Color.Black,
+        color = textColor,
         fontWeight = FontWeight.W600,
         fontSize = 20.sp
     ),
-    val descriptionTextStyle: TextStyle = TextStyle(color = Color.Gray, fontSize = 14.sp),
+    val descriptionTextStyle: TextStyle = TextStyle(color = textColor.copy(alpha = 0.5f), fontSize = 14.sp),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val shape: Shape = RoundedCornerShape(26.dp),

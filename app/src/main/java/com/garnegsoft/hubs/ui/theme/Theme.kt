@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorPalette = darkColors(
-    primary = PrimaryColor,
-    primaryVariant = PrimaryVariantColor,
-    secondary = SecondaryColor,
+    primary = Color(0xFF23CF00),
+    primaryVariant = Color(0xFF4CB43B),
+    secondary = Color(0xFF8AD582),
     background = Color(31, 31, 31, 255),
     surface = Color(49, 49, 49, 255)
 )
@@ -36,7 +36,7 @@ private val LightColorPalette = lightColors(
 @Composable
 fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
-        LightColorPalette//DarkColorPalette
+        DarkColorPalette
     } else {
         LightColorPalette
     }

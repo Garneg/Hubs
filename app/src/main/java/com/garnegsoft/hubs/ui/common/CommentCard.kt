@@ -5,9 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,9 +26,17 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 
 
 @Composable
+private fun defaultCommentCardStyle(): CommentCardStyle {
+    return CommentCardStyle(
+        background = MaterialTheme.colors.surface,
+        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
+    )
+}
+
+@Composable
 fun CommentCard(
     comment: CommentSnippet,
-    style: CommentCardStyle = CommentCardStyle(),
+    style: CommentCardStyle = defaultCommentCardStyle(),
     onCommentClick: () -> Unit,
     onAuthorClick: () -> Unit,
     onParentPostClick: () -> Unit
@@ -158,13 +164,14 @@ fun CommentCard(
 
 data class CommentCardStyle(
     val background: Color = Color.White,
-    val parentPostTextStyle: TextStyle = TextStyle(fontWeight = FontWeight.W700, fontSize = 18.sp),
+    val textColor: Color = Color.Black,
+    val parentPostTextStyle: TextStyle = TextStyle(color = textColor, fontWeight = FontWeight.W700, fontSize = 18.sp),
     val shape: Shape = RoundedCornerShape(26.dp),
     val avatarShape: Shape = RoundedCornerShape(8.dp),
     val padding: PaddingValues = PaddingValues(18.dp),
     val avatarSize: Dp = 34.dp,
-    val authorAliasTextStyle: TextStyle = TextStyle(fontWeight = FontWeight.W500),
-    val messageTextStyle: TextStyle = TextStyle.Default,
+    val authorAliasTextStyle: TextStyle = TextStyle(color = textColor, fontWeight = FontWeight.W500),
+    val messageTextStyle: TextStyle = TextStyle.Default.copy(color = textColor),
     val publishedTimeTextStyle: TextStyle = TextStyle(
         color = Color.Gray,
         fontWeight = FontWeight.W400,
