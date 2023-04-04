@@ -134,6 +134,8 @@ class MainActivity : ComponentActivity() {
                                 NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
                                 NavDeepLink("https://habr.com/{lang}/companies/{company}/{type}/{id}"),
                                 NavDeepLink("https://habr.com/{lang}/companies/{company}/{type}/{id}/"),
+                                NavDeepLink("https://habr.com/p/{id}"),
+                                NavDeepLink("https://habr.com/p/{id}/")
                                 )
                         ) {
 
@@ -143,7 +145,7 @@ class MainActivity : ComponentActivity() {
 
                                 ArticleScreen(
                                     article = article!!,
-                                    onBackButtonClicked = { navController.popBackStack() },
+                                    onBackButtonClicked = { navController.navigateUp() },
                                     onCommentsClicked = {
                                         navController.navigate("comments/${article!!.id}")
                                     },
