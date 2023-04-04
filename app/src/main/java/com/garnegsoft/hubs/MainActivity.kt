@@ -4,28 +4,14 @@ import ArticleController
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import android.webkit.CookieManager
-import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.addCallback
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.datastore.core.DataStore
-import androidx.datastore.core.DataStoreFactory
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.activity
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -48,27 +34,49 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
-import okhttp3.internal.notify
-import okhttp3.internal.wait
-import java.lang.Boolean
+import android.webkit.CookieManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.lifecycleScope
+import com.garnegsoft.hubs.ui.screens.main.MainMenuButton
+import android.content.Intent
+import android.net.Uri
+import androidx.navigation.NavDeepLink
+import androidx.navigation.NavDeepLinkBuilder
+import androidx.navigation.navDeepLink
+
+var cookies: String = ""
+var authorized: Boolean = false
+
+val Context.authDataStore by preferencesDataStore("auth")
+val Context.settingsDataStore by preferencesDataStore("settings")
 
 class MainActivity : ComponentActivity() {
 
-    val authDataStore by preferencesDataStore("auth")
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val obossanyFlow = authDataStore.data.map { it.get(DataStoreKeys.Auth.Cookies) ?: "" }
-        var cookies: String
-        runBlocking { cookies = obossanyFlow.first() }
+        CookieManager.getInstance().removeAllCookies(null)
+        val cookiesFlow = authDataStore.data.map { it.get(DataStoreKeys.Auth.Cookies) ?: "" }
+        val isAuthorizedFlow = authDataStore.data.map { it[DataStoreKeys.Auth.Authorized] ?: false }
 
-        if (cookies == "") {
-            registerForActivityResult(AuthActivityResultContract()) { result ->
-                lifecycle.coroutineScope.launch { authDataStore.edit { it.set(DataStoreKeys.Auth.Cookies, result ?: "") } }
-                cookies = result ?: ""
-            }
-                .launch(Unit)
+
+        runBlocking {
+            cookies = cookiesFlow.first()
+            authorized = isAuthorizedFlow.first()
+
         }
+
+        val authActivityLauncher = registerForActivityResult(AuthActivityResultContract()) { result ->
+            lifecycle.coroutineScope.launch {
+                authDataStore.edit {
+                    it[DataStoreKeys.Auth.Cookies] = result ?: ""
+                    it[DataStoreKeys.Auth.Authorized] = true
+                    authorized = true
+                    cookies = result ?: ""
+                }
+            }
+
+        }
+
 
         intent.dataString?.let { Log.e("intentData", it) }
         HabrApi.HttpClient = OkHttpClient.Builder()
@@ -83,40 +91,51 @@ class MainActivity : ComponentActivity() {
             .build()
 
         setContent {
-            HubsTheme() {
-                var navController = rememberNavController()
-
+            HubsTheme {
+                val navController = rememberNavController()
                 NavHost(
                     navController = navController,
                     startDestination = "articles",
                     builder = {
-
                         composable("articles") {
-                                ArticlesScreen(
-                                    viewModelStoreOwner = it,
-                                    onSearchClicked = { navController.navigate("search") },
-                                    onArticleClicked = {
-                                        if (!navController.currentBackStackEntry!!.destination.route!!.contains(
-                                                "article/"
-                                            )
-                                        )
-                                            navController.navigate("article/$it")
-                                    },
-                                    onCommentsClicked = {
-                                        navController.navigate("comments/$it")
-                                    },
-                                    onUserClicked = {
-                                        navController.navigate("user/$it")
-                                    },
-                                    onCompanyClicked = {
-                                        navController.navigate("company/$it")
-                                    },
-                                    onHubClicked = {
-                                        navController.navigate("hub/$it")
-                                    }
-                                )
+                            ArticlesScreen(
+                                viewModelStoreOwner = it,
+                                onSearchClicked = { navController.navigate("search") },
+                                onArticleClicked = {
+                                    if (!navController.currentBackStackEntry!!.destination.route!!.contains(
+                                            "article/")
+                                    )
+                                        navController.navigate("article/$it")
+                                },
+                                onCommentsClicked = {
+                                    navController.navigate("comments/$it")
+                                },
+                                onUserClicked = {
+                                    navController.navigate("user/$it")
+                                },
+                                onCompanyClicked = {
+                                    navController.navigate("company/$it")
+                                },
+                                onHubClicked = {
+
+                                    navController.navigate("hub/$it")
+                                },
+                                menu = { MainMenuButton() }
+                            )
                         }
-                        composable("article/{id}") {
+                        composable(
+                            route = "article/{id}",
+                            deepLinks = listOf(
+                                NavDeepLink("https://habr.com/{lang}/post/{id}"),
+                                NavDeepLink("https://habr.com/{lang}/post/{id}/"),
+                                NavDeepLink("https://habrahabr.ru/article/{id}"),
+                                NavDeepLink("https://habrahabr.ru/article/{id}/"),
+                                NavDeepLink("https://habr.com/{lang}/news/t/{id}"),
+                                NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
+                                NavDeepLink("https://habr.com/{lang}/companies/{company}/{type}/{id}"),
+                                NavDeepLink("https://habr.com/{lang}/companies/{company}/{type}/{id}/"),
+                                )
+                        ) {
 
                             var articleViewModel = viewModel<ArticleScreenViewModel>(it)
                             val article by articleViewModel.article.observeAsState()
@@ -213,9 +232,9 @@ class MainActivity : ComponentActivity() {
                                 viewModelStoreOwner = it,
                                 alias = alias,
                                 onBack = { navController.popBackStack() },
-                                onArticleClick = { navController.navigate("article/$it")},
-                                onCommentsClick = { navController.navigate("comments/$it")},
-                                onUserClick = { navController.navigate("user/$it")}
+                                onArticleClick = { navController.navigate("article/$it") },
+                                onCommentsClick = { navController.navigate("comments/$it") },
+                                onUserClick = { navController.navigate("user/$it") }
                             )
                         }
 
@@ -224,6 +243,16 @@ class MainActivity : ComponentActivity() {
         }
 
         Log.e("ExternalLink", intent.data.toString())
+
     }
 
+}
+
+enum class userScreenPages {
+    Profile,
+    Articles,
+    Comments,
+    Bookmarks,
+    Subscriptions,
+    Subscribers
 }

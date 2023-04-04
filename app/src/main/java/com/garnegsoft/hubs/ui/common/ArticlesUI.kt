@@ -42,7 +42,6 @@ import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
 /**
  * Style of the [ArticleCard]
  */

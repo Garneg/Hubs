@@ -60,7 +60,8 @@ fun ArticlesScreen(
     onCommentsClicked: (articleId: Int) -> Unit,
     onUserClicked: (alias: String) -> Unit,
     onCompanyClicked: (alias: String) -> Unit,
-    onHubClicked: (alias: String) -> Unit
+    onHubClicked: (alias: String) -> Unit,
+    menu: @Composable () -> Unit,
 ) {
     val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
 
@@ -84,8 +85,7 @@ fun ArticlesScreen(
                             tint = Color.White
                         )
                     }
-                    MainMenuButton()
-
+                    menu()
                 })
         }
     ) {
@@ -215,28 +215,31 @@ fun ArticlesScreen(
                         var swipestate = rememberPullRefreshState(
                             refreshing = isRefreshing,
                             refreshThreshold = 50.dp,
-                            onRefresh = { updateFeedCoroutineScope.launch(Dispatchers.IO) {
-                                isRefreshing = true
-                                pageNumber.value = 1
-                                var newArticlesList =
-                                    ArticlesListController.getArticlesSnippets(
-                                        "articles",
-                                        mapOf("sort" to "rating", "news" to "true")
-                                    )
-                                if (newArticlesList != null) {
-                                    viewModel.news.postValue(newArticlesList)
-                                }
-                                //delay(400)
-                                //newsLazyListState.scrollToItem(0)
-                                isRefreshing = false
+                            onRefresh = {
+                                updateFeedCoroutineScope.launch(Dispatchers.IO) {
+                                    isRefreshing = true
+                                    pageNumber.value = 1
+                                    var newArticlesList =
+                                        ArticlesListController.getArticlesSnippets(
+                                            "articles",
+                                            mapOf("sort" to "rating", "news" to "true")
+                                        )
+                                    if (newArticlesList != null) {
+                                        viewModel.news.postValue(newArticlesList)
+                                    }
+                                    //delay(400)
+                                    //newsLazyListState.scrollToItem(0)
+                                    isRefreshing = false
 
-                            } })
+                                }
+                            })
 
 
                         Box(
                             modifier = Modifier.pullRefresh(
-                                state = swipestate)
-                        ){
+                                state = swipestate
+                            )
+                        ) {
 
                             if (newsList != null) {
                                 PagedHabrSnippetsColumn(
@@ -272,7 +275,8 @@ fun ArticlesScreen(
                                 PullRefreshIndicator(
                                     modifier = Modifier.align(Alignment.TopCenter),
                                     contentColor = SecondaryColor,
-                                    refreshing = isRefreshing, state = swipestate)
+                                    refreshing = isRefreshing, state = swipestate
+                                )
                             } else {
                                 LaunchedEffect(key1 = Unit) {
                                     launch(Dispatchers.IO) {

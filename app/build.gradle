@@ -12,8 +12,8 @@ android {
         applicationId "com.garnegsoft.hubs"
         minSdk 21
         targetSdk 33
-        versionCode 1
-        versionName "Авторизации обновление"
+        versionCode 2
+        versionName "2.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

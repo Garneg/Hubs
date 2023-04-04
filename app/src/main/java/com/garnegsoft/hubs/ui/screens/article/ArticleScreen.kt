@@ -584,7 +584,7 @@ fun parseElement(
         "code" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
                 fontFamily = FontFamily.Monospace,
-                background = Color(110, 209, 255, 20)
+                background = Color(138, 156, 165, 20)
             )
         }
         "u" -> {
