@@ -29,7 +29,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -104,9 +103,9 @@ fun ArticleScreen(
                 },
                 actions = {
                     val context = LocalContext.current
-                    IconButton(onClick = {
-                        context.startActivity(shareIntent)
-                    }) {
+                    IconButton(
+                        onClick = { context.startActivity(shareIntent) }
+                    ) {
                         Icon(Icons.Outlined.Share, contentDescription = "")
                     }
                 })
@@ -1032,9 +1031,6 @@ fun parseElement(
     return resultAnnotatedString to mainComposable
 }
 
-fun HandleUrl(url: String) {
-
-}
 
 val LanguagesMap = mapOf<String, String>(
     "" to "Язык неизвестен",

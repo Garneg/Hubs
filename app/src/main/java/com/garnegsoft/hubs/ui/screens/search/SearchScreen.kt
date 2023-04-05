@@ -26,7 +26,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -149,10 +151,10 @@ fun SearchScreen(
         Column(modifier = Modifier.padding(it)) {
             var searchTextValue by rememberSaveable { mutableStateOf("") }
             var showClearAllButton by rememberSaveable { mutableStateOf(false) }
-            var focusRequester by remember { mutableStateOf(FocusRequester()) }
-            var keyboardController = LocalSoftwareKeyboardController.current
-            var coroutineScope = rememberCoroutineScope()
-            var lazyListState = rememberLazyListState()
+            val focusRequester by remember { mutableStateOf(FocusRequester()) }
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val coroutineScope = rememberCoroutineScope()
+            val lazyListState = rememberLazyListState()
             var pageNumber by rememberSaveable { mutableStateOf(1) }
 
             var currentQuery by rememberSaveable {
@@ -212,7 +214,8 @@ fun SearchScreen(
                             showPages = true
                         }
                     }),
-                    singleLine = true
+                    singleLine = true,
+                    cursorBrush = SolidColor(MaterialTheme.colors.secondary)
                 )
                 if (showClearAllButton)
                     IconButton(

@@ -65,17 +65,18 @@ class MainActivity : ComponentActivity() {
 
         }
 
-        val authActivityLauncher = registerForActivityResult(AuthActivityResultContract()) { result ->
-            lifecycle.coroutineScope.launch {
-                authDataStore.edit {
-                    it[DataStoreKeys.Auth.Cookies] = result ?: ""
-                    it[DataStoreKeys.Auth.Authorized] = true
-                    authorized = true
-                    cookies = result ?: ""
+        val authActivityLauncher =
+            registerForActivityResult(AuthActivityResultContract()) { result ->
+                lifecycle.coroutineScope.launch {
+                    authDataStore.edit {
+                        it[DataStoreKeys.Auth.Cookies] = result ?: ""
+                        it[DataStoreKeys.Auth.Authorized] = true
+                        authorized = true
+                        cookies = result ?: ""
+                    }
                 }
-            }
 
-        }
+            }
 
 
         intent.dataString?.let { Log.e("intentData", it) }
@@ -103,7 +104,8 @@ class MainActivity : ComponentActivity() {
                                 onSearchClicked = { navController.navigate("search") },
                                 onArticleClicked = {
                                     if (!navController.currentBackStackEntry!!.destination.route!!.contains(
-                                            "article/")
+                                            "article/"
+                                        )
                                     )
                                         navController.navigate("article/$it")
                                 },
@@ -117,7 +119,6 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("company/$it")
                                 },
                                 onHubClicked = {
-
                                     navController.navigate("hub/$it")
                                 },
                                 menu = { MainMenuButton() }
@@ -130,13 +131,15 @@ class MainActivity : ComponentActivity() {
                                 NavDeepLink("https://habr.com/{lang}/post/{id}/"),
                                 NavDeepLink("https://habrahabr.ru/article/{id}"),
                                 NavDeepLink("https://habrahabr.ru/article/{id}/"),
+                                NavDeepLink("https://habrahabr.ru/company/{company}/blog/{id}"),
+                                NavDeepLink("https://habrahabr.ru/company/{company}/blog/{id}/"),
                                 NavDeepLink("https://habr.com/{lang}/news/t/{id}"),
                                 NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
                                 NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}"),
                                 NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}/"),
                                 NavDeepLink("https://habr.com/p/{id}"),
                                 NavDeepLink("https://habr.com/p/{id}/")
-                                )
+                            )
                         ) {
 
                             var articleViewModel = viewModel<ArticleScreenViewModel>(it)
@@ -194,7 +197,16 @@ class MainActivity : ComponentActivity() {
 
                         }
 
-                        composable("user/{alias}") {
+                        composable(
+                            "user/{alias}",
+//                            deepLinks = listOf(
+//                                NavDeepLink("https://habr.com/{lang}/users/{alias}"),
+//                                NavDeepLink("https://habr.com/{lang}/users/{alias}/"),
+//                                NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}"),
+//                                NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}/"),
+//
+//                                )
+                        ) {
                             var user: User? by remember { mutableStateOf(null) }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
@@ -218,7 +230,16 @@ class MainActivity : ComponentActivity() {
 
                         }
 
-                        composable("hub/{alias}") {
+                        composable(
+                            "hub/{alias}",
+                            deepLinks = listOf(
+                                NavDeepLink("https://habr.com/{lang}/hub/{alias}"),
+                                NavDeepLink("https://habr.com/{lang}/hub/{alias}/"),
+                                NavDeepLink("https://habr.com/{lang}/hub/{alias}/{page}"),
+                                NavDeepLink("https://habr.com/{lang}/hub/{alias}/{page}/"),
+
+                                )
+                        ) {
                             val alias = it.arguments?.getString("alias")
                             HubScreen(alias = alias!!, viewModelStoreOwner = it,
                                 onBackClick = { navController.popBackStack() },
@@ -228,7 +249,16 @@ class MainActivity : ComponentActivity() {
                                 onCommentsClick = { navController.navigate("comments/$it") }
                             )
                         }
-                        composable("company/{alias}") {
+                        composable(
+                            "company/{alias}",
+                            deepLinks = listOf(
+                                NavDeepLink("https://habr.com/{lang}/companies/{alias}"),
+                                NavDeepLink("https://habr.com/{lang}/companies/{alias}/"),
+                                NavDeepLink("https://habr.com/{lang}/companies/{alias}/{page}"),
+                                NavDeepLink("https://habr.com/{lang}/companies/{alias}/{page}/"),
+
+                            )
+                        ) {
                             val alias = it.arguments?.getString("alias")!!
                             CompanyScreen(
                                 viewModelStoreOwner = it,

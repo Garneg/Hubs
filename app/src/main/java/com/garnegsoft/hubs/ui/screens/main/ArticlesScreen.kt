@@ -104,12 +104,9 @@ fun ArticlesScreen(
             }
             var pagerState = rememberPagerState()
 
-
             var articlesLazyListState = rememberLazyListState()
 
-
             var newsLazyListState = rememberLazyListState()
-
 
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
             HorizontalPager(
