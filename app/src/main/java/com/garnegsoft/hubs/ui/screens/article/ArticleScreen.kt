@@ -55,6 +55,7 @@ import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -75,8 +76,18 @@ fun ArticleScreen(
     onCommentsClicked: () -> Unit,
     onAuthorClicked: () -> Unit
 ) {
-    var scrollState = rememberScrollState()
+    val scrollState = rememberScrollState()
 
+    val shareIntent = remember {
+        val sendIntent = Intent(Intent.ACTION_SEND)
+
+        sendIntent.putExtra(
+            Intent.EXTRA_TEXT,
+            "${article.title} — https://habr.com/ru/post/${article.id}/"
+        )
+        sendIntent.setType("text/plain")
+        Intent.createChooser(sendIntent, null)
+    }
 
     Scaffold(
         topBar = {
@@ -92,17 +103,8 @@ fun ArticleScreen(
                     Text(text = "Публикация")
                 },
                 actions = {
-                    var context = LocalContext.current
+                    val context = LocalContext.current
                     IconButton(onClick = {
-                        var sendIntent = Intent()
-                        sendIntent.setAction(Intent.ACTION_SEND)
-
-                        sendIntent.putExtra(
-                            Intent.EXTRA_TEXT,
-                            "${article.title} — https://habr.com/ru/post/${article.id}/"
-                        )
-                        sendIntent.setType("text/plain")
-                        var shareIntent = Intent.createChooser(sendIntent, null)
                         context.startActivity(shareIntent)
                     }) {
                         Icon(Icons.Outlined.Share, contentDescription = "")
@@ -356,13 +358,13 @@ fun ArticleScreen(
                                     .size(34.dp)
                                     .border(
                                         width = 2.dp,
-                                        color = Color(0xFF8baab5),
+                                        color = placeholderColor(article.author.alias),
                                         shape = RoundedCornerShape(8.dp)
                                     )
                                     .padding(2.dp),
                                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                 contentDescription = "",
-                                tint = Color(0xFF8baab5)
+                                tint = placeholderColor(article.author.alias)
                             )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
