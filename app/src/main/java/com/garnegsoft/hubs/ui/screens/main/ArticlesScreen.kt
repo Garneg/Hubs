@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.ui.screens.main
 
 
 import ArticlesListController
-import android.view.MenuItem
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,7 +22,6 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
@@ -37,7 +35,9 @@ import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
+import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.*
+import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.*
 
@@ -293,7 +293,6 @@ fun ArticlesScreen(
                     2 -> {
                         val hubs by viewModel.hubs.observeAsState()
                         if (hubs != null) {
-
                             PagedHabrSnippetsColumn(
                                 lazyListState = rememberLazyListState(),
                                 data = hubs!!,
@@ -402,7 +401,7 @@ fun ArticlesScreen(
 
 
 @Composable
-fun MainMenuButton() {
+fun UnauthorizedMenu() {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }) {
         Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
@@ -412,14 +411,10 @@ fun MainMenuButton() {
         onDismissRequest = { expanded = false },
         modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
     ) {
-        Row(modifier = Modifier
-            .clickable { }
-            .padding(12.dp)) {
+        MenuItem(title = "Войти", icon = {
             Icon(imageVector = Icons.Outlined.ExitToApp, contentDescription = "")
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("Войти")
-            Spacer(modifier = Modifier.width(12.dp))
-            Spacer(modifier = Modifier.weight(1f))
+        }) {
+
         }
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
         MenuItem(title = "Закладки", icon = {
@@ -432,48 +427,73 @@ fun MainMenuButton() {
         }) {
 
         }
+
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-        Row(modifier = Modifier
-            .clickable { }
-            .padding(12.dp)) {
-            Icon(imageVector = Icons.Outlined.Settings, contentDescription = "")
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("Настройки")
-            Spacer(modifier = Modifier.width(12.dp))
-            Spacer(modifier = Modifier.weight(1f))
-        }
-        Row(modifier = Modifier
-            .clickable { }
-            .padding(12.dp)
-        ) {
+
+        MenuItem(title = "О приложении", icon = {
             Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = "",
                 modifier = Modifier.size(24.dp)
             )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text("О приложении")
-            Spacer(modifier = Modifier.width(12.dp))
-            Spacer(modifier = Modifier.weight(1f))
-        }
+        }) {
 
-//        DropdownMenuItem(onClick = {
-//            expanded = false
-//        }) {
-//
-//        }
-//        DropdownMenuItem(onClick = {
-//            expanded = false
-//        }) {
-//            Text("Настройки")
-//        }
-//
-//        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-//        DropdownMenuItem(onClick = {
-//            expanded = false
-//        }) {
-//            Text(text = "О приложении")
-//        }
+        }
+    }
+}
+
+@Composable
+fun AuthorizedMenu() {
+    var expanded by remember { mutableStateOf(false) }
+    IconButton(onClick = { expanded = true }) {
+        Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
+    }
+    DropdownMenu(
+        expanded = expanded,
+        onDismissRequest = { expanded = false },
+        modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
+    ) {
+        MenuItem(title = "Garneg", icon = {
+            Icon(
+                modifier = Modifier
+                    .size(32.dp)
+                    .border(
+                        width = 2.dp, color = placeholderColor("Fart"),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(2.5.dp),
+                painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                contentDescription = "",
+                tint = placeholderColor("Fart")
+            )
+        }) {
+
+        }
+        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+
+        MenuItem(title = "Статьи", icon = { 
+            Icon(painter = painterResource(id = R.drawable.article), contentDescription = "")
+        }) {
+            
+        }
+        MenuItem(title = "Комментарии", icon = { 
+            Icon(
+                painter = painterResource(id = R.drawable.comments_icon), contentDescription = "")
+        }) {
+            
+        }
+        MenuItem(title = "Закладки", icon = {
+            Icon(painter = painterResource(id = R.drawable.bookmark), contentDescription = "")
+        }) {
+            
+        }
+        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
+
+        MenuItem(title = "О приложении", icon = {
+            Icon(imageVector = Icons.Outlined.Info, contentDescription = "")
+        }) {
+
+        }
     }
 }
 
@@ -486,12 +506,13 @@ fun MenuItem(
     Row(
         modifier = Modifier
             .clickable(onClick = onClick)
-            .padding(12.dp)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
         icon()
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Text(title)
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(14.dp))
         Spacer(modifier = Modifier.weight(1f))
     }
 }

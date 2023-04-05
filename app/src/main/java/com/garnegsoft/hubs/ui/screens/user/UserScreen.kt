@@ -44,6 +44,15 @@ class UserScreenViewModel : ViewModel() {
 
 // TODO: remove default actions for navigation events
 
+enum class UserScreenPages {
+    Profile,
+    Articles,
+    Comments,
+    Bookmarks,
+    Subscribers,
+    Subscriptions
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UserScreen(
@@ -53,10 +62,11 @@ fun UserScreen(
     onArticleClicked: (articleId: Int) -> Unit,
     onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit = { i, a -> },
     onUserClicked: (alias: String) -> Unit,
-    onCommentsClicked: (postId: Int) -> Unit = { }
+    onCommentsClicked: (postId: Int) -> Unit = { },
+    initialPage: UserScreenPages = UserScreenPages.Profile
 ) {
     val viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState(initialPage = initialPage.ordinal)
 
     Scaffold(
         topBar = {

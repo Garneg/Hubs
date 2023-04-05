@@ -35,14 +35,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.lifecycleScope
-import com.garnegsoft.hubs.ui.screens.main.MainMenuButton
-import android.content.Intent
-import android.net.Uri
+import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import androidx.navigation.NavDeepLink
-import androidx.navigation.NavDeepLinkBuilder
-import androidx.navigation.navDeepLink
+import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 
 var cookies: String = ""
 var authorized: Boolean = false
@@ -121,7 +116,7 @@ class MainActivity : ComponentActivity() {
                                 onHubClicked = {
                                     navController.navigate("hub/$it")
                                 },
-                                menu = { MainMenuButton() }
+                                menu = { AuthorizedMenu() }
                             )
                         }
                         composable(
@@ -280,11 +275,4 @@ class MainActivity : ComponentActivity() {
 
 }
 
-enum class userScreenPages {
-    Profile,
-    Articles,
-    Comments,
-    Bookmarks,
-    Subscriptions,
-    Subscribers
-}
+
