@@ -132,8 +132,8 @@ class MainActivity : ComponentActivity() {
                                 NavDeepLink("https://habrahabr.ru/article/{id}/"),
                                 NavDeepLink("https://habr.com/{lang}/news/t/{id}"),
                                 NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
-                                NavDeepLink("https://habr.com/{lang}/companies/{company}/{type}/{id}"),
-                                NavDeepLink("https://habr.com/{lang}/companies/{company}/{type}/{id}/"),
+                                NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}"),
+                                NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}/"),
                                 NavDeepLink("https://habr.com/p/{id}"),
                                 NavDeepLink("https://habr.com/p/{id}/")
                                 )
