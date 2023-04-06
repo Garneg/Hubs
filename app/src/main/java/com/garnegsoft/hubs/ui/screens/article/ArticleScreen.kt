@@ -93,6 +93,7 @@ fun ArticleScreen(
             TopAppBar(
                 modifier = Modifier
                     .height(55.dp),
+                elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = { onBackButtonClicked() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
@@ -227,7 +228,9 @@ fun ArticleScreen(
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
-                        .clickable {
+                        .clickable(
+                            enabled = article.relatedData != null
+                        ) {
                             article.relatedData?.let {
                                 favoriteCoroutineScope.launch(Dispatchers.IO) {
                                     if (addedToBookmarks) {
@@ -312,6 +315,7 @@ fun ArticleScreen(
                 modifier = Modifier
                     .verticalScroll(scrollState)
                     .padding(bottom = 12.dp)
+                    .padding(16.dp)
             ) {
                 if (article.editorVersion == EditorVersion.FirstVersion) {
 
@@ -338,7 +342,6 @@ fun ArticleScreen(
                 if (article.author != null) {
                     Row(
                         modifier = Modifier
-                            .padding(8.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .clickable(onClick = onAuthorClicked),
                         verticalAlignment = Alignment.CenterVertically,
@@ -381,10 +384,8 @@ fun ArticleScreen(
                     AsyncImage(article.metadata.mainImageUrl, "")
                     Spacer(Modifier.height(8.dp))
                 }
-
+                Spacer(modifier = Modifier.size(8.dp))
                 Column(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp)
                 ) {
                     SelectionContainer() {
                         Text(

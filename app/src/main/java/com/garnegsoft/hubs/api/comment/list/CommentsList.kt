@@ -106,25 +106,28 @@ class CommentsListController {
             var commentsList = arrayListOf<CommentSnippet>()
 
             raw?.let {
-                raw.comments.values.forEach {
-                    commentsList.add(
-                        CommentSnippet(
-                            id = it.id.toInt(),
-                            parentPost = CommentSnippet.ParentPost(
-                                id = it.post!!.id,
-                                title = it.post!!.title
-                            ),
-                            text = Jsoup.parse(it.message).text(),
-                            timePublished = it.timePublished,
-                            score = it.score,
-                            author = Article.Author(
-                                alias = it.author!!.alias!!,
-                                fullname = it.author!!.fullname,
-                                avatarUrl = it.author!!.avatarUrl,
+                raw.threads.forEach {
+                    raw.comments[it]?.let{
+                        commentsList.add(
+                            CommentSnippet(
+                                id = it.id.toInt(),
+                                parentPost = CommentSnippet.ParentPost(
+                                    id = it.post!!.id,
+                                    title = it.post!!.title
+                                ),
+                                text = Jsoup.parse(it.message).text(),
+                                timePublished = it.timePublished,
+                                score = it.score,
+                                author = Article.Author(
+                                    alias = it.author!!.alias!!,
+                                    fullname = it.author!!.fullname,
+                                    avatarUrl = it.author!!.avatarUrl,
+                                )
                             )
                         )
-                    )
+                    }
                 }
+
 
                 result = HabrList(commentsList, raw.pages!!)
             }

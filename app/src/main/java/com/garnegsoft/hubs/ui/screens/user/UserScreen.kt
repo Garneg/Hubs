@@ -171,7 +171,7 @@ fun UserScreen(
                                             mapOf("page" to it.toString())
                                         )?.let {
                                             viewModel.comments.postValue(
-                                                it + userComments!!
+                                                userComments!! + it
                                             )
                                         }
                                     }

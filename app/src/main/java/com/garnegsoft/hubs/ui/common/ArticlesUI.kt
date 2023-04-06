@@ -92,7 +92,7 @@ data class ArticleCardStyle(
     ),
 
     val publishedTimeTextStyle: TextStyle = TextStyle(
-        color = textColor.copy(alpha = 0.75f),
+        color = textColor.copy(alpha = 0.5f),
         fontSize = 12.sp,
         fontWeight = FontWeight.W400
     ),
