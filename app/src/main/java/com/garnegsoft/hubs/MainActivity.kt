@@ -121,20 +121,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             route = "article/{id}",
-                            deepLinks = listOf(
-                                NavDeepLink("https://habr.com/{lang}/post/{id}"),
-                                NavDeepLink("https://habr.com/{lang}/post/{id}/"),
-                                NavDeepLink("https://habrahabr.ru/article/{id}"),
-                                NavDeepLink("https://habrahabr.ru/article/{id}/"),
-                                NavDeepLink("https://habrahabr.ru/company/{company}/blog/{id}"),
-                                NavDeepLink("https://habrahabr.ru/company/{company}/blog/{id}/"),
-                                NavDeepLink("https://habr.com/{lang}/news/t/{id}"),
-                                NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
-                                NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}"),
-                                NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}/"),
-                                NavDeepLink("https://habr.com/p/{id}"),
-                                NavDeepLink("https://habr.com/p/{id}/")
-                            )
+                            deepLinks = ArticleNavDeepLinks
                         ) {
 
                             var articleViewModel = viewModel<ArticleScreenViewModel>(it)
@@ -194,13 +181,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(
                             "user/{alias}",
-//                            deepLinks = listOf(
-//                                NavDeepLink("https://habr.com/{lang}/users/{alias}"),
-//                                NavDeepLink("https://habr.com/{lang}/users/{alias}/"),
-//                                NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}"),
-//                                NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}/"),
-//
-//                                )
+                            deepLinks = UserScreenNavDeepLinks
                         ) {
                             var user: User? by remember { mutableStateOf(null) }
                             LaunchedEffect(key1 = Unit, block = {
@@ -227,13 +208,7 @@ class MainActivity : ComponentActivity() {
 
                         composable(
                             "hub/{alias}",
-                            deepLinks = listOf(
-                                NavDeepLink("https://habr.com/{lang}/hub/{alias}"),
-                                NavDeepLink("https://habr.com/{lang}/hub/{alias}/"),
-                                NavDeepLink("https://habr.com/{lang}/hub/{alias}/{page}"),
-                                NavDeepLink("https://habr.com/{lang}/hub/{alias}/{page}/"),
-
-                                )
+                            deepLinks = HubScreenNavDeepLinks
                         ) {
                             val alias = it.arguments?.getString("alias")
                             HubScreen(alias = alias!!, viewModelStoreOwner = it,
@@ -246,13 +221,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             "company/{alias}",
-                            deepLinks = listOf(
-                                NavDeepLink("https://habr.com/{lang}/companies/{alias}"),
-                                NavDeepLink("https://habr.com/{lang}/companies/{alias}/"),
-                                NavDeepLink("https://habr.com/{lang}/companies/{alias}/{page}"),
-                                NavDeepLink("https://habr.com/{lang}/companies/{alias}/{page}/"),
-
-                            )
+                            deepLinks = CompanyScreenNavDeepLinks,
                         ) {
                             val alias = it.arguments?.getString("alias")!!
                             CompanyScreen(
