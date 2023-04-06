@@ -47,76 +47,7 @@ class CommentsScreenViewModel : ViewModel() {
     var comments = MutableLiveData<ArrayList<Comment>>()
 }
 
-@Composable
-fun CommentItem(
-    comment: Comment,
-    content: @Composable () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .padding(8.dp)
-    ) {
-        Row(
-            modifier = if (comment.isArticleAuthor) Modifier
-                .fillMaxWidth()
-                .clip(
-                    RoundedCornerShape(8.dp)
-                )
-                .background(Color(0x536BEB40)) else Modifier
-        ) {
-            if (comment.author.avatarUrl == null || comment.author.avatarUrl.isBlank()) {
-                Icon(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(shape = RoundedCornerShape(8.dp))
-                        .background(Color.White)
-                        .border(
-                            BorderStroke(2.dp, color = placeholderColor(comment.author.alias)),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(2.dp),
-                    painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                    contentDescription = "",
-                    tint = placeholderColor(comment.author.alias)
-                )
-            } else {
-                AsyncImage(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    model = comment.author?.avatarUrl, contentDescription = "authorAvatar"
-                )
-            }
-            Spacer(modifier = Modifier.width(4.dp))
-            Column {
-                Text(text = comment.author?.alias ?: "")
 
-                Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-
-        content.invoke()
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Icon(
-                modifier = Modifier.size(18.dp),
-                painter = painterResource(id = R.drawable.rating), contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(2.dp))
-            Text(text = comment.score.toString())
-        }
-    }
-
-}
 
 
 // TODO: remove default actions for navigation events

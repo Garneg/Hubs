@@ -36,7 +36,6 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
-import androidx.navigation.NavDeepLink
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 
 var cookies: String = ""

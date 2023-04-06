@@ -23,6 +23,8 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.theme.RatingNegative
+import com.garnegsoft.hubs.ui.theme.RatingPositive
 
 
 @Composable
@@ -144,13 +146,16 @@ fun CommentCard(
                 Spacer(modifier = Modifier.width(4.dp))
                 comment.score.let {
                     Text(
-                        text =
-                        if (it > 0) {
+                        text = if (it > 0) {
                             "+"
                         } else {
                             ""
+                        } + it,
+                        color = when {
+                            it > 0 -> RatingPositive
+                            it < 0 -> RatingNegative
+                            else -> style.textColor
                         }
-                                + it
 
                     )
                 }
@@ -165,12 +170,19 @@ fun CommentCard(
 data class CommentCardStyle(
     val background: Color = Color.White,
     val textColor: Color = Color.Black,
-    val parentPostTextStyle: TextStyle = TextStyle(color = textColor, fontWeight = FontWeight.W700, fontSize = 18.sp),
+    val parentPostTextStyle: TextStyle = TextStyle(
+        color = textColor,
+        fontWeight = FontWeight.W700,
+        fontSize = 18.sp
+    ),
     val shape: Shape = RoundedCornerShape(26.dp),
     val avatarShape: Shape = RoundedCornerShape(8.dp),
     val padding: PaddingValues = PaddingValues(18.dp),
     val avatarSize: Dp = 34.dp,
-    val authorAliasTextStyle: TextStyle = TextStyle(color = textColor, fontWeight = FontWeight.W500),
+    val authorAliasTextStyle: TextStyle = TextStyle(
+        color = textColor,
+        fontWeight = FontWeight.W500
+    ),
     val messageTextStyle: TextStyle = TextStyle.Default.copy(color = textColor),
     val publishedTimeTextStyle: TextStyle = TextStyle(
         color = Color.Gray,
