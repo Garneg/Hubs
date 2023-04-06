@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.api.user
 
+import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
 import com.garnegsoft.hubs.api.hub.list.HubsListController
@@ -105,6 +106,7 @@ class UserController {
          */
         fun subscription(alias: String): Boolean {
             val response = HabrApi.post("users/$alias/following/toggle")
+
             response.body?.string()?.let {
                 return Json.parseToJsonElement(it).jsonObject["isSubscribed"]?.jsonPrimitive!!.boolean
             }

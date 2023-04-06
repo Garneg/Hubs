@@ -35,8 +35,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
+import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
+import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 
 var cookies: String = ""
 var authorized: Boolean = false
@@ -115,14 +117,24 @@ class MainActivity : ComponentActivity() {
                                 onHubClicked = {
                                     navController.navigate("hub/$it")
                                 },
-                                menu = { AuthorizedMenu() }
+                                menu = {
+
+                                    AuthorizedMenu(
+                                        userAlias = "Boomburum",
+                                        avatarUrl = null,
+                                        onProfileClick = { navController.navigate("user/boomburum")},
+                                        onArticlesClick = { navController.navigate("user/boomburum?page=${UserScreenPages.Articles}")},
+                                        onCommentsClick = { navController.navigate("user/boomburum?page=${UserScreenPages.Comments}")},
+                                        onBookmarksClick = { navController.navigate("user/boomburum?page=${UserScreenPages.Bookmarks}")},
+                                        onAboutClick = { navController.navigate("about")}
+                                    )
+                                }
                             )
                         }
                         composable(
                             route = "article/{id}",
                             deepLinks = ArticleNavDeepLinks
                         ) {
-
                             var articleViewModel = viewModel<ArticleScreenViewModel>(it)
                             val article by articleViewModel.article.observeAsState()
                             if (article != null) {
@@ -179,9 +191,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(
-                            "user/{alias}",
+                            "user/{alias}?page={page}",
                             deepLinks = UserScreenNavDeepLinks
                         ) {
+                            val page = it.arguments?.getString("page")?.let{ UserScreenPages.valueOf(it) } ?: UserScreenPages.Profile
+
                             var user: User? by remember { mutableStateOf(null) }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
@@ -193,12 +207,13 @@ class MainActivity : ComponentActivity() {
 
                             if (user != null) {
                                 UserScreen(
+                                    initialPage = page,
                                     user = user!!,
                                     onBack = { navController.popBackStack() },
                                     onArticleClicked = { navController.navigate("article/$it") },
                                     onUserClicked = { navController.navigate("user/$it") },
                                     onCommentsClicked = { navController.navigate("comments/$it") },
-                                    onCommentClicked = { a, e -> },
+                                    onCommentClicked = { postId, commentId -> navController.navigate("comments/$postId")},
                                     viewModelStoreOwner = it
                                 )
                             }
@@ -231,6 +246,12 @@ class MainActivity : ComponentActivity() {
                                 onCommentsClick = { navController.navigate("comments/$it") },
                                 onUserClick = { navController.navigate("user/$it") }
                             )
+                        }
+
+                        composable("about"){
+                            AboutScreen {
+                                navController.popBackStack()
+                            }
                         }
 
                     })

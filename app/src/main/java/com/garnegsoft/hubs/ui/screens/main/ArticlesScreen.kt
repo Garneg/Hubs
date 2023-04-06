@@ -20,12 +20,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
@@ -417,18 +419,6 @@ fun UnauthorizedMenu() {
 
         }
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-        MenuItem(title = "Закладки", icon = {
-            Icon(imageVector = Icons.Outlined.Favorite, contentDescription = "")
-        }) {
-
-        }
-        MenuItem(title = "Диалоги", icon = {
-            Icon(imageVector = Icons.Outlined.Email, contentDescription = "")
-        }) {
-
-        }
-
-        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
         MenuItem(title = "О приложении", icon = {
             Icon(
@@ -443,57 +433,91 @@ fun UnauthorizedMenu() {
 }
 
 @Composable
-fun AuthorizedMenu() {
+fun AuthorizedMenu(
+    userAlias: String,
+    avatarUrl: String?,
+    onProfileClick: () -> Unit,
+    onArticlesClick: () -> Unit,
+    onCommentsClick: () -> Unit,
+    onBookmarksClick: () -> Unit,
+    onAboutClick: () -> Unit,
+) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }) {
-        Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
+        if (avatarUrl != null){
+            AsyncImage(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.White),
+                contentScale = ContentScale.FillBounds,
+                model = avatarUrl, contentDescription = "")
+        } else {
+            Icon(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+
+                    .border(
+                        width = 2.dp, color = placeholderColor(userAlias),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(1.dp)
+                    .background(Color.White)
+                    .padding(1.5.dp),
+                painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                contentDescription = "",
+                tint = placeholderColor(userAlias)
+            )
+        }
+
     }
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
         modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
     ) {
-        MenuItem(title = "Garneg", icon = {
-            Icon(
-                modifier = Modifier
-                    .size(32.dp)
-                    .border(
-                        width = 2.dp, color = placeholderColor("Fart"),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(2.5.dp),
-                painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                contentDescription = "",
-                tint = placeholderColor("Fart")
-            )
-        }) {
-
-        }
+        MenuItem(title = userAlias, icon = {
+            if (avatarUrl != null){
+                AsyncImage(
+                    modifier = Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.FillBounds,
+                    model = avatarUrl, contentDescription = "")
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .border(
+                            width = 2.dp, color = placeholderColor(userAlias),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(2.5.dp),
+                    painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                    contentDescription = "",
+                    tint = placeholderColor(userAlias)
+                )
+            }
+        }, onClick = onProfileClick)
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
         MenuItem(title = "Статьи", icon = { 
             Icon(painter = painterResource(id = R.drawable.article), contentDescription = "")
-        }) {
-            
-        }
+        }, onClick = onArticlesClick)
+
         MenuItem(title = "Комментарии", icon = { 
             Icon(
                 painter = painterResource(id = R.drawable.comments_icon), contentDescription = "")
-        }) {
-            
-        }
+        }, onClick = onCommentsClick)
+
         MenuItem(title = "Закладки", icon = {
             Icon(painter = painterResource(id = R.drawable.bookmark), contentDescription = "")
-        }) {
-            
-        }
+        }, onClick = onBookmarksClick)
+
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
         MenuItem(title = "О приложении", icon = {
             Icon(imageVector = Icons.Outlined.Info, contentDescription = "")
-        }) {
-
-        }
+        }, onClick = onAboutClick)
     }
 }
 

@@ -57,8 +57,10 @@ class ArticlesListController {
                             articleIdsfinal.add(it)
                         } catch (ex: java.lang.Exception) {
                             Log.e("ARTCL_PARS_ERR", "UNABLE TO PARSE ARTICLE")
-                            if (BuildConfig.DEBUG)
-                                throw ex
+
+//                            if (BuildConfig.DEBUG) {
+//                                throw ex
+//                            }
                         }
                     }
 

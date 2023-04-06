@@ -73,7 +73,7 @@ fun ArticleScreen(
     article: Article,
     onBackButtonClicked: () -> Unit,
     onCommentsClicked: () -> Unit,
-    onAuthorClicked: () -> Unit
+    onAuthorClicked: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -82,7 +82,7 @@ fun ArticleScreen(
 
         sendIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "${article.title} — https://habr.com/ru/post/${article.id}/"
+            "${article.title} — https://habr.com/p/${article.id}/"
         )
         sendIntent.setType("text/plain")
         Intent.createChooser(sendIntent, null)
