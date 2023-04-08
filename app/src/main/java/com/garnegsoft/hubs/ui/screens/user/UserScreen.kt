@@ -63,7 +63,9 @@ fun UserScreen(
     onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit = { i, a -> },
     onUserClicked: (alias: String) -> Unit,
     onCommentsClicked: (postId: Int) -> Unit = { },
-    initialPage: UserScreenPages = UserScreenPages.Profile
+    initialPage: UserScreenPages = UserScreenPages.Profile,
+    isAppUser: Boolean = false,
+    onLogout: (() -> Unit)? = null
 ) {
     val viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
     val pagerState = rememberPagerState(initialPage = initialPage.ordinal)
@@ -115,7 +117,7 @@ fun UserScreen(
             ) { pageIndex ->
                 when (pageIndex) {
                     0 -> {
-                        UserProfile(user)
+                        UserProfile(user, isAppUser, onLogout)
                     }
                     1 -> {
                         val articles by viewModel.articles.observeAsState()

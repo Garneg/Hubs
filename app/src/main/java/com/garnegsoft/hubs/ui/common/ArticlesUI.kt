@@ -1,10 +1,7 @@
 package com.garnegsoft.hubs.ui.common
 
 import ArticleController
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -100,7 +97,7 @@ data class ArticleCardStyle(
     /**
      * Text style of statistics row, note that text color for score indicator won't apply if it is non-zero value (will be red or green)
      */
-    val statisticsColor: Color = textColor.copy(alpha = 0.75f),
+    val statisticsColor: Color = textColor.copy(alpha = 0.5f),
 
     val statisticsTextStyle: TextStyle = TextStyle(
         color = statisticsColor,
@@ -121,7 +118,10 @@ fun defaultArticleCardStyle(): ArticleCardStyle {
     return ArticleCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
         textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
+        statisticsColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
+            .copy(alpha = if (MaterialTheme.colors.isLight){ 0.75f } else { 0.5f }
 
+        )
     )
 }
 
@@ -195,7 +195,8 @@ fun ArticleCard(
                             AsyncImage(
                                 modifier = Modifier
                                     .size(style.authorAvatarSize)
-                                    .clip(style.innerElementsShape),
+                                    .clip(style.innerElementsShape)
+                                    .background(Color.White),
                                 model = it.avatarUrl,
                                 contentDescription = "avatar",
                                 onState = { })
@@ -328,7 +329,8 @@ fun ArticleCard(
                     )
                     .fillMaxWidth()
                     .clip(style.innerElementsShape)
-                    .aspectRatio(16f / 9f),
+                    .aspectRatio(16f / 9f)
+                    .background(Color.White),
                 model = article.imageUrl,
                 contentScale = ContentScale.Crop,
                 onState = { state ->
@@ -337,22 +339,6 @@ fun ArticleCard(
                 },
                 contentDescription = ""
             )
-
-//            if (showLoadingIndication)
-//                Box(
-//                    modifier = Modifier
-//                        .absolutePadding(
-//                            left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
-//                            right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr)
-//                        )
-//                        .fillMaxWidth()
-//                        .wrapContentSize()
-//                        .aspectRatio(16f / 9f),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    CircularProgressIndicator(color = style.imageLoadingIndicatorColor)
-//                }
-//
         }
 
         //Stats

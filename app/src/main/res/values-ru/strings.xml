@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Хабы</string>
+    <string name="about_app_text">"Неофициальный клиент для Хабра - сайта, посвященного айти тематике.   Внесите свой вклад в развитие проекта, написав идею новой функциональности или отчёт об ошибках на почту "</string>
+    <string name="version">версия</string>
+    <string name="about_app">О приложении</string>
+    <string name="publication">Публикация</string>
+    <string name="bookmarks">Закладки</string>
+</resources>

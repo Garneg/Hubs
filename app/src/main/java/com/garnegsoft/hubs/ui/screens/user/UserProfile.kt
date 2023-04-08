@@ -3,9 +3,7 @@ package com.garnegsoft.hubs.ui.screens.user
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -31,7 +29,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun UserProfile(
-    user: User
+    user: User,
+    isAppUser: Boolean,
+    onUserLogout: (() -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -172,34 +172,36 @@ internal fun UserProfile(
                         Text(text = "Рейтинг", color = Color.Gray)
                     }
                 }
-                user.relatedData?.let{
-                    var subscribed by rememberSaveable {
-                        mutableStateOf(it.isSubscribed)
-                    }
-                    val subscriptionCoroutineScope = rememberCoroutineScope()
-                    Box(modifier = Modifier
-                        .padding(8.dp)
-                        .height(45.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
-                        .border(
-                            width = 1.dp,
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (subscribed) Color.Transparent else Color(0xFF4CB025)
-                        )
-                        .clickable {
-                            subscriptionCoroutineScope.launch(Dispatchers.IO) {
-                                subscribed = !subscribed
-                                subscribed = UserController.subscription(user.alias)
-                            }
+                if (!isAppUser) {
+                    user.relatedData?.let {
+                        var subscribed by rememberSaveable {
+                            mutableStateOf(it.isSubscribed)
                         }
-                    ){
-                        Text(
-                            modifier = Modifier.align(Alignment.Center),
-                            text = if (subscribed) "Вы подписаны" else "Подписаться",
-                            color = if (subscribed) Color.White else Color(0xFF4CB025)
-                        )
+                        val subscriptionCoroutineScope = rememberCoroutineScope()
+                        Box(modifier = Modifier
+                            .padding(8.dp)
+                            .height(45.dp)
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
+                            .border(
+                                width = 1.dp,
+                                shape = RoundedCornerShape(10.dp),
+                                color = if (subscribed) Color.Transparent else Color(0xFF4CB025)
+                            )
+                            .clickable {
+                                subscriptionCoroutineScope.launch(Dispatchers.IO) {
+                                    subscribed = !subscribed
+                                    subscribed = UserController.subscription(user.alias)
+                                }
+                            }
+                        ) {
+                            Text(
+                                modifier = Modifier.align(Alignment.Center),
+                                text = if (subscribed) "Вы подписаны" else "Подписаться",
+                                color = if (subscribed) Color.White else Color(0xFF4CB025)
+                            )
+                        }
                     }
                 }
 
@@ -232,7 +234,7 @@ internal fun UserProfile(
                         textAlign = TextAlign.End
                     )
                 }
-                if (user.location != null){
+                if (user.location != null) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -289,6 +291,21 @@ internal fun UserProfile(
                 }
             }
         }
-
+        if (isAppUser){
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(8.dp).clickable(onClick = onUserLogout!!),
+                elevation = 0.dp,
+                shape = RoundedCornerShape(26.dp),
+                backgroundColor = MaterialTheme.colors.surface,
+            ) {
+                Box(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                    Text(
+                        modifier = Modifier.align(Alignment.Center),
+                        text = "Выйти",
+                        color = MaterialTheme.colors.error
+                    )
+                }
+            }
+        }
     }
 }

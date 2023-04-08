@@ -62,6 +62,7 @@ fun HubCard(
                 modifier = Modifier
                     .size(style.avatarSize)
                     .clip(style.avatarShape)
+                    .background(Color.White)
             )
             Spacer(modifier = Modifier.width(style.innerPadding))
             Column(

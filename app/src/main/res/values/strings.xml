@@ -1,3 +1,12 @@
 <resources>
-    <string name="app_name">Хабы</string>
+    <string name="app_name">Hubs</string>
+
+    <string name="about_app_text">"Unofficial mobile client for Habr - IT website by TechMedia.  \n\nContribute to this app by email me - "</string>
+    <string name="developer_email" translatable="false">garnegsoft@gmail.com</string>
+    <string name="version">version</string>
+    <string name="about_app">About</string>
+    <string name="publication">Publication</string>
+    <string name="bookmarks">Bookmarks</string>
+
+
 </resources>

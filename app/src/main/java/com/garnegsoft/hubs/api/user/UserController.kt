@@ -42,18 +42,19 @@ class UserController {
             return result
         }
 
-        fun get(path: String, args: Map<String, String>? = null): User? {
+        fun get(path: String, args: Map<String, String>? = null, loadNote: Boolean): User? {
             val raw = getRaw(path, args)
 
             var result: User? = null
 
             raw?.let {
-                val followedHubs = HubsListController.get(
-                    "users/${raw.alias}/subscriptions/hubs",
-                    mapOf("perPage" to "50")
-                )?.list
+                val followedHubs =
+                    HubsListController.get("users/${raw.alias}/subscriptions/hubs",
+                    mapOf("perPage" to "50"))?.list
+
                 val followedCompanies =
                     CompaniesListController.get("users/${raw.alias}/subscriptions/companies")?.list
+
                 result = User(
                     alias = it.alias,
                     fullname = if (it.fullname?.isEmpty() == true) null else it.fullname,

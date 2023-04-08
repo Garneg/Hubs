@@ -45,6 +45,8 @@ import kotlinx.coroutines.*
 
 
 class ArticlesScreenViewModel : ViewModel() {
+
+    var myFeedArticles = MutableLiveData<HabrList<ArticleSnippet>>()
     var articles = MutableLiveData<HabrList<ArticleSnippet>>()
     var news = MutableLiveData<HabrList<ArticleSnippet>>()
     var hubs = MutableLiveData<HabrList<HubSnippet>>()
@@ -52,6 +54,8 @@ class ArticlesScreenViewModel : ViewModel() {
     var companies = MutableLiveData<HabrList<CompanySnippet>>()
 
 }
+
+
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -403,7 +407,10 @@ fun ArticlesScreen(
 
 
 @Composable
-fun UnauthorizedMenu() {
+fun UnauthorizedMenu(
+    onLoginClick: () -> Unit,
+    onAboutClick: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }) {
         Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
@@ -415,9 +422,8 @@ fun UnauthorizedMenu() {
     ) {
         MenuItem(title = "Войти", icon = {
             Icon(imageVector = Icons.Outlined.ExitToApp, contentDescription = "")
-        }) {
+        }, onClick = onLoginClick)
 
-        }
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
         MenuItem(title = "О приложении", icon = {
@@ -426,9 +432,7 @@ fun UnauthorizedMenu() {
                 contentDescription = "",
                 modifier = Modifier.size(24.dp)
             )
-        }) {
-
-        }
+        }, onClick = onAboutClick)
     }
 }
 

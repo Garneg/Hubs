@@ -49,9 +49,10 @@ class AuthActivity : AppCompatActivity() {
     ) : WebViewClient() {
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-            if (url == loginSucceedUrl) {
-                onLogin()
-            } else
+            url?.let {
+                if (it.contains("/all/"))
+                    onLogin()
+            }
                 super.onPageStarted(view, url, favicon)
         }
 

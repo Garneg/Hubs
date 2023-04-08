@@ -113,9 +113,10 @@ fun ArticleScreen(
         },
         backgroundColor = Color(0xFFF9F9F9),
         bottomBar = {
+            val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
             BottomAppBar(
                 elevation = 0.dp,
-                backgroundColor = Color.White,
+                backgroundColor = MaterialTheme.colors.surface,
                 modifier = Modifier
                     .height(60.dp)
                     .drawBehind {
@@ -145,20 +146,22 @@ fun ArticleScreen(
                             layoutDirection: LayoutDirection,
                             popupContentSize: IntSize
                         ): IntOffset {
-                            return IntOffset(anchorBounds.left, anchorBounds.top - popupContentSize.height - 10)
+                            return IntOffset(
+                                anchorBounds.left,
+                                anchorBounds.top - popupContentSize.height - 10
+                            )
                         }
 
                     }
                     if (showVotesCounter) {
                         Popup(
                             popupPositionProvider = positionProvider,
-                            onDismissRequest = { showVotesCounter = false}
+                            onDismissRequest = { showVotesCounter = false }
                         ) {
                             Box(
                                 modifier = Modifier
                                     .shadow(1.5.dp, shape = RoundedCornerShape(8.dp))
                                     .clip(RoundedCornerShape(8.dp))
-
                                     .background(MaterialTheme.colors.surface)
                                     .padding(8.dp)
                             ) {
@@ -167,7 +170,7 @@ fun ArticleScreen(
                                             "${article.statistics.votesCountMinus + article.statistics.votesCountPlus}: " +
                                             "￪${article.statistics.votesCountPlus} и " +
                                             "￬${article.statistics.votesCountMinus}",
-
+                                    color = statisticsColor
                                 )
                             }
                         }
@@ -176,7 +179,7 @@ fun ArticleScreen(
                         modifier = Modifier.size(18.dp),
                         painter = painterResource(id = R.drawable.rating),
                         contentDescription = "",
-                        tint = Color.Gray
+                        tint = statisticsColor
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
@@ -189,10 +192,11 @@ fun ArticleScreen(
                         else if (article.statistics.score < 0)
                             RatingNegative
                         else
-                            Color.Gray,
+                            statisticsColor,
                         fontWeight = FontWeight.W500
                     )
                 }
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
@@ -205,12 +209,12 @@ fun ArticleScreen(
                         modifier = Modifier.size(18.dp),
                         painter = painterResource(id = R.drawable.views_icon),
                         contentDescription = "",
-                        tint = Color.Gray
+                        tint = statisticsColor
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         article.statistics.readingCount,
-                        color = Color.Gray,
+                        color = statisticsColor,
                         fontWeight = FontWeight.W500
                     )
                 }
@@ -267,15 +271,14 @@ fun ArticleScreen(
                                 painterResource(id = R.drawable.bookmark_filled)
                             else
                                 null
-                        } ?:
-                        painterResource(id = R.drawable.bookmark),
+                        } ?: painterResource(id = R.drawable.bookmark),
                         contentDescription = "",
-                        tint = Color.Gray
+                        tint = statisticsColor
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         addedToBookmarksCount.toString(),
-                        color = Color.Gray,
+                        color = statisticsColor,
                         fontWeight = FontWeight.W500
                     )
                 }
@@ -292,13 +295,13 @@ fun ArticleScreen(
                         modifier = Modifier.size(18.dp),
                         painter = painterResource(id = R.drawable.comments_icon),
                         contentDescription = "",
-                        tint = Color.Gray
+                        tint = statisticsColor
 
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
                         text = article.statistics.commentsCount,
-                        color = Color.Gray,
+                        color = statisticsColor,
                         fontWeight = FontWeight.W500
                     )
                 }
@@ -318,26 +321,26 @@ fun ArticleScreen(
                     .padding(16.dp)
             ) {
                 if (article.editorVersion == EditorVersion.FirstVersion) {
-
-                    Surface(color = Color(0xFF_fa6767)) {
-
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp), verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Warning,
-                                contentDescription = "",
-                                tint = Color.White
-                            )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                "Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
-                                color = Color.White
-                            )
-                        }
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colors.error.copy(alpha = 0.75f))
+                            .padding(8.dp), verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Warning,
+                            contentDescription = "",
+                            tint = MaterialTheme.colors.onError
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            "Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
+                            color = MaterialTheme.colors.onError
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
                 if (article.author != null) {
                     Row(
