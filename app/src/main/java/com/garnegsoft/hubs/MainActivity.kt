@@ -35,9 +35,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.compose.navigation
+import com.garnegsoft.hubs.api.me.Me
+import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
@@ -49,15 +53,13 @@ var authorized: Boolean = false
 val Context.authDataStore by preferencesDataStore("auth")
 val Context.settingsDataStore by preferencesDataStore("settings")
 
-class AuthViewModel : ViewModel() {
-    var authorized = MutableLiveData<Boolean>(false)
-    var alias = MutableLiveData<String>()
-    var avatarUrl = MutableLiveData<String>()
-
-
+fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
+    return authDataStore.data.map { it[key] }
 }
 
+
 class MainActivity : ComponentActivity() {
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,19 +70,21 @@ class MainActivity : ComponentActivity() {
         val isAuthorizedFlow = authDataStore.data.map { it[DataStoreKeys.Auth.Authorized] ?: false }
         lifecycle.coroutineScope.launch {
             cookiesFlow
-                .collect{
+                .collect {
                     cookies = it
                 }
-                
+
         }
 
 
         runBlocking {
             authorized = isAuthorizedFlow.first()
+
         }
 
         val authActivityLauncher =
             registerForActivityResult(AuthActivityResultContract()) { result ->
+                CookieManager.getInstance().removeAllCookies(null)
                 lifecycle.coroutineScope.launch {
                     result?.let {
                         authDataStore.edit {
@@ -107,13 +111,28 @@ class MainActivity : ComponentActivity() {
             .addInterceptor(NoConnectionInterceptor(this))
             .build()
 
+
+
         setContent {
+            var userInfo: Me? by remember { mutableStateOf(null) }
+            val userInfoUpdateBlock = remember {
+                {
+                    userInfo = MeController.getMe()
+                    Log.e("userInfoUpdateBlock", userInfo.toString())
+                }
+            }
+            LaunchedEffect(
+                key1 = isAuthorizedFlow.collectAsState(initial = false).value,
+                block = {
+                    launch(Dispatchers.IO, block = { userInfoUpdateBlock() })
+                })
             HubsTheme {
                 val navController = rememberNavController()
                 NavHost(
                     navController = navController,
                     startDestination = "articles",
                     builder = {
+
                         composable("articles") {
                             ArticlesScreen(
                                 viewModelStoreOwner = it,
@@ -139,19 +158,23 @@ class MainActivity : ComponentActivity() {
                                 },
                                 menu = {
                                     val authorizedMenu by isAuthorizedFlow.collectAsState(initial = false)
-                                    if (authorizedMenu) {
+                                    if (authorizedMenu && userInfo != null) {
                                         AuthorizedMenu(
-                                            userAlias = "Boomburum",
-                                            avatarUrl = null,
-                                            onProfileClick = { navController.navigate("user/Garneg") },
-                                            onArticlesClick = { navController.navigate("user/boomburum?page=${UserScreenPages.Articles}") },
-                                            onCommentsClick = { navController.navigate("user/boomburum?page=${UserScreenPages.Comments}") },
-                                            onBookmarksClick = { navController.navigate("user/boomburum?page=${UserScreenPages.Bookmarks}") },
+                                            userAlias = userInfo!!.alias,
+                                            avatarUrl = userInfo!!.avatarUrl,
+                                            onProfileClick = { navController.navigate("user/${userInfo!!.alias}") },
+                                            onArticlesClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Articles}") },
+                                            onCommentsClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Comments}") },
+                                            onBookmarksClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}") },
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     } else {
+
                                         UnauthorizedMenu(
-                                            onLoginClick = { authActivityLauncher.launch(Unit) },
+                                            onLoginClick = {
+                                                authActivityLauncher.launch(Unit)
+                                                lifecycle.coroutineScope.launch(Dispatchers.IO) { userInfoUpdateBlock() }
+                                            },
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     }
@@ -239,7 +262,7 @@ class MainActivity : ComponentActivity() {
                             val logoutCoroutineScope = rememberCoroutineScope()
                             if (user != null) {
                                 UserScreen(
-                                    isAppUser = user!!.alias == "Garneg",
+                                    isAppUser = user!!.alias == userInfo?.alias,
                                     initialPage = page,
                                     user = user!!,
                                     onBack = { navController.popBackStack() },

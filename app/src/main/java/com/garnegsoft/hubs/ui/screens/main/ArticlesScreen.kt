@@ -21,6 +21,7 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.MutableLiveData
@@ -29,6 +30,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.DataStoreKeys
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
@@ -38,10 +40,13 @@ import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.authDataStore
+import com.garnegsoft.hubs.authDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.map
 
 
 class ArticlesScreenViewModel : ViewModel() {
@@ -69,6 +74,9 @@ fun ArticlesScreen(
     onHubClicked: (alias: String) -> Unit,
     menu: @Composable () -> Unit,
 ) {
+    val isAuthorized by LocalContext.current.authDataStoreFlow(DataStoreKeys.Auth.Authorized).collectAsState(
+        initial = false
+    )
     val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
 
     Scaffold(
@@ -99,29 +107,13 @@ fun ArticlesScreen(
             Modifier.padding(it)
         ) {
 
-            val tabs = remember {
-                listOf(
-                    "Статьи",
-                    "Новости",
-                    "Хабы",
-                    "Авторы",
-                    "Компании"
-                )
-            }
-            var pagerState = rememberPagerState()
+            val articlesLazyListState = rememberLazyListState()
 
-            var articlesLazyListState = rememberLazyListState()
+            val newsLazyListState = rememberLazyListState()
 
-            var newsLazyListState = rememberLazyListState()
-
-            HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
-            HorizontalPager(
-                state = pagerState,
-                pageCount = 5
-            ) {
-                when (it) {
-                    // all articles
-                    0 -> {
+            val pages = remember(isAuthorized) {
+                var map = mapOf<String, @Composable () -> Unit>(
+                    "Статьи" to {
                         val articles by viewModel.articles.observeAsState()
 
                         var updateFeedCoroutineScope = rememberCoroutineScope()
@@ -162,7 +154,7 @@ fun ArticlesScreen(
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     contentPadding = PaddingValues(8.dp),
                                     onNextPageLoad = {
-                                        updateFeedCoroutineScope.launch(Dispatchers.IO) {
+                                        launch(Dispatchers.IO) {
                                             ArticlesListController
                                                 .getArticlesSnippets(
                                                     "articles",
@@ -208,9 +200,8 @@ fun ArticlesScreen(
                         }
 
 
-                    }
-                    // news
-                    1 -> {
+                    },
+                    "Новости" to {
                         val newsList by viewModel.news.observeAsState()
                         var pageNumber = rememberSaveable { mutableStateOf(1) }
                         var updateFeedCoroutineScope = rememberCoroutineScope()
@@ -294,9 +285,8 @@ fun ArticlesScreen(
                             }
                         }
 
-                    }
-                    // hubs
-                    2 -> {
+                    },
+                    "Хабы" to {
                         val hubs by viewModel.hubs.observeAsState()
                         if (hubs != null) {
                             PagedHabrSnippetsColumn(
@@ -327,9 +317,8 @@ fun ArticlesScreen(
                                 }
                             }
                         }
-                    }
-                    // authors
-                    3 -> {
+                    },
+                    "Авторы" to {
                         val authors by viewModel.authors.observeAsState()
                         if (authors != null) {
                             PagedHabrSnippetsColumn(
@@ -361,9 +350,8 @@ fun ArticlesScreen(
                             })
 
                         }
-                    }
-                    // companies
-                    4 -> {
+                    },
+                    "Компании" to {
                         val companies by viewModel.companies.observeAsState()
                         if (companies != null) {
                             PagedHabrSnippetsColumn(
@@ -399,7 +387,63 @@ fun ArticlesScreen(
                             })
                         }
                     }
-                }
+                )
+                if (isAuthorized == true) map = mapOf<String, @Composable () -> Unit>("Моя лента" to {
+                    val articles by viewModel.myFeedArticles.observeAsState()
+                    if (articles != null){
+                        PagedHabrSnippetsColumn(
+                            data = articles!!,
+                            onNextPageLoad = {
+                                launch(Dispatchers.IO) {
+                                   ArticlesListController.getArticlesSnippets(
+                                       "articles",
+                                       mapOf("custom" to "true",
+                                       "page" to it.toString())
+                                   )?.let{
+                                       viewModel.myFeedArticles.postValue(
+                                           articles!! + it
+                                       )
+                                   }
+                                }
+                            }
+                        ) {
+                            ArticleCard(
+                                article = it,
+                                onClick = { onArticleClicked(it.id) },
+                                onAuthorClick = { onUserClicked(it.author!!.alias) },
+                                onCommentsClick = { onCommentsClicked(it.id) })
+                        }
+                    }
+                    else {
+                        Box(modifier = Modifier.fillMaxSize())
+                        LaunchedEffect(key1 = Unit, block = {
+                            launch(Dispatchers.IO) {
+                                ArticlesListController.getArticlesSnippets(
+                                    "articles",
+                                    mapOf("custom" to "true")
+                                )?.let {
+                                    viewModel.myFeedArticles.postValue(
+                                        it
+                                    )
+                                }
+                            }
+                        })
+                    }
+                }) + map
+                map
+            }
+            val pagerState = rememberPagerState()
+
+
+
+            HabrScrollableTabRow(pagerState = pagerState, tabs = pages.keys.toList())
+            HorizontalPager(
+                state = pagerState,
+                pageCount = pages.size,
+
+            ) {
+                pages.values.elementAt(it)( )
+
             }
         }
     }
@@ -484,7 +528,9 @@ fun AuthorizedMenu(
         MenuItem(title = userAlias, icon = {
             if (avatarUrl != null){
                 AsyncImage(
-                    modifier = Modifier.size(32.dp).clip(RoundedCornerShape(8.dp)),
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.FillBounds,
                     model = avatarUrl, contentDescription = "")
             } else {
