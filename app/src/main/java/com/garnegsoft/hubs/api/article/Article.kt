@@ -74,8 +74,11 @@ class Article(
         val alias: String,
         val isProfiled: Boolean,
         val isCorporative: Boolean,
-        val title: String
-    )
+        val title: String,
+        val relatedData: RelatedData?
+    ){
+        data class RelatedData(val isSubscribed: Boolean)
+    }
 
 
     class FlowSnippet(

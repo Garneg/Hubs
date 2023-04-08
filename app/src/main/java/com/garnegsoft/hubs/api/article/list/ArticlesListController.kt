@@ -174,7 +174,9 @@ class ArticlesListController {
                         alias = it.alias,
                         isProfiled = it.isProfiled,
                         isCorporative = it.type == "corporative",
-                        title = it.title
+                        title = it.title,
+                        relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(it.isSubscribed) }
+
                     )
                 )
             }
@@ -261,6 +263,12 @@ class ArticlesListController {
         var type: String,
         var title: String,
         var isProfiled: Boolean,
+        var relatedData: ArticlesListHubRelatedData?
+    )
+
+    @Serializable
+    data class ArticlesListHubRelatedData(
+        var isSubscribed: Boolean
     )
 
     @Serializable

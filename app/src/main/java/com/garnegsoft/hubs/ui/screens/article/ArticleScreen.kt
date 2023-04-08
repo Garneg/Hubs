@@ -68,12 +68,14 @@ class ArticleScreenViewModel : ViewModel() {
 
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ArticleScreen(
     article: Article,
     onBackButtonClicked: () -> Unit,
     onCommentsClicked: () -> Unit,
     onAuthorClicked: () -> Unit,
+    onHubClicked: (alias: String) -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -450,12 +452,20 @@ fun ArticleScreen(
                     }
                     Spacer(Modifier.height(4.dp))
 
-                    Text(text = article.hubs.joinToString(separator = ", ") {
-                        if (it.isProfiled)
-                            (it.title + "*").replace(" ", "\u00A0")
-                        else
-                            it.title.replace(" ", "\u00A0")
-                    }, fontSize = 12.sp, fontWeight = FontWeight.W600, color = Color.Gray)
+                    FlowRow() {
+                        article.hubs.forEach {
+                            val hubTitle = (if (it.isProfiled) it.title + "*" else it.title) + ", "
+
+                            Text(
+                                modifier = Modifier.clickable { onHubClicked(it.alias) },
+                                text = hubTitle,
+                                style = TextStyle(
+                                    color = Color.Gray,
+                                    fontWeight = FontWeight.W500
+                                )
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -498,18 +508,20 @@ fun ArticleScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
 
-                        var hubsString = ""
-                        article.hubs.forEach {
-                            hubsString += (if (it.isProfiled) it.title + "*" else it.title) + ", "
+                        FlowRow() {
+                            article.hubs.forEach {
+                                val hubTitle = (if (it.isProfiled) it.title + "*" else it.title) + ", "
+
+                                Text(
+                                    modifier = Modifier.clickable { onHubClicked(it.alias) },
+                                    text = hubTitle,
+                                    style = TextStyle(
+                                        color = Color.Gray,
+                                        fontWeight = FontWeight.W500
+                                    )
+                                )
+                            }
                         }
-                        if (hubsString.length > 0) hubsString = hubsString.dropLast(2)
-                        Text(
-                            text = hubsString,
-                            style = TextStyle(
-                                color = Color.Gray,
-                                fontWeight = FontWeight.W500
-                            )
-                        )
                     }
                 }
             }

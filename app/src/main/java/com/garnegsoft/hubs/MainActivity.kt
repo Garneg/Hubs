@@ -197,6 +197,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onAuthorClicked = {
                                         navController.navigate("user/${article!!.author?.alias}")
+                                    },
+                                    onHubClicked = {
+                                        navController.navigate("hub/$it")
                                     }
                                 )
                             } else {

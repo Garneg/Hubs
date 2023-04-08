@@ -1,6 +1,7 @@
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.screens.article.parseElement
@@ -109,7 +110,9 @@ class ArticleController {
                                     alias = it.alias,
                                     title = it.title,
                                     isProfiled = it.isProfiled,
-                                    isCorporative = it.type == "corporative"
+                                    isCorporative = it.type == "corporative",
+                                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(it.isSubscribed) }
+
                                 )
                             )
                         }
@@ -183,7 +186,8 @@ class ArticleController {
                                     alias = it.alias,
                                     title = it.title,
                                     isProfiled = it.isProfiled,
-                                    isCorporative = it.type == "corporative"
+                                    isCorporative = it.type == "corporative",
+                                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(it.isSubscribed) }
                                 )
                             )
                         }

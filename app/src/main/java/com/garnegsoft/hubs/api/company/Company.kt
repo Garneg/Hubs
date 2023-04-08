@@ -11,7 +11,7 @@ class Company(
     val siteUrl: String?,
     val staffNumber: String,
     val habrCareerAlias: String?,
-    val location: String,
+    val location: String?,
     val statistics: Statistics,
     val relatedData: RelatedData?
 ) {

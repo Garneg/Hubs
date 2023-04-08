@@ -48,7 +48,7 @@ class CompanyController {
                     siteUrl = it.siteUrl,
                     staffNumber = it.staffNumber,
                     habrCareerAlias = it.careerAlias,
-                    location = it.location.let { it.country?.title!! },
+                    location = it.location?.let { it.country?.title!! },
                     statistics = Company.Statistics(
                         subscribersCount = it.statistics.subscribersCount,
                         rating = it.statistics.rating,
@@ -86,7 +86,7 @@ class CompanyController {
         var relatedData: RelatedData? = null,
         var statistics: CompanyStatistics,
         var foundationDate: FoundationDate?,
-        var location: Location,
+        var location: Location?,
         var siteUrl: String?,
         var staffNumber: String,
         var registrationDate: String,

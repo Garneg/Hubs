@@ -212,18 +212,19 @@ fun CompanyProfile(
                         textAlign = TextAlign.Right
                     )
                 }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "Местоположение", modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = company.location,
-                        textAlign = TextAlign.Right
-                    )
+                company.location?.let{
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(text = "Местоположение", modifier = Modifier.weight(1f))
+                        Text(
+                            modifier = Modifier.weight(1f),
+                            text = company.location,
+                            textAlign = TextAlign.Right
+                        )
+                    }
                 }
 
                 if (company.siteUrl != null) {
