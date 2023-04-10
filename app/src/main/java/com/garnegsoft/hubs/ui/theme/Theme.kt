@@ -16,8 +16,8 @@ private val DarkColorPalette = darkColors(
     surface = Color(20, 20, 20, 255)
 )
 
-@Composable
-private fun LightColorPalette() = lightColors(
+
+private val LightColorPalette = lightColors(
     primary = PrimaryColor,
     primaryVariant = PrimaryVariantColor,
     secondary = SecondaryColor,
@@ -42,7 +42,7 @@ fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
-        LightColorPalette()
+        LightColorPalette
     }
 
     MaterialTheme(

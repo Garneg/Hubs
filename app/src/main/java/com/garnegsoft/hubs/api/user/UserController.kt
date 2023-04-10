@@ -1,18 +1,17 @@
 package com.garnegsoft.hubs.api.user
 
-import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
-import com.garnegsoft.hubs.api.company.list.CompaniesListController
-import com.garnegsoft.hubs.api.hub.list.HubsListController
+import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.utils.formatBirthdate
 import com.garnegsoft.hubs.api.utils.formatTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 
 class UserController {
+
     companion object {
-        private fun getRaw(path: String, args: Map<String, String>? = null): UserProfileData? {
-            var response = HabrApi.get(path, args)
+        private fun _get(path: String, args: Map<String, String>? = null): UserProfileData? {
+            val response = HabrApi.get(path, args)
 
             var result: UserProfileData? = null
 
@@ -42,18 +41,45 @@ class UserController {
             return result
         }
 
-        fun get(path: String, args: Map<String, String>? = null, loadNote: Boolean): User? {
-            val raw = getRaw(path, args)
+        private fun _whoIs(path: String, args: Map<String, String>? = null): WhoIs? {
+            val response = HabrApi.get(path, args)
+
+            if (response.code != 200 || response.body?.string() == null){
+                return null
+            }
+            response.body?.string()?.let {
+                val result = HabrDataParser.parseJson<WhoIs>(it)
+                result.invitedBy?.let {
+                    result.invitedBy!!.timeCreated = formatTime(it.timeCreated)
+                }
+
+                return result
+            }
+            return null
+        }
+
+        private fun _note(path: String, args: Map<String, String>? = null): Note? {
+            val response = HabrApi.get(path, args)
+
+            if (response.code != 200)
+                return null
+
+            response.body?.string()?.let {
+                return HabrDataParser.parseJson<Note>(it)
+
+            }
+            return null
+        }
+
+        fun get(
+            alias: String,
+            args: Map<String, String>? = null,
+        ): User? {
+            val raw = _get("users/$alias/card", args)
 
             var result: User? = null
 
             raw?.let {
-                val followedHubs =
-                    HubsListController.get("users/${raw.alias}/subscriptions/hubs",
-                    mapOf("perPage" to "50"))?.list
-
-                val followedCompanies =
-                    CompaniesListController.get("users/${raw.alias}/subscriptions/companies")?.list
 
                 result = User(
                     alias = it.alias,
@@ -84,20 +110,43 @@ class UserController {
 
                         buffer.toString()
                     },
-                    workPlaces = listOf(),
-                    whoIs = null,
-                    occupation = null,
-                    note = null,
                     articlesCount = it.counterStats.postCount,
                     commentsCount = it.counterStats.commentCount,
                     favoritesCount = it.counterStats.favoriteCount,
-                    followHubs = followedHubs,
-                    followCompanies = followedCompanies,
+                    workPlaces = it.workplace.map { User.WorkPlace(it.title, it.alias) },
                     relatedData = it.relatedData?.let{ User.RelatedData(it.isSubscribed)}
                 )
             }
 
             return result
+        }
+
+        fun whoIs(
+            alias: String,
+            args: Map<String, String>? = null,
+        ): User.WhoIs? {
+            val raw = _whoIs("users/$alias/whois", args)
+
+            raw?.let {
+                return User.WhoIs(
+                    badges = it.badgets.map { User.WhoIs.Badge(it.title, it.description) },
+                    invite = it.invitedBy?.let { User.WhoIs.Invite(it.issuerLogin, it.timeCreated) },
+                    contacts = it.contacts.map { User.WhoIs.Contact(it.title, it.url, it.favicon) }
+                )
+            }
+            return null
+        }
+
+        fun note(
+            alias: String,
+            args: Map<String, String>? = null
+        ): User.Note? {
+            val raw = _note("users/$alias/note", args)
+
+            raw?.let {
+                return User.Note(it.text)
+            }
+            return null
         }
 
         /**
@@ -116,23 +165,29 @@ class UserController {
         }
     }
 
+
+    @Serializable
+    data class Note(
+        var text: String?
+    )
+
     @Serializable
     data class WhoIs(
-        val alias: String,
-        val badgets: List<Badget>,
-        val aboutHtml: String,
-        val contacts: List<Contact>,
-        val invitedBy: InvitedBy? = null
+        var alias: String,
+        var badgets: List<Badget>,
+        var aboutHtml: String,
+        var contacts: List<Contact>,
+        var invitedBy: InvitedBy? = null
     )
 
 
     @Serializable
     data class Badget(
-        val id: String,
-        val title: String,
-        val description: String,
-        val url: String? = null,
-        val isRemovable: Boolean
+        var id: String,
+        var title: String,
+        var description: String,
+        var url: String? = null,
+        var isRemovable: Boolean
     )
 
     @Serializable
@@ -147,7 +202,7 @@ class UserController {
     @Serializable
     data class InvitedBy(
         val issuerLogin: String?,
-        val timeCreated: String
+        var timeCreated: String
     )
 
 }

@@ -255,10 +255,8 @@ class MainActivity : ComponentActivity() {
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     user =
-                                        UserController.get(
-                                            "users/${it.arguments!!.getString("alias")}/card",
-                                            loadNote = false
-                                        )
+                                        it.arguments!!.getString("alias")
+                                            ?.let { it1 -> UserController.get(it1) }
 
                                 }
                             })
