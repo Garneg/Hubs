@@ -567,7 +567,6 @@ fun ScrollBar(
 }
 
 val STRONG_FONT_WEIGHT = FontWeight.W600
-val DEFAULT_FONT_SIZE = 16f
 val HEADER_FONT_WEIGHT = FontWeight.W700
 
 fun parseElement(

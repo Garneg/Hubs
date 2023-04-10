@@ -212,6 +212,7 @@ fun CompanyProfile(
                         textAlign = TextAlign.Right
                     )
                 }
+
                 company.location?.let{
                     Row(
                         modifier = Modifier

@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.api.me
 
-import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
 import kotlinx.serialization.Serializable
@@ -27,7 +26,7 @@ class MeController {
             val raw = get()
 
             raw?.let {
-                return com.garnegsoft.hubs.api.me.Me(
+                return Me(
                     alias = it.alias,
                     avatarUrl = it.avatarUrl
                 )

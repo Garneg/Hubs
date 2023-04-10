@@ -22,6 +22,8 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.user.User
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.common.BasicTitledColumn
+import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -214,91 +216,79 @@ internal fun UserProfile(
                     .background(Color.White)
                     .padding(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(text = "Информация", fontSize = 20.sp, fontWeight = FontWeight.W500)
-                }
-                Divider(modifier = Modifier.padding(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "Место в рейтинге", modifier = Modifier.weight(1f))
+                BasicTitledColumn(title = {
                     Text(
-                        modifier = Modifier.weight(1f),
-                        text = if (user.ratingPosition == null) "Не участвует" else user.ratingPosition.toString() + "-й",
-                        textAlign = TextAlign.End
-                    )
-                }
-                if (user.location != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
+                        modifier = Modifier.padding(12.dp),
+                        text = "Информация", style = MaterialTheme.typography.subtitle1)
+                }, divider = { Divider() }) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 12.dp,
+                            end = 12.dp,
+                            bottom = 12.dp,
+                            top = 12.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
-                        Text(text = "Откуда", modifier = Modifier.weight(1f))
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = user.location,
-                            textAlign = TextAlign.End
-                        )
-                    }
-                }
+                        TitledColumn(
+                            title = "Место в рейтинге"
+                        ) {
+                            Text(
+                                text = if (user.ratingPosition == null) "Не участвует" else user.ratingPosition.toString() + "-й",
+                            )
+                        }
 
-                if (user.birthday != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(text = "Дата рождения", modifier = Modifier.weight(1f))
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = user.birthday,
-                            textAlign = TextAlign.End
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "Дата регистрации", modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = user.registrationDate,
-                        textAlign = TextAlign.End
-                    )
-                }
-                if (user.lastActivityDate != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(text = "Активность")
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = user.lastActivityDate,
-                            textAlign = TextAlign.End
-                        )
+                        if (user.location != null) {
+                            TitledColumn(title = "Откуда") {
+                                Text(
+                                    text = user.location,
+                                )
+                            }
+                        }
+
+                        if (user.birthday != null) {
+
+                            TitledColumn(title = "Дата рождения") {
+                                Text(
+                                    text = user.birthday,
+                                )
+                            }
+                        }
+
+                        TitledColumn(title = "Дата регистрации") {
+                            Text(
+                                text = user.registrationDate,
+                            )
+                        }
+
+                        if (user.lastActivityDate != null) {
+
+                            TitledColumn(title = "Активность") {
+                                Text(
+                                    text = user.lastActivityDate
+                                )
+                            }
+                        }
+
                     }
                 }
             }
         }
-        if (isAppUser){
+        if (isAppUser) {
             Card(
-                modifier = Modifier.fillMaxWidth().padding(8.dp).clickable(onClick = onUserLogout!!),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable(onClick = onUserLogout!!),
                 elevation = 0.dp,
                 shape = RoundedCornerShape(26.dp),
                 backgroundColor = MaterialTheme.colors.surface,
             ) {
-                Box(modifier = Modifier.fillMaxWidth().padding(12.dp)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(12.dp)
+                ) {
                     Text(
                         modifier = Modifier.align(Alignment.Center),
                         text = "Выйти",
