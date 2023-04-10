@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,12 +30,16 @@ import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun UserProfile(
     user: User,
     isAppUser: Boolean,
-    onUserLogout: (() -> Unit)? = null
+    onUserLogout: (() -> Unit)? = null,
+    onHubClick: (alias: String) -> Unit,
+    viewModel: UserScreenViewModel
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -219,7 +224,8 @@ internal fun UserProfile(
                 BasicTitledColumn(title = {
                     Text(
                         modifier = Modifier.padding(12.dp),
-                        text = "Информация", style = MaterialTheme.typography.subtitle1)
+                        text = "Информация", style = MaterialTheme.typography.subtitle1
+                    )
                 }, divider = { Divider() }) {
                     Column(
                         modifier = Modifier.padding(
@@ -269,6 +275,37 @@ internal fun UserProfile(
                                 )
                             }
                         }
+                        val hubs by viewModel.subscribedHubs.observeAsState()
+                        hubs?.let {
+                            if (it.list.size > 0) {
+                                Column() {
+                                    TitledColumn(title = "Состоит в хабах") {
+                                        FlowRow(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            it.list.forEach {
+                                                HubChip(hub = it) {
+                                                    onHubClick(it.alias)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if(viewModel.moreHubsAvailable) {
+                                        TextButton(
+                                            onClick = {
+                                                viewModel.loadSubscribedHubs()
+                                            }
+                                        ) {
+                                            Text("Показать ещё",
+                                                color = MaterialTheme.colors.secondary,
+                                                letterSpacing = 0.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
 
                     }
                 }

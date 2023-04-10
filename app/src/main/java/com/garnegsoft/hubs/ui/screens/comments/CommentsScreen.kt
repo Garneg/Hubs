@@ -35,6 +35,7 @@ import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.ArticleCardStyle
+import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.PrimaryColor
 import kotlinx.coroutines.Dispatchers
@@ -98,7 +99,7 @@ fun CommentsScreen(
                     ArticleCard(
                         article = articleSnippet,
                         onClick = onArticleClicked,
-                        style = ArticleCardStyle(showImage = false, showTextSnippet = false),
+                        style = defaultArticleCardStyle().copy(showImage = false, showTextSnippet = false),
                         onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
                         onCommentsClick = {}
                     )

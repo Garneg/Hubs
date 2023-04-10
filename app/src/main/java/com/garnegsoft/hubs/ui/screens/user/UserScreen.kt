@@ -1,5 +1,8 @@
 package com.garnegsoft.hubs.ui.screens.user
 
+import com.garnegsoft.hubs.api.hub.list.HubsList
+import com.garnegsoft.hubs.api.hub.list.HubsListController
+import com.garnegsoft.hubs.ui.screens.user.UserProfile
 import ArticlesListController
 import android.content.Intent
 import androidx.compose.foundation.*
@@ -16,15 +19,15 @@ import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
+import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.user.User
+import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
@@ -34,12 +37,63 @@ import kotlinx.coroutines.launch
 
 
 class UserScreenViewModel : ViewModel() {
-    var user = MutableLiveData<User>()
-    var articles = MutableLiveData<HabrList<ArticleSnippet>>()
-    var comments = MutableLiveData<HabrList<CommentSnippet>>()
-    var bookmarks = MutableLiveData<HabrList<ArticleSnippet>>()
-    var followers = MutableLiveData<HabrList<UserSnippet>>()
-    var follow = MutableLiveData<HabrList<UserSnippet>>()
+    val user = MutableLiveData<User>()
+    val articles = MutableLiveData<HabrList<ArticleSnippet>>()
+    val comments = MutableLiveData<HabrList<CommentSnippet>>()
+    val bookmarks = MutableLiveData<HabrList<ArticleSnippet>>()
+    val followers = MutableLiveData<HabrList<UserSnippet>>()
+    val follow = MutableLiveData<HabrList<UserSnippet>>()
+
+    private val _note = MutableLiveData<User.Note>()
+    val note: LiveData<User.Note> get() = _note
+    fun loadNote() {
+        viewModelScope.launch(Dispatchers.IO) {
+            user.value?.let {
+                UserController.note(it.alias)?.let {
+                    _note.postValue(it)
+                }
+
+            }
+        }
+
+    }
+
+    private val _subscribedHubs = MutableLiveData<HabrList<HubSnippet>>()
+    val subscribedHubs: LiveData<HabrList<HubSnippet>> get() = _subscribedHubs
+
+    private var subscribedHubsPage = 1
+    val moreHubsAvailable: Boolean
+        get() {
+            if (_subscribedHubs.isInitialized)
+                return (subscribedHubs.value?.pagesCount ?: 1) >= subscribedHubsPage
+
+            return true
+        }
+    fun loadSubscribedHubs() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (subscribedHubsPage == 1) {
+                HubsListController.get(
+                    "users/${user.value?.alias}/subscriptions/hubs"
+                )?.let {
+                    _subscribedHubs.postValue(it)
+                    subscribedHubsPage++
+                }
+            } else {
+                if (subscribedHubs.isInitialized && moreHubsAvailable)
+                    HubsListController.get(
+                        "users/${user.value?.alias}/subscriptions/hubs",
+                        mapOf("page" to subscribedHubsPage.toString())
+                    )?.let {
+                        _subscribedHubs.postValue(subscribedHubs.value!! + it)
+                        subscribedHubsPage++
+                    }
+            }
+        }
+    }
+
+
+
+
 }
 
 // TODO: remove default actions for navigation events
@@ -60,9 +114,10 @@ fun UserScreen(
     user: User,
     onBack: () -> Unit,
     onArticleClicked: (articleId: Int) -> Unit,
-    onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit = { i, a -> },
+    onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit,
     onUserClicked: (alias: String) -> Unit,
-    onCommentsClicked: (postId: Int) -> Unit = { },
+    onCommentsClicked: (postId: Int) -> Unit,
+    onHubClicked: (alias: String) -> Unit,
     initialPage: UserScreenPages = UserScreenPages.Profile,
     isAppUser: Boolean = false,
     onLogout: (() -> Unit)? = null
@@ -88,8 +143,8 @@ fun UserScreen(
                             Intent.EXTRA_TEXT,
                             if (user.fullname != null)
                                 "${user.fullname} — https://habr.com/ru/users/${user.alias}/"
-                        else
-                            "${user.alias} — https://habr.com/ru/users/${user.alias}/"
+                            else
+                                "${user.alias} — https://habr.com/ru/users/${user.alias}/"
                         )
                         sendIntent.setType("text/plain")
                         val shareIntent = Intent.createChooser(sendIntent, null)
@@ -117,7 +172,19 @@ fun UserScreen(
             ) { pageIndex ->
                 when (pageIndex) {
                     0 -> {
-                        UserProfile(user, isAppUser, onLogout)
+                        if(viewModel.user.observeAsState().value != null) {
+                            val note by viewModel.note.observeAsState()
+                            val hubs by viewModel.subscribedHubs.observeAsState()
+                            if (hubs != null)
+                                UserProfile(user, isAppUser, onLogout, onHubClicked, viewModel)
+                            else
+                                LaunchedEffect(key1 = Unit, block = {
+                                    viewModel.loadNote()
+                                    viewModel.loadSubscribedHubs()
+                                })
+                        } else {
+                            viewModel.user.postValue(user)
+                        }
                     }
                     1 -> {
                         val articles by viewModel.articles.observeAsState()

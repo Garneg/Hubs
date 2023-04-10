@@ -4,11 +4,9 @@ import ArticleController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -119,9 +117,14 @@ fun defaultArticleCardStyle(): ArticleCardStyle {
         backgroundColor = MaterialTheme.colors.surface,
         textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
         statisticsColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
-            .copy(alpha = if (MaterialTheme.colors.isLight){ 0.75f } else { 0.5f }
+            .copy(
+                alpha = if (MaterialTheme.colors.isLight) {
+                    0.75f
+                } else {
+                    0.5f
+                }
 
-        )
+            )
     )
 }
 
@@ -289,6 +292,7 @@ fun ArticleCard(
                 fontSize = 14.sp
             )
         }
+
         // Hubs
         if (style.showHubsList)
             Text(
@@ -575,6 +579,7 @@ fun ArticleCard(
                     overflow = TextOverflow.Clip,
                     maxLines = 1
                 )
+
             }
         }
     }

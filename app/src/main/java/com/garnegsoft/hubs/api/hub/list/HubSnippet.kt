@@ -21,7 +21,9 @@ data class HubSnippet(
 
     val isProfiled: Boolean,
 
-    val isOfftop: Boolean
+    val isOfftop: Boolean,
+
+    val relatedData: RelatedData?
 
 ) : HabrSnippet {
     data class Statistics(
@@ -30,4 +32,6 @@ data class HubSnippet(
         val authorsCount: Int,
         val postsCount: Int
     )
+
+    class RelatedData(val isSubscribed: Boolean)
 }

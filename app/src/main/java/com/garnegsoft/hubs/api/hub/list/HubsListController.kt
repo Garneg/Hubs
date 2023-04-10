@@ -56,7 +56,8 @@ class HubsListController{
                                 tags = mutableListOf<String>().apply {
                                     it.commonTags.forEach { add(it) }
                                 },
-                                title = it.titleHtml
+                                title = it.titleHtml,
+                                relatedData = it.relatedData?.let { HubSnippet.RelatedData(it.isSubscribed) }
                             )
                         )
                     }
@@ -89,7 +90,8 @@ data class HubListItem (
     var statistics: Statistics,
     var commonTags: List<String>,
     var isProfiled: Boolean,
-    var isOfftop: Boolean
+    var isOfftop: Boolean,
+    var relatedData: RelatedData?
 ){
 
     @Serializable
@@ -99,5 +101,8 @@ data class HubListItem (
         var authorsCount: Int,
         var postsCount: Int
     )
+
+    @Serializable
+    class RelatedData(var isSubscribed: Boolean)
 }
 

@@ -289,6 +289,9 @@ class MainActivity : ComponentActivity() {
                                                 inclusive = false
                                             )
                                         }
+                                    },
+                                    onHubClicked = {
+                                        navController.navigate("hub/$it")
                                     }
                                 )
                             }
