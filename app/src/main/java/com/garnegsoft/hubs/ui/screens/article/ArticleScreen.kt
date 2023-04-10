@@ -451,7 +451,6 @@ fun ArticleScreen(
                         )
                     }
                     Spacer(Modifier.height(4.dp))
-
                     FlowRow() {
                         article.hubs.forEach {
                             val hubTitle = (if (it.isProfiled) it.title + "*" else it.title) + ", "
