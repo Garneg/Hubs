@@ -86,7 +86,7 @@ fun CompanyProfile(
                             modifier = Modifier
                                 .size(55.dp)
                                 .background(
-                                    color = MaterialTheme.colors.surface,
+                                    color = Color.White,
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .border(

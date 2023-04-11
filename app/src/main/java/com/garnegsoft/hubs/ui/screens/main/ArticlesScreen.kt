@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.screens.main
 
 
 import ArticlesListController
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -40,13 +41,10 @@ import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.placeholderColor
-import com.garnegsoft.hubs.authDataStore
 import com.garnegsoft.hubs.authDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
-import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.map
 
 
 class ArticlesScreenViewModel : ViewModel() {
@@ -58,6 +56,9 @@ class ArticlesScreenViewModel : ViewModel() {
     var authors = MutableLiveData<HabrList<UserSnippet>>()
     var companies = MutableLiveData<HabrList<CompanySnippet>>()
 
+    fun aob(){
+
+    }
 }
 
 
@@ -74,9 +75,13 @@ fun ArticlesScreen(
     onHubClicked: (alias: String) -> Unit,
     menu: @Composable () -> Unit,
 ) {
-    val isAuthorized by LocalContext.current.authDataStoreFlow(DataStoreKeys.Auth.Authorized).collectAsState(
-        initial = false
-    )
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    var isAuthorized by rememberSaveable() { mutableStateOf(false) }
+    val authorizedState by context.authDataStoreFlow(DataStoreKeys.Auth.Authorized).collectAsState(initial = false)
+    LaunchedEffect(key1 = authorizedState, block = {
+        isAuthorized = authorizedState == true
+    })
     val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
 
     Scaffold(
@@ -111,7 +116,7 @@ fun ArticlesScreen(
 
             val newsLazyListState = rememberLazyListState()
 
-            val pages = remember(isAuthorized) {
+            val pages = remember(key1 = isAuthorized) {
                 var map = mapOf<String, @Composable () -> Unit>(
                     "Статьи" to {
                         val articles by viewModel.articles.observeAsState()
@@ -433,8 +438,6 @@ fun ArticlesScreen(
                 map
             }
             val pagerState = rememberPagerState()
-
-
 
             HabrScrollableTabRow(pagerState = pagerState, tabs = pages.keys.toList())
             HorizontalPager(
