@@ -22,8 +22,6 @@ class Article(
 
     val author: Author?,
 
-    val snippet: ArticleSnippet,
-
     val content: @Composable (SpanStyle) -> Unit,
 
     val isCorporative: Boolean,

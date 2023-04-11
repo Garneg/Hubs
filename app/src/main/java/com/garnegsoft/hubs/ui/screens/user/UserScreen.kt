@@ -91,6 +91,19 @@ class UserScreenViewModel : ViewModel() {
         }
     }
 
+    var _whoIs = MutableLiveData<User.WhoIs>()
+    val whoIs: LiveData<User.WhoIs> get() = _whoIs
+
+    fun loadWhoIs() {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (user.value?.relatedData != null) {
+                UserController.whoIs(user.value!!.alias)?.let {
+                    _whoIs.postValue(it)
+                }
+            }
+        }
+    }
+
 
 
 

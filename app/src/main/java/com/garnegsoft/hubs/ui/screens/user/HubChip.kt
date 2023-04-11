@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -26,18 +27,18 @@ fun HubChip(
             .clickable(onClick = onClick)
             .background(hub.relatedData?.let {
                 if (it.isSubscribed)
-                    Color(0xFFD5F0C7)
+                    Color(0x2658F507)
                 else
                     null
-            } ?: Color(0xFFDBEAF3))
+            } ?: Color(0x260F9AEE))
             .padding(vertical = 8.dp, horizontal = 12.dp),
         text = hub.title,
         color = hub.relatedData?.let {
             if (it.isSubscribed)
-                Color(0xFF475E38)
+                MaterialTheme.colors.onSurface.copy(ContentAlpha.medium)
             else
                 null
-        } ?: Color(0xFF4B697C),
+        } ?: MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
         style = MaterialTheme.typography.body2
     )
 }

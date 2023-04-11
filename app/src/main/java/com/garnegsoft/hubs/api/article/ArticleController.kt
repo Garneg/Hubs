@@ -54,43 +54,6 @@ class ArticleController {
                         Jsoup.parse(it.textHtml),
                         SpanStyle(fontSize = 16.sp)
                     ).second!!,
-                    snippet = ArticleSnippet(
-                        id = it.id.toInt(),
-                        timePublished = it.timePublished,
-                        isCorporative = it.isCorporative,
-                        title = Jsoup.parse(it.titleHtml).text(),
-                        editorVersion = EditorVersion.fromString(it.editorVersion),
-                        type = PostType.fromString(it.postType),
-                        labels = null,
-                        author = if (it.author != null) {
-                            com.garnegsoft.hubs.api.article.Article.Author(
-                                alias = it.author!!.alias,
-                                fullname = it.author!!.fullname,
-                                avatarUrl = it.author!!.avatarUrl,
-                            )
-                        } else {
-                            null
-                        },
-                        statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
-                            commentsCount = it.statistics.commentsCount.toString(),
-                            favoritesCount = it.statistics.favoritesCount.toString(),
-                            readingCount = it.statistics.readingCount.toString(),
-                            score = it.statistics.score,
-                            votesCountMinus = it.statistics.votesCountMinus,
-                            votesCountPlus = it.statistics.votesCountPlus
-                        ),
-                        imageUrl = it.leadData.imageUrl,
-                        format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
-                        textSnippet = it.leadData.textHtml,
-                        hubs = listOf(),
-                        complexity = PostComplexity.fromString(it.complexity),
-                        readingTime = it.readingTime,
-                        relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
-                            bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
-                        ) }
-                    ),
                     editorVersion = EditorVersion.fromString(it.editorVersion),
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(

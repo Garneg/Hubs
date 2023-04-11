@@ -56,7 +56,7 @@ internal fun UserProfile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(26.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colors.surface)
                     .padding(12.dp)
             ) {
                 Box(
@@ -79,6 +79,7 @@ internal fun UserProfile(
                         Icon(
                             modifier = Modifier
                                 .size(75.dp)
+                                .background(Color.White, shape = RoundedCornerShape(12.dp))
                                 .border(
                                     width = 4.dp,
                                     color = placeholderColor(user.alias),
@@ -120,7 +121,7 @@ internal fun UserProfile(
                             modifier = Modifier.align(Alignment.Center),
                             text = "Read Only",
                             fontWeight = FontWeight.W400,
-                            color = Color.LightGray,
+                            color = MaterialTheme.colors.onSurface.copy(0.2f),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -139,7 +140,7 @@ internal fun UserProfile(
                             modifier = Modifier.align(Alignment.Center),
                             text = user.speciality,
                             fontWeight = FontWeight.W500,
-                            color = Color.Gray,
+                            color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -161,11 +162,11 @@ internal fun UserProfile(
                                 RatingPositive
                             else
                                 if (user.score == 0)
-                                    Color.Black
+                                    MaterialTheme.colors.onSurface
                                 else
                                     RatingNegative
                         )
-                        Text(text = "Карма", color = Color.Gray)
+                        Text(text = "Карма", color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
                     }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -176,7 +177,7 @@ internal fun UserProfile(
                             fontWeight = FontWeight.W600,
                             color = Color.Magenta
                         )
-                        Text(text = "Рейтинг", color = Color.Gray)
+                        Text(text = "Рейтинг", color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
                     }
                 }
                 if (!isAppUser) {
@@ -218,7 +219,7 @@ internal fun UserProfile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(26.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colors.surface)
                     .padding(8.dp)
             ) {
                 BasicTitledColumn(title = {

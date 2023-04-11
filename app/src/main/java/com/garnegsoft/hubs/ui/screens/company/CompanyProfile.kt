@@ -5,9 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.runtime.*
@@ -16,6 +14,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -27,6 +27,8 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.Company
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.common.BasicTitledColumn
+import com.garnegsoft.hubs.ui.common.TitledColumn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -45,12 +47,17 @@ fun CompanyProfile(
             modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            AsyncImage(
+                modifier = Modifier.padding(0.dp).aspectRatio(12f/3f).clip(
+                    RoundedCornerShape(26.dp)),
+                contentScale = ContentScale.FillHeight,
+                model = "https://hsto.org/getpro/habr/branding/ea2/32a/1c4/ea232a1c4d3c4f31e800a2221c764b84.jpg", contentDescription = "")
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(26.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colors.surface)
                     .padding(12.dp)
             ) {
                 Box(
@@ -66,13 +73,22 @@ fun CompanyProfile(
                                 .align(Alignment.Center)
                                 .clip(
                                     RoundedCornerShape(12.dp)
+                                )
+                                .background(
+                                    color = Color.White
                                 ),
+
+
                             contentDescription = ""
                         )
                     } else {
                         Icon(
                             modifier = Modifier
                                 .size(55.dp)
+                                .background(
+                                    color = MaterialTheme.colors.surface,
+                                    shape = RoundedCornerShape(12.dp)
+                                )
                                 .border(
                                     width = 4.dp,
                                     color = placeholderColor(company.alias),
@@ -111,11 +127,11 @@ fun CompanyProfile(
                             modifier = Modifier.align(Alignment.Center),
                             text = company.description,
                             fontWeight = FontWeight.W500,
-                            color = Color.Gray,
+                            color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
                             textAlign = TextAlign.Center
                         )
                     }
-                company.relatedData?.let{
+                company.relatedData?.let {
                     var isSubscribed by rememberSaveable {
                         mutableStateOf(it.isSubscribed)
                     }
@@ -137,7 +153,7 @@ fun CompanyProfile(
                                 isSubscribed = CompanyController.subscription(company.alias)
                             }
                         }
-                    ){
+                    ) {
                         Text(
                             modifier = Modifier.align(Alignment.Center),
                             text = if (isSubscribed) "Вы подписаны" else "Подписаться",
@@ -151,112 +167,85 @@ fun CompanyProfile(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(26.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colors.surface)
                     .padding(8.dp)
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(text = "Информация", fontSize = 20.sp, fontWeight = FontWeight.W500)
-                }
-                Divider(modifier = Modifier.padding(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "Рейтинг", modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = company.statistics.rating.toString(),
-                        textAlign = TextAlign.Right
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Text(text = "Дата регистрации", modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = company.registrationDate,
-                        textAlign = TextAlign.Right
-                    )
-                }
-                if (company.foundationDate != null) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(text = "Дата основания", modifier = Modifier.weight(1f))
+                BasicTitledColumn(
+                    title = {
                         Text(
-                            modifier = Modifier.weight(1f),
-                            text = company.foundationDate,
-                            textAlign = TextAlign.Right
-                        )
-                    }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
+                            modifier = Modifier.padding(12.dp),
+                            text = "Информация", style = MaterialTheme.typography.subtitle1)
+                    },
+                    divider = { Divider() }
                 ) {
-                    Text(text = "Численность", modifier = Modifier.weight(1f))
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = company.staffNumber,
-                        textAlign = TextAlign.Right
-                    )
-                }
 
-                company.location?.let{
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
-                        Text(text = "Местоположение", modifier = Modifier.weight(1f))
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = company.location,
-                            textAlign = TextAlign.Right
-                        )
-                    }
-                }
+                    Column(modifier = Modifier.padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)) {
 
-                if (company.siteUrl != null) {
-                    val context = LocalContext.current
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(
-                                RoundedCornerShape(
-                                    topStart = 9.dp,
-                                    topEnd = 9.dp,
-                                    bottomStart = 18.dp,
-                                    bottomEnd = 18.dp
-                                )
+
+                        TitledColumn(title = "Рейтинг") {
+                            Text(
+                                text = company.statistics.rating.toString(),
                             )
-                            .clickable {
-                                context.startActivity(
-                                    Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse(company.siteUrl)
-                                    )
+                        }
+                        TitledColumn(title = "Дата регистрации") {
+                            Text(
+                                text = company.registrationDate,
+                            )
+                        }
+                        if (company.foundationDate != null) {
+                            TitledColumn(title = "Дата основания") {
+                                Text(
+                                    text = company.foundationDate,
                                 )
                             }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(text = "Перейти на сайт")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(imageVector = Icons.Outlined.ArrowForward, contentDescription = "")
+                        }
+
+                        TitledColumn(title = "Численность") {
+                            Text(
+                                text = company.staffNumber,
+                            )
+                        }
+
+                        company.location?.let {
+                            TitledColumn(title = "Местоположение") {
+                                Text(
+                                    text = company.location
+                                )
+                            }
+                        }
                     }
+                }
+
+            }
+            if (company.siteUrl != null) {
+                val context = LocalContext.current
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(
+                            RoundedCornerShape(26.dp)
+                        )
+                        .background(MaterialTheme.colors.surface)
+                        .clickable {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(company.siteUrl)
+                                )
+                            )
+                        }
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "Перейти на сайт", color = MaterialTheme.colors.onSurface)
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.Outlined.ArrowForward,
+                        contentDescription = "",
+                        tint = MaterialTheme.colors.onSurface
+                    )
                 }
             }
         }
