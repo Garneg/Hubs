@@ -47,12 +47,6 @@ fun CompanyProfile(
             modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AsyncImage(
-                modifier = Modifier.padding(0.dp).aspectRatio(12f/3f).clip(
-                    RoundedCornerShape(26.dp)),
-                contentScale = ContentScale.FillHeight,
-                model = "https://hsto.org/getpro/habr/branding/ea2/32a/1c4/ea232a1c4d3c4f31e800a2221c764b84.jpg", contentDescription = "")
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

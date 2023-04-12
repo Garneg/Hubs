@@ -3,9 +3,11 @@ package com.garnegsoft.hubs.ui.screens.comments
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,27 +32,35 @@ fun CommentItem(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White)
-            .padding(8.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(MaterialTheme.colors.surface)
+            .padding(16.dp)
     ) {
         Row(
-            modifier = if (comment.isArticleAuthor) Modifier
-                .fillMaxWidth()
-                .clip(
+            modifier =
+            (if (comment.isArticleAuthor) {
+                Modifier
+                    .fillMaxWidth()
+                    .clip(
+                        RoundedCornerShape(8.dp)
+                    )
+                    .background(Color(0x536BEB40))
+            }
+            else {
+                Modifier.clip(
                     RoundedCornerShape(8.dp)
                 )
-                .background(Color(0x536BEB40)) else Modifier
+            })
         ) {
             if (comment.author.avatarUrl == null || comment.author.avatarUrl.isBlank()) {
                 Icon(
                     modifier = Modifier
                         .size(34.dp)
-                        .clip(shape = RoundedCornerShape(8.dp))
+                        .clip(shape = RoundedCornerShape(10.dp))
                         .background(Color.White)
                         .border(
                             BorderStroke(2.dp, color = placeholderColor(comment.author.alias)),
-                            shape = RoundedCornerShape(8.dp)
+                            shape = RoundedCornerShape(10.dp)
                         )
                         .padding(2.dp),
                     painter = painterResource(id = R.drawable.user_avatar_placeholder),
@@ -62,7 +72,7 @@ fun CommentItem(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    model = comment.author?.avatarUrl, contentDescription = "authorAvatar"
+                    model = comment.author.avatarUrl, contentDescription = "authorAvatar"
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
@@ -87,16 +97,18 @@ fun CommentItem(
                 painter = painterResource(id = R.drawable.rating), contentDescription = ""
             )
             Spacer(modifier = Modifier.width(2.dp))
-            Text(text = if (comment.score > 0) {
-                "+"
-            } else {
-                ""
-            } + comment.score,
+            Text(
+                text = if (comment.score > 0) {
+                    "+"
+                } else {
+                    ""
+                } + comment.score,
                 color = when {
                     comment.score > 0 -> RatingPositive
                     comment.score < 0 -> RatingNegative
                     else -> Color.Unspecified
-                })
+                }
+            )
         }
     }
 

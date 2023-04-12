@@ -78,8 +78,8 @@ fun CommentsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                elevation = 0.dp,
                 title = { Text("Комментарии") },
-                backgroundColor = PrimaryColor,
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
@@ -129,12 +129,15 @@ fun CommentsScreen(
     }
 }
 
+@Composable
 fun bakeChildrenComments(comment: Comment): (@Composable () -> Unit) {
     var children = ArrayList<(@Composable () -> Unit)>()
     comment.children.forEach {
         children.add { bakeChildrenComments(it)() }
     }
-    var content = parseElement(element = Jsoup.parse(comment.message), spanStyle = SpanStyle())
+    val content = parseElement(element = Jsoup.parse(comment.message),
+        spanStyle = SpanStyle(color = MaterialTheme.colors.onSurface)
+    )
 
     return {
         Column() {
@@ -143,7 +146,7 @@ fun bakeChildrenComments(comment: Comment): (@Composable () -> Unit) {
                 content = {
                     Column() {
                         content.first?.let {
-                            if (it.text.length > 0)
+                            if (it.text.isNotEmpty())
                                 Text(it)
                         }
                         content.second?.let {
@@ -151,7 +154,8 @@ fun bakeChildrenComments(comment: Comment): (@Composable () -> Unit) {
                         }
                     }
 
-                }
+                },
+
             )
             var commentLevelIndicator = with(LocalDensity.current) { 2.dp.toPx() }
             Column(modifier = Modifier
@@ -168,7 +172,9 @@ fun bakeChildrenComments(comment: Comment): (@Composable () -> Unit) {
                         }
                     }
                 }
-                .padding(start = 8.dp, top = 8.dp)) {
+                .padding(
+                    start = if (comment.level <= 5) 8.dp else 0.dp,
+                    top = 8.dp)) {
                 children.forEach {
                     it()
                 }

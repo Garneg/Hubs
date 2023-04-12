@@ -5,7 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -25,13 +27,32 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.screens.company.CompanyProfile
 
+
+@Composable
+private fun defaultCompanyCardStyle(): CompanyCardStyle {
+    return CompanyCardStyle(
+        backgroundColor = MaterialTheme.colors.surface,
+        descriptionTextStyle = TextStyle.Default.copy(
+            color = MaterialTheme.colors.onSurface.copy(
+                ContentAlpha.disabled
+            )
+        )
+    )
+}
 
 @Composable
 fun CompanyCard(
     company: CompanySnippet,
-    style: CompanyCardStyle = CompanyCardStyle(),
-    indicator: @Composable () -> Unit = { Text(company.statistics.rating.toString(), fontWeight = FontWeight.W400, color = Color(0xFFF555D7)) },
+    style: CompanyCardStyle = defaultCompanyCardStyle(),
+    indicator: @Composable () -> Unit = {
+        Text(
+            company.statistics.rating.toString(),
+            fontWeight = FontWeight.W400,
+            color = Color(0xFFF555D7)
+        )
+    },
     onClick: () -> Unit
 ) {
     Row(
@@ -41,11 +62,12 @@ fun CompanyCard(
             .clickable { onClick() }
             .padding(style.innerPadding),
         verticalAlignment = remember {
-        if (style.showDescription && company.description != null)
-            Alignment.Top
-        else
-            Alignment.CenterVertically}) {
-        if (company.avatarUrl != null){
+            if (style.showDescription && company.description != null)
+                Alignment.Top
+            else
+                Alignment.CenterVertically
+        }) {
+        if (company.avatarUrl != null) {
             AsyncImage(
                 model = company.avatarUrl,
                 contentDescription = "",
@@ -54,12 +76,15 @@ fun CompanyCard(
                     .clip(style.avatarShape)
             )
 
-        }
-        else{
+        } else {
             Icon(
                 modifier = Modifier
                     .size(style.avatarSize)
-                    .border(width = 2.5.dp, color = placeholderColor(company.alias), shape = style.avatarShape)
+                    .border(
+                        width = 2.5.dp,
+                        color = placeholderColor(company.alias),
+                        shape = style.avatarShape
+                    )
                     .padding(3.dp),
                 painter = painterResource(id = R.drawable.company_avatar_placeholder),
                 contentDescription = "",
@@ -70,7 +95,7 @@ fun CompanyCard(
         Column(
             modifier = Modifier.weight(1f),
 
-        ) {
+            ) {
             Text(text = company.title, style = style.titleTextStyle)
             if (style.showDescription)
                 company.description?.let {

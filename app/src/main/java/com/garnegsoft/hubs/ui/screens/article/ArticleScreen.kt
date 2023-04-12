@@ -54,12 +54,14 @@ import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 
 
@@ -76,9 +78,10 @@ fun ArticleScreen(
     onCommentsClicked: () -> Unit,
     onAuthorClicked: () -> Unit,
     onHubClicked: (alias: String) -> Unit,
+    onCompanyClick: (alias: String) -> Unit,
 ) {
     val scrollState = rememberScrollState()
-
+    val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val shareIntent = remember {
         val sendIntent = Intent(Intent.ACTION_SEND)
 
@@ -113,9 +116,9 @@ fun ArticleScreen(
                     }
                 })
         },
-        backgroundColor = Color(0xFFF9F9F9),
+        backgroundColor = if (MaterialTheme.colors.isLight == true) Color(0xFFF9F9F9) else MaterialTheme.colors.background,
         bottomBar = {
-            val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+
             BottomAppBar(
                 elevation = 0.dp,
                 backgroundColor = MaterialTheme.colors.surface,
@@ -368,6 +371,7 @@ fun ArticleScreen(
                                         color = placeholderColor(article.author.alias),
                                         shape = RoundedCornerShape(8.dp)
                                     )
+                                    .background(Color.White, shape = RoundedCornerShape(8.dp))
                                     .padding(2.dp),
                                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                 contentDescription = "",
@@ -440,12 +444,12 @@ fun ArticleScreen(
                             painter = painterResource(id = R.drawable.clock_icon),
                             modifier = Modifier.size(14.dp),
                             contentDescription = "",
-                            tint = Color.DarkGray
+                            tint = statisticsColor
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
                             text = "${article.readingTime} мин",
-                            color = Color.DarkGray,
+                            color = statisticsColor,
                             fontWeight = FontWeight.W500,
                             fontSize = 14.sp
                         )
@@ -456,7 +460,12 @@ fun ArticleScreen(
                             val hubTitle = (if (it.isProfiled) it.title + "*" else it.title) + ", "
 
                             Text(
-                                modifier = Modifier.clickable { onHubClicked(it.alias) },
+                                modifier = Modifier.clickable {
+                                    if (it.isCorporative)
+                                        onCompanyClick(it.alias)
+                                    else
+                                        onHubClicked(it.alias)
+                                },
                                 text = hubTitle,
                                 style = TextStyle(
                                     color = Color.Gray,
@@ -469,7 +478,18 @@ fun ArticleScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     SelectionContainer() {
-                        article.content(SpanStyle(fontSize = 16.sp))
+                        parseElement(
+                            Jsoup.parse(article.contentHtml),
+                            SpanStyle(
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.body1.fontSize
+                            )
+                        ).second?.let { it1 ->
+                            it1(SpanStyle(
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.body1.fontSize
+                            ))
+                        }
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     // Tags
@@ -509,10 +529,12 @@ fun ArticleScreen(
 
                         FlowRow() {
                             article.hubs.forEach {
-                                val hubTitle = (if (it.isProfiled) it.title + "*" else it.title) + ", "
+                                val hubTitle =
+                                    (if (it.isProfiled) it.title + "*" else it.title) + ", "
 
                                 Text(
-                                    modifier = Modifier.clickable { onHubClicked(it.alias) },
+                                    modifier = Modifier.clip(
+                                        RoundedCornerShape(4.dp)).clickable { onHubClicked(it.alias) },
                                     text = hubTitle,
                                     style = TextStyle(
                                         color = Color.Gray,
@@ -951,11 +973,12 @@ fun parseElement(
                     .padding(vertical = 8.dp)
                     .fillMaxWidth()
             ) {
+                val blockQuoteColor = if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground
                 Column(modifier = Modifier
                     .drawWithContent {
                         drawContent()
                         drawRoundRect(
-                            color = SecondaryColor,
+                            color = blockQuoteColor,
                             size = Size(quoteWidth, size.height),
                             cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
                         )
@@ -1135,13 +1158,13 @@ fun TextList(
 @Composable
 fun Code(code: String, language: String, modifier: Modifier = Modifier) {
     Column(
-        Modifier
+        modifier
             .clip(RoundedCornerShape(4.dp))
-            .border(0.4.dp, Color.LightGray, shape = RoundedCornerShape(4.dp))
+            .border(0.4.dp, MaterialTheme.colors.onBackground.copy(0.1f), shape = RoundedCornerShape(4.dp))
     ) {
         Surface(
-            color = Color(252, 252, 255),
-            border = BorderStroke(.4.dp, Color.LightGray),
+            color = MaterialTheme.colors.onBackground.copy(0.05f),
+            border = BorderStroke(.4.dp, MaterialTheme.colors.onBackground.copy(0.1f)),
             modifier = Modifier
                 .fillMaxWidth()
         ) {
@@ -1153,14 +1176,14 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
             )
         }
         Surface(
-            color = Color(247, 247, 250),
-            border = BorderStroke(.4.dp, Color.LightGray),
+            color = MaterialTheme.colors.onBackground.copy(0.06f),
+            border = BorderStroke(.4.dp, MaterialTheme.colors.onBackground.copy(0.1f)),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row() {
                 Surface(
-                    color = Color(245, 245, 248, 255),
-                    border = BorderStroke(.4.dp, Color.LightGray)
+                    color = MaterialTheme.colors.onBackground.copy(0.02f),
+                    border = BorderStroke(.4.dp, MaterialTheme.colors.onBackground.copy(0.1f))
                 ) {
                     Column(Modifier.padding(8.dp)) {
                         var linesIndicator = String()
@@ -1192,49 +1215,4 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
             }
         }
     }
-}
-
-@Preview
-@Composable
-fun Codeprev() {
-    Column(
-        Modifier
-            .padding(8.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        Code(
-            "using System;\n" +
-                    "using Telegram.Bot;\n" +
-                    "\n" +
-                    "namespace MyNameSpace\n" +
-                    "{\n" +
-                    "\t\t\t\tclass ProgramUndefinedClassOOPCoolNamingStyleGuideExampleOfCoolUnreal_adsfksdjfljsdjfl;ajsdklfjdjkl;jsflkjdslkfj;\n" +
-                    "\t\t\t\t{\n" +
-                    "\t\t\t\t\t\t\t\tstatic void Main()\n" +
-                    "\t\t\t\t\t\t\t\t{\n" +
-                    "\t\t\t\t\t\t\t\t\t\t\t\tConsole.WriteLine(\"Hello world\");\n" +
-                    "\t\t\t\t\t\t\t\t}\n" +
-                    "\t\t\t\t}\n" +
-                    "}\n\n\n" +
-                    "Programming language is not defined",
-            language = "Lang"
-        )
-
-    }
-}
-
-@Preview
-@Composable
-fun listprev() {
-    TextList(
-        items = arrayListOf(
-            { Text(buildAnnotatedString { withStyle(it) { append("aboba21") } }) },
-            { Text(text = "Aboba2") }),
-        modifier = Modifier
-            .padding(8.dp)
-            .padding(start = 8.dp),
-        ordered = true,
-        spanStyle = SpanStyle(fontWeight = STRONG_FONT_WEIGHT, fontStyle = FontStyle.Italic)
-    )
-
 }

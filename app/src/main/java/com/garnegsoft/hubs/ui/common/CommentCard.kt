@@ -100,7 +100,8 @@ fun CommentCard(
                                 model = comment.author.avatarUrl,
                                 modifier = Modifier
                                     .size(style.avatarSize)
-                                    .clip(style.avatarShape),
+                                    .clip(style.avatarShape)
+                                    .background(Color.White),
                                 contentDescription = ""
                             )
                         } else {
@@ -112,6 +113,7 @@ fun CommentCard(
                                         color = placeholderColor(comment.author.alias),
                                         shape = style.avatarShape
                                     )
+                                    .background(Color.White, shape = style.avatarShape)
                                     .padding(2.dp),
                                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                 contentDescription = "",

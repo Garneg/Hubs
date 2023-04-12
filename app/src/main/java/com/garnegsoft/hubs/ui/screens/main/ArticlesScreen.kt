@@ -56,9 +56,6 @@ class ArticlesScreenViewModel : ViewModel() {
     var authors = MutableLiveData<HabrList<UserSnippet>>()
     var companies = MutableLiveData<HabrList<CompanySnippet>>()
 
-    fun aob(){
-
-    }
 }
 
 
@@ -76,7 +73,6 @@ fun ArticlesScreen(
     menu: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     var isAuthorized by rememberSaveable() { mutableStateOf(false) }
     val authorizedState by context.authDataStoreFlow(DataStoreKeys.Auth.Authorized).collectAsState(initial = false)
     LaunchedEffect(key1 = authorizedState, block = {
@@ -87,7 +83,7 @@ fun ArticlesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                contentColor = Color.White,
+                elevation = 0.dp,
                 title = {
                     Text(
                         text = "Хабы"
@@ -134,7 +130,7 @@ fun ArticlesScreen(
                                     updateFeedCoroutineScope.launch(Dispatchers.IO) {
                                         refreshing = true
                                         pageNumber.value = 1
-                                        var newArticlesList =
+                                        val newArticlesList =
                                             ArticlesListController.getArticlesSnippets(
                                                 "articles",
                                                 mapOf("sort" to "rating")

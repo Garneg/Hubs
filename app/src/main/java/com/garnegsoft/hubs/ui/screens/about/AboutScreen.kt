@@ -59,20 +59,26 @@ fun AboutScreen(
                 Text(
                     modifier = Modifier.padding(8.dp),
                     text = stringResource(id = R.string.app_name),
-                    fontWeight = FontWeight.W700
+                    style = MaterialTheme.typography.subtitle1
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = R.string.about_app_text),
+                    text = stringResource(id = R.string.about_app_text) + stringResource(id = R.string.developer_email),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colors.onBackground.copy(.5f)
                 )
-
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = "\n\n" + stringResource(id = R.string.feedback_is_important),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colors.onBackground.copy(.5f)
+                )
             }
             Text(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                text = "${stringResource(id = R.string.app_name)}, ${stringResource(id = R.string.version)} ${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}",
-                color = MaterialTheme.colors.onBackground.copy(.5f)
+                text = "${stringResource(id = R.string.version)} ${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}",
+                color = MaterialTheme.colors.onBackground.copy(.5f),
+
             )
         }
     }

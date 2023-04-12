@@ -1,12 +1,13 @@
 <resources>
     <string name="app_name">Hubs</string>
 
-    <string name="about_app_text">"Unofficial mobile client for Habr - IT website by TechMedia.  \n\nContribute to this app by email me - "</string>
+    <string name="about_app_text">"Unofficial mobile client for Habr - IT website by TechMedia.\n\nIf you like using this app, contribute to its development by writing your suggestions and bug reports to developer on email - "</string>
     <string name="developer_email" translatable="false">garnegsoft@gmail.com</string>
     <string name="version">version</string>
     <string name="about_app">About</string>
     <string name="publication">Publication</string>
     <string name="bookmarks">Bookmarks</string>
+    <string name="feedback_is_important">Your feedback is very important to developer!</string>
 
 
 </resources>

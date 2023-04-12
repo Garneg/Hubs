@@ -98,7 +98,8 @@ class ArticleController {
                         bookmarked = it.bookmarked,
                         canVoteMinus = it.canVoteMinus,
                         canVotePlus = it.canVotePlus
-                    ) }
+                    ) },
+                    contentHtml = it.textHtml
                 )
             }
             return result

@@ -6,7 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -40,9 +42,17 @@ data class UserCardStyle(
 )
 
 @Composable
+private fun defaultUserCardStyle(): UserCardStyle {
+    return UserCardStyle(
+        backgroundColor = MaterialTheme.colors.surface,
+        specialityTextStyle = TextStyle(color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
+    )
+}
+
+@Composable
 fun UserCard(
     user: UserSnippet,
-    style: UserCardStyle = UserCardStyle(),
+    style: UserCardStyle = defaultUserCardStyle(),
     indicator: @Composable () -> Unit = {
         Text(text = user.rating.toString(), fontWeight = FontWeight.W400, color = Color(0xFFF555D7))
     },
@@ -61,7 +71,8 @@ fun UserCard(
             AsyncImage(
                 modifier = Modifier
                     .size(size = style.avatarSize)
-                    .clip(shape = style.avatarShape),
+                    .clip(shape = style.avatarShape)
+                    .background(Color.White, shape = style.avatarShape),
                 model = user.avatarUrl,
                 contentDescription = ""
             )
@@ -69,7 +80,7 @@ fun UserCard(
             Icon(
                 modifier = Modifier
                     .size(style.avatarSize)
-                    .background(Color.White)
+                    .background(Color.White, shape = style.avatarShape)
                     .border(2.3.dp, color = placeholderColor(user.alias), shape = style.avatarShape)
                     .padding(3.dp),
                 painter = painterResource(id = R.drawable.user_avatar_placeholder),

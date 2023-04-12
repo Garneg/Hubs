@@ -2,6 +2,8 @@ package com.garnegsoft.hubs
 
 import ArticleController
 import android.content.Context
+import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -35,6 +37,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
+import androidx.compose.foundation.background
+import androidx.compose.material.MaterialTheme
+import androidx.compose.ui.Modifier
 import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -75,7 +80,9 @@ class MainActivity : ComponentActivity() {
                 }
 
         }
-
+        if(resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES){
+            window.statusBarColor = Color.parseColor("#FF141414")
+        }
 
         runBlocking {
             authorized = isAuthorizedFlow.first()
@@ -129,6 +136,7 @@ class MainActivity : ComponentActivity() {
             HubsTheme {
                 val navController = rememberNavController()
                 NavHost(
+                    modifier = Modifier.background(MaterialTheme.colors.background),
                     navController = navController,
                     startDestination = "articles",
                     builder = {
@@ -200,6 +208,9 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onHubClicked = {
                                         navController.navigate("hub/$it")
+                                    },
+                                    onCompanyClick = {
+                                        navController.navigate("company/$it")
                                     }
                                 )
                             } else {

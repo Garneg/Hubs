@@ -13,7 +13,8 @@ private val DarkColorPalette = darkColors(
     primaryVariant = Color(0xFF4CB43B),
     secondary = Color(0xFF8AD582),
     background = Color(0, 0, 0, 255),
-    surface = Color(20, 20, 20, 255)
+    surface = Color(20, 20, 20, 255),
+    onError = Color.White
 )
 
 

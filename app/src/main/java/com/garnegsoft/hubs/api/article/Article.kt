@@ -24,6 +24,9 @@ class Article(
 
     val content: @Composable (SpanStyle) -> Unit,
 
+    // TODO: remove
+    val contentHtml: String,
+
     val isCorporative: Boolean,
 
     val editorVersion: EditorVersion,
