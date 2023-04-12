@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import ArticleController
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -47,6 +48,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.AsyncGifImage
@@ -67,6 +69,14 @@ import org.jsoup.nodes.*
 
 class ArticleScreenViewModel : ViewModel() {
     var article = MutableLiveData<Article>()
+
+    fun loadArticle(id: Int){
+        viewModelScope.launch {
+            ArticleController.get("articles/$id")?.let {
+                article.postValue(it)
+            }
+        }
+    }
 
 }
 
@@ -380,7 +390,8 @@ fun ArticleScreen(
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = article.author.alias, fontWeight = FontWeight.W600,
-                            fontSize = 14.sp
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colors.onBackground
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Text(
@@ -400,7 +411,8 @@ fun ArticleScreen(
                         Text(
                             text = article.title,
                             fontSize = 22.sp,
-                            fontWeight = FontWeight.W800
+                            fontWeight = FontWeight.W800,
+                            color = MaterialTheme.colors.onBackground
                         )
 
                     }

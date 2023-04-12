@@ -26,6 +26,7 @@ fun AboutScreen(
     Scaffold(
         topBar = {
             TopAppBar(
+                elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")

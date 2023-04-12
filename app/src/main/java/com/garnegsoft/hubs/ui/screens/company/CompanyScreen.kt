@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
@@ -62,6 +63,7 @@ fun CompanyScreen(
             val context = LocalContext.current
             TopAppBar(
                 title = { Text("Компания") },
+                elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")

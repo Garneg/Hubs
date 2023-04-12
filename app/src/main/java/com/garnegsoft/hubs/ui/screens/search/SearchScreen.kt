@@ -139,9 +139,10 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = {
-                Text(text = "Поиск")
-            }, navigationIcon = {
+            TopAppBar(
+                title = { Text(text = "Поиск") },
+                elevation = 0.dp,
+                navigationIcon = {
                 IconButton(onClick = onBackClicked) {
                     Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "")
                 }

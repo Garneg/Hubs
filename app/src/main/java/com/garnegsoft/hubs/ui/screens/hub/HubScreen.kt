@@ -85,6 +85,7 @@ fun HubScreen(
         topBar = {
             TopAppBar(
                 title = { Text(text = "Хаб") },
+                elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
