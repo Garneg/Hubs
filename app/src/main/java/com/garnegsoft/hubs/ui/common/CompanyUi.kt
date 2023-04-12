@@ -74,6 +74,7 @@ fun CompanyCard(
                 modifier = Modifier
                     .size(style.avatarSize)
                     .clip(style.avatarShape)
+                    .background(Color.White)
             )
 
         } else {
@@ -85,6 +86,7 @@ fun CompanyCard(
                         color = placeholderColor(company.alias),
                         shape = style.avatarShape
                     )
+                    .background(Color.White, shape = style.avatarShape)
                     .padding(3.dp),
                 painter = painterResource(id = R.drawable.company_avatar_placeholder),
                 contentDescription = "",

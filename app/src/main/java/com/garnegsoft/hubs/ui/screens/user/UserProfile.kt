@@ -72,7 +72,8 @@ internal fun UserProfile(
                                 .align(Alignment.Center)
                                 .clip(
                                     RoundedCornerShape(12.dp)
-                                ),
+                                )
+                                .background(Color.White),
                             contentDescription = ""
                         )
                     } else {
