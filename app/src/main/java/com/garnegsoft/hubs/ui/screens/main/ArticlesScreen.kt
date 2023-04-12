@@ -183,7 +183,7 @@ fun ArticlesScreen(
                                     refreshing = refreshing,
                                     state = refreshingState,
                                     modifier = Modifier.align(Alignment.TopCenter),
-                                    contentColor = SecondaryColor
+                                    contentColor = MaterialTheme.colors.primary
                                 )
                             }
                         } else {
@@ -269,7 +269,7 @@ fun ArticlesScreen(
                                 }
                                 PullRefreshIndicator(
                                     modifier = Modifier.align(Alignment.TopCenter),
-                                    contentColor = SecondaryColor,
+                                    contentColor = MaterialTheme.colors.primary,
                                     refreshing = isRefreshing, state = swipestate
                                 )
                             } else {
