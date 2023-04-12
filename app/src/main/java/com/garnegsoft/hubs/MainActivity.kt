@@ -81,7 +81,7 @@ class MainActivity : ComponentActivity() {
 
         }
         if(resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES){
-            window.statusBarColor = Color.parseColor("#FF141414")
+            window.statusBarColor = Color.parseColor("#FF313131")
         }
 
         runBlocking {

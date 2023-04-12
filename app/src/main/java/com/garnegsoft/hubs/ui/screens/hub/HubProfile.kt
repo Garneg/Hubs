@@ -5,7 +5,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -42,7 +44,7 @@ fun HubProfile(hub: Hub) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(26.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colors.surface)
                 .padding(12.dp),
         ) {
 
@@ -68,7 +70,7 @@ fun HubProfile(hub: Hub) {
                 textAlign = TextAlign.Center
             )
             Text(
-                color = Color.Gray,
+                color = MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
                 text = hub.description,
                 modifier = Modifier.fillMaxWidth().padding(8.dp),
                 textAlign = TextAlign.Center
@@ -88,7 +90,7 @@ fun HubProfile(hub: Hub) {
                         fontWeight = FontWeight.W600,
                         color = Color.Magenta
                     )
-                    Text(text = "Рейтинг", color = Color.Gray)
+                    Text(text = "Рейтинг", color = MaterialTheme.colors.onSurface.copy(ContentAlpha.medium))
                 }
             }
             hub.relatedData?.let{
@@ -128,7 +130,7 @@ fun HubProfile(hub: Hub) {
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(26.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colors.surface)
                 .padding(8.dp)
         ) {
             Box(
