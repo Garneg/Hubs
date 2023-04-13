@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 
 private val DarkColorPalette = darkColors(
-    primary = Color(0xFFFFFFFF),
+    primary = Color(0xFFE7E7E7),
     primaryVariant = Color(0xFF4CB43B),
     secondary = Color(0xFF8AD582),
     background = Color(32, 32, 32, 255),

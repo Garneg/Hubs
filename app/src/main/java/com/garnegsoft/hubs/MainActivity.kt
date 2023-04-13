@@ -80,7 +80,7 @@ class MainActivity : ComponentActivity() {
                 }
 
         }
-        if(resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES){
+        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
             window.statusBarColor = Color.parseColor("#FF313131")
         }
 
@@ -193,41 +193,25 @@ class MainActivity : ComponentActivity() {
                             route = "article/{id}",
                             deepLinks = ArticleNavDeepLinks
                         ) {
-                            var articleViewModel = viewModel<ArticleScreenViewModel>(it)
-                            val article by articleViewModel.article.observeAsState()
-                            if (article != null) {
+                            val id = it.arguments?.getString("id")?.toIntOrNull()
 
-                                ArticleScreen(
-                                    article = article!!,
-                                    onBackButtonClicked = { navController.navigateUp() },
-                                    onCommentsClicked = {
-                                        navController.navigate("comments/${article!!.id}")
-                                    },
-                                    onAuthorClicked = {
-                                        navController.navigate("user/${article!!.author?.alias}")
-                                    },
-                                    onHubClicked = {
-                                        navController.navigate("hub/$it")
-                                    },
-                                    onCompanyClick = {
-                                        navController.navigate("company/$it")
-                                    }
-                                )
-                            } else {
-                                LaunchedEffect(Unit) {
-                                    launch(Dispatchers.IO) {
-                                        ArticleController.get(
-                                            "articles/${
-                                                it.arguments!!.getString("id")
-                                            }"
-                                        )?.let {
-                                            launch(Dispatchers.Main) {
-                                                articleViewModel.article.value = it
-                                            }
-                                        }
-                                    }
+                            ArticleScreen(
+                                articleId = id!!,
+                                onBackButtonClicked = { navController.navigateUp() },
+                                onCommentsClicked = {
+                                    navController.navigate("comments/${id}")
+                                },
+                                onAuthorClicked = {
+                                    navController.navigate("user/${it}")
+                                },
+                                onHubClicked = {
+                                    navController.navigate("hub/$it")
+                                },
+                                onCompanyClick = {
+                                    navController.navigate("company/$it")
                                 }
-                            }
+                            )
+
                         }
 
                         composable(route = "search") {
