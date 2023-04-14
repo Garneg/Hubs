@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.launch
+import kotlin.math.absoluteValue
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -29,14 +30,6 @@ fun HabrScrollableTabRow(
     tabs: List<String>
 ) {
     val pagerStateCoroutineScope = rememberCoroutineScope()
-    val density = LocalDensity.current
-    val tabWidths = remember {
-        val tabWidthStateList = mutableStateListOf<Dp>()
-        repeat(tabs.size) {
-            tabWidthStateList.add(0.dp)
-        }
-        tabWidthStateList
-    }
 
     ScrollableTabRow(
         selectedTabIndex = pagerState.currentPage,
@@ -48,7 +41,14 @@ fun HabrScrollableTabRow(
         indicator = {
                     TabRowDefaults.Indicator(modifier = Modifier.customTabIndicatorOffset(
                         currentTabPosition = it[pagerState.currentPage],
-                        pagerState.currentPageOffsetFraction
+                        offset = pagerState.currentPageOffsetFraction,
+                        nextTabPosition =
+                        when {
+                            pagerState.currentPageOffsetFraction < 0 -> it[pagerState.currentPage - 1]
+                            pagerState.currentPageOffsetFraction > 0 -> it[pagerState.currentPage + 1]
+                            else -> it[pagerState.currentPage]
+                        }
+
                     ))
         },
         contentColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.secondary else MaterialTheme.colors.primary
@@ -74,10 +74,13 @@ fun HabrScrollableTabRow(
 
 fun Modifier.customTabIndicatorOffset(
     currentTabPosition: TabPosition,
-    offset: Float
+    offset: Float,
+    nextTabPosition: TabPosition,
 ): Modifier {
-    val indicatorWidth = currentTabPosition.width
-    val indicatorOffset = currentTabPosition.left + currentTabPosition.width * offset
+    val indicatorWidth = currentTabPosition.width + (nextTabPosition.width - currentTabPosition.width) * offset.absoluteValue
+    val indicatorOffset = currentTabPosition.left + (nextTabPosition.left - currentTabPosition.left) * offset.absoluteValue
+    Log.e("cti_width", indicatorWidth.value.toString())
+    Log.e("cti_offset", indicatorOffset.value.toString())
 
     return fillMaxWidth()
         .wrapContentSize(Alignment.BottomStart)

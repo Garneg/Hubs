@@ -10,6 +10,7 @@ import org.jsoup.Jsoup
 
 
 class ArticleController {
+
     companion object {
         private fun getArticle(path: String, args: Map<String, String>? = null): Article? {
             val response = HabrApi.get(path, args)
