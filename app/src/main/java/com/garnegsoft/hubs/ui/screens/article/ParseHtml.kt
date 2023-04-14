@@ -43,7 +43,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImage
+import coil.decode.SvgDecoder
+import coil.request.ImageRequest
 import com.garnegsoft.hubs.api.AsyncGifImage
+import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
@@ -330,19 +334,29 @@ fun parseElement(
                 }
             }
         else null
-        "img" -> { it: SpanStyle ->
-            AsyncGifImage(
-                model = if (element.hasAttr("data-src")) {
-                    element.attr("data-src")
-                } else {
-                    element.attr("src")
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                contentScale = ContentScale.FillWidth
-            )
+        "img" -> if (element.hasClass("formula")) {
+            {
+                AsyncSvgImage(
+                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    data = element.attr("src"),
+                    contentScale = ContentScale.Inside
+                )
+            }
+        } else {
+            { it: SpanStyle ->
+                AsyncGifImage(
+                    model = if (element.hasAttr("data-src")) {
+                        element.attr("data-src")
+                    } else {
+                        element.attr("src")
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                    contentScale = ContentScale.FillWidth
+                )
+            }
         }
 
         "div" -> if (element.hasClass("tm-iframe_temp"))
@@ -674,10 +688,10 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
                     Text(
                         text = code,
                         fontFamily = FontFamily.Monospace,
-                        modifier = Modifier.widthIn(0.dp, 20000.dp)
                     )
                 }
             }
         }
     }
 }
+

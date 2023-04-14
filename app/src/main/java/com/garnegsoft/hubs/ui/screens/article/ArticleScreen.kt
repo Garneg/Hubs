@@ -104,7 +104,7 @@ fun ArticleScreen(
 
     val scrollState = rememberScrollState()
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
-    val shareIntent = remember {
+    val shareIntent = remember(article?.title) {
         val sendIntent = Intent(Intent.ACTION_SEND)
 
         sendIntent.putExtra(
