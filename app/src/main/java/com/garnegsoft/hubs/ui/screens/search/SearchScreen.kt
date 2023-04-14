@@ -167,14 +167,14 @@ fun SearchScreen(
             LaunchedEffect(key1 = Unit) { focusRequester.requestFocus() }
             Row(
                 modifier = Modifier
-                    .background(Color.White)
+                    .background(if (currentQuery.isNotEmpty()) MaterialTheme.colors.surface else MaterialTheme.colors.background)
                     .padding(8.dp)
                     .padding(horizontal = 4.dp)
                     .clip(shape = RoundedCornerShape(8.dp))
 //                        .background(Color(0xFFDBDBDB))
                     .border(
                         width = 1.5.dp,
-                        color = SecondaryColor,
+                        color = MaterialTheme.colors.secondary,
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
@@ -190,12 +190,13 @@ fun SearchScreen(
                                 keyboardController?.show()
                             }
                         },
+
                     value = searchTextValue,
                     onValueChange = {
                         searchTextValue = it
                         showClearAllButton = it.length > 0
                     },
-                    textStyle = TextStyle(),
+                    textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Sentences,
                         autoCorrect = false,
