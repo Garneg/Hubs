@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.ui.screens.main
 
 
 import ArticlesListController
-import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -31,7 +30,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.DataStoreKeys
+import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
@@ -43,7 +42,6 @@ import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.authDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
-import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.*
 
 
@@ -74,7 +72,7 @@ fun ArticlesScreen(
 ) {
     val context = LocalContext.current
     var isAuthorized by rememberSaveable() { mutableStateOf(false) }
-    val authorizedState by context.authDataStoreFlow(DataStoreKeys.Auth.Authorized).collectAsState(initial = false)
+    val authorizedState by context.authDataStoreFlow(HubsDataStore.Auth.Keys.Authorized).collectAsState(initial = false)
     LaunchedEffect(key1 = authorizedState, block = {
         isAuthorized = authorizedState == true
     })

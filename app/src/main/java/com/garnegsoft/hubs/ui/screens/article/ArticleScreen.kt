@@ -2,23 +2,15 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
 import android.content.Intent
-import android.net.Uri
-import android.util.Log
-import android.webkit.WebView
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
@@ -31,22 +23,15 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.BaselineShift
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -54,16 +39,15 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.EditorVersion
+import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
-import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
@@ -78,6 +62,7 @@ class ArticleScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             ArticleController.get("articles/$id")?.let {
                 _article.postValue(it)
+
             }
         }
     }
@@ -88,6 +73,7 @@ class ArticleScreenViewModel : ViewModel() {
 @Composable
 fun ArticleScreen(
     articleId: Int,
+    initialPosition: Int = 0,
     onBackButtonClicked: () -> Unit,
     onCommentsClicked: () -> Unit,
     onAuthorClicked: (alias: String) -> Unit,
@@ -101,7 +87,6 @@ fun ArticleScreen(
         if (!viewModel.article.isInitialized)
             viewModel.loadArticle(articleId)
     })
-
     val scrollState = rememberScrollState()
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val shareIntent = remember(article?.title) {
@@ -139,7 +124,7 @@ fun ArticleScreen(
                     }
                 })
         },
-        backgroundColor = if (MaterialTheme.colors.isLight == true) MaterialTheme.colors.surface else MaterialTheme.colors.background,
+        backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
         bottomBar = {
             article?.let { article ->
 
@@ -334,6 +319,12 @@ fun ArticleScreen(
         }
     ) {
         article?.let { article ->
+            val context = LocalContext.current
+            LaunchedEffect(key1 = Unit, block = {
+                context.lastReadDataStore.edit {
+                    it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
+                }
+            })
             Row(
                 Modifier.padding(
                     top = it.calculateTopPadding(),
@@ -560,10 +551,12 @@ fun ArticleScreen(
 
                                     Text(
                                         modifier = Modifier
+
                                             .clip(
-                                                RoundedCornerShape(4.dp)
+                                                RoundedCornerShape(2.dp)
                                             )
-                                            .clickable { onHubClicked(it.alias) },
+                                            .clickable { onHubClicked(it.alias) }
+                                            .padding(horizontal = 2.dp),
                                         text = hubTitle,
                                         style = TextStyle(
                                             color = Color.Gray,
@@ -577,6 +570,9 @@ fun ArticleScreen(
                 }
                 ScrollBar(scrollState = scrollState)
             }
+            LaunchedEffect(key1 = Unit, block = {
+                scrollState.scrollTo(initialPosition)
+            })
         } ?: Box(
             modifier = Modifier
                 .fillMaxSize()

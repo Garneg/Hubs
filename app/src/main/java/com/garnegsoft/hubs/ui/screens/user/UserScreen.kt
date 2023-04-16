@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.user
 
+
 import com.garnegsoft.hubs.api.hub.list.HubsList
 import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.ui.screens.user.UserProfile
@@ -34,7 +35,6 @@ import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
 
 class UserScreenViewModel : ViewModel() {
     val user = MutableLiveData<User>()
@@ -100,6 +100,14 @@ class UserScreenViewModel : ViewModel() {
                 UserController.whoIs(user.value!!.alias)?.let {
                     _whoIs.postValue(it)
                 }
+            }
+        }
+    }
+
+    fun loadUserProfile(alias: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            UserController.get(alias)?.let {
+                user.postValue(it)
             }
         }
     }

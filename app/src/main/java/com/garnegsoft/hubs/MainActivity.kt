@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs
 
-import ArticleController
+
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
@@ -9,21 +9,18 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.garnegsoft.hubs.api.DataStoreKeys
+import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.NoConnectionInterceptor
 import com.garnegsoft.hubs.api.user.User
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
-import com.garnegsoft.hubs.ui.screens.article.ArticleScreenViewModel
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
 import com.garnegsoft.hubs.ui.screens.hub.HubScreen
@@ -37,19 +34,14 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.preferences.core.Preferences
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.navigation.compose.navigation
-import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.me.Me
 import com.garnegsoft.hubs.api.me.MeController
-import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
@@ -58,8 +50,13 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 var cookies: String = ""
 var authorized: Boolean = false
 
-val Context.authDataStore by preferencesDataStore("auth")
-val Context.settingsDataStore by preferencesDataStore("settings")
+val Context.authDataStore by preferencesDataStore(HubsDataStore.Auth.DataStoreName)
+val Context.settingsDataStore by preferencesDataStore(HubsDataStore.Settings.DataStoreName)
+val Context.lastReadDataStore by preferencesDataStore(HubsDataStore.LastRead.DataStoreName)
+
+fun <T> Context.lastReadDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
+    return lastReadDataStore.data.map { it[key] }
+}
 
 fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
     return authDataStore.data.map { it[key] }
@@ -74,8 +71,9 @@ class MainActivity : ComponentActivity() {
 
 
         CookieManager.getInstance().removeAllCookies(null)
-        val cookiesFlow = authDataStore.data.map { it.get(DataStoreKeys.Auth.Cookies) ?: "" }
-        val isAuthorizedFlow = authDataStore.data.map { it[DataStoreKeys.Auth.Authorized] ?: false }
+        val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
+        val isAuthorizedFlow =
+            authDataStore.data.map { it[HubsDataStore.Auth.Keys.Authorized] ?: false }
         lifecycle.coroutineScope.launch {
             cookiesFlow
                 .collect {
@@ -83,6 +81,9 @@ class MainActivity : ComponentActivity() {
                 }
 
         }
+
+        val lastArticleFlow = lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
+
         if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
             window.statusBarColor = Color.parseColor("#FF313131")
         }
@@ -98,8 +99,8 @@ class MainActivity : ComponentActivity() {
                 lifecycle.coroutineScope.launch {
                     result?.let {
                         authDataStore.edit {
-                            it[DataStoreKeys.Auth.Cookies] = result
-                            it[DataStoreKeys.Auth.Authorized] = true
+                            it[HubsDataStore.Auth.Keys.Cookies] = result
+                            it[HubsDataStore.Auth.Keys.Authorized] = true
                             authorized = true
                             //cookies = result
                         }
@@ -131,6 +132,14 @@ class MainActivity : ComponentActivity() {
                     Log.e("userInfoUpdateBlock", userInfo.toString())
                 }
             }
+            val lastArticle by lastArticleFlow.collectAsState(initial = 0)
+            LaunchedEffect(key1 = lastArticle, block = {
+                Toast.makeText(
+                    this@MainActivity,
+                    lastArticle?.toString() ?: "no article in there",
+                    Toast.LENGTH_SHORT
+                ).show()
+            })
             LaunchedEffect(
                 key1 = isAuthorizedFlow.collectAsState(initial = false).value,
                 block = {
@@ -193,14 +202,29 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(
-                            route = "article/{id}",
+                            route = "article/{id}?position={position}",
                             deepLinks = ArticleNavDeepLinks
                         ) {
                             val id = it.arguments?.getString("id")?.toIntOrNull()
 
+                            BackHandler(enabled = true) {
+                                lifecycle.coroutineScope.launch(Dispatchers.IO) {
+                                    lastReadDataStore.edit {
+                                        it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
+                                    }
+                                }
+                                navController.navigateUp()
+                            }
                             ArticleScreen(
                                 articleId = id!!,
-                                onBackButtonClicked = { navController.navigateUp() },
+                                onBackButtonClicked = {
+                                    lifecycle.coroutineScope.launch(Dispatchers.IO) {
+                                        lastReadDataStore.edit {
+                                            it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
+                                        }
+                                    }
+                                    navController.navigateUp()
+                                },
                                 onCommentsClicked = {
                                     navController.navigate("comments/${id}")
                                 },
@@ -245,6 +269,7 @@ class MainActivity : ComponentActivity() {
                             "user/{alias}?page={page}",
                             deepLinks = UserScreenNavDeepLinks
                         ) {
+                            navController.popBackStack("", false)
                             val page =
                                 it.arguments?.getString("page")?.let { UserScreenPages.valueOf(it) }
                                     ?: UserScreenPages.Profile
@@ -277,8 +302,8 @@ class MainActivity : ComponentActivity() {
                                     onLogout = {
                                         logoutCoroutineScope.launch {
                                             authDataStore.edit {
-                                                it[DataStoreKeys.Auth.Authorized] = false
-                                                it[DataStoreKeys.Auth.Cookies] = ""
+                                                it[HubsDataStore.Auth.Keys.Authorized] = false
+                                                it[HubsDataStore.Auth.Keys.Cookies] = ""
                                             }
                                             //cookies = ""
                                             authorized = false

@@ -24,14 +24,12 @@ class HabrApi {
             if (args != null){
                 finalArgs.putAll(args)
             }
-            var paramsString = StringBuilder()
-            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&")})
+            val paramsString = StringBuilder()
+            finalArgs.keys.forEach { paramsString.append("$it=${finalArgs[it]}&") }
 
             val request = Request
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
-//                .addHeader("Cookie", "" +
-//                        "connect_sid=s%3ASTwcR2CDj2UcfLEKd_xwC1mc4UdPZusA.qG0nI%2FsdlOKSXL8bL9Bu6zT2ccmdQIacV9t4QgURR1s")
                 .build()
             return HttpClient.newCall(request).execute()
         }
