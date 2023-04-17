@@ -54,6 +54,7 @@ import org.jsoup.nodes.TextNode
 
 val STRONG_FONT_WEIGHT = FontWeight.W600
 val HEADER_FONT_WEIGHT = FontWeight.W700
+val LINE_HEIGHT = 1.5.sp
 
 fun parseElement(
     element: Element,
@@ -234,6 +235,7 @@ fun parseElement(
                         var context = LocalContext.current
                         ClickableText(
                             text = thisElementCurrentText,
+                            style = LocalTextStyle.current.copy(lineHeight = LINE_HEIGHT.times(LocalTextStyle.current.fontSize.value)),
                             onClick = {
                                 thisElementCurrentText.getStringAnnotations(it, it)
                                     .find { it.tag == "url" }
@@ -255,9 +257,6 @@ fun parseElement(
                 currentText = buildAnnotatedString { }
             }
 
-            if (thisNode.previousSibling() != null && thisNode.previousSibling() is TextNode) {
-
-            }
 
             // if node is block element, break the currentText annotated string and place Text() Composable
             childElementsIndex++
@@ -282,6 +281,7 @@ fun parseElement(
             val context = LocalContext.current
             ClickableText(
                 text = currentText,
+                style = LocalTextStyle.current.copy(lineHeight = LINE_HEIGHT.times(LocalTextStyle.current.fontSize.value)),
                 onClick = {
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
                         if (it.item.startsWith("http")) {
@@ -478,7 +478,7 @@ fun parseElement(
             var spoilerCaption = element.getElementsByTag("summary").first()?.text() ?: "Спойлер"
             var showDetails by rememberSaveable { mutableStateOf(false) }
             Surface(
-                color = Color(0x65EBEBEB),
+                color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x40141414),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)

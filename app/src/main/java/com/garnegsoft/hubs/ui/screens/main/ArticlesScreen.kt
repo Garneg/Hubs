@@ -1,7 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.main
 
 
+import ArticleController
 import ArticlesListController
+import android.graphics.DiscretePathEffect
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -10,6 +13,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -23,7 +27,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
+import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
@@ -41,8 +48,11 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.authDataStoreFlow
+import com.garnegsoft.hubs.lastReadDataStore
+import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
 
 
 class ArticlesScreenViewModel : ViewModel() {
@@ -55,7 +65,6 @@ class ArticlesScreenViewModel : ViewModel() {
     var companies = MutableLiveData<HabrList<CompanySnippet>>()
 
 }
-
 
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -72,11 +81,53 @@ fun ArticlesScreen(
 ) {
     val context = LocalContext.current
     var isAuthorized by rememberSaveable() { mutableStateOf(false) }
-    val authorizedState by context.authDataStoreFlow(HubsDataStore.Auth.Keys.Authorized).collectAsState(initial = false)
+    val authorizedState by context.authDataStoreFlow(HubsDataStore.Auth.Keys.Authorized)
+        .collectAsState(initial = false)
     LaunchedEffect(key1 = authorizedState, block = {
         isAuthorized = authorizedState == true
     })
     val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
+
+    val scaffoldState = rememberScaffoldState()
+
+    val lastArticleRead by context.lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
+        .collectAsState(
+            initial = -1
+        )
+
+    var showSnackBar by rememberSaveable {
+        mutableStateOf(true)
+    }
+
+    LaunchedEffect(key1 = lastArticleRead, block = {
+        Log.e("lastarticle", lastArticleRead.toString())
+
+            if (showSnackBar && lastArticleRead != null && lastArticleRead!! > 0) {
+
+                launch(Dispatchers.IO) {
+                    val snippet = ArticleController.getSnippet(lastArticleRead!!)
+
+                    snippet?.let {
+                        val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                            message = it.title,
+                            actionLabel = it.imageUrl,
+                            duration = SnackbarDuration.Indefinite
+                        )
+                        if (snackbarResult == SnackbarResult.ActionPerformed) {
+                            launch(Dispatchers.Main) { onArticleClicked(it.id) }
+                        } else {
+                            context.lastReadDataStore.edit {
+                                it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
+                            }
+                        }
+                        showSnackBar = false
+
+                    }
+                }
+            } else if (lastArticleRead == 0) {
+                showSnackBar = false
+            }
+    })
 
     Scaffold(
         topBar = {
@@ -88,7 +139,9 @@ fun ArticlesScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { onSearchClicked() }) {
+                    IconButton(onClick = {
+                        onSearchClicked()
+                    }) {
                         Icon(
                             modifier = Modifier
                                 .size(20.dp)
@@ -100,6 +153,12 @@ fun ArticlesScreen(
                     }
                     menu()
                 })
+        },
+        scaffoldState = scaffoldState,
+        snackbarHost = {
+            SnackbarHost(hostState = it) {
+                ContinueReadSnackBar(data = it)
+            }
         }
     ) {
         Column(
@@ -387,48 +446,50 @@ fun ArticlesScreen(
                         }
                     }
                 )
-                if (isAuthorized == true) map = mapOf<String, @Composable () -> Unit>("Моя лента" to {
-                    val articles by viewModel.myFeedArticles.observeAsState()
-                    if (articles != null){
-                        PagedHabrSnippetsColumn(
-                            data = articles!!,
-                            onNextPageLoad = {
+                if (isAuthorized == true) map =
+                    mapOf<String, @Composable () -> Unit>("Моя лента" to {
+                        val articles by viewModel.myFeedArticles.observeAsState()
+                        if (articles != null) {
+                            PagedHabrSnippetsColumn(
+                                data = articles!!,
+                                onNextPageLoad = {
+                                    launch(Dispatchers.IO) {
+                                        ArticlesListController.getArticlesSnippets(
+                                            "articles",
+                                            mapOf(
+                                                "custom" to "true",
+                                                "page" to it.toString()
+                                            )
+                                        )?.let {
+                                            viewModel.myFeedArticles.postValue(
+                                                articles!! + it
+                                            )
+                                        }
+                                    }
+                                }
+                            ) {
+                                ArticleCard(
+                                    article = it,
+                                    onClick = { onArticleClicked(it.id) },
+                                    onAuthorClick = { onUserClicked(it.author!!.alias) },
+                                    onCommentsClick = { onCommentsClicked(it.id) })
+                            }
+                        } else {
+                            Box(modifier = Modifier.fillMaxSize())
+                            LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
-                                   ArticlesListController.getArticlesSnippets(
-                                       "articles",
-                                       mapOf("custom" to "true",
-                                       "page" to it.toString())
-                                   )?.let{
-                                       viewModel.myFeedArticles.postValue(
-                                           articles!! + it
-                                       )
-                                   }
+                                    ArticlesListController.getArticlesSnippets(
+                                        "articles",
+                                        mapOf("custom" to "true")
+                                    )?.let {
+                                        viewModel.myFeedArticles.postValue(
+                                            it
+                                        )
+                                    }
                                 }
-                            }
-                        ) {
-                            ArticleCard(
-                                article = it,
-                                onClick = { onArticleClicked(it.id) },
-                                onAuthorClick = { onUserClicked(it.author!!.alias) },
-                                onCommentsClick = { onCommentsClicked(it.id) })
+                            })
                         }
-                    }
-                    else {
-                        Box(modifier = Modifier.fillMaxSize())
-                        LaunchedEffect(key1 = Unit, block = {
-                            launch(Dispatchers.IO) {
-                                ArticlesListController.getArticlesSnippets(
-                                    "articles",
-                                    mapOf("custom" to "true")
-                                )?.let {
-                                    viewModel.myFeedArticles.postValue(
-                                        it
-                                    )
-                                }
-                            }
-                        })
-                    }
-                }) + map
+                    }) + map
                 map
             }
             val pagerState = rememberPagerState()
@@ -438,8 +499,8 @@ fun ArticlesScreen(
                 state = pagerState,
                 pageCount = pages.size,
 
-            ) {
-                pages.values.elementAt(it)( )
+                ) {
+                pages.values.elementAt(it)()
 
             }
         }
@@ -489,14 +550,15 @@ fun AuthorizedMenu(
 ) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }) {
-        if (avatarUrl != null){
+        if (avatarUrl != null) {
             AsyncImage(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.White),
                 contentScale = ContentScale.FillBounds,
-                model = avatarUrl, contentDescription = "")
+                model = avatarUrl, contentDescription = ""
+            )
         } else {
             Icon(
                 modifier = Modifier
@@ -523,13 +585,14 @@ fun AuthorizedMenu(
         modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
     ) {
         MenuItem(title = userAlias, icon = {
-            if (avatarUrl != null){
+            if (avatarUrl != null) {
                 AsyncImage(
                     modifier = Modifier
                         .size(32.dp)
                         .clip(RoundedCornerShape(8.dp)),
                     contentScale = ContentScale.FillBounds,
-                    model = avatarUrl, contentDescription = "")
+                    model = avatarUrl, contentDescription = ""
+                )
             } else {
                 Icon(
                     modifier = Modifier
@@ -547,13 +610,14 @@ fun AuthorizedMenu(
         }, onClick = onProfileClick)
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
-        MenuItem(title = "Статьи", icon = { 
+        MenuItem(title = "Статьи", icon = {
             Icon(painter = painterResource(id = R.drawable.article), contentDescription = "")
         }, onClick = onArticlesClick)
 
-        MenuItem(title = "Комментарии", icon = { 
+        MenuItem(title = "Комментарии", icon = {
             Icon(
-                painter = painterResource(id = R.drawable.comments_icon), contentDescription = "")
+                painter = painterResource(id = R.drawable.comments_icon), contentDescription = ""
+            )
         }, onClick = onCommentsClick)
 
         MenuItem(title = "Закладки", icon = {

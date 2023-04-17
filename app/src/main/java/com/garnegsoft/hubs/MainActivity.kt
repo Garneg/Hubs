@@ -34,7 +34,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
-import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.material.MaterialTheme
@@ -132,14 +131,6 @@ class MainActivity : ComponentActivity() {
                     Log.e("userInfoUpdateBlock", userInfo.toString())
                 }
             }
-            val lastArticle by lastArticleFlow.collectAsState(initial = 0)
-            LaunchedEffect(key1 = lastArticle, block = {
-                Toast.makeText(
-                    this@MainActivity,
-                    lastArticle?.toString() ?: "no article in there",
-                    Toast.LENGTH_SHORT
-                ).show()
-            })
             LaunchedEffect(
                 key1 = isAuthorizedFlow.collectAsState(initial = false).value,
                 block = {

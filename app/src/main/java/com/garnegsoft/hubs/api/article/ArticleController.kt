@@ -75,7 +75,11 @@ class ArticleController {
                                     title = it.title,
                                     isProfiled = it.isProfiled,
                                     isCorporative = it.type == "corporative",
-                                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(it.isSubscribed) }
+                                    relatedData = it.relatedData?.let {
+                                        com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(
+                                            it.isSubscribed
+                                        )
+                                    }
 
                                 )
                             )
@@ -95,15 +99,23 @@ class ArticleController {
                     ) else null,
                     complexity = PostComplexity.fromString(it.complexity),
                     readingTime = it.readingTime,
-                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
-                        bookmarked = it.bookmarked,
-                        canVoteMinus = it.canVoteMinus,
-                        canVotePlus = it.canVotePlus
-                    ) },
+                    relatedData = it.relatedData?.let {
+                        com.garnegsoft.hubs.api.article.Article.RelatedData(
+                            bookmarked = it.bookmarked,
+                            canVoteMinus = it.canVoteMinus,
+                            canVotePlus = it.canVotePlus
+                        )
+                    },
                     contentHtml = it.textHtml
                 )
             }
             return result
+        }
+
+        fun getSnippet(
+            id: Int
+        ): ArticleSnippet? {
+            return getSnippet("articles/$id")
         }
 
         fun getSnippet(
@@ -140,7 +152,17 @@ class ArticleController {
                         votesCountMinus = it.statistics.votesCountMinus,
                         votesCountPlus = it.statistics.votesCountPlus
                     ),
-                    imageUrl = it.leadData.imageUrl,
+                    imageUrl = if (
+                        it.leadData.imageUrl == null &&
+                        it.leadData.textHtml.contains("<img")
+                    ) {
+                        Jsoup.parse(it.leadData.textHtml)
+                            .getElementsByTag("img")[0]?.attr("src")
+                    } else if (it.leadData.imageUrl == null && it.leadData.image?.url != null) {
+                        it.leadData.image?.url
+                    } else {
+                        it.leadData.imageUrl
+                    },
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
                     textSnippet = it.leadData.textHtml,
                     hubs = it.hubs.run {
@@ -152,7 +174,11 @@ class ArticleController {
                                     title = it.title,
                                     isProfiled = it.isProfiled,
                                     isCorporative = it.type == "corporative",
-                                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(it.isSubscribed) }
+                                    relatedData = it.relatedData?.let {
+                                        com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(
+                                            it.isSubscribed
+                                        )
+                                    }
                                 )
                             )
                         }
@@ -160,11 +186,13 @@ class ArticleController {
                     },
                     complexity = PostComplexity.fromString(it.complexity),
                     readingTime = it.readingTime,
-                    relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
-                        bookmarked = it.bookmarked,
-                        canVoteMinus = it.canVoteMinus,
-                        canVotePlus = it.canVotePlus
-                    ) }
+                    relatedData = it.relatedData?.let {
+                        com.garnegsoft.hubs.api.article.Article.RelatedData(
+                            bookmarked = it.bookmarked,
+                            canVoteMinus = it.canVoteMinus,
+                            canVotePlus = it.canVotePlus
+                        )
+                    }
                 )
             }
 
@@ -178,7 +206,7 @@ class ArticleController {
             return true
         }
 
-        fun removeFromBookmarks(id: Int): Boolean{
+        fun removeFromBookmarks(id: Int): Boolean {
             val response = HabrApi.post("articles/$id/bookmarks/remove", version = 1)
             if (response.code != 200)
                 return false
@@ -347,7 +375,7 @@ class ArticleController {
         )
 
         @Serializable
-        data class Poll (
+        data class Poll(
             var id: String,
             var timeElapsed: String? = null,
             var answersType: String,
@@ -356,12 +384,13 @@ class ArticleController {
             var textHtml: String,
             var relatedData: RelatedData? = null,
             var variants: List<Variant>
-        ){
+        ) {
             @Serializable
             data class RelatedData(var canVote: Boolean)
         }
+
         @Serializable
-        data class Variant (
+        data class Variant(
             var id: String,
             var textHtml: String,
             var votesCount: Long,

@@ -497,7 +497,8 @@ fun ArticleScreen(
                                 Jsoup.parse(article.contentHtml),
                                 SpanStyle(
                                     color = MaterialTheme.colors.onSurface,
-                                    fontSize = MaterialTheme.typography.body1.fontSize
+                                    fontSize = MaterialTheme.typography.body1.fontSize,
+
                                 )
                             ).second?.let { it1 ->
                                 it1(
@@ -597,6 +598,7 @@ fun ScrollBar(
     )
 
     var scrollbarWidth = with(LocalDensity.current) { 3.dp.toPx() }
+    val scrollbarColor = if (MaterialTheme.colors.isLight) Color(0x59_000000) else Color(0x59_FFFFFF)
     Box(modifier = modifier
         .fillMaxHeight()
         .width(6.dp)
@@ -607,7 +609,7 @@ fun ScrollBar(
             var offsetheight =
                 scrollState.value.toFloat() / scrollState.maxValue.toFloat() * place
             drawRoundRect(
-                color = Color(0x59_000000),
+                color = scrollbarColor,
                 size = Size(size.width - scrollbarWidth, scrollbarheight),
                 topLeft = Offset(x = -scrollbarWidth / 2, y = offsetheight),
                 cornerRadius = CornerRadius(40.dp.toPx(), 40.dp.toPx()),
