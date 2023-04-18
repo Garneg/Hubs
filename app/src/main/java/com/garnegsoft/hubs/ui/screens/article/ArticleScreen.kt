@@ -349,7 +349,7 @@ fun ArticleScreen(
                                     if (abs(initialVelocity) <= 1f)
                                         return initialVelocity
 
-                                    val performedInitialVelocity = initialVelocity * 1f
+                                    val performedInitialVelocity = initialVelocity * 1.2f
 
                                     var velocityLeft = performedInitialVelocity
                                     var lastValue = 0f
@@ -531,7 +531,9 @@ fun ArticleScreen(
 
                         SelectionContainer() {
                             parseElement(
-                                Jsoup.parse(article.contentHtml),
+                                Jsoup.parse(
+                                    article.contentHtml.replace("<br/>\r\n<br/>\r\n", "<br/>\n")
+                                ),
                                 SpanStyle(
                                     color = MaterialTheme.colors.onSurface,
                                     fontSize = MaterialTheme.typography.body1.fontSize,

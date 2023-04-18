@@ -28,9 +28,12 @@ fun ContinueReadSnackBar(
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
-        .shadow(2.dp, shape = RoundedCornerShape(10.dp))
+        .shadow(8.dp, shape = RoundedCornerShape(10.dp))
         .clip(RoundedCornerShape(10.dp))
-        .background(MaterialTheme.colors.surface)
+        .background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else Color(
+            0xFF414141
+        )
+        )
         .clickable { data.performAction() }
         .padding(12.dp)
     ) {

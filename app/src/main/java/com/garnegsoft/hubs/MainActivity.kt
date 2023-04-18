@@ -198,34 +198,40 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val id = it.arguments?.getString("id")?.toIntOrNull()
 
-                            BackHandler(enabled = true) {
-                                lifecycle.coroutineScope.launch(Dispatchers.IO) {
-                                    lastReadDataStore.edit {
-                                        it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
-                                    }
-                                }
-                                navController.navigateUp()
-                            }
-                            ArticleScreen(
-                                articleId = id!!,
-                                onBackButtonClicked = {
+                            val clearLastArticle = remember {
+                                {
                                     lifecycle.coroutineScope.launch(Dispatchers.IO) {
                                         lastReadDataStore.edit {
                                             it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
                                         }
                                     }
+                                }
+                            }
+
+                            BackHandler(enabled = true) {
+                                clearLastArticle()
+                                navController.navigateUp()
+                            }
+                            ArticleScreen(
+                                articleId = id!!,
+                                onBackButtonClicked = {
+                                    clearLastArticle()
                                     navController.navigateUp()
                                 },
                                 onCommentsClicked = {
+                                    clearLastArticle()
                                     navController.navigate("comments/${id}")
                                 },
                                 onAuthorClicked = {
+                                    clearLastArticle()
                                     navController.navigate("user/${it}")
                                 },
                                 onHubClicked = {
+                                    clearLastArticle()
                                     navController.navigate("hub/$it")
                                 },
                                 onCompanyClick = {
+                                    clearLastArticle()
                                     navController.navigate("company/$it")
                                 }
                             )
