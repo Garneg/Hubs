@@ -2,9 +2,14 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
 import android.content.Intent
+import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -52,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
+import kotlin.math.abs
 
 
 class ArticleScreenViewModel : ViewModel() {
@@ -88,6 +94,7 @@ fun ArticleScreen(
             viewModel.loadArticle(articleId)
     })
     val scrollState = rememberScrollState()
+
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val shareIntent = remember(article?.title) {
         val sendIntent = Intent(Intent.ACTION_SEND)
@@ -331,9 +338,39 @@ fun ArticleScreen(
                     bottom = it.calculateBottomPadding()
                 )
             ) {
+                val flingSpec = rememberSplineBasedDecay<Float>()
+
                 Column(
                     modifier = Modifier
-                        .verticalScroll(scrollState)
+                        .verticalScroll(
+                            state = scrollState,
+                            flingBehavior = object : FlingBehavior {
+                                override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                                    if (abs(initialVelocity) <= 1f)
+                                        return initialVelocity
+
+                                    val performedInitialVelocity = initialVelocity * 1f
+
+                                    var velocityLeft = performedInitialVelocity
+                                    var lastValue = 0f
+                                    AnimationState(
+                                        initialValue = 0f,
+                                        initialVelocity = performedInitialVelocity
+                                    ).animateDecay(flingSpec){
+                                        val delta = value - lastValue
+                                        val consumed = scrollBy(delta)
+                                        lastValue = value
+                                        velocityLeft = velocity
+
+                                        if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
+
+                                    }
+                                    return velocityLeft
+
+                                }
+
+                            }
+                            )
                         .padding(bottom = 12.dp)
                         .padding(16.dp)
                 ) {
