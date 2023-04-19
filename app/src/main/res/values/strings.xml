@@ -9,6 +9,7 @@
     <string name="bookmarks">Bookmarks</string>
     <string name="feedback_is_important">Your feedback is very important to developer!</string>
     <string name="continue_reading">Do you want to continue reading</string>
+    <string name="write_developer">Email developer</string>
 
 
 </resources>

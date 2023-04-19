@@ -93,7 +93,9 @@ fun HubScreen(
                 },
                 actions = {
                     val context = LocalContext.current
-                    IconButton(onClick = {
+                    IconButton(
+                        enabled = viewModel.hub.isInitialized,
+                        onClick = {
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
                             Intent.EXTRA_TEXT,

@@ -1,18 +1,25 @@
 package com.garnegsoft.hubs.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.android.style.LetterSpacingSpanEm
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -68,9 +75,27 @@ fun AboutScreen(
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colors.onBackground.copy(.5f)
                 )
+                val developerEmail = stringResource(id = R.string.developer_email)
+                val context = LocalContext.current
+                OutlinedButton(
+                    modifier = Modifier.padding(16.dp),
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                            "mailto",developerEmail, null))
+                        context.startActivity(intent)
+                    }
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.write_developer),
+                        style = MaterialTheme.typography.body1
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(imageVector = Icons.Outlined.Email, contentDescription = "")
+                }
+
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = "\n\n" + stringResource(id = R.string.feedback_is_important),
+                    text = stringResource(id = R.string.feedback_is_important),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colors.onBackground.copy(.5f)
                 )

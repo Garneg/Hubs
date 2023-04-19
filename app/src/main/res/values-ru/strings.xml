@@ -8,4 +8,5 @@
     <string name="bookmarks">Закладки</string>
     <string name="feedback_is_important">Ваша обратная связь очень важна для разработчика!</string>
     <string name="continue_reading">"Хотите дочитать "</string>
+    <string name="write_developer">Написать разработчику</string>
 </resources>
