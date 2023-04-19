@@ -37,11 +37,6 @@ class Article(
 
     val tags: List<String>,
 
-    /**
-     * Represents relations between user and article. Null if user is unauthorized
-     */
-    val userRelatedData: UserData?,
-
     val statistics: Statistics,
 
     val format: ArticleFormat?,
@@ -54,7 +49,9 @@ class Article(
 
     val complexity: PostComplexity,
 
-    val relatedData: RelatedData?
+    val relatedData: RelatedData?,
+
+    val translationData: TranslationData
 
 ) {
 
@@ -70,7 +67,6 @@ class Article(
     /**
      * Short information about article's hub.
      */
-
     data class Hub(
         val alias: String,
         val isProfiled: Boolean,
@@ -80,29 +76,6 @@ class Article(
     ){
         data class RelatedData(val isSubscribed: Boolean)
     }
-
-
-    class FlowSnippet(
-        val id: Int,
-        val alias: String,
-        val title: String,
-    )
-
-
-    class UserData(
-        val unreadCommentsCount: Long?,
-        //val vote: RelatedDataVote,
-        val bookmarked: Boolean,
-        val canComment: Boolean,
-        val canEdit: Boolean,
-        val canVote: Boolean,
-        val canViewVotes: Boolean,
-        val canVotePlus: Boolean,
-        val canVoteMinus: Boolean,
-        val canModerateComments: Boolean,
-        val trackerSubscribed: Boolean,
-        val emailSubscribed: Boolean
-    )
 
     /**
      * Stats of article. If value is greater than 1000, it will be shorten to 1k
@@ -124,5 +97,11 @@ class Article(
         val bookmarked: Boolean,
         val canVotePlus: Boolean,
         val canVoteMinus: Boolean
+    )
+
+    data class TranslationData(
+        val isTranslation: Boolean,
+        val originalAuthorName: String?,
+        val originUrl: String?
     )
 }

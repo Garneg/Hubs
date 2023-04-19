@@ -93,5 +93,8 @@ data class ArticleSnippet(
     /**
      * Data related to app user
      */
-    val relatedData: Article.RelatedData?
+    val relatedData: Article.RelatedData?,
+
+    val isTranslation: Boolean
+
 ) : HabrSnippet

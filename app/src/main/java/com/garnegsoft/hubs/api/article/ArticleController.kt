@@ -1,7 +1,6 @@
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
-import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.screens.article.parseElement
@@ -92,7 +91,6 @@ class ArticleController {
                             add(it.titleHtml)
                         }
                     },
-                    userRelatedData = null,
                     postType = PostType.fromString(it.postType),
                     metadata = if (it.metadata != null) com.garnegsoft.hubs.api.article.Article.Metadata(
                         it.metadata!!.mainImageUrl
@@ -106,7 +104,12 @@ class ArticleController {
                             canVotePlus = it.canVotePlus
                         )
                     },
-                    contentHtml = it.textHtml
+                    contentHtml = it.textHtml,
+                    translationData = com.garnegsoft.hubs.api.article.Article.TranslationData(
+                        isTranslation = it.postLabels?.find { it.type == "translation" } != null,
+                        originalAuthorName = it.postLabels?.find { it.type == "translation" }?.data?.originalAuthorName,
+                        originUrl = it.postLabels?.find { it.type == "translation" }?.data?.originalUrl
+                    )
                 )
             }
             return result
@@ -192,8 +195,10 @@ class ArticleController {
                             canVoteMinus = it.canVoteMinus,
                             canVotePlus = it.canVotePlus
                         )
-                    }
+                    },
+                    isTranslation = it.postLabels?.find { it.type == "translation" } != null,
                 )
+
             }
 
             return result
@@ -335,7 +340,14 @@ class ArticleController {
         @Serializable
         data class ArticlePostLabel(
             var type: String,
-        )
+            var data: ArticlePostLabelData?
+        ) {
+            @Serializable
+            class ArticlePostLabelData(
+                var originalAuthorName: String?,
+                var originalUrl: String?
+            )
+        }
 
         @Serializable
         data class ArticleRelatedData(

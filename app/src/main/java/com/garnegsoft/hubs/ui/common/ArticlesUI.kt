@@ -4,7 +4,6 @@ import ArticleController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.ripple.rememberRipple
@@ -153,7 +152,7 @@ fun ArticleCard(
                 .clickable(
                     interactionSource = authorInteractionSource,
                     indication = null,
-                    onClick = onAuthorClick //rememberRipple()
+                    onClick = onAuthorClick
                 )
                 .absolutePadding(
                     left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
@@ -291,6 +290,15 @@ fun ArticleCard(
                 fontWeight = FontWeight.W500,
                 fontSize = 14.sp
             )
+            if (article.isTranslation){
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "Перевод",
+                    color = style.statisticsColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
         }
 
         // Hubs
@@ -307,6 +315,8 @@ fun ArticleCard(
                         it.title.replace(" ", "\u00A0")
                 }, style = style.hubsTextStyle
             )
+
+
 
         // Snippet
         if (style.showTextSnippet)

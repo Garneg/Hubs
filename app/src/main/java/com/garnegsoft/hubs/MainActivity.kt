@@ -82,6 +82,7 @@ class MainActivity : ComponentActivity() {
         }
 
         val lastArticleFlow = lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
+        val lastArticlePosititonFlow = lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleReadPosition)
 
         if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
             window.statusBarColor = Color.parseColor("#FF313131")
@@ -193,7 +194,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(
-                            route = "article/{id}?position={position}",
+                            route = "article/{id}",
                             deepLinks = ArticleNavDeepLinks
                         ) {
                             val id = it.arguments?.getString("id")?.toIntOrNull()
@@ -203,6 +204,7 @@ class MainActivity : ComponentActivity() {
                                     lifecycle.coroutineScope.launch(Dispatchers.IO) {
                                         lastReadDataStore.edit {
                                             it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
+                                            it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] = 0
                                         }
                                     }
                                 }

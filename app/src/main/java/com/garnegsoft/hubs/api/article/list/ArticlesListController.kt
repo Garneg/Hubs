@@ -1,7 +1,5 @@
 import android.util.Log
-import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.*
-import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.formatTime
@@ -150,7 +148,8 @@ class ArticlesListController {
                                     bookmarked = it.bookmarked,
                                     canVoteMinus = it.canVoteMinus,
                                     canVotePlus = it.canVotePlus
-                                ) }
+                                ) },
+                                isTranslation = it.postLabels?.contains(ArticlesListLabel("translation")) ?: false
                             )
                         )
                     }

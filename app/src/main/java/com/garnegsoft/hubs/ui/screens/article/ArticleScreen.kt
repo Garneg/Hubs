@@ -2,6 +2,8 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
 import android.content.Intent
+import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
@@ -51,9 +53,11 @@ import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
+import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
@@ -79,13 +83,14 @@ class ArticleScreenViewModel : ViewModel() {
 @Composable
 fun ArticleScreen(
     articleId: Int,
-    initialPosition: Int = 0,
     onBackButtonClicked: () -> Unit,
     onCommentsClicked: () -> Unit,
     onAuthorClicked: (alias: String) -> Unit,
     onHubClicked: (alias: String) -> Unit,
     onCompanyClick: (alias: String) -> Unit,
 ) {
+    val context = LocalContext.current
+
     val viewModel = viewModel<ArticleScreenViewModel>()
     val article by viewModel.article.observeAsState()
 
@@ -93,7 +98,23 @@ fun ArticleScreen(
         if (!viewModel.article.isInitialized)
             viewModel.loadArticle(articleId)
     })
+
     val scrollState = rememberScrollState()
+
+    //TODO: save position of last read article
+//    LaunchedEffect(key1 = Unit, block = {
+//        launch(Dispatchers.IO) {
+//            while (true) {
+//                delay(2000)
+//                if (!scrollState.isScrollInProgress && viewModel.article.isInitialized){
+//                    context.lastReadDataStore.edit {
+//                        it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] = scrollState.value
+//                    }
+//                }
+//            }
+//        }
+//
+//    })
 
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val shareIntent = remember(article?.title) {
@@ -122,7 +143,6 @@ fun ArticleScreen(
                     Text(text = "Публикация")
                 },
                 actions = {
-                    val context = LocalContext.current
                     IconButton(
                         onClick = { context.startActivity(shareIntent) },
                         enabled = article != null
@@ -326,7 +346,6 @@ fun ArticleScreen(
         }
     ) {
         article?.let { article ->
-            val context = LocalContext.current
             LaunchedEffect(key1 = Unit, block = {
                 context.lastReadDataStore.edit {
                     it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
@@ -356,7 +375,7 @@ fun ArticleScreen(
                                     AnimationState(
                                         initialValue = 0f,
                                         initialVelocity = performedInitialVelocity
-                                    ).animateDecay(flingSpec){
+                                    ).animateDecay(flingSpec) {
                                         val delta = value - lastValue
                                         val consumed = scrollBy(delta)
                                         lastValue = value
@@ -370,7 +389,7 @@ fun ArticleScreen(
                                 }
 
                             }
-                            )
+                        )
                         .padding(bottom = 12.dp)
                         .padding(16.dp)
                 ) {
@@ -506,25 +525,15 @@ fun ArticleScreen(
                             )
                         }
                         Spacer(Modifier.height(4.dp))
-                        FlowRow() {
-                            article.hubs.forEach {
-                                val hubTitle =
-                                    (if (it.isProfiled) it.title + "*" else it.title) + ", "
 
-                                Text(
-                                    modifier = Modifier.clickable {
-                                        if (it.isCorporative)
-                                            onCompanyClick(it.alias)
-                                        else
-                                            onHubClicked(it.alias)
-                                    },
-                                    text = hubTitle,
-                                    style = TextStyle(
-                                        color = Color.Gray,
-                                        fontWeight = FontWeight.W500
-                                    )
-                                )
-                            }
+                        HubsRow(hubs = article.hubs, onHubClicked = onHubClicked)
+
+                        TranslationMessage(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            translationInfo = article.translationData
+                        ){
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.translationData.originUrl))
+                            context.startActivity(intent)
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -532,7 +541,7 @@ fun ArticleScreen(
                         SelectionContainer() {
                             parseElement(
                                 Jsoup.parse(
-                                    article.contentHtml.replace("<br/>\r\n<br/>\r\n", "<br/>\n")
+                                    article.contentHtml
                                 ),
                                 SpanStyle(
                                     color = MaterialTheme.colors.onSurface,
@@ -584,35 +593,12 @@ fun ArticleScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
 
-                            FlowRow() {
-                                article.hubs.forEach {
-                                    val hubTitle =
-                                        (if (it.isProfiled) it.title + "*" else it.title) + ", "
-
-                                    Text(
-                                        modifier = Modifier
-
-                                            .clip(
-                                                RoundedCornerShape(2.dp)
-                                            )
-                                            .clickable { onHubClicked(it.alias) }
-                                            .padding(horizontal = 2.dp),
-                                        text = hubTitle,
-                                        style = TextStyle(
-                                            color = Color.Gray,
-                                            fontWeight = FontWeight.W500
-                                        )
-                                    )
-                                }
-                            }
+                            HubsRow(hubs = article.hubs, onHubClicked = onHubClicked)
                         }
                     }
                 }
                 ScrollBar(scrollState = scrollState)
             }
-            LaunchedEffect(key1 = Unit, block = {
-                scrollState.scrollTo(initialPosition)
-            })
         } ?: Box(
             modifier = Modifier
                 .fillMaxSize()
