@@ -13,5 +13,7 @@ class Comment (
     val deleted: Boolean = false,
     val author: Article.Author,
     val isArticleAuthor: Boolean,
+    val isNew: Boolean,
+    val isUserAuthor: Boolean,
     val edited: Boolean
 )

@@ -10,6 +10,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,21 +37,19 @@ fun CommentItem(
             .background(MaterialTheme.colors.surface)
             .padding(16.dp)
     ) {
-        Row(
-            modifier =
-            (if (comment.isArticleAuthor) {
-                Modifier
-                    .fillMaxWidth()
-                    .clip(
-                        RoundedCornerShape(8.dp)
-                    )
-                    .background(Color(0x536BEB40))
+        val commentFlagColor = remember {
+            when {
+                comment.isArticleAuthor -> Color(0x336BEB40)
+                comment.isNew -> Color(0x33337EE7)
+                comment.isUserAuthor -> Color(0x33ECC72B)
+                else -> Color.Unspecified
             }
-            else {
-                Modifier.clip(
-                    RoundedCornerShape(8.dp)
-                )
-            })
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(commentFlagColor)
         ) {
             if (comment.author.avatarUrl == null || comment.author.avatarUrl.isBlank()) {
                 Icon(
