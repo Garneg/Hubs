@@ -1,11 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.user
 
 
-import com.garnegsoft.hubs.api.hub.list.HubsList
 import com.garnegsoft.hubs.api.hub.list.HubsListController
-import com.garnegsoft.hubs.ui.screens.user.UserProfile
 import ArticlesListController
 import android.content.Intent
+import android.graphics.Paint.Align
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -69,6 +68,7 @@ class UserScreenViewModel : ViewModel() {
 
             return true
         }
+
     fun loadSubscribedHubs() {
         viewModelScope.launch(Dispatchers.IO) {
             if (subscribedHubsPage == 1) {
@@ -113,8 +113,6 @@ class UserScreenViewModel : ViewModel() {
     }
 
 
-
-
 }
 
 // TODO: remove default actions for navigation events
@@ -131,8 +129,7 @@ enum class UserScreenPages {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UserScreen(
-    viewModelStoreOwner: ViewModelStoreOwner,
-    user: User,
+    alias: String,
     onBack: () -> Unit,
     onArticleClicked: (articleId: Int) -> Unit,
     onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit,
@@ -141,7 +138,8 @@ fun UserScreen(
     onHubClicked: (alias: String) -> Unit,
     initialPage: UserScreenPages = UserScreenPages.Profile,
     isAppUser: Boolean = false,
-    onLogout: (() -> Unit)? = null
+    onLogout: (() -> Unit)? = null,
+    viewModelStoreOwner: ViewModelStoreOwner,
 ) {
     val viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
     val pagerState = rememberPagerState(initialPage = initialPage.ordinal)
@@ -158,14 +156,16 @@ fun UserScreen(
                 },
                 actions = {
                     val context = LocalContext.current
-                    IconButton(onClick = {
+                    IconButton(
+                        enabled = viewModel.user.isInitialized,
+                        onClick = {
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
                             Intent.EXTRA_TEXT,
-                            if (user.fullname != null)
-                                "${user.fullname} — https://habr.com/ru/users/${user.alias}/"
+                            if (viewModel.user.value?.fullname != null)
+                                "${viewModel.user.value!!.fullname} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
                             else
-                                "${user.alias} — https://habr.com/ru/users/${user.alias}/"
+                                "${viewModel.user.value!!.alias} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
                         )
                         sendIntent.setType("text/plain")
                         val shareIntent = Intent.createChooser(sendIntent, null)
@@ -177,238 +177,274 @@ fun UserScreen(
             )
         }
     ) {
-        val tabs = listOf<String>(
-            "Профиль",
-            "Публикации${if (user.articlesCount > 0) " " + formatLongNumbers(user.articlesCount) else ""}",
-            "Комментарии${if (user.commentsCount > 0) " " + formatLongNumbers(user.commentsCount) else ""}",
-            "Закладки${if (user.favoritesCount > 0) " " + formatLongNumbers(user.favoritesCount) else ""}",
-            "Подписчики${if (user.followersCount > 0) " " + formatLongNumbers(user.followersCount) else ""}",
-            "Подписки${if (user.followsCount > 0) " " + formatLongNumbers(user.followsCount) else ""}"
-        )
-        Column(modifier = Modifier.padding(it)) {
-            HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
-            HorizontalPager(
-                state = pagerState,
-                pageCount = 6
-            ) { pageIndex ->
-                when (pageIndex) {
-                    0 -> {
-                        if(viewModel.user.observeAsState().value != null) {
-                            val note by viewModel.note.observeAsState()
-                            val hubs by viewModel.subscribedHubs.observeAsState()
-                            if (hubs != null)
-                                UserProfile(user, isAppUser, onLogout, onHubClicked, viewModel)
-                            else
+        LaunchedEffect(key1 = Unit) {
+            viewModel.loadUserProfile(alias)
+        }
+        viewModel.user.observeAsState().value?.let { usr ->
+            val tabs = listOf<String>(
+                "Профиль",
+                "Публикации${
+                    if (viewModel.user.value!!.articlesCount > 0) " " + formatLongNumbers(
+                        viewModel.user.value!!.articlesCount
+                    ) else ""
+                }",
+                "Комментарии${
+                    if (viewModel.user.value!!.commentsCount > 0) " " + formatLongNumbers(
+                        viewModel.user.value!!.commentsCount
+                    ) else ""
+                }",
+                "Закладки${
+                    if (viewModel.user.value!!.favoritesCount > 0) " " + formatLongNumbers(
+                        viewModel.user.value!!.favoritesCount
+                    ) else ""
+                }",
+                "Подписчики${
+                    if (viewModel.user.value!!.followersCount > 0) " " + formatLongNumbers(
+                        viewModel.user.value!!.followersCount
+                    ) else ""
+                }",
+                "Подписки${
+                    if (viewModel.user.value!!.followsCount > 0) " " + formatLongNumbers(
+                        viewModel.user.value!!.followsCount
+                    ) else ""
+                }"
+            )
+            Column(modifier = Modifier.padding(it)) {
+                HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
+                HorizontalPager(
+                    state = pagerState,
+                    pageCount = 6
+                ) { pageIndex ->
+                    when (pageIndex) {
+                        0 -> {
+                            val user by viewModel.user.observeAsState()
+                            if (user != null) {
+
+                                val note by viewModel.note.observeAsState()
+                                val hubs by viewModel.subscribedHubs.observeAsState()
+
+                                if (hubs != null)
+                                    UserProfile(
+                                        user!!,
+                                        isAppUser,
+                                        onLogout,
+                                        onHubClicked,
+                                        viewModel
+                                    )
+                                else
+                                    LaunchedEffect(key1 = Unit, block = {
+                                        viewModel.loadNote()
+                                        viewModel.loadSubscribedHubs()
+                                    })
+                            }
+                        }
+                        1 -> {
+                            val articles by viewModel.articles.observeAsState()
+
+                            if (articles != null) {
+                                PagedHabrSnippetsColumn(
+                                    data = articles!!,
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            ArticlesListController.getArticlesSnippets(
+                                                "articles",
+                                                mapOf(
+                                                    "user" to viewModel.user.value!!.alias,
+                                                    "page" to it.toString()
+                                                )
+                                            )?.let {
+                                                viewModel.articles.postValue(
+                                                    articles!! + it
+                                                )
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    ArticleCard(
+                                        article = it,
+                                        onClick = { onArticleClicked(it.id) },
+                                        onCommentsClick = { onCommentsClicked(it.id) },
+                                        onAuthorClick = { onUserClicked(it.author!!.alias) }
+                                    )
+                                }
+                            } else {
                                 LaunchedEffect(key1 = Unit, block = {
-                                    viewModel.loadNote()
-                                    viewModel.loadSubscribedHubs()
+                                    launch(Dispatchers.IO) {
+                                        viewModel.articles.postValue(
+                                            ArticlesListController.getArticlesSnippets(
+                                                "articles",
+                                                mapOf("user" to viewModel.user.value!!.alias)
+                                            )
+                                        )
+                                    }
                                 })
-                        } else {
-                            viewModel.user.postValue(user)
+                            }
                         }
-                    }
-                    1 -> {
-                        val articles by viewModel.articles.observeAsState()
-
-                        if (articles != null) {
-                            PagedHabrSnippetsColumn(
-                                data = articles!!,
-                                onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf(
-                                                "user" to user.alias,
-                                                "page" to it.toString()
-                                            )
-                                        )?.let {
-                                            viewModel.articles.postValue(
-                                                articles!! + it
-                                            )
+                        2 -> {
+                            val userComments by viewModel.comments.observeAsState()
+                            if (userComments != null) {
+                                PagedHabrSnippetsColumn(
+                                    data = userComments!!,
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            CommentsListController.getCommentsSnippets(
+                                                "users/${alias}/comments",
+                                                mapOf("page" to it.toString())
+                                            )?.let {
+                                                viewModel.comments.postValue(
+                                                    userComments!! + it
+                                                )
+                                            }
                                         }
                                     }
-                                }
-                            ) {
-                                ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClicked(it.id) },
-                                    onCommentsClick = { onCommentsClicked(it.id) },
-                                    onAuthorClick = { onUserClicked(it.author!!.alias) }
-                                )
-                            }
-                        } else {
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.articles.postValue(
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf("user" to user.alias)
-                                        )
+                                ) {
+                                    CommentCard(
+                                        comment = it,
+                                        onCommentClick = {
+                                            onCommentClicked(
+                                                it.parentPost.id,
+                                                it.id
+                                            )
+                                        },
+                                        onAuthorClick = { onUserClicked(it.author.alias) },
+                                        onParentPostClick = { onArticleClicked(it.parentPost.id) }
                                     )
                                 }
-                            })
-                        }
-                    }
-                    2 -> {
-                        val userComments by viewModel.comments.observeAsState()
-                        if (userComments != null) {
-                            PagedHabrSnippetsColumn(
-                                data = userComments!!,
-                                onNextPageLoad = {
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator()
+                                }
+                                LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
-                                        CommentsListController.getCommentsSnippets(
-                                            "users/${user.alias}/comments",
-                                            mapOf("page" to it.toString())
-                                        )?.let {
-                                            viewModel.comments.postValue(
-                                                userComments!! + it
-                                            )
+                                        viewModel.comments.postValue(
+                                            CommentsListController.getCommentsSnippets("users/${alias}/comments")
+                                        )
+                                    }
+                                })
+                            }
+                        }
+                        3 -> {
+                            val bookmarks by viewModel.bookmarks.observeAsState()
+
+                            if (bookmarks != null) {
+                                PagedHabrSnippetsColumn(
+                                    data = bookmarks!!,
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            ArticlesListController.getArticlesSnippets(
+                                                path = "articles",
+                                                args = mapOf(
+                                                    "user" to alias,
+                                                    "user_bookmarks" to "true",
+                                                    "page" to it.toString()
+                                                )
+                                            )?.let {
+                                                viewModel.bookmarks.postValue(bookmarks!! + it)
+                                            }
                                         }
                                     }
-                                }
-                            ) {
-                                CommentCard(
-                                    comment = it,
-                                    onCommentClick = {
-                                        onCommentClicked(
-                                            it.parentPost.id,
-                                            it.id
-                                        )
-                                    },
-                                    onAuthorClick = { onUserClicked(it.author.alias) },
-                                    onParentPostClick = { onArticleClicked(it.parentPost.id) }
-                                )
-                            }
-                        } else {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator()
-                            }
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.comments.postValue(
-                                        CommentsListController.getCommentsSnippets("users/${user.alias}/comments")
+                                ) {
+                                    ArticleCard(
+                                        article = it,
+                                        onClick = { onArticleClicked(it.id) },
+                                        onCommentsClick = { onCommentsClicked(it.id) },
+                                        onAuthorClick = {
+                                            onUserClicked(it.author!!.alias)
+                                        }
                                     )
                                 }
-                            })
-                        }
-                    }
-                    3 -> {
-                        val bookmarks by viewModel.bookmarks.observeAsState()
-
-                        if (bookmarks != null) {
-                            PagedHabrSnippetsColumn(
-                                data = bookmarks!!,
-                                onNextPageLoad = {
+                            } else {
+                                LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
                                         ArticlesListController.getArticlesSnippets(
                                             path = "articles",
                                             args = mapOf(
-                                                "user" to user.alias,
-                                                "user_bookmarks" to "true",
-                                                "page" to it.toString()
+                                                "user" to alias,
+                                                "user_bookmarks" to "true"
                                             )
                                         )?.let {
-                                            viewModel.bookmarks.postValue(bookmarks!! + it)
+                                            viewModel.bookmarks.postValue(it)
                                         }
                                     }
-                                }
-                            ) {
-                                ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClicked(it.id) },
-                                    onCommentsClick = { onCommentsClicked(it.id) },
-                                    onAuthorClick = {
-                                        onUserClicked(it.author!!.alias)
-                                    }
-                                )
+                                })
                             }
-                        } else {
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    ArticlesListController.getArticlesSnippets(
-                                        path = "articles",
-                                        args = mapOf(
-                                            "user" to user.alias,
-                                            "user_bookmarks" to "true"
+                        }
+                        4 -> {
+                            val followers by viewModel.followers.observeAsState()
+                            if (followers != null) {
+                                PagedHabrSnippetsColumn(
+                                    data = followers!!,
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            UsersListController.get(
+                                                "users/${alias}/followers",
+                                                mapOf("page" to it.toString())
+                                            )?.let {
+                                                viewModel.followers.postValue(
+                                                    followers!! + it
+                                                )
+                                            }
+
+                                        }
+                                    }
+                                ) {
+                                    UserCard(user = it, onClick = { onUserClicked(it.alias) })
+                                }
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator()
+                                }
+                                LaunchedEffect(key1 = Unit, block = {
+                                    launch(Dispatchers.IO) {
+                                        viewModel.followers.postValue(
+                                            UsersListController.get("users/${alias}/followers")
                                         )
-                                    )?.let {
-                                        viewModel.bookmarks.postValue(it)
                                     }
-                                }
-                            })
-                        }
-                    }
-                    4 -> {
-                        val followers by viewModel.followers.observeAsState()
-                        if (followers != null) {
-                            PagedHabrSnippetsColumn(
-                                data = followers!!,
-                                onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
-                                        UsersListController.get(
-                                            "users/${user.alias}/followers",
-                                            mapOf("page" to it.toString())
-                                        )?.let {
-                                            viewModel.followers.postValue(
-                                                followers!! + it
-                                            )
-                                        }
-
-                                    }
-                                }
-                            ) {
-                                UserCard(user = it, onClick = { onUserClicked(it.alias) })
+                                })
                             }
-                        } else {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator()
-                            }
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.followers.postValue(
-                                        UsersListController.get("users/${user.alias}/followers")
-                                    )
-                                }
-                            })
                         }
-                    }
-                    5 -> {
-                        val follows by viewModel.follow.observeAsState()
+                        5 -> {
+                            val follows by viewModel.follow.observeAsState()
 
-                        if (follows != null) {
-                            PagedHabrSnippetsColumn(
-                                data = follows!!,
-                                onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
-                                        UsersListController.get(
-                                            "users/${user.alias}/followed",
-                                            mapOf("page" to it.toString())
-                                        )?.let {
-                                            viewModel.follow.postValue(
-                                                follows!! + it
-                                            )
+                            if (follows != null) {
+                                PagedHabrSnippetsColumn(
+                                    data = follows!!,
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            UsersListController.get(
+                                                "users/${alias}/followed",
+                                                mapOf("page" to it.toString())
+                                            )?.let {
+                                                viewModel.follow.postValue(
+                                                    follows!! + it
+                                                )
+                                            }
                                         }
                                     }
+                                ) {
+                                    UserCard(user = it, onClick = { onUserClicked(it.alias) })
                                 }
-                            ) {
-                                UserCard(user = it, onClick = { onUserClicked(it.alias) })
-                            }
-                        } else {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator()
-                            }
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.follow.postValue(
-                                        UsersListController.get("users/${user.alias}/followed")
-                                    )
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator()
                                 }
-                            })
-                        }
+                                LaunchedEffect(key1 = Unit, block = {
+                                    launch(Dispatchers.IO) {
+                                        viewModel.follow.postValue(
+                                            UsersListController.get("users/${alias}/followed")
+                                        )
+                                    }
+                                })
+                            }
 
+                        }
                     }
                 }
             }
+        } ?: Box(modifier = Modifier
+            .fillMaxSize()
+            .padding(it)) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     }
 

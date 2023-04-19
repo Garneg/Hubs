@@ -18,8 +18,6 @@ import androidx.navigation.compose.rememberNavController
 import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.NoConnectionInterceptor
-import com.garnegsoft.hubs.api.user.User
-import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
@@ -273,21 +271,13 @@ class MainActivity : ComponentActivity() {
                                 it.arguments?.getString("page")?.let { UserScreenPages.valueOf(it) }
                                     ?: UserScreenPages.Profile
 
-                            var user: User? by remember { mutableStateOf(null) }
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    user =
-                                        it.arguments!!.getString("alias")
-                                            ?.let { it1 -> UserController.get(it1) }
+                            val alias = it.arguments!!.getString("alias")!!
 
-                                }
-                            })
                             val logoutCoroutineScope = rememberCoroutineScope()
-                            if (user != null) {
                                 UserScreen(
-                                    isAppUser = user!!.alias == userInfo?.alias,
+                                    isAppUser = alias == userInfo?.alias,
                                     initialPage = page,
-                                    user = user!!,
+                                    alias = alias,
                                     onBack = { navController.popBackStack() },
                                     onArticleClicked = { navController.navigate("article/$it") },
                                     onUserClicked = { navController.navigate("user/$it") },
@@ -316,7 +306,7 @@ class MainActivity : ComponentActivity() {
                                         navController.navigate("hub/$it")
                                     }
                                 )
-                            }
+
 
                         }
 
