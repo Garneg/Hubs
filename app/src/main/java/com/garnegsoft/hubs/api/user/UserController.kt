@@ -15,9 +15,11 @@ class UserController {
 
             var result: UserProfileData? = null
 
+            if (response.code != 200)
+                return null
+
             response.body?.let {
                 var customJson = Json { ignoreUnknownKeys = true }
-
 
                 result =
                     customJson.decodeFromJsonElement(customJson.parseToJsonElement(it.string()))
@@ -152,7 +154,7 @@ class UserController {
         /**
          * Subscribe/unsubscribe to user.
          * @return subscription status
-         * @throws UnsupportedOperationException TODO: check subscription to user itself
+         * @throws UnsupportedOperationException
          */
         fun subscription(alias: String): Boolean {
             val response = HabrApi.post("users/$alias/following/toggle")

@@ -115,8 +115,6 @@ class UserScreenViewModel : ViewModel() {
 
 }
 
-// TODO: remove default actions for navigation events
-
 enum class UserScreenPages {
     Profile,
     Articles,

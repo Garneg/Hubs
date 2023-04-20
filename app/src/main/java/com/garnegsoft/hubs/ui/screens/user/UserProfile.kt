@@ -181,7 +181,7 @@ internal fun UserProfile(
                         Text(text = "Рейтинг", color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
                     }
                 }
-                if (!isAppUser) {
+                if (!isAppUser && !user.isReadonly) {
                     user.relatedData?.let {
                         var subscribed by rememberSaveable {
                             mutableStateOf(it.isSubscribed)

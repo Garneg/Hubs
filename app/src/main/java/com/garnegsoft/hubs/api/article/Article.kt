@@ -33,8 +33,6 @@ class Article(
 
     val hubs: List<Hub>,
 
-    val postLabels: List<String>,
-
     val tags: List<String>,
 
     val statistics: Statistics,

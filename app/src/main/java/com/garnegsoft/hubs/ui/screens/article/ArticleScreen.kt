@@ -469,11 +469,12 @@ fun ArticleScreen(
                             Text(
                                 text = article.title,
                                 fontSize = 22.sp,
-                                fontWeight = FontWeight.W800,
+                                fontWeight = FontWeight.W700,
                                 color = MaterialTheme.colors.onBackground
                             )
 
                         }
+                        Spacer(modifier = Modifier.height(4.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -595,6 +596,7 @@ fun ArticleScreen(
 
                             HubsRow(hubs = article.hubs, onHubClicked = onHubClicked)
                         }
+
                     }
                 }
                 ScrollBar(scrollState = scrollState)

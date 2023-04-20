@@ -52,7 +52,7 @@ fun CompanyScreen(
     onCommentsClick: (postId: Int) -> Unit,
     onBack: () -> Unit
 ) {
-    var viewModel = viewModel<CompanyScreenViewModel>(viewModelStoreOwner)
+    val viewModel = viewModel<CompanyScreenViewModel>(viewModelStoreOwner)
     val companyProfile by viewModel.companyProfile.observeAsState()
     val articles by viewModel.blogArticles.observeAsState()
     val employees by viewModel.employees.observeAsState()
@@ -74,7 +74,7 @@ fun CompanyScreen(
                         enabled = viewModel.companyProfile.isInitialized,
                         onClick = {
                         val intent = Intent(Intent.ACTION_SEND)
-                        intent.putExtra(Intent.EXTRA_TEXT, "Блог ${companyProfile?.title} — https://habr.com/ru/company/$alias/blog")
+                        intent.putExtra(Intent.EXTRA_TEXT, "Блог ${companyProfile?.title} — https://habr.com/ru/companies/$alias/blog")
                         intent.setType("text/plain")
                         val chooser = Intent.createChooser(intent, null)
                         context.startActivity(chooser)

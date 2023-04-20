@@ -16,7 +16,7 @@ class ArticleController {
 
             var article: Article? = null
 
-            if (response.body != null) {
+            if (response.code == 200 && response.body != null) {
                 article = HabrDataParser.parseJson<Article>(response.body!!.string())
                 article!!.timePublished = formatTime(article.timePublished)
                 article.author?.avatarUrl?.let {
@@ -64,7 +64,6 @@ class ArticleController {
                         votesCountMinus = it.statistics.votesCountMinus,
                         votesCountPlus = it.statistics.votesCountPlus
                     ),
-                    //TODO
                     hubs = it.hubs.run {
                         val hubs = arrayListOf<com.garnegsoft.hubs.api.article.Article.Hub>()
                         this.forEach {
@@ -85,7 +84,6 @@ class ArticleController {
                         }
                         hubs
                     },
-                    postLabels = listOf(),
                     tags = arrayListOf<String>().apply {
                         it.tags?.forEach {
                             add(it.titleHtml)

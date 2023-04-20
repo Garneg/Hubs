@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -278,8 +279,8 @@ fun ArticleCard(
                 Spacer(modifier = Modifier.width(12.dp))
             }
             Icon(
-                painter = painterResource(id = R.drawable.clock_icon),
                 modifier = Modifier.size(14.dp),
+                painter = painterResource(id = R.drawable.clock_icon),
                 contentDescription = "",
                 tint = style.statisticsColor
             )
@@ -292,6 +293,13 @@ fun ArticleCard(
             )
             if (article.isTranslation){
                 Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    modifier = Modifier.size(14.dp),
+                    painter = painterResource(id = R.drawable.translate),
+                    contentDescription = "",
+                    tint = style.statisticsColor
+                )
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = "Перевод",
                     color = style.statisticsColor,

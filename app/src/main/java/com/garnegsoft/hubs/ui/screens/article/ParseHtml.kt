@@ -289,7 +289,7 @@ fun parseElement(
                                 "URL Clicked",
                                 it.item
                             )
-                            var intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
                             context.startActivity(intent)
                         }
                     }
@@ -337,7 +337,9 @@ fun parseElement(
         "img" -> if (element.hasClass("formula")) {
             {
                 AsyncSvgImage(
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     data = element.attr("src"),
                     contentScale = ContentScale.Inside
                 )
@@ -448,7 +450,7 @@ fun parseElement(
                     .fillMaxWidth()
             ) {
                 val blockQuoteColor =
-                    if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground
+                    if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(0.75f)
                 Column(modifier = Modifier
                     .drawWithContent {
                         drawContent()
@@ -478,7 +480,7 @@ fun parseElement(
             var spoilerCaption = element.getElementsByTag("summary").first()?.text() ?: "Спойлер"
             var showDetails by rememberSaveable { mutableStateOf(false) }
             Surface(
-                color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x40141414),
+                color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x803C3C3C),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)

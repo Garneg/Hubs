@@ -12,6 +12,9 @@ class HubController {
 
             var profile: HubProfile? = null
 
+            if (response.code != 200)
+                return null
+
             response.body?.string()?.let {
                 var customJson = Json { ignoreUnknownKeys = true }
                 profile = customJson.decodeFromJsonElement(customJson.parseToJsonElement(it))
