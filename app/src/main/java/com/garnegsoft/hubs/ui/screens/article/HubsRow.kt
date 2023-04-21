@@ -19,7 +19,8 @@ import com.garnegsoft.hubs.api.article.Article
 @Composable
 fun HubsRow(
     hubs: List<Article.Hub>,
-    onHubClicked: (alias: String) -> Unit
+    onHubClicked: (alias: String) -> Unit,
+    onCompanyClicked: (alias: String) -> Unit,
 ) {
     FlowRow() {
         hubs.forEach {
@@ -32,7 +33,7 @@ fun HubsRow(
                     .clip(
                         RoundedCornerShape(2.dp)
                     )
-                    .clickable { onHubClicked(it.alias) }
+                    .clickable { if (it.isCorporative) onCompanyClicked(it.alias) else onHubClicked(it.alias) }
                     .padding(horizontal = 2.dp),
                 text = hubTitle,
                 style = TextStyle(

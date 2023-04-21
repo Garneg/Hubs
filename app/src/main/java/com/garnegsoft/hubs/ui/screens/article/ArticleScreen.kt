@@ -527,7 +527,7 @@ fun ArticleScreen(
                         }
                         Spacer(Modifier.height(4.dp))
 
-                        HubsRow(hubs = article.hubs, onHubClicked = onHubClicked)
+                        HubsRow(hubs = article.hubs, onHubClicked = onHubClicked, onCompanyClicked = onCompanyClick)
 
                         TranslationMessage(
                             modifier = Modifier.padding(vertical = 8.dp),
@@ -594,7 +594,7 @@ fun ArticleScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
 
-                            HubsRow(hubs = article.hubs, onHubClicked = onHubClicked)
+                            HubsRow(hubs = article.hubs, onHubClicked = onHubClicked, onCompanyClicked = onCompanyClick)
                         }
 
                     }

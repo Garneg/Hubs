@@ -27,6 +27,8 @@ val CompanyScreenNavDeepLinks = listOf(
     )
 
 val ArticleNavDeepLinks = listOf(
+    NavDeepLink("https://habr.com/p/{id}"),
+    NavDeepLink("https://habr.com/p/{id}/"),
     NavDeepLink("https://habr.com/{lang}/post/{id}"),
     NavDeepLink("https://habr.com/{lang}/post/{id}/"),
     NavDeepLink("https://{domain}/article/{id}"),
@@ -39,13 +41,11 @@ val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/news/{id}/"),
     NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}"),
     NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}/"),
-    NavDeepLink("https://habr.com/p/{id}"),
-    NavDeepLink("https://habr.com/p/{id}/"),
     NavDeepLink("https://habr.com/{lang}/article/{id}"),
     NavDeepLink("https://habr.com/{lang}/article/{id}/"),
     NavDeepLink("https://habr.com/{lang}/articles/{id}"),
-    NavDeepLink("https://habr.com/{lang}/articles/{id}/")
-
-
+    NavDeepLink("https://habr.com/{lang}/articles/{id}/"),
+    NavDeepLink("https://habr.com/{lang}/amp/publications/{id}"),
+    NavDeepLink("https://habr.com/{lang}/amp/publications/{id}/")
 
 )
