@@ -338,12 +338,12 @@ class ArticleController {
         @Serializable
         data class ArticlePostLabel(
             var type: String,
-            var data: ArticlePostLabelData?
+            var data: ArticlePostLabelData? = null
         ) {
             @Serializable
             class ArticlePostLabelData(
-                var originalAuthorName: String?,
-                var originalUrl: String?
+                var originalAuthorName: String? = null,
+                var originalUrl: String? = null
             )
         }
 

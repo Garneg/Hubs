@@ -167,6 +167,7 @@ fun ArticlesScreen(
 
             val articlesLazyListState = rememberLazyListState()
 
+
             val newsLazyListState = rememberLazyListState()
 
             val pages = remember(key1 = isAuthorized) {
@@ -178,6 +179,10 @@ fun ArticlesScreen(
                         var pageNumber = rememberSaveable { mutableStateOf(1) }
 
                         if (articles != null) {
+
+                            LaunchedEffect(key1 = articles?.list?.getOrNull(0), block = {
+                                articlesLazyListState.animateScrollToItem(0)
+                            })
 
                             var refreshing by remember { mutableStateOf(false) }
                             val refreshingState = rememberPullRefreshState(
@@ -194,8 +199,17 @@ fun ArticlesScreen(
                                             )
                                         if (newArticlesList != null) {
                                             viewModel.articles.postValue(newArticlesList)
+                                            Log.e("alls", articlesLazyListState.canScrollBackward.toString())
+                                            if (articlesLazyListState.canScrollBackward) {
+                                                launch {
+//                                                    articlesLazyListState.scrollToItem(0)
+
+                                                }
+
+                                            }
+
                                         }
-                                        delay(400)
+
 
                                         refreshing = false
                                     }
@@ -222,6 +236,7 @@ fun ArticlesScreen(
                                                     )
                                                 )?.let {
                                                     viewModel.articles.postValue(articles!! + it)
+
                                                 }
 
                                         }
@@ -244,13 +259,15 @@ fun ArticlesScreen(
                                 )
                             }
                         } else {
-                            LaunchedEffect(key1 = Unit) {
+                            LaunchedEffect(key1 = isAuthorized) {
                                 launch(Dispatchers.IO) {
                                     ArticlesListController.getArticlesSnippets(
                                         "articles",
                                         mapOf("sort" to "rating")
                                     )?.let {
-                                        viewModel.articles.postValue(it)
+                                        viewModel.articles.postValue(
+                                            HabrList(it.list.drop(1), it.pagesCount)
+                                        )
                                     }
 
                                 }
@@ -494,7 +511,10 @@ fun ArticlesScreen(
             }
             val pagerState = rememberPagerState()
 
-            HabrScrollableTabRow(pagerState = pagerState, tabs = pages.keys.toList())
+            HabrScrollableTabRow(pagerState = pagerState, tabs = pages.keys.toList(),
+            onCurrentPositionTabClick = { index, title ->
+
+            })
             HorizontalPager(
                 state = pagerState,
                 pageCount = pages.size,
@@ -506,151 +526,5 @@ fun ArticlesScreen(
         }
     }
 }
-
-
-@Composable
-fun UnauthorizedMenu(
-    onLoginClick: () -> Unit,
-    onAboutClick: () -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    IconButton(onClick = { expanded = true }) {
-        Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
-    }
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
-    ) {
-        MenuItem(title = "Войти", icon = {
-            Icon(imageVector = Icons.Outlined.ExitToApp, contentDescription = "")
-        }, onClick = onLoginClick)
-
-        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-
-        MenuItem(title = "О приложении", icon = {
-            Icon(
-                imageVector = Icons.Outlined.Info,
-                contentDescription = "",
-                modifier = Modifier.size(24.dp)
-            )
-        }, onClick = onAboutClick)
-    }
-}
-
-@Composable
-fun AuthorizedMenu(
-    userAlias: String,
-    avatarUrl: String?,
-    onProfileClick: () -> Unit,
-    onArticlesClick: () -> Unit,
-    onCommentsClick: () -> Unit,
-    onBookmarksClick: () -> Unit,
-    onAboutClick: () -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-    IconButton(onClick = { expanded = true }) {
-        if (avatarUrl != null) {
-            AsyncImage(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Color.White),
-                contentScale = ContentScale.FillBounds,
-                model = avatarUrl, contentDescription = ""
-            )
-        } else {
-            Icon(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-
-                    .border(
-                        width = 2.dp, color = placeholderColor(userAlias),
-                        shape = RoundedCornerShape(8.dp)
-                    )
-                    .padding(1.dp)
-                    .background(Color.White)
-                    .padding(1.5.dp),
-                painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                contentDescription = "",
-                tint = placeholderColor(userAlias)
-            )
-        }
-
-    }
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-        modifier = Modifier.width(intrinsicSize = IntrinsicSize.Max)
-    ) {
-        MenuItem(title = userAlias, icon = {
-            if (avatarUrl != null) {
-                AsyncImage(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    contentScale = ContentScale.FillBounds,
-                    model = avatarUrl, contentDescription = ""
-                )
-            } else {
-                Icon(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .border(
-                            width = 2.dp, color = placeholderColor(userAlias),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(2.5.dp),
-                    painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                    contentDescription = "",
-                    tint = placeholderColor(userAlias)
-                )
-            }
-        }, onClick = onProfileClick)
-        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-
-        MenuItem(title = "Статьи", icon = {
-            Icon(painter = painterResource(id = R.drawable.article), contentDescription = "")
-        }, onClick = onArticlesClick)
-
-        MenuItem(title = "Комментарии", icon = {
-            Icon(
-                painter = painterResource(id = R.drawable.comments_icon), contentDescription = ""
-            )
-        }, onClick = onCommentsClick)
-
-        MenuItem(title = "Закладки", icon = {
-            Icon(painter = painterResource(id = R.drawable.bookmark), contentDescription = "")
-        }, onClick = onBookmarksClick)
-
-        Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
-
-        MenuItem(title = "О приложении", icon = {
-            Icon(imageVector = Icons.Outlined.Info, contentDescription = "")
-        }, onClick = onAboutClick)
-    }
-}
-
-@Composable
-fun MenuItem(
-    title: String,
-    icon: @Composable () -> Unit,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        icon()
-        Spacer(modifier = Modifier.width(14.dp))
-        Text(title)
-        Spacer(modifier = Modifier.width(14.dp))
-        Spacer(modifier = Modifier.weight(1f))
-    }
-}
-
 
 
