@@ -197,7 +197,7 @@ fun HubScreen(
                                 onNextPageLoad = {
                                     launch(Dispatchers.IO) {
                                         viewModel.companies.postValue(
-                                            CompaniesListController.get("hubs/$alias/companies", mapOf("page" to it.toString()))
+                                            companies + CompaniesListController.get("hubs/$alias/companies", mapOf("page" to it.toString()))!!
                                         )
                                     }
                                 }

@@ -167,7 +167,6 @@ fun ArticlesScreen(
 
             val articlesLazyListState = rememberLazyListState()
 
-
             val newsLazyListState = rememberLazyListState()
 
             val pages = remember(key1 = isAuthorized) {
@@ -265,9 +264,7 @@ fun ArticlesScreen(
                                         "articles",
                                         mapOf("sort" to "rating")
                                     )?.let {
-                                        viewModel.articles.postValue(
-                                            HabrList(it.list.drop(1), it.pagesCount)
-                                        )
+                                        viewModel.articles.postValue(it)
                                     }
 
                                 }
