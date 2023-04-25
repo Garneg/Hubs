@@ -258,6 +258,9 @@ fun ArticlesScreen(
                                 )
                             }
                         } else {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                             LaunchedEffect(key1 = isAuthorized) {
                                 launch(Dispatchers.IO) {
                                     ArticlesListController.getArticlesSnippets(
@@ -306,7 +309,6 @@ fun ArticlesScreen(
                                 state = swipestate
                             )
                         ) {
-
                             if (newsList != null) {
                                 PagedHabrSnippetsColumn(
                                     data = newsList!!,
@@ -343,7 +345,11 @@ fun ArticlesScreen(
                                     contentColor = MaterialTheme.colors.primary,
                                     refreshing = isRefreshing, state = swipestate
                                 )
-                            } else {
+                            }
+                            else {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                                 LaunchedEffect(key1 = Unit) {
                                     launch(Dispatchers.IO) {
                                         ArticlesListController.getArticlesSnippets(
@@ -383,6 +389,9 @@ fun ArticlesScreen(
                                 )
                             }
                         } else {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                             LaunchedEffect(key1 = Unit) {
                                 launch(Dispatchers.IO) {
                                     viewModel.hubs.postValue(HubsListController.get("hubs"))
@@ -446,7 +455,9 @@ fun ArticlesScreen(
                                     onClick = { onCompanyClicked(it.alias) })
                             }
                         } else {
-
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     viewModel.companies.postValue(
@@ -460,7 +471,7 @@ fun ArticlesScreen(
                         }
                     }
                 )
-                if (isAuthorized == true) map =
+                if (isAuthorized) map =
                     mapOf<String, @Composable () -> Unit>("Моя лента" to {
                         val articles by viewModel.myFeedArticles.observeAsState()
                         if (articles != null) {
@@ -489,7 +500,9 @@ fun ArticlesScreen(
                                     onCommentsClick = { onCommentsClicked(it.id) })
                             }
                         } else {
-                            Box(modifier = Modifier.fillMaxSize())
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     ArticlesListController.getArticlesSnippets(
