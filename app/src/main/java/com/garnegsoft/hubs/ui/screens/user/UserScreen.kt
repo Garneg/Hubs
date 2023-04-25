@@ -91,7 +91,7 @@ class UserScreenViewModel : ViewModel() {
         }
     }
 
-    var _whoIs = MutableLiveData<User.WhoIs>()
+    private var _whoIs = MutableLiveData<User.WhoIs>()
     val whoIs: LiveData<User.WhoIs> get() = _whoIs
 
     fun loadWhoIs() {
@@ -220,8 +220,9 @@ fun UserScreen(
 
                                 val note by viewModel.note.observeAsState()
                                 val hubs by viewModel.subscribedHubs.observeAsState()
+                                val whoIs by viewModel.whoIs.observeAsState()
 
-                                if (hubs != null)
+                                if (hubs != null && note != null && whoIs != null)
                                     UserProfile(
                                         user!!,
                                         isAppUser,
@@ -233,6 +234,7 @@ fun UserScreen(
                                     LaunchedEffect(key1 = Unit, block = {
                                         viewModel.loadNote()
                                         viewModel.loadSubscribedHubs()
+                                        viewModel.loadWhoIs()
                                     })
                             }
                         }

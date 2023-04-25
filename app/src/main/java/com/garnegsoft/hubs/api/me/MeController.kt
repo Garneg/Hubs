@@ -9,7 +9,7 @@ class MeController {
     companion object {
         private fun get(): Me? {
             val response = HabrApi.get("me")
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
             response.body?.string()?.let {
                 if (it == "null") return null

@@ -16,7 +16,7 @@ class ArticleController {
 
             var article: Article? = null
 
-            if (response.code == 200 && response.body != null) {
+            if (response?.body != null && response.code == 200) {
                 article = HabrDataParser.parseJson<Article>(response.body!!.string())
                 article!!.timePublished = formatTime(article.timePublished)
                 article.author?.avatarUrl?.let {

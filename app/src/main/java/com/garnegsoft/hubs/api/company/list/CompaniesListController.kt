@@ -15,7 +15,7 @@ class CompaniesListController {
 
             var result: CompaniesList? = null
 
-            response.body?.let {
+            response?.body?.let {
                 var customJson = Json { ignoreUnknownKeys = true }
                 result = customJson.decodeFromJsonElement<CompaniesList>(customJson.parseToJsonElement(it.string()))
                 result?.companyRefs?.forEach{

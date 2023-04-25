@@ -19,7 +19,7 @@ class HabrApi {
         lateinit var HttpClient: OkHttpClient
         private var csrfToken: String? = null
 
-        fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response {
+        fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null){
                 finalArgs.putAll(args)
@@ -31,7 +31,13 @@ class HabrApi {
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
                 .build()
-            return HttpClient.newCall(request).execute()
+            try {
+                return HttpClient.newCall(request).execute()
+
+            }
+            catch (ex: Exception){
+                return null
+            }
         }
 
         fun post(path: String, args: Map<String, String>? = null, version: Int = 2): Response {

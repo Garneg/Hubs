@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.user
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -167,7 +168,10 @@ internal fun UserProfile(
                                 else
                                     RatingNegative
                         )
-                        Text(text = "Карма", color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
+                        Text(
+                            text = "Карма",
+                            color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled)
+                        )
                     }
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -178,7 +182,10 @@ internal fun UserProfile(
                             fontWeight = FontWeight.W600,
                             color = Color.Magenta
                         )
-                        Text(text = "Рейтинг", color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
+                        Text(
+                            text = "Рейтинг",
+                            color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled)
+                        )
                     }
                 }
                 if (!isAppUser && !user.isReadonly) {
@@ -214,6 +221,47 @@ internal fun UserProfile(
                     }
                 }
 
+            }
+            val note by viewModel.note.observeAsState()
+            if (!isAppUser && note?.text != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(MaterialTheme.colors.surface)
+                        .padding(8.dp)
+                ) {
+                    BasicTitledColumn(
+                        title = {
+                            Text(
+                                modifier = Modifier.padding(12.dp),
+                                text = "Заметка", style = MaterialTheme.typography.subtitle1
+                            )
+                        },
+                        divider = {
+            //                        Divider()
+                        }
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = 12.dp,
+                                    end = 12.dp,
+                                    bottom = 12.dp
+                                )
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    MaterialTheme.colors.onSurface.copy(0.05f)
+                                )
+                                .padding(8.dp)
+                        ) {
+                            Text(
+                                color = MaterialTheme.colors.onSurface.copy(0.75f),
+                                text = note?.text ?: "")
+                        }
+                    }
+                }
             }
 
             Column(
@@ -292,13 +340,14 @@ internal fun UserProfile(
                                             }
                                         }
                                     }
-                                    if(viewModel.moreHubsAvailable) {
+                                    if (viewModel.moreHubsAvailable) {
                                         TextButton(
                                             onClick = {
                                                 viewModel.loadSubscribedHubs()
                                             }
                                         ) {
-                                            Text("Показать ещё",
+                                            Text(
+                                                "Показать ещё",
                                                 color = MaterialTheme.colors.secondary,
                                                 letterSpacing = 0.sp
                                             )

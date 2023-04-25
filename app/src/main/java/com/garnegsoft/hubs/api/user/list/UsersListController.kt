@@ -12,7 +12,7 @@ class UsersListController {
         private fun getOriginalData(path: String, args: Map<String, String>? = null): AuthorsList? {
             var response = HabrApi.get(path, args)
 
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             var authorsList: AuthorsList? = null

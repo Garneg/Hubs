@@ -6,6 +6,8 @@ import com.garnegsoft.hubs.api.utils.formatBirthdate
 import com.garnegsoft.hubs.api.utils.formatTime
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
+import okhttp3.ResponseBody
+import org.jsoup.Jsoup
 
 class UserController {
 
@@ -15,7 +17,7 @@ class UserController {
 
             var result: UserProfileData? = null
 
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             response.body?.let {
@@ -45,11 +47,11 @@ class UserController {
 
         private fun _whoIs(path: String, args: Map<String, String>? = null): WhoIs? {
             val response = HabrApi.get(path, args)
-
-            if (response.code != 200 || response.body?.string() == null){
+            val responseBody = response?.body?.string()
+            if (response?.code != 200 || responseBody == null){
                 return null
             }
-            response.body?.string()?.let {
+            responseBody.let {
                 val result = HabrDataParser.parseJson<WhoIs>(it)
                 result.invitedBy?.let {
                     result.invitedBy!!.timeCreated = formatTime(it.timeCreated)
@@ -63,12 +65,15 @@ class UserController {
         private fun _note(path: String, args: Map<String, String>? = null): Note? {
             val response = HabrApi.get(path, args)
 
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             response.body?.string()?.let {
-                return HabrDataParser.parseJson<Note>(it)
-
+                val result = HabrDataParser.parseJson<Note>(it)
+                result.text?.let {
+                    result.text = Jsoup.parse(it).text()
+                }
+                return result
             }
             return null
         }

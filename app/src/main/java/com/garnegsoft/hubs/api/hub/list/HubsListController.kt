@@ -13,7 +13,7 @@ class HubsListController{
         private fun getHubsList(path: String, args: Map<String, String>? = null): HubsList? {
             var response = HabrApi.get(path, args)
 
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             var result: HubsList? = null

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.Hubs" parent="android:Theme.Material.Light.NoActionBar">
+    <style name="Theme.Hubs" parent="android:Theme.Material.NoActionBar">
         <item name="android:statusBarColor">@color/habrTopColor</item>
-
-
     </style>
     <style name="Theme.Hubs.transparent" parent="android:Theme.Black.NoTitleBar">
 

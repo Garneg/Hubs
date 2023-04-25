@@ -20,20 +20,14 @@ class ArticlesListController {
          * *null* if path or/and args are invalid or status code is not 200
          **/
         private fun get(path: String, args: Map<String, String>? = null): ArticlesList? {
-            var response: Response? = null
-            try {
-                response = HabrApi.get(path, args)
-            }
-            catch (ex: Exception){
+            var response = HabrApi.get(path, args)
+
+            if (response != null && response.code != 200) {
                 return null
             }
 
-            if (response.code != 200) {
-                return null
-            }
-
-            if (response.body != null) {
-                var responseJson = Json.parseToJsonElement(response.body!!.string())
+            if (response?.body != null) {
+                var responseJson = Json.parseToJsonElement(response!!.body!!.string())
                 var articles = kotlin.run {
                     var articlesIds =
                         HabrDataParser.parseJson<List<Int>>(responseJson.jsonObject["articleIds"]?.jsonArray!!)

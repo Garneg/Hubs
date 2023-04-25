@@ -17,7 +17,7 @@ class CompanyController {
         private fun getPrivate(path: String, args: Map<String, String>? = null): CompanyProfile? {
             val response = HabrApi.get(path, args)
 
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             response.body?.string()?.let {
