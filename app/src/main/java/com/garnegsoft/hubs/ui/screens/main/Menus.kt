@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.utils.placeholderColor
@@ -125,6 +126,7 @@ fun UnauthorizedMenu(
     IconButton(onClick = { expanded = true }) {
         Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "menu")
     }
+
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },

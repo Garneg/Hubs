@@ -95,7 +95,7 @@ data class HubCardStyle(
     val textColor: Color = Color.Black,
     val titleTextStyle: TextStyle = TextStyle(
         color = textColor,
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.W700,
         fontSize = 20.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle(color = textColor.copy(alpha = 0.5f), fontSize = 14.sp),

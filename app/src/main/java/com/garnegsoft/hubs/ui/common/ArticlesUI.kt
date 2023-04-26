@@ -71,13 +71,14 @@ data class ArticleCardStyle(
     val titleTextStyle: TextStyle = TextStyle(
         color = textColor,
         fontSize = 20.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
     ),
 
     val snippetTextStyle: TextStyle = TextStyle(
         color = textColor.copy(alpha = 0.75f),
         fontSize = 16.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeight = 16.sp.times(1.25f)
     ),
 
     val authorTextStyle: TextStyle = TextStyle(
@@ -243,19 +244,22 @@ fun ArticleCard(
                 ),
                 vertical = 0.dp
             ),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             if (article.complexity != PostComplexity.None) {
+                val postComplexityColor = remember {
+                    when (article.complexity) {
+                        PostComplexity.Low -> Color(0xFF4CBE51)
+                        PostComplexity.Medium -> Color(0xFFEEBC25)
+                        PostComplexity.High -> Color(0xFFEB3B2E)
+                        else -> style.statisticsColor
+                    }
+                }
                 Icon(
                     modifier = Modifier.size(height = 10.dp, width = 20.dp),
                     painter = painterResource(id = R.drawable.speedmeter_hard),
                     contentDescription = "",
-                    tint = when (article.complexity) {
-                        PostComplexity.Low -> Color(0xFF4CBE51)
-                        PostComplexity.Medium -> Color(0xFFEEBC25)
-                        PostComplexity.High -> Color(0xFFEB3B2E)
-                        else -> Color.Red
-                    }
+                    tint = postComplexityColor
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
@@ -265,12 +269,7 @@ fun ArticleCard(
                         PostComplexity.High -> "Сложный"
                         else -> ""
                     },
-                    color = when (article.complexity) {
-                        PostComplexity.Low -> Color(0xFF4CBE51)
-                        PostComplexity.Medium -> Color(0xFFEEBC25)
-                        PostComplexity.High -> Color(0xFFEB3B2E)
-                        else -> Color.Red
-                    },
+                    color = postComplexityColor,
                     fontWeight = FontWeight.W500,
                     fontSize = 14.sp
 

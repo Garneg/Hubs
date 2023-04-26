@@ -472,7 +472,8 @@ fun ArticlesScreen(
                     }
                 )
                 if (isAuthorized) map =
-                    mapOf<String, @Composable () -> Unit>("Моя лента" to {
+                    mapOf<String, @Composable () -> Unit>(
+                        "Моя лента" to {
                         val articles by viewModel.myFeedArticles.observeAsState()
                         if (articles != null) {
                             PagedHabrSnippetsColumn(
@@ -521,14 +522,14 @@ fun ArticlesScreen(
             }
             val pagerState = rememberPagerState()
 
-            HabrScrollableTabRow(pagerState = pagerState, tabs = pages.keys.toList(),
-            onCurrentPositionTabClick = { index, title ->
-
+            HabrScrollableTabRow(
+                pagerState = pagerState,
+                tabs = pages.keys.toList(),
+                onCurrentPositionTabClick = { index, title ->
             })
             HorizontalPager(
                 state = pagerState,
                 pageCount = pages.size,
-
                 ) {
                 pages.values.elementAt(it)()
 

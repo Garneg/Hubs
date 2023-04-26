@@ -222,7 +222,7 @@ fun UserScreen(
                                 val hubs by viewModel.subscribedHubs.observeAsState()
                                 val whoIs by viewModel.whoIs.observeAsState()
 
-                                if (hubs != null && note != null && whoIs != null)
+                                if (hubs != null && whoIs != null && (isAppUser || note != null))
                                     UserProfile(
                                         user!!,
                                         isAppUser,
@@ -268,6 +268,12 @@ fun UserScreen(
                                     )
                                 }
                             } else {
+                                if (!viewModel.articles.isInitialized){
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(
+                                            Alignment.Center))
+                                    }
+                                }
                                 LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
                                         viewModel.articles.postValue(
@@ -311,8 +317,11 @@ fun UserScreen(
                                     )
                                 }
                             } else {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator()
+                                if (!viewModel.comments.isInitialized){
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(
+                                            Alignment.Center))
+                                    }
                                 }
                                 LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
@@ -354,6 +363,12 @@ fun UserScreen(
                                     )
                                 }
                             } else {
+                                if (!viewModel.bookmarks.isInitialized){
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(
+                                            Alignment.Center))
+                                    }
+                                }
                                 LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
                                         ArticlesListController.getArticlesSnippets(
@@ -391,8 +406,11 @@ fun UserScreen(
                                     UserCard(user = it, onClick = { onUserClicked(it.alias) })
                                 }
                             } else {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator()
+                                if (!viewModel.followers.isInitialized){
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(
+                                            Alignment.Center))
+                                    }
                                 }
                                 LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
@@ -425,8 +443,11 @@ fun UserScreen(
                                     UserCard(user = it, onClick = { onUserClicked(it.alias) })
                                 }
                             } else {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator()
+                                if (!viewModel.follow.isInitialized){
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(
+                                            Alignment.Center))
+                                    }
                                 }
                                 LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {

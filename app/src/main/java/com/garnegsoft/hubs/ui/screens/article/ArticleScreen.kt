@@ -51,6 +51,7 @@ import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.lastReadDataStoreFlow
@@ -248,7 +249,7 @@ fun ArticleScreen(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            article.statistics.readingCount,
+                            formatLongNumbers(article.statistics.readingCount.toInt()),
                             color = statisticsColor,
                             fontWeight = FontWeight.W500
                         )
@@ -426,7 +427,8 @@ fun ArticleScreen(
                                 AsyncImage(
                                     modifier = Modifier
                                         .size(34.dp)
-                                        .clip(RoundedCornerShape(8.dp)),
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(Color.White),
                                     model = article.author.avatarUrl,
                                     contentDescription = ""
                                 )

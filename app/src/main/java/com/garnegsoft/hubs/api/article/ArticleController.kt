@@ -2,6 +2,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.serialization.Serializable
@@ -146,9 +147,9 @@ class ArticleController {
                         null
                     },
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
-                        commentsCount = it.statistics.commentsCount.toString(),
+                        commentsCount = formatLongNumbers(it.statistics.commentsCount),
                         favoritesCount = it.statistics.favoritesCount.toString(),
-                        readingCount = it.statistics.readingCount.toString(),
+                        readingCount = formatLongNumbers(it.statistics.readingCount),
                         score = it.statistics.score,
                         votesCountMinus = it.statistics.votesCountMinus,
                         votesCountPlus = it.statistics.votesCountPlus

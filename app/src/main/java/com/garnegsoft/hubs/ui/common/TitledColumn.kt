@@ -43,7 +43,7 @@ fun TitledColumn(
         BasicTitledColumn(
             modifier = modifier,
             title = { Text(text = title, style = titleStyle)},
-            divider = { Spacer(modifier = Modifier.height(8.dp)) },
+            divider = { Spacer(modifier = Modifier.height(6.dp)) },
             content = content
         )
     }

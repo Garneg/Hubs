@@ -32,7 +32,7 @@ import com.garnegsoft.hubs.R
 
 data class UserCardStyle(
     val backgroundColor: Color = Color.White,
-    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W600),
+    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W700),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val cardShape: Shape = RoundedCornerShape(26.dp),
@@ -91,12 +91,13 @@ fun UserCard(
         }
         Spacer(modifier = Modifier.width(style.padding.calculateStartPadding(LayoutDirection.Ltr)))
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                modifier = Modifier.offset(0.dp, -4.dp),
-                text = user.alias,
-                style = style.aliasTextStyle
-            )
+
             if (style.showSpeciality && user.speciality != null) {
+                Text(
+                    modifier = Modifier.offset(0.dp, -4.dp),
+                    text = user.alias,
+                    style = style.aliasTextStyle
+                )
                 user.speciality.let {
                     Text(
                         modifier = Modifier.offset(0.dp, -4.dp),
@@ -106,6 +107,13 @@ fun UserCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+            }
+            else {
+                Text(
+                    modifier = Modifier.offset(0.dp, 0.dp),
+                    text = user.alias,
+                    style = style.aliasTextStyle
+                )
             }
         }
         indicator()

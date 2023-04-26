@@ -69,7 +69,7 @@ internal fun UserProfile(
                         AsyncImage(
                             model = user.avatarUrl,
                             modifier = Modifier
-                                .size(75.dp)
+                                .size(65.dp)
                                 .align(Alignment.Center)
                                 .clip(
                                     RoundedCornerShape(12.dp)
@@ -80,7 +80,7 @@ internal fun UserProfile(
                     } else {
                         Icon(
                             modifier = Modifier
-                                .size(75.dp)
+                                .size(65.dp)
                                 .background(Color.White, shape = RoundedCornerShape(12.dp))
                                 .border(
                                     width = 4.dp,
@@ -276,15 +276,17 @@ internal fun UserProfile(
                         modifier = Modifier.padding(12.dp),
                         text = "Информация", style = MaterialTheme.typography.subtitle1
                     )
-                }, divider = { Divider() }) {
+                }, divider = {
+//                    Divider()
+                }) {
                     Column(
                         modifier = Modifier.padding(
                             start = 12.dp,
                             end = 12.dp,
                             bottom = 12.dp,
-                            top = 12.dp
+                            top = 4.dp
                         ),
-                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         TitledColumn(
                             title = "Место в рейтинге"
@@ -361,29 +363,30 @@ internal fun UserProfile(
                     }
                 }
             }
-        }
-        if (isAppUser) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-                    .clickable(onClick = onUserLogout!!),
-                elevation = 0.dp,
-                shape = RoundedCornerShape(26.dp),
-                backgroundColor = MaterialTheme.colors.surface,
-            ) {
-                Box(
+            if (isAppUser) {
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(12.dp)
+                        .clip(RoundedCornerShape(26.dp))
+                        .clickable(onClick = onUserLogout!!),
+                    elevation = 0.dp,
+                    shape = RoundedCornerShape(26.dp),
+                    backgroundColor = MaterialTheme.colors.surface,
                 ) {
-                    Text(
-                        modifier = Modifier.align(Alignment.Center),
-                        text = "Выйти",
-                        color = MaterialTheme.colors.error
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
+                    ) {
+                        Text(
+                            modifier = Modifier.align(Alignment.Center),
+                            text = "Выйти",
+                            color = MaterialTheme.colors.error
+                        )
+                    }
                 }
             }
         }
+
     }
 }

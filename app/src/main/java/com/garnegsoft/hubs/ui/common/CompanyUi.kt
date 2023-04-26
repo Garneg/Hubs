@@ -120,7 +120,7 @@ data class CompanyCardStyle(
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val titleTextStyle: TextStyle = TextStyle.Default.copy(
-        fontWeight = FontWeight.W600,
+        fontWeight = FontWeight.W700,
         fontSize = 20.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle.Default.copy(color = Color.Gray),

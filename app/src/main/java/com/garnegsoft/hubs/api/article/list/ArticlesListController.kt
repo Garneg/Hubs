@@ -129,7 +129,7 @@ class ArticlesListController {
                                 statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
                                     score = it.statistics.score,
                                     readingCount = formatLongNumbers(it.statistics.readingCount),
-                                    commentsCount = it.statistics.commentsCount.toString(),
+                                    commentsCount = formatLongNumbers(it.statistics.commentsCount),
                                     favoritesCount = it.statistics.favoritesCount.toString(),
                                     votesCountMinus = it.statistics.votesCountMinus,
                                     votesCountPlus = it.statistics.votesCountPlus

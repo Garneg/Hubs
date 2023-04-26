@@ -63,7 +63,7 @@ fun CompanyProfile(
                         AsyncImage(
                             model = company.avatarUrl,
                             modifier = Modifier
-                                .size(55.dp)
+                                .size(65.dp)
                                 .align(Alignment.Center)
                                 .clip(
                                     RoundedCornerShape(12.dp)
@@ -78,7 +78,7 @@ fun CompanyProfile(
                     } else {
                         Icon(
                             modifier = Modifier
-                                .size(55.dp)
+                                .size(65.dp)
                                 .background(
                                     color = Color.White,
                                     shape = RoundedCornerShape(12.dp)
@@ -170,10 +170,15 @@ fun CompanyProfile(
                             modifier = Modifier.padding(12.dp),
                             text = "Информация", style = MaterialTheme.typography.subtitle1)
                     },
-                    divider = { Divider() }
+                    divider = {  }
                 ) {
 
-                    Column(modifier = Modifier.padding(12.dp),
+                    Column(modifier = Modifier.padding(
+                        top = 12.dp,
+                        bottom = 12.dp,
+                        start = 12.dp,
+                        end = 12.dp
+                    ),
                     verticalArrangement = Arrangement.spacedBy(20.dp)) {
 
 

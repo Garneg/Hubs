@@ -55,7 +55,7 @@ fun HubProfile(hub: Hub) {
             ) {
                 AsyncImage(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(65.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(Color.White),
                     model = hub.avatarUrl,
