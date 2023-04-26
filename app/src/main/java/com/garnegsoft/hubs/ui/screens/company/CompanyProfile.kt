@@ -174,7 +174,7 @@ fun CompanyProfile(
                 ) {
 
                     Column(modifier = Modifier.padding(
-                        top = 12.dp,
+                        top = 4.dp,
                         bottom = 12.dp,
                         start = 12.dp,
                         end = 12.dp

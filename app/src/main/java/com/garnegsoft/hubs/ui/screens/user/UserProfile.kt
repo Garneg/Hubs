@@ -286,7 +286,7 @@ internal fun UserProfile(
                             bottom = 12.dp,
                             top = 4.dp
                         ),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         TitledColumn(
                             title = "Место в рейтинге"
