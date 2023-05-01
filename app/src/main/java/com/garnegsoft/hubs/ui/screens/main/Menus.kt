@@ -74,7 +74,8 @@ fun AuthorizedMenu(
                 AsyncImage(
                     modifier = Modifier
                         .size(32.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Color.White),
                     contentScale = ContentScale.FillBounds,
                     model = avatarUrl, contentDescription = ""
                 )
@@ -86,6 +87,7 @@ fun AuthorizedMenu(
                             width = 2.dp, color = placeholderColor(userAlias),
                             shape = RoundedCornerShape(8.dp)
                         )
+                        .background(Color.White, shape = RoundedCornerShape(8.dp))
                         .padding(2.5.dp),
                     painter = painterResource(id = R.drawable.user_avatar_placeholder),
                     contentDescription = "",
