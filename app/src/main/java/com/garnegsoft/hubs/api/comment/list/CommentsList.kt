@@ -27,6 +27,14 @@ class CommentsListController {
                         }
                     }
                 }
+                commentsList.moderated?.values?.forEach {
+                    it.apply {
+                        timePublished = formatTime(timePublished)
+                        author?.avatarUrl?.let {
+                            author?.avatarUrl = "https:" + author?.avatarUrl
+                        }
+                    }
+                }
                 return commentsList
             }
 
@@ -40,8 +48,12 @@ class CommentsListController {
 
 
             serializedData?.comments?.values?.forEach {
-                commentsList.add(parseComment(it))
+                commentsList.add(parseComment(it, false))
             }
+            serializedData?.moderated?.values?.forEach {
+                commentsList.add(parseComment(it, true))
+            }
+
 
             if (commentsList.size > 0) {
 
@@ -70,7 +82,7 @@ class CommentsListController {
             return commentsList
         }
 
-        private fun parseComment(comment: CommentsList.Comment): Comment {
+        private fun parseComment(comment: CommentsList.Comment, inModeration: Boolean): Comment {
             if (comment.editorVersion == 0) {
                 return Comment(
                     id = comment.id.toInt(),
@@ -81,7 +93,6 @@ class CommentsListController {
                         fullname = null
                     ),
                     publishedTime = comment.timePublished,
-                    children = ArrayList<Comment>(),
                     deleted = true,
                     message = comment.message,
                     score = comment.score,
@@ -90,6 +101,7 @@ class CommentsListController {
                     edited = comment.timeChanged != null,
                     isNew = comment.isNew ?: false,
                     isUserAuthor = comment.isAuthor,
+                    inModeration = inModeration
                 )
             }
             return Comment(
@@ -101,7 +113,6 @@ class CommentsListController {
                     fullname = comment.author!!.fullname
                 ),
                 publishedTime = comment.timePublished,
-                children = ArrayList<Comment>(),
                 deleted = false,
                 message = comment.message,
                 score = comment.score,
@@ -110,6 +121,7 @@ class CommentsListController {
                 edited = comment.timeChanged != null,
                 isNew = comment.isNew ?: false,
                 isUserAuthor = comment.isAuthor,
+                inModeration = inModeration
             )
         }
 
@@ -135,7 +147,7 @@ class CommentsListController {
                                 ),
                                 text = Jsoup.parse(it.message).text(),
                                 timePublished = it.timePublished,
-                                score = it.score,
+                                score = it.score ?: 0,
                                 author = Article.Author(
                                     alias = it.author!!.alias!!,
                                     fullname = it.author!!.fullname,
@@ -158,6 +170,7 @@ class CommentsListController {
     private data class CommentsList(
         val comments: Map<String, Comment>,
         val threads: ArrayList<String>,
+        var moderated: Map<String, Comment>? = null,
         //val commentAccess: CommentAccess,
         val lastCommentTimestamp: Long? = null,
         val pages: Int? = null
@@ -169,10 +182,10 @@ class CommentsListController {
             var level: Int,
             var timePublished: String,
             var timeChanged: String? = null,
-            var isSuspended: Boolean,
+            var isSuspended: Boolean?,
             //val status: Status,
-            var score: Int,
-            var votesCount: Int,
+            var score: Int?,
+            var votesCount: Int?,
             var message: String,
             var editorVersion: Int,
             var author: Author? = null,

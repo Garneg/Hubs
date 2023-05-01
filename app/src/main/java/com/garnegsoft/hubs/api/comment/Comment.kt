@@ -8,11 +8,12 @@ class Comment (
     val level: Int,
     val publishedTime: String,
     val message: String,
-    val score: Int,
+    val score: Int?,
     val deleted: Boolean,
     val author: Article.Author,
     val isArticleAuthor: Boolean,
     val isNew: Boolean,
     val isUserAuthor: Boolean,
-    val edited: Boolean
+    val edited: Boolean,
+    val inModeration: Boolean
 )

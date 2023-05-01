@@ -44,8 +44,10 @@ fun CommentItem(
         val commentFlagColor = remember {
             when {
                 comment.isArticleAuthor -> Color(0x336BEB40)
-                comment.isNew -> Color(0x33337EE7)
+                comment.inModeration -> Color(0x33DF2020)
                 comment.isUserAuthor -> Color(0x33ECC72B)
+                comment.isNew -> Color(0x33337EE7)
+
                 else -> Color.Unspecified
             }
         }
@@ -95,28 +97,29 @@ fun CommentItem(
         content.invoke()
 
         Spacer(modifier = Modifier.height(4.dp))
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 8.dp)
-        ) {
-            Icon(
-                modifier = Modifier.size(18.dp),
-                painter = painterResource(id = R.drawable.rating), contentDescription = ""
-            )
-            Spacer(modifier = Modifier.width(2.dp))
-            Text(
-                text = if (comment.score > 0) {
-                    "+"
-                } else {
-                    ""
-                } + comment.score,
-                color = when {
-                    comment.score > 0 -> RatingPositive
-                    comment.score < 0 -> RatingNegative
-                    else -> Color.Unspecified
-                }
-            )
+        if (comment.score != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 8.dp)
+            ) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    painter = painterResource(id = R.drawable.rating), contentDescription = ""
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    text = if (comment.score > 0) {
+                        "+"
+                    } else {
+                        ""
+                    } + comment.score,
+                    color = when {
+                        comment.score > 0 -> RatingPositive
+                        comment.score < 0 -> RatingNegative
+                        else -> Color.Unspecified
+                    }
+                )
+            }
         }
     }
 
