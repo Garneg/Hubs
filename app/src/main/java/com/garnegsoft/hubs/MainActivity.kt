@@ -253,11 +253,16 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
-                        composable("comments/{postId}") {
+                        composable(
+                            route = "comments/{postId}?commentId={commentId}",
+                            deepLinks = CommentsScreenNavDeepLinks
+                        ) {
                             val postId = it.arguments!!.getString("postId")!!
+                            val commentId = it.arguments?.getString("commentId")
                             CommentsScreen(
                                 viewModelStoreOwner = it,
                                 parentPostId = postId.toInt(),
+                                commentId = commentId?.toInt(),
                                 onBackClicked = { navController.navigateUp() },
                                 onArticleClicked = { navController.navigate("article/$postId") },
                                 onUserClicked = { navController.navigate("user/$it") }
@@ -287,7 +292,7 @@ class MainActivity : ComponentActivity() {
                                 onCommentsClicked = { navController.navigate("comments/$it") },
                                 onCommentClicked = { postId, commentId ->
                                     navController.navigate(
-                                        "comments/$postId"
+                                        "comments/$postId?commentId=$commentId"
                                     )
                                 },
                                 viewModelStoreOwner = it,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -52,20 +53,22 @@ class CommentsScreenViewModel : ViewModel() {
 }
 
 
-// TODO: remove default actions for navigation events
 @Composable
 fun CommentsScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
     parentPostId: Int,
+    commentId: Int?,
     showArticleSnippet: Boolean = true,
     onBackClicked: () -> Unit,
-    onArticleClicked: () -> Unit = {},
-    onUserClicked: (alias: String) -> Unit = {},
+    onArticleClicked: () -> Unit,
+    onUserClicked: (alias: String) -> Unit,
 ) {
     var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 
     val comments = viewModel.comments.observeAsState().value
     val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
+
+    val lazyListState = rememberLazyListState()
 
     LaunchedEffect(key1 = Unit) {
         launch(Dispatchers.IO) {
@@ -73,6 +76,17 @@ fun CommentsScreen(
             viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
         }
     }
+
+    LaunchedEffect(key1 = comments, block = {
+        commentId?.let { commId ->
+            if (viewModel.comments.isInitialized){
+                comments?.indexOf(comments.find { it.id == commId })?.let {
+                    if (it > -1)
+                        lazyListState.animateScrollToItem(it)
+                }
+            }
+        }
+    })
 
     Scaffold(
         topBar = {
@@ -89,6 +103,7 @@ fun CommentsScreen(
     ) {
 
         LazyColumn(
+            state = lazyListState,
             modifier = Modifier.padding(it),
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -121,7 +136,8 @@ fun CommentsScreen(
                         comment = comment,
                         onAuthorClick = {
                             onUserClicked(comment.author.alias)
-                        }
+                        },
+                        highlight = comment.id == commentId
                     ) {
                         Column {
                             comment.let {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -31,9 +32,21 @@ import com.garnegsoft.hubs.ui.theme.RatingPositive
 fun CommentItem(
     modifier: Modifier = Modifier,
     comment: Comment,
+    highlight: Boolean,
     onAuthorClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
+    val onSurfaceColor = MaterialTheme.colors.onSurface
+    val commentFlagColor = remember {
+        when {
+            comment.inModeration -> Color(0x33DF2020)
+            comment.isNew -> Color(0x33337EE7)
+            comment.isUserAuthor -> Color(0x33ECC72B)
+            comment.isArticleAuthor -> Color(0x336BEB40)
+
+            else -> onSurfaceColor.copy(0f)
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -41,22 +54,18 @@ fun CommentItem(
             .background(MaterialTheme.colors.surface)
             .padding(16.dp)
     ) {
-        val commentFlagColor = remember {
-            when {
-                comment.isArticleAuthor -> Color(0x336BEB40)
-                comment.inModeration -> Color(0x33DF2020)
-                comment.isUserAuthor -> Color(0x33ECC72B)
-                comment.isNew -> Color(0x33337EE7)
 
-                else -> Color.Unspecified
-            }
-        }
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(10.dp))
                 .clickable(onClick = onAuthorClick)
                 .background(commentFlagColor)
+                .border(
+                    width = 1.5.dp,
+                    color = if (highlight) commentFlagColor.copy(0.5f) else Color.Unspecified,
+                    shape = RoundedCornerShape(10.dp)
+                )
         ) {
             if (comment.author.avatarUrl == null || comment.author.avatarUrl.isBlank()) {
                 Icon(
@@ -77,7 +86,7 @@ fun CommentItem(
                 AsyncImage(
                     modifier = Modifier
                         .size(34.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(RoundedCornerShape(10.dp)),
                     model = comment.author.avatarUrl, contentDescription = "authorAvatar"
                 )
             }
@@ -85,7 +94,9 @@ fun CommentItem(
             Spacer(modifier = Modifier.width(4.dp))
             Column {
                 Text(text = comment.author?.alias ?: "")
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
                     if (comment.edited)
                         Text(text = " (изменено)", fontSize = 12.sp, color = Color.Gray)
