@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.api.comment.list
 
+import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
@@ -37,30 +38,40 @@ class CommentsListController {
 
             var commentsList = ArrayList<Comment>()
 
+
             serializedData?.comments?.values?.forEach {
                 commentsList.add(parseComment(it))
             }
 
             if (commentsList.size > 0) {
-                var maxLevel = commentsList.sortedByDescending { it.parentCommentId }[0].level
 
-                for (currentLevel in maxLevel downTo 1){
-                    commentsList.filter { it.level == currentLevel }
-                        .forEach { child ->
-                            commentsList.find { parentComment ->
-                                parentComment.id == child.parentCommentId
-                            }?.children?.add(child)
-                            commentsList.remove(child)
+                var maxLevel = commentsList.maxByOrNull { it.level }?.level ?: 0
+
+                commentsList.sortBy { it.level }
+                var newList = ArrayList<Comment>()
+
+                for (level in 0..maxLevel + 1){
+                    commentsList.forEach{
+                        if (it.level == level){
+                            var nextIndex = newList.size
+                            if (newList.find { it1 -> it1.id == it.id } == null){
+                                newList.add(it)
+                                nextIndex++
+                            } else {
+                                nextIndex = newList.indexOf(newList.find { it1 -> it1.id == it.id }) + 1
+                            }
+                            newList.addAll(nextIndex, commentsList.filter { it1 ->  it1.parentCommentId == it.id })
                         }
+                    }
                 }
-
+                return newList
             }
 
             return commentsList
         }
 
         private fun parseComment(comment: CommentsList.Comment): Comment {
-            if (comment.editorVersion == 0){
+            if (comment.editorVersion == 0) {
                 return Comment(
                     id = comment.id.toInt(),
                     level = comment.level,
@@ -102,7 +113,10 @@ class CommentsListController {
             )
         }
 
-        fun getCommentsSnippets(path: String, args: Map<String, String>? = null): HabrList<CommentSnippet>? {
+        fun getCommentsSnippets(
+            path: String,
+            args: Map<String, String>? = null
+        ): HabrList<CommentSnippet>? {
             val raw = get(path, args)
 
             var result: HabrList<CommentSnippet>? = null
@@ -111,7 +125,7 @@ class CommentsListController {
 
             raw?.let {
                 raw.threads.forEach {
-                    raw.comments[it]?.let{
+                    raw.comments[it]?.let {
                         commentsList.add(
                             CommentSnippet(
                                 id = it.id.toInt(),
@@ -179,7 +193,7 @@ class CommentsListController {
                 var title: String,
                 var commentsCount: Int,
                 var postType: String,
-                )
+            )
 
             @Serializable
             data class Author(

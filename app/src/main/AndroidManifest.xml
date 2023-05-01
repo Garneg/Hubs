@@ -39,6 +39,7 @@
                 <data android:scheme="http"/>
                 <data android:host="habrahabr.com"/>
                 <data android:host="habr.com" />
+                <data android:host="m.habr.com" />
             </intent-filter>
 
         </activity>

@@ -12,9 +12,11 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -165,6 +167,7 @@ fun ArticleCard(
         {
             Row(
                 modifier = Modifier
+                    .height(style.authorAvatarSize)
                     .weight(1f)
             ) {
                 article.author?.let {
@@ -323,8 +326,6 @@ fun ArticleCard(
                 }, style = style.hubsTextStyle
             )
 
-
-
         // Snippet
         if (style.showTextSnippet)
             Text(
@@ -351,14 +352,14 @@ fun ArticleCard(
                     .fillMaxWidth()
                     .clip(style.innerElementsShape)
                     .aspectRatio(16f / 9f)
-                    .background(Color.White),
+                    .background(MaterialTheme.colors.onSurface.copy(0.1f)),
                 model = article.imageUrl,
                 contentScale = ContentScale.Crop,
                 onState = { state ->
                     if (state is AsyncImagePainter.State.Success)
                         showLoadingIndication = false
                 },
-                contentDescription = ""
+                contentDescription = "",
             )
         }
 
@@ -371,13 +372,7 @@ fun ArticleCard(
                 )
                 .height(38.dp + style.innerPadding.calculateBottomPadding() * 2)
                 .fillMaxWidth()
-                .shadow(
-                    0.dp,
-                    style.innerElementsShape,
-                    spotColor = Color.Black
-                )
-                .clip(style.innerElementsShape)
-                .padding(0.dp),
+                .clip(style.innerElementsShape),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

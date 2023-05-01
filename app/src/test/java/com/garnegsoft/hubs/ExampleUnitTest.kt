@@ -22,5 +22,12 @@ class ExampleUnitTest {
         assertEquals(HabrApi.getCsrfToken(), HabrApi.getCsrfToken())
     }
 
+    @Test
+    fun test_listInsertion(){
+        val originalList = mutableListOf<Int>(5, 6, 7)
+        originalList.addAll(1, listOf(8, 9))
+        print(originalList)
+    }
+
 
 }

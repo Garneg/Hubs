@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
@@ -46,9 +47,9 @@ import org.jsoup.Jsoup
 class CommentsScreenViewModel : ViewModel() {
     var parentPostSnippet = MutableLiveData<ArticleSnippet>()
     var comments = MutableLiveData<ArrayList<Comment>>()
+
+
 }
-
-
 
 
 // TODO: remove default actions for navigation events
@@ -64,8 +65,6 @@ fun CommentsScreen(
     var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 
     val comments = viewModel.comments.observeAsState().value
-    val bakedComments: HashMap<Int, @Composable () -> Unit> by
-    remember { mutableStateOf(hashMapOf<Int, @Composable () -> Unit>()) }
     val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
 
     LaunchedEffect(key1 = Unit) {
@@ -94,12 +93,15 @@ fun CommentsScreen(
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            if (articleSnippet != null) {
+            if (showArticleSnippet && articleSnippet != null) {
                 item {
                     ArticleCard(
                         article = articleSnippet,
                         onClick = onArticleClicked,
-                        style = defaultArticleCardStyle().copy(showImage = false, showTextSnippet = false),
+                        style = defaultArticleCardStyle().copy(
+                            showImage = false,
+                            showTextSnippet = false
+                        ),
                         onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
                         onCommentsClick = {}
                     )
@@ -110,9 +112,26 @@ fun CommentsScreen(
                     count = comments.size,
                     key = { comments[it].id },
                 ) {
-                    if (!bakedComments.containsKey(it))
-                        bakedComments[it] = bakeChildrenComments(comments[it])
-                    bakedComments.get(it)!!()
+                    val comment = comments[it]
+                    CommentItem(
+                        modifier = Modifier
+                            .padding(
+                                start = 16.dp.times(comment.level.coerceAtMost(5))
+                            ),
+                        comment = comment,
+                        onAuthorClick = {
+                            onUserClicked(comment.author.alias)
+                        }
+                    ) {
+                        Column {
+                            comment.let {
+                                ((parseElement(it.message, SpanStyle(
+                                    fontSize = 16.sp,
+                                    color = MaterialTheme.colors.onSurface)).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
+                            }
+
+                        }
+                    }
                 }
             } else {
                 item {
@@ -126,62 +145,6 @@ fun CommentsScreen(
             }
         }
 
-    }
-}
-
-@Composable
-fun bakeChildrenComments(comment: Comment): (@Composable () -> Unit) {
-    var children = ArrayList<(@Composable () -> Unit)>()
-    comment.children.forEach {
-        children.add { bakeChildrenComments(it)() }
-    }
-    val content = parseElement(element = Jsoup.parse(comment.message),
-        spanStyle = SpanStyle(color = MaterialTheme.colors.onSurface)
-    )
-
-    return {
-        Column() {
-            CommentItem(
-                comment = comment,
-                content = {
-                    Column() {
-                        content.first?.let {
-                            if (it.text.isNotEmpty())
-                                Text(it)
-                        }
-                        content.second?.let {
-                            it(SpanStyle())
-                        }
-                    }
-
-                },
-
-            )
-            var commentLevelIndicator = with(LocalDensity.current) { 2.dp.toPx() }
-            Column(modifier = Modifier
-                .padding(start = 8.dp)
-                .drawWithCache {
-                    val hasChildren = comment.children.size > 0
-
-                    this.onDrawBehind {
-                        if (hasChildren) {
-                            drawRect(
-                                color = Color.LightGray,
-                                size = Size(commentLevelIndicator, size.height)
-                            )
-                        }
-                    }
-                }
-                .padding(
-                    start = if (comment.level <= 5) 8.dp else 0.dp,
-                    top = 8.dp)) {
-                children.forEach {
-                    it()
-                }
-            }
-
-
-        }
     }
 }
 

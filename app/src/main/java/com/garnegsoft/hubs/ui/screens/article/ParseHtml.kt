@@ -49,6 +49,7 @@ import coil.request.ImageRequest
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
+import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.TextNode
 
@@ -56,6 +57,14 @@ val STRONG_FONT_WEIGHT = FontWeight.W600
 val HEADER_FONT_WEIGHT = FontWeight.W700
 val LINE_HEIGHT = 1.5.sp
 
+fun parseElement(
+    html: String,
+    spanStyle: SpanStyle
+): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> = parseElement(Jsoup.parse(html), spanStyle)
+
+/**
+ * WARNING! Specify fontSize with **spanStyle** or you will get exception
+ */
 fun parseElement(
     element: Element,
     spanStyle: SpanStyle
@@ -172,7 +181,8 @@ fun parseElement(
             ChildrenSpanStyle =
                 ChildrenSpanStyle.copy(
                     color = Color.Gray,
-                    fontSize = (ChildrenSpanStyle.fontSize.value - 4).coerceAtLeast(4f).sp
+                    // TODO: Fix unspecified span style's fontSize that leads to NaN and exception
+                    fontSize = (ChildrenSpanStyle.fontSize.value - 4).sp
                 )
 
         }

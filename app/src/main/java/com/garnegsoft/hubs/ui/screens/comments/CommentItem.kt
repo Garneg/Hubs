@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,16 +23,19 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 
 @Composable
 fun CommentItem(
+    modifier: Modifier = Modifier,
     comment: Comment,
+    onAuthorClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(26.dp))
             .background(MaterialTheme.colors.surface)
@@ -49,6 +53,7 @@ fun CommentItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
+                .clickable(onClick = onAuthorClick)
                 .background(commentFlagColor)
         ) {
             if (comment.author.avatarUrl == null || comment.author.avatarUrl.isBlank()) {
@@ -74,11 +79,15 @@ fun CommentItem(
                     model = comment.author.avatarUrl, contentDescription = "authorAvatar"
                 )
             }
+
             Spacer(modifier = Modifier.width(4.dp))
             Column {
                 Text(text = comment.author?.alias ?: "")
-
-                Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
+                Row {
+                    Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
+                    if (comment.edited)
+                        Text(text = " (изменено)", fontSize = 12.sp, color = Color.Gray)
+                }
             }
         }
         Spacer(modifier = Modifier.height(4.dp))

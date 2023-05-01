@@ -4,6 +4,7 @@ package com.garnegsoft.hubs
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -66,6 +67,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+            window.statusBarColor = Color.parseColor("#FF313131")
+        }
 
         CookieManager.getInstance().removeAllCookies(null)
         val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
@@ -80,11 +84,10 @@ class MainActivity : ComponentActivity() {
         }
 
         val lastArticleFlow = lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
-        val lastArticlePosititonFlow = lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleReadPosition)
+        val lastArticlePosititonFlow =
+            lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleReadPosition)
 
-        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-            window.statusBarColor = Color.parseColor("#FF313131")
-        }
+
 
         runBlocking {
             authorized = isAuthorizedFlow.first()
@@ -106,7 +109,6 @@ class MainActivity : ComponentActivity() {
                 }
 
             }
-
 
         intent.dataString?.let { Log.e("intentData", it) }
         HabrApi.HttpClient = OkHttpClient.Builder()
@@ -202,7 +204,8 @@ class MainActivity : ComponentActivity() {
                                     lifecycle.coroutineScope.launch(Dispatchers.IO) {
                                         lastReadDataStore.edit {
                                             it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
-                                            it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] = 0
+                                            it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] =
+                                                0
                                         }
                                     }
                                 }
@@ -274,38 +277,38 @@ class MainActivity : ComponentActivity() {
                             val alias = it.arguments!!.getString("alias")!!
 
                             val logoutCoroutineScope = rememberCoroutineScope()
-                                UserScreen(
-                                    isAppUser = alias == userInfo?.alias,
-                                    initialPage = page,
-                                    alias = alias,
-                                    onBack = { navController.popBackStack() },
-                                    onArticleClicked = { navController.navigate("article/$it") },
-                                    onUserClicked = { navController.navigate("user/$it") },
-                                    onCommentsClicked = { navController.navigate("comments/$it") },
-                                    onCommentClicked = { postId, commentId ->
-                                        navController.navigate(
-                                            "comments/$postId"
-                                        )
-                                    },
-                                    viewModelStoreOwner = it,
-                                    onLogout = {
-                                        logoutCoroutineScope.launch {
-                                            authDataStore.edit {
-                                                it[HubsDataStore.Auth.Keys.Authorized] = false
-                                                it[HubsDataStore.Auth.Keys.Cookies] = ""
-                                            }
-                                            //cookies = ""
-                                            authorized = false
-                                            navController.popBackStack(
-                                                "articles",
-                                                inclusive = false
-                                            )
+                            UserScreen(
+                                isAppUser = alias == userInfo?.alias,
+                                initialPage = page,
+                                alias = alias,
+                                onBack = { navController.popBackStack() },
+                                onArticleClicked = { navController.navigate("article/$it") },
+                                onUserClicked = { navController.navigate("user/$it") },
+                                onCommentsClicked = { navController.navigate("comments/$it") },
+                                onCommentClicked = { postId, commentId ->
+                                    navController.navigate(
+                                        "comments/$postId"
+                                    )
+                                },
+                                viewModelStoreOwner = it,
+                                onLogout = {
+                                    logoutCoroutineScope.launch {
+                                        authDataStore.edit {
+                                            it[HubsDataStore.Auth.Keys.Authorized] = false
+                                            it[HubsDataStore.Auth.Keys.Cookies] = ""
                                         }
-                                    },
-                                    onHubClicked = {
-                                        navController.navigate("hub/$it")
+                                        //cookies = ""
+                                        authorized = false
+                                        navController.popBackStack(
+                                            "articles",
+                                            inclusive = false
+                                        )
                                     }
-                                )
+                                },
+                                onHubClicked = {
+                                    navController.navigate("hub/$it")
+                                }
+                            )
 
 
                         }
