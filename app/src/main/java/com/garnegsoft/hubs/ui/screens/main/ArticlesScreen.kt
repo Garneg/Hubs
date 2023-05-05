@@ -7,6 +7,7 @@ import android.graphics.DiscretePathEffect
 import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -177,10 +178,16 @@ fun ArticlesScreen(
                         var updateFeedCoroutineScope = rememberCoroutineScope()
                         var pageNumber = rememberSaveable { mutableStateOf(1) }
 
+                        var doScrollUp by rememberSaveable { mutableStateOf(false) }
+
                         if (articles != null) {
 
-                            LaunchedEffect(key1 = articles?.list?.getOrNull(0), block = {
-                                articlesLazyListState.animateScrollToItem(0)
+                            LaunchedEffect(key1 = doScrollUp, block = {
+                                if (doScrollUp) {
+                                    articlesLazyListState.animateScrollToItem(0)
+                                    doScrollUp = false
+                                }
+
                             })
 
                             var refreshing by remember { mutableStateOf(false) }
@@ -198,21 +205,13 @@ fun ArticlesScreen(
                                             )
                                         if (newArticlesList != null) {
                                             viewModel.articles.postValue(newArticlesList)
-                                            Log.e("alls", articlesLazyListState.canScrollBackward.toString())
-                                            if (articlesLazyListState.canScrollBackward) {
-                                                launch {
-//                                                    articlesLazyListState.scrollToItem(0)
-
-                                                }
-
-                                            }
+                                            doScrollUp = true
 
                                         }
-
-
                                         refreshing = false
                                     }
                                 })
+                            LazyListState()
                             Box(
                                 modifier = Modifier.pullRefresh(
                                     state = refreshingState
@@ -267,7 +266,9 @@ fun ArticlesScreen(
                                         "articles",
                                         mapOf("sort" to "rating")
                                     )?.let {
-                                        viewModel.articles.postValue(it)
+                                        viewModel.articles.postValue(
+                                            HabrList(it.list.drop(1), it.pagesCount)
+                                        )
                                     }
 
                                 }
