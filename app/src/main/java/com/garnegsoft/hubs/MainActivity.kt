@@ -35,8 +35,11 @@ import okhttp3.*
 import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.Preferences
 import com.garnegsoft.hubs.api.me.Me
 import com.garnegsoft.hubs.api.me.MeController
@@ -66,10 +69,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-            window.statusBarColor = Color.parseColor("#FF313131")
-        }
 
         CookieManager.getInstance().removeAllCookies(null)
         val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
@@ -82,12 +83,6 @@ class MainActivity : ComponentActivity() {
                 }
 
         }
-
-        val lastArticleFlow = lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
-        val lastArticlePosititonFlow =
-            lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleReadPosition)
-
-
 
         runBlocking {
             authorized = isAuthorizedFlow.first()
@@ -124,6 +119,7 @@ class MainActivity : ComponentActivity() {
 
 
 
+
         setContent {
             var userInfo: Me? by remember { mutableStateOf(null) }
             val userInfoUpdateBlock = remember {
@@ -137,15 +133,18 @@ class MainActivity : ComponentActivity() {
                 block = {
                     launch(Dispatchers.IO, block = { userInfoUpdateBlock() })
                 })
+
             HubsTheme {
                 val navController = rememberNavController()
+
                 NavHost(
-                    modifier = Modifier.background(MaterialTheme.colors.background),
+                    modifier = Modifier.statusBarsPadding().navigationBarsPadding().background(MaterialTheme.colors.background),
                     navController = navController,
                     startDestination = "articles",
                     builder = {
 
                         composable("articles") {
+
                             ArticlesScreen(
                                 viewModelStoreOwner = it,
                                 onSearchClicked = { navController.navigate("search") },
@@ -192,6 +191,11 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             )
+                            if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                                window.statusBarColor = Color.parseColor("#FF313131")
+                            } else {
+                                window.statusBarColor = resources.getColor(R.color.habrTopColor)
+                            }
                         }
                         composable(
                             route = "article/{id}",

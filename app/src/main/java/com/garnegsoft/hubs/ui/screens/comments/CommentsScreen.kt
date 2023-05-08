@@ -1,9 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import android.text.style.TtsSpan.TextBuilder
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,6 +24,9 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.getSelectedText
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
@@ -41,8 +45,10 @@ import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.PrimaryColor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
+import kotlin.random.Random
 
 
 class CommentsScreenViewModel : ViewModel() {
@@ -72,8 +78,9 @@ fun CommentsScreen(
 
     LaunchedEffect(key1 = Unit) {
         launch(Dispatchers.IO) {
+            if (showArticleSnippet)
+                viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
             viewModel.comments.postValue(CommentsListController.getComments("articles/$parentPostId/comments"))
-            viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
         }
     }
 
@@ -101,63 +108,102 @@ fun CommentsScreen(
             )
         }
     ) {
-
-        LazyColumn(
-            state = lazyListState,
-            modifier = Modifier.padding(it),
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (showArticleSnippet && articleSnippet != null) {
-                item {
-                    ArticleCard(
-                        article = articleSnippet,
-                        onClick = onArticleClicked,
-                        style = defaultArticleCardStyle().copy(
-                            showImage = false,
-                            showTextSnippet = false
-                        ),
-                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-                        onCommentsClick = {}
-                    )
-                }
-            }
-            if (comments != null) {
-                items(
-                    count = comments.size,
-                    key = { comments[it].id },
-                ) {
-                    val comment = comments[it]
-                    CommentItem(
-                        modifier = Modifier
-                            .padding(
-                                start = 16.dp.times(comment.level.coerceAtMost(5))
+        Column(modifier = Modifier.padding(it).imePadding()) {
+            LazyColumn(
+                state = lazyListState,
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                if (articleSnippet != null) {
+                    item {
+                        ArticleCard(
+                            article = articleSnippet,
+                            onClick = onArticleClicked,
+                            style = defaultArticleCardStyle().copy(
+                                showImage = false,
+                                showTextSnippet = false,
+                                addToBookmarksButtonEnabled = articleSnippet.relatedData != null
                             ),
-                        comment = comment,
-                        onAuthorClick = {
-                            onUserClicked(comment.author.alias)
-                        },
-                        highlight = comment.id == commentId
+                            onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+                            onCommentsClick = {}
+                        )
+                    }
+                }
+                if (comments != null) {
+                    items(
+                        count = comments.size,
+                        key = { comments[it].id },
                     ) {
-                        Column {
-                            comment.let {
-                                ((parseElement(it.message, SpanStyle(
-                                    fontSize = 16.sp,
-                                    color = MaterialTheme.colors.onSurface)).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
-                            }
+                        val comment = comments[it]
+                        CommentItem(
+                            modifier = Modifier
+                                .padding(
+                                    start = 16.dp.times(comment.level.coerceAtMost(5))
+                                ),
+                            comment = comment,
+                            onAuthorClick = {
+                                onUserClicked(comment.author.alias)
+                            },
+                            highlight = comment.id == commentId
+                        ) {
+                            Column {
+                                comment.let {
+                                    ((parseElement(it.message, SpanStyle(
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colors.onSurface)).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
+                                }
 
+                            }
+                        }
+
+
+                    }
+                } else {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
                         }
                     }
                 }
-            } else {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
+            }
+            var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text("Выскажите своё мнение [Markdown]", style = MaterialTheme.typography.body1) },
+                value = commentTextFieldValue,
+                onValueChange = {
+                    commentTextFieldValue = it
+
                 }
+            )
+
+
+        }
+
+
+    }
+}
+
+@Preview
+@Composable
+fun imepaddingprev() {
+    Column(){
+        TextField(value = "", onValueChange = {})
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+            .verticalScroll(rememberScrollState())) {
+            repeat(50) {
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    Text("Hello world")
+                }
+            }
+            Card {
+                Text("Goodbye world")
             }
         }
 

@@ -38,8 +38,8 @@ val CommentsScreenNavDeepLinks = listOf(
 val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/p/{id}"),
     NavDeepLink("https://habr.com/p/{id}/"),
-    NavDeepLink("https://habr.com/{lang}/post/{id}"),
-    NavDeepLink("https://habr.com/{lang}/post/{id}/"),
+    NavDeepLink("https://{domain}/{lang}/post/{id}"),
+    NavDeepLink("https://{domain}/{lang}/post/{id}/"),
     NavDeepLink("https://{domain}/article/{id}"),
     NavDeepLink("https://{domain}/article/{id}/"),
     NavDeepLink("https://{domain}/company/{company}/blog/{id}"),

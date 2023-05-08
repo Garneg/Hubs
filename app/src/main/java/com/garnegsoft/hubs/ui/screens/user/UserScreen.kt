@@ -154,8 +154,9 @@ fun UserScreen(
                 },
                 actions = {
                     val context = LocalContext.current
+                    val enabled = remember(viewModel.user.isInitialized) { viewModel.user.isInitialized }
                     IconButton(
-                        enabled = viewModel.user.isInitialized,
+                        enabled = enabled,
                         onClick = {
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
@@ -222,7 +223,7 @@ fun UserScreen(
                                 val hubs by viewModel.subscribedHubs.observeAsState()
                                 val whoIs by viewModel.whoIs.observeAsState()
 
-                                if (hubs != null && whoIs != null && (isAppUser || note != null))
+                                if (hubs != null)
                                     UserProfile(
                                         user!!,
                                         isAppUser,

@@ -4,11 +4,11 @@ import ArticleController
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -189,13 +190,38 @@ fun ArticleScreen(
                             }
 
                         }
+                        var visible by remember { mutableStateOf(false) }
+                        LaunchedEffect(key1 = showVotesCounter, block = {
+                            if (showVotesCounter) {
+                                visible = showVotesCounter
+                            }
+                        })
+                        LaunchedEffect(key1 = visible, block = {
+                            delay(150)
+                            if (!visible) {
+                                showVotesCounter = false
+                            }
+
+                        })
+                        val offset by animateFloatAsState(
+                            targetValue = if (visible) 0f else 8f,
+                            animationSpec = tween(150)
+                        )
+                        val alpha by animateFloatAsState(
+                            targetValue = if (visible) 1f else 0.0f,
+                            animationSpec = tween(150)
+                        )
                         if (showVotesCounter) {
                             Popup(
                                 popupPositionProvider = positionProvider,
-                                onDismissRequest = { showVotesCounter = false }
+                                onDismissRequest = { visible = false }
                             ) {
                                 Box(
                                     modifier = Modifier
+
+                                        .offset(0.dp, offset.dp)
+                                        .alpha(alpha)
+                                        .padding(2.dp)
                                         .shadow(1.5.dp, shape = RoundedCornerShape(8.dp))
                                         .clip(RoundedCornerShape(8.dp))
                                         .background(MaterialTheme.colors.surface)
@@ -209,8 +235,11 @@ fun ArticleScreen(
                                         color = statisticsColor
                                     )
                                 }
+
                             }
+
                         }
+
                         Icon(
                             modifier = Modifier.size(18.dp),
                             painter = painterResource(id = R.drawable.rating),
@@ -529,13 +558,20 @@ fun ArticleScreen(
                         }
                         Spacer(Modifier.height(4.dp))
 
-                        HubsRow(hubs = article.hubs, onHubClicked = onHubClicked, onCompanyClicked = onCompanyClick)
+                        HubsRow(
+                            hubs = article.hubs,
+                            onHubClicked = onHubClicked,
+                            onCompanyClicked = onCompanyClick
+                        )
 
                         TranslationMessage(
                             modifier = Modifier.padding(vertical = 8.dp),
                             translationInfo = article.translationData
-                        ){
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(article.translationData.originUrl))
+                        ) {
+                            val intent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(article.translationData.originUrl)
+                            )
                             context.startActivity(intent)
                         }
 
@@ -550,7 +586,7 @@ fun ArticleScreen(
                                     color = MaterialTheme.colors.onSurface,
                                     fontSize = MaterialTheme.typography.body1.fontSize,
 
-                                )
+                                    )
                             ).second?.let { it1 ->
                                 it1(
                                     SpanStyle(
@@ -596,7 +632,11 @@ fun ArticleScreen(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
 
-                            HubsRow(hubs = article.hubs, onHubClicked = onHubClicked, onCompanyClicked = onCompanyClick)
+                            HubsRow(
+                                hubs = article.hubs,
+                                onHubClicked = onHubClicked,
+                                onCompanyClicked = onCompanyClick
+                            )
                         }
 
                     }
@@ -607,7 +647,7 @@ fun ArticleScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(it)
-        ){ CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+        ) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
 
 
     }
@@ -627,7 +667,8 @@ fun ScrollBar(
     )
 
     var scrollbarWidth = with(LocalDensity.current) { 3.dp.toPx() }
-    val scrollbarColor = if (MaterialTheme.colors.isLight) Color(0x59_000000) else Color(0x59_FFFFFF)
+    val scrollbarColor =
+        if (MaterialTheme.colors.isLight) Color(0x59_000000) else Color(0x59_FFFFFF)
     Box(modifier = modifier
         .fillMaxHeight()
         .width(6.dp)

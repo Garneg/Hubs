@@ -127,7 +127,7 @@ fun defaultArticleCardStyle(): ArticleCardStyle {
                     0.5f
                 }
 
-            )
+            ),
     )
 }
 

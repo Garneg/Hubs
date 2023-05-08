@@ -5,7 +5,9 @@ import ArticleController
 import ArticlesListController
 import android.graphics.DiscretePathEffect
 import android.util.Log
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -103,31 +105,31 @@ fun ArticlesScreen(
     LaunchedEffect(key1 = lastArticleRead, block = {
         Log.e("lastarticle", lastArticleRead.toString())
 
-            if (showSnackBar && lastArticleRead != null && lastArticleRead!! > 0) {
+        if (showSnackBar && lastArticleRead != null && lastArticleRead!! > 0) {
 
-                launch(Dispatchers.IO) {
-                    val snippet = ArticleController.getSnippet(lastArticleRead!!)
+            launch(Dispatchers.IO) {
+                val snippet = ArticleController.getSnippet(lastArticleRead!!)
 
-                    snippet?.let {
-                        val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
-                            message = it.title,
-                            actionLabel = it.imageUrl,
-                            duration = SnackbarDuration.Indefinite
-                        )
-                        if (snackbarResult == SnackbarResult.ActionPerformed) {
-                            launch(Dispatchers.Main) { onArticleClicked(it.id) }
-                        } else {
-                            context.lastReadDataStore.edit {
-                                it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
-                            }
+                snippet?.let {
+                    val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                        message = it.title,
+                        actionLabel = it.imageUrl,
+                        duration = SnackbarDuration.Indefinite
+                    )
+                    if (snackbarResult == SnackbarResult.ActionPerformed) {
+                        launch(Dispatchers.Main) { onArticleClicked(it.id) }
+                    } else {
+                        context.lastReadDataStore.edit {
+                            it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
                         }
-                        showSnackBar = false
-
                     }
+                    showSnackBar = false
+
                 }
-            } else if (lastArticleRead == 0) {
-                showSnackBar = false
             }
+        } else if (lastArticleRead == 0) {
+            showSnackBar = false
+        }
     })
 
     Scaffold(
@@ -178,22 +180,36 @@ fun ArticlesScreen(
                         var updateFeedCoroutineScope = rememberCoroutineScope()
                         var pageNumber = rememberSaveable { mutableStateOf(1) }
 
-                        var doScrollUp by rememberSaveable { mutableStateOf(false) }
+                        var readyToScrollUp = remember { mutableStateOf(false) }
 
                         if (articles != null) {
 
-                            LaunchedEffect(key1 = doScrollUp, block = {
-                                if (doScrollUp) {
-                                    articlesLazyListState.animateScrollToItem(0)
-                                    doScrollUp = false
-                                }
-
-                            })
-
                             var refreshing by remember { mutableStateOf(false) }
-                            val refreshingState = rememberPullRefreshState(
+                            PagedRefreshableHabrSnippetsColumn(
+                                data = articles!!,
+                                lazyListState = articlesLazyListState,
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                contentPadding = PaddingValues(8.dp),
+                                onNextPageLoad = {
+                                    launch(Dispatchers.IO) {
+                                        ArticlesListController
+                                            .getArticlesSnippets(
+                                                "articles",
+                                                mapOf(
+                                                    "sort" to "rating",
+                                                    "page" to it.toString()
+                                                )
+                                            )?.let {
+                                                viewModel.articles.postValue(articles!! + it)
+
+                                            }
+
+                                    }
+
+                                },
+                                page = pageNumber,
                                 refreshing = refreshing,
-                                refreshThreshold = 50.dp,
                                 onRefresh = {
                                     updateFeedCoroutineScope.launch(Dispatchers.IO) {
                                         refreshing = true
@@ -205,57 +221,23 @@ fun ArticlesScreen(
                                             )
                                         if (newArticlesList != null) {
                                             viewModel.articles.postValue(newArticlesList)
-                                            doScrollUp = true
+                                            readyToScrollUp.value = true
 
                                         }
                                         refreshing = false
                                     }
-                                })
-                            LazyListState()
-                            Box(
-                                modifier = Modifier.pullRefresh(
-                                    state = refreshingState
-                                )
+                                },
+                                readyToScrollUpAfterRefresh = readyToScrollUp
                             ) {
-                                PagedHabrSnippetsColumn(
-                                    data = articles!!,
-                                    lazyListState = articlesLazyListState,
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    contentPadding = PaddingValues(8.dp),
-                                    onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
-                                            ArticlesListController
-                                                .getArticlesSnippets(
-                                                    "articles",
-                                                    mapOf(
-                                                        "sort" to "rating",
-                                                        "page" to it.toString()
-                                                    )
-                                                )?.let {
-                                                    viewModel.articles.postValue(articles!! + it)
-
-                                                }
-
-                                        }
-
-                                    },
-                                    page = pageNumber
-                                ) {
-                                    ArticleCard(
-                                        article = it,
-                                        onClick = { onArticleClicked(it.id) },
-                                        onCommentsClick = { onCommentsClicked(it.id) },
-                                        onAuthorClick = { onUserClicked(it.author!!.alias) }
-                                    )
-                                }
-                                PullRefreshIndicator(
-                                    refreshing = refreshing,
-                                    state = refreshingState,
-                                    modifier = Modifier.align(Alignment.TopCenter),
-                                    contentColor = MaterialTheme.colors.primary
+                                ArticleCard(
+                                    article = it,
+                                    onClick = { onArticleClicked(it.id) },
+                                    onCommentsClick = { onCommentsClicked(it.id) },
+                                    onAuthorClick = { onUserClicked(it.author!!.alias) }
                                 )
                             }
+
+
                         } else {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -267,7 +249,7 @@ fun ArticlesScreen(
                                         mapOf("sort" to "rating")
                                     )?.let {
                                         viewModel.articles.postValue(
-                                            HabrList(it.list.drop(1), it.pagesCount)
+                                            it
                                         )
                                     }
 
@@ -346,8 +328,7 @@ fun ArticlesScreen(
                                     contentColor = MaterialTheme.colors.primary,
                                     refreshing = isRefreshing, state = swipestate
                                 )
-                            }
-                            else {
+                            } else {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                                 }
@@ -475,50 +456,50 @@ fun ArticlesScreen(
                 if (isAuthorized) map =
                     mapOf<String, @Composable () -> Unit>(
                         "Моя лента" to {
-                        val articles by viewModel.myFeedArticles.observeAsState()
-                        if (articles != null) {
-                            PagedHabrSnippetsColumn(
-                                data = articles!!,
-                                onNextPageLoad = {
+                            val articles by viewModel.myFeedArticles.observeAsState()
+                            if (articles != null) {
+                                PagedHabrSnippetsColumn(
+                                    data = articles!!,
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            ArticlesListController.getArticlesSnippets(
+                                                "articles",
+                                                mapOf(
+                                                    "custom" to "true",
+                                                    "page" to it.toString()
+                                                )
+                                            )?.let {
+                                                viewModel.myFeedArticles.postValue(
+                                                    articles!! + it
+                                                )
+                                            }
+                                        }
+                                    }
+                                ) {
+                                    ArticleCard(
+                                        article = it,
+                                        onClick = { onArticleClicked(it.id) },
+                                        onAuthorClick = { onUserClicked(it.author!!.alias) },
+                                        onCommentsClick = { onCommentsClicked(it.id) })
+                                }
+                            } else {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
+                                LaunchedEffect(key1 = Unit, block = {
                                     launch(Dispatchers.IO) {
                                         ArticlesListController.getArticlesSnippets(
                                             "articles",
-                                            mapOf(
-                                                "custom" to "true",
-                                                "page" to it.toString()
-                                            )
+                                            mapOf("custom" to "true")
                                         )?.let {
                                             viewModel.myFeedArticles.postValue(
-                                                articles!! + it
+                                                it
                                             )
                                         }
                                     }
-                                }
-                            ) {
-                                ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClicked(it.id) },
-                                    onAuthorClick = { onUserClicked(it.author!!.alias) },
-                                    onCommentsClick = { onCommentsClicked(it.id) })
+                                })
                             }
-                        } else {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                            }
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    ArticlesListController.getArticlesSnippets(
-                                        "articles",
-                                        mapOf("custom" to "true")
-                                    )?.let {
-                                        viewModel.myFeedArticles.postValue(
-                                            it
-                                        )
-                                    }
-                                }
-                            })
-                        }
-                    }) + map
+                        }) + map
                 map
             }
             val pagerState = rememberPagerState()
@@ -527,11 +508,27 @@ fun ArticlesScreen(
                 pagerState = pagerState,
                 tabs = pages.keys.toList(),
                 onCurrentPositionTabClick = { index, title ->
-            })
+                    if (title == "Статьи") {
+
+                        articlesLazyListState.scrollToItem(
+                            0,
+                            articlesLazyListState.firstVisibleItemScrollOffset
+                        )
+
+                        articlesLazyListState.animateScrollToItem(0)
+                    }
+                    if (title == "Новости") {
+                        newsLazyListState.animateScrollToItem(
+                            0,
+                            newsLazyListState.firstVisibleItemScrollOffset
+                        )
+                        newsLazyListState.animateScrollToItem(0)
+                    }
+                })
             HorizontalPager(
                 state = pagerState,
                 pageCount = pages.size,
-                ) {
+            ) {
                 pages.values.elementAt(it)()
 
             }
