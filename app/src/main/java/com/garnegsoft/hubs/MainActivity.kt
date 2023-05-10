@@ -118,8 +118,6 @@ class MainActivity : ComponentActivity() {
             .build()
 
 
-
-
         setContent {
             var userInfo: Me? by remember { mutableStateOf(null) }
             val userInfoUpdateBlock = remember {
@@ -191,11 +189,7 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             )
-                            if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                                window.statusBarColor = Color.parseColor("#FF313131")
-                            } else {
-                                window.statusBarColor = resources.getColor(R.color.habrTopColor)
-                            }
+
                         }
                         composable(
                             route = "article/{id}",
@@ -357,6 +351,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                     })
+                if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                    window.statusBarColor = Color.parseColor("#FF313131")
+                } else {
+                    window.statusBarColor = resources.getColor(R.color.habrTopColor)
+                }
             }
         }
 

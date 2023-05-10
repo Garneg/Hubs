@@ -89,7 +89,11 @@ fun CommentsScreen(
             if (viewModel.comments.isInitialized){
                 comments?.indexOf(comments.find { it.id == commId })?.let {
                     if (it > -1)
-                        lazyListState.animateScrollToItem(it)
+                        if (showArticleSnippet)
+                            lazyListState.animateScrollToItem(it + 1)
+                        else
+                            lazyListState.animateScrollToItem(it)
+
                 }
             }
         }
