@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
+import android.content.Intent
 import android.text.style.TtsSpan.TextBuilder
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
@@ -20,6 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
@@ -112,7 +114,9 @@ fun CommentsScreen(
             )
         }
     ) {
-        Column(modifier = Modifier.padding(it).imePadding()) {
+        Column(modifier = Modifier
+            .padding(it)
+            .imePadding()) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.weight(1f),
@@ -140,6 +144,7 @@ fun CommentsScreen(
                         key = { comments[it].id },
                     ) {
                         val comment = comments[it]
+                        val context = LocalContext.current
                         CommentItem(
                             modifier = Modifier
                                 .padding(
@@ -149,7 +154,13 @@ fun CommentsScreen(
                             onAuthorClick = {
                                 onUserClicked(comment.author.alias)
                             },
-                            highlight = comment.id == commentId
+                            highlight = comment.id == commentId,
+                            onShare = {
+                                val intent = Intent(Intent.ACTION_SEND)
+                                intent.putExtra(Intent.EXTRA_TEXT, "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}")
+                                intent.setType("text/plain")
+                                context.startActivity(Intent.createChooser(intent, null))
+                            }
                         ) {
                             Column {
                                 comment.let {

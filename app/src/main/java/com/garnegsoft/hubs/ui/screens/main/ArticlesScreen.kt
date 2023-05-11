@@ -89,6 +89,7 @@ fun ArticlesScreen(
     LaunchedEffect(key1 = authorizedState, block = {
         isAuthorized = authorizedState == true
     })
+
     val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
 
     val scaffoldState = rememberScaffoldState()
@@ -103,7 +104,6 @@ fun ArticlesScreen(
     }
 
     LaunchedEffect(key1 = lastArticleRead, block = {
-        Log.e("lastarticle", lastArticleRead.toString())
 
         if (showSnackBar && lastArticleRead != null && lastArticleRead!! > 0) {
 
@@ -518,7 +518,7 @@ fun ArticlesScreen(
                         articlesLazyListState.animateScrollToItem(0)
                     }
                     if (title == "Новости") {
-                        newsLazyListState.animateScrollToItem(
+                        newsLazyListState.scrollToItem(
                             0,
                             newsLazyListState.firstVisibleItemScrollOffset
                         )

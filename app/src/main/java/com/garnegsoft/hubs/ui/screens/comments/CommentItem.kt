@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
+import android.content.Intent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,8 +9,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,6 +38,7 @@ fun CommentItem(
     comment: Comment,
     highlight: Boolean,
     onAuthorClick: () -> Unit,
+    onShare: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val onSurfaceColor = MaterialTheme.colors.onSurface
@@ -54,7 +59,6 @@ fun CommentItem(
             .background(MaterialTheme.colors.surface)
             .padding(16.dp)
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -109,28 +113,45 @@ fun CommentItem(
 
         Spacer(modifier = Modifier.height(4.dp))
         if (comment.score != null) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(vertical = 8.dp)
-            ) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    painter = painterResource(id = R.drawable.rating), contentDescription = ""
-                )
-                Spacer(modifier = Modifier.width(2.dp))
-                Text(
-                    text = if (comment.score > 0) {
-                        "+"
-                    } else {
-                        ""
-                    } + comment.score,
-                    color = when {
-                        comment.score > 0 -> RatingPositive
-                        comment.score < 0 -> RatingNegative
-                        else -> Color.Unspecified
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    modifier = Modifier.weight(1f),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(18.dp),
+                        painter = painterResource(id = R.drawable.rating), contentDescription = ""
+                    )
+                    Spacer(modifier = Modifier.width(2.dp))
+                    Text(
+                        text = if (comment.score > 0) {
+                            "+"
+                        } else {
+                            ""
+                        } + comment.score,
+                        color = when {
+                            comment.score > 0 -> RatingPositive
+                            comment.score < 0 -> RatingNegative
+                            else -> Color.Unspecified
+                        }
+                    )
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    IconButton(onClick = onShare) {
+                        Icon(modifier = Modifier.size(18.dp), imageVector = Icons.Outlined.Share, contentDescription = "")
                     }
-                )
+
+                }
+                
+                IconButton(onClick = { /*TODO*/ }) {
+                    Icon(painter = painterResource(id = R.drawable.reply), contentDescription = "")
+                }
             }
+
         }
     }
 

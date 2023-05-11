@@ -82,6 +82,9 @@ class ArticlesListController {
                         if (leadData?.imageUrl == null && leadData?.image?.url != null) {
                             leadData?.imageUrl = leadData?.image?.url
                         }
+                        if (leadData.imageUrl != null){
+                            leadData.imageUrl = leadData.imageUrl?.replace("http:", "https:")
+                        }
                     }
                 }
 
