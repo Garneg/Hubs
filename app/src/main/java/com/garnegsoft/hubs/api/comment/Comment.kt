@@ -17,3 +17,13 @@ class Comment (
     val edited: Boolean,
     val inModeration: Boolean
 )
+
+class ArticleComments(
+    val comments: ArrayList<Comment>,
+    val commentAccess: CommentAccess
+) {
+    class CommentAccess(
+        val canComment: Boolean,
+        val cantCommentReason: String?
+    )
+}

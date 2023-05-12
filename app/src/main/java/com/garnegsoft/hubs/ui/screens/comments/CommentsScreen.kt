@@ -2,62 +2,57 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
-import android.text.style.TtsSpan.TextBuilder
-import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.getSelectedText
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
-import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.comment.Comment
+import com.garnegsoft.hubs.api.comment.ArticleComments
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
-import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.ArticleCard
-import com.garnegsoft.hubs.ui.common.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.parseElement
-import com.garnegsoft.hubs.ui.theme.PrimaryColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
-import kotlin.random.Random
 
 
 class CommentsScreenViewModel : ViewModel() {
     var parentPostSnippet = MutableLiveData<ArticleSnippet>()
-    var comments = MutableLiveData<ArrayList<Comment>>()
+    var commentsData = MutableLiveData<ArticleComments?>()
+
+    fun comment(text: String, postId: Int, parentCommentId: Int? = null){
+        viewModelScope.launch(Dispatchers.IO) {
+            val newAccess = CommentsListController.sendComment(
+                articleId = postId,
+                text = text,
+                parentCommentId = parentCommentId
+            )
+
+            CommentsListController.getComments(postId)?.let {
+                commentsData.postValue(newAccess?.let { it1 -> ArticleComments(it.comments, it1) })
+            }
+        }
 
 
+
+    }
 }
 
 
@@ -73,7 +68,7 @@ fun CommentsScreen(
 ) {
     var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 
-    val comments = viewModel.comments.observeAsState().value
+    val commentsData = viewModel.commentsData.observeAsState().value
     val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
 
     val lazyListState = rememberLazyListState()
@@ -82,14 +77,14 @@ fun CommentsScreen(
         launch(Dispatchers.IO) {
             if (showArticleSnippet)
                 viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
-            viewModel.comments.postValue(CommentsListController.getComments("articles/$parentPostId/comments"))
+            viewModel.commentsData.postValue(CommentsListController.getComments("articles/$parentPostId/comments"))
         }
     }
 
-    LaunchedEffect(key1 = comments, block = {
+    LaunchedEffect(key1 = commentsData, block = {
         commentId?.let { commId ->
-            if (viewModel.comments.isInitialized){
-                comments?.indexOf(comments.find { it.id == commId })?.let {
+            if (viewModel.commentsData.isInitialized){
+                commentsData?.comments?.indexOf(commentsData.comments.find { it.id == commId })?.let {
                     if (it > -1)
                         if (showArticleSnippet)
                             lazyListState.animateScrollToItem(it + 1)
@@ -138,12 +133,12 @@ fun CommentsScreen(
                         )
                     }
                 }
-                if (comments != null) {
+                if (commentsData != null) {
                     items(
-                        count = comments.size,
-                        key = { comments[it].id },
+                        count = commentsData.comments.size,
+                        key = { commentsData.comments[it].id },
                     ) {
-                        val comment = comments[it]
+                        val comment = commentsData.comments[it]
                         val context = LocalContext.current
                         CommentItem(
                             modifier = Modifier
@@ -185,17 +180,31 @@ fun CommentsScreen(
                     }
                 }
             }
-            var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { Text("Выскажите своё мнение [Markdown]", style = MaterialTheme.typography.body1) },
-                value = commentTextFieldValue,
-                onValueChange = {
-                    commentTextFieldValue = it
+            if (commentsData?.commentAccess?.canComment == true) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+                    OutlinedTextField(
+                        modifier = Modifier.weight(1f),
+                        placeholder = {
+                            Text(
+                                "Выскажите своё мнение [Markdown]",
+                                style = MaterialTheme.typography.body1
+                            )
+                        },
+                        value = commentTextFieldValue,
+                        onValueChange = {
+                            commentTextFieldValue = it
 
+                        }
+                    )
+                    IconButton(onClick = {
+                        viewModel.comment(commentTextFieldValue.text, parentPostId) }
+                    ) {
+                        Icon(imageVector = Icons.Default.Send, contentDescription = "send comment")
+                    }
                 }
-            )
 
+            }
 
         }
 
@@ -203,26 +212,5 @@ fun CommentsScreen(
     }
 }
 
-@Preview
-@Composable
-fun imepaddingprev() {
-    Column(){
-        TextField(value = "", onValueChange = {})
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .imePadding()
-            .verticalScroll(rememberScrollState())) {
-            repeat(50) {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Text("Hello world")
-                }
-            }
-            Card {
-                Text("Goodbye world")
-            }
-        }
-
-    }
-}
 
 

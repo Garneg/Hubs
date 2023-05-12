@@ -2,14 +2,24 @@ package com.garnegsoft.hubs.api.comment.list
 
 import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
+import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.comment.ArticleComments
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.formatTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttp
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
+import okio.Okio
 import org.jsoup.Jsoup
+
 
 class CommentsListController {
     companion object {
@@ -41,7 +51,11 @@ class CommentsListController {
             return null
         }
 
-        fun getComments(path: String, args: Map<String, String>? = null): ArrayList<Comment> {
+        fun getComments(articleId: Int): ArticleComments? {
+            return getComments("articles/$articleId/comments")
+        }
+
+        fun getComments(path: String, args: Map<String, String>? = null): ArticleComments? {
             var serializedData = get(path, args)
 
             var commentsList = ArrayList<Comment>()
@@ -62,24 +76,40 @@ class CommentsListController {
                 commentsList.sortBy { it.level }
                 var newList = ArrayList<Comment>()
 
-                for (level in 0..maxLevel + 1){
-                    commentsList.forEach{
-                        if (it.level == level){
+                for (level in 0..maxLevel + 1) {
+                    commentsList.forEach {
+                        if (it.level == level) {
                             var nextIndex = newList.size
-                            if (newList.find { it1 -> it1.id == it.id } == null){
+                            if (newList.find { it1 -> it1.id == it.id } == null) {
                                 newList.add(it)
                                 nextIndex++
                             } else {
-                                nextIndex = newList.indexOf(newList.find { it1 -> it1.id == it.id }) + 1
+                                nextIndex =
+                                    newList.indexOf(newList.find { it1 -> it1.id == it.id }) + 1
                             }
-                            newList.addAll(nextIndex, commentsList.filter { it1 ->  it1.parentCommentId == it.id })
+                            newList.addAll(
+                                nextIndex,
+                                commentsList.filter { it1 -> it1.parentCommentId == it.id })
                         }
                     }
                 }
-                return newList
+
+                return ArticleComments(
+                    newList,
+                    ArticleComments.CommentAccess(
+                        canComment = serializedData?.commentAccess?.isCanComment ?: false,
+                        cantCommentReason = serializedData?.commentAccess?.cantCommentReason
+                    )
+                )
             }
 
-            return commentsList
+            return ArticleComments(
+                commentsList,
+                ArticleComments.CommentAccess(
+                    canComment = serializedData?.commentAccess?.isCanComment ?: false,
+                    cantCommentReason = serializedData?.commentAccess?.cantCommentReason
+                )
+            )
         }
 
         private fun parseComment(comment: CommentsList.Comment, inModeration: Boolean): Comment {
@@ -164,14 +194,85 @@ class CommentsListController {
 
             return result
         }
+
+        private fun _sendComment(
+            articleId: Int,
+            text: String,
+            parentCommentId: Int? = null
+        ): SendCommentResponse? {
+
+            val comment = UserCommentPayload(
+                articleId = articleId.toString(),
+                parentId = parentCommentId?.toString(),
+                isPost = false,
+                text = UserCommentPayload.CommentContent(
+                    source = text,
+                    editorVersion = 2,
+                    isMarkdown = true
+                )
+            )
+
+            val serializedComment = Json.encodeToString(comment)
+
+            val response = HabrApi.post(
+                "comments/posts/$articleId/add",
+                requestBody = serializedComment.toRequestBody(contentType = "application/json".toMediaType())
+            )
+            if (response.code != 200)
+                return null
+
+            response.body?.string()?.let {
+                val sendResponse = HabrDataParser.parseJson<SendCommentResponse>(it)
+                return sendResponse
+            }
+
+            return null
+        }
+
+        fun sendComment(
+            articleId: Int,
+            text: String,
+            parentCommentId: Int? = null
+        ): ArticleComments.CommentAccess? {
+            val response = _sendComment(articleId, text, parentCommentId)
+            return response?.let {
+                ArticleComments.CommentAccess(
+                    response.commentAccess.isCanComment,
+                    response.commentAccess.cantCommentReason,
+                )
+            }
+        }
     }
+
+
+    @Serializable
+    private data class UserCommentPayload(
+        var articleId: String,
+        var text: CommentContent,
+        var parentId: String?,
+        var isPost: Boolean
+    ) {
+        @Serializable
+        data class CommentContent(
+            var source: String,
+            var editorVersion: Long,
+            var isMarkdown: Boolean
+        )
+    }
+
+    @Serializable
+    private data class SendCommentResponse(
+        val commentAccess: CommentsList.CommentAccess,
+        val data: CommentsList.Comment
+    )
+
 
     @Serializable
     private data class CommentsList(
         val comments: Map<String, Comment>,
         val threads: ArrayList<String>,
         var moderated: Map<String, Comment>? = null,
-        //val commentAccess: CommentAccess,
+        var commentAccess: CommentAccess? = null,
         val lastCommentTimestamp: Long? = null,
         val pages: Int? = null
     ) {
@@ -218,19 +319,19 @@ class CommentsListController {
             )
 
             @Serializable
-            data class Access(
-                val isCanComment: Boolean,
-                val cantCommentReasonKey: String,
-                val cantCommentReason: String,
-                //val data: Any? = null
-            )
-
-            @Serializable
             data class Vote(
                 //val value: Any? = null,
                 val isCanVote: Boolean
             )
         }
+
+        @Serializable
+        data class CommentAccess(
+            val isCanComment: Boolean,
+            val cantCommentReasonKey: String?,
+            val cantCommentReason: String?,
+//            val data: Any? = null
+        )
     }
 
 

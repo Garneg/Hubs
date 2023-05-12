@@ -21,7 +21,7 @@ class HabrApi {
 
         fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
-            if (args != null){
+            if (args != null) {
                 finalArgs.putAll(args)
             }
             val paramsString = StringBuilder()
@@ -34,30 +34,34 @@ class HabrApi {
             try {
                 return HttpClient.newCall(request).execute()
 
-            }
-            catch (ex: Exception){
+            } catch (ex: Exception) {
                 return null
             }
         }
 
-        fun post(path: String, args: Map<String, String>? = null, version: Int = 2): Response {
+        fun post(
+            path: String,
+            args: Map<String, String>? = null,
+            requestBody: RequestBody = String().toRequestBody(),
+            version: Int = 2
+        ): Response {
             val token = getCsrfToken()
-            val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
-            if (args != null){
-                finalArgs.putAll(args)
-            }
+//            val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
+//            if (args != null) {
+//                finalArgs.putAll(args)
+//            }
             val paramsString = StringBuilder()
-            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&")})
+//            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&") })
             val request = Request
                 .Builder()
-                .post(String().toRequestBody())
-                .url("$baseAddress/kek/v$version/$path?$paramsString")
+                .post(requestBody)
+                .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
             return HttpClient.newCall(request).execute()
         }
 
-        fun getCsrfToken() : String? {
+        fun getCsrfToken(): String? {
             if (csrfToken == null) {
                 var request = Request
                     .Builder()
@@ -66,7 +70,8 @@ class HabrApi {
                 val response = HttpClient.newCall(request).execute()
 
                 response.body?.string()?.let {
-                    Jsoup.parse(it).getElementsByTag("meta").find { it.attr("name") == "csrf-token" }?.let {
+                    Jsoup.parse(it).getElementsByTag("meta")
+                        .find { it.attr("name") == "csrf-token" }?.let {
                         csrfToken = it.attr("content")
                     }
                 } ?: return null
@@ -83,7 +88,7 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
         return if (!isConnectionOn()) {
             throw NoConnectivityException()
 
-        } else if(!isInternetAvailable()) {
+        } else if (!isInternetAvailable()) {
             throw NoInternetException()
         } else {
             chain.proceed(chain.request())
@@ -91,7 +96,8 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
     }
 
     private fun isConnectionOn(): Boolean {
-        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             val network = connectivityManager.activeNetwork
