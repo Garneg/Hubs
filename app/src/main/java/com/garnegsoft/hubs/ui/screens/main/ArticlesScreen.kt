@@ -168,9 +168,12 @@ fun ArticlesScreen(
             Modifier.padding(it)
         ) {
 
+            val myFeedLazyListState = rememberLazyListState()
             val articlesLazyListState = rememberLazyListState()
-
             val newsLazyListState = rememberLazyListState()
+            val hubsLazyListState = rememberLazyListState()
+            val usersLazyListState = rememberLazyListState()
+            val companiesLazyListState = rememberLazyListState()
 
             val pages = remember(key1 = isAuthorized) {
                 var map = mapOf<String, @Composable () -> Unit>(
@@ -350,7 +353,7 @@ fun ArticlesScreen(
                         val hubs by viewModel.hubs.observeAsState()
                         if (hubs != null) {
                             PagedHabrSnippetsColumn(
-                                lazyListState = rememberLazyListState(),
+                                lazyListState = hubsLazyListState,
                                 data = hubs!!,
                                 onNextPageLoad = {
                                     launch(Dispatchers.IO) {
@@ -385,6 +388,7 @@ fun ArticlesScreen(
                         val authors by viewModel.authors.observeAsState()
                         if (authors != null) {
                             PagedHabrSnippetsColumn(
+                                lazyListState = usersLazyListState,
                                 data = authors!!,
                                 onNextPageLoad = {
                                     launch(Dispatchers.IO) {
@@ -418,6 +422,7 @@ fun ArticlesScreen(
                         val companies by viewModel.companies.observeAsState()
                         if (companies != null) {
                             PagedHabrSnippetsColumn(
+                                lazyListState = companiesLazyListState,
                                 data = companies!!,
                                 onNextPageLoad = {
                                     launch(Dispatchers.IO) {
@@ -459,6 +464,7 @@ fun ArticlesScreen(
                             val articles by viewModel.myFeedArticles.observeAsState()
                             if (articles != null) {
                                 PagedHabrSnippetsColumn(
+                                    lazyListState = myFeedLazyListState,
                                     data = articles!!,
                                     onNextPageLoad = {
                                         launch(Dispatchers.IO) {
@@ -508,21 +514,13 @@ fun ArticlesScreen(
                 pagerState = pagerState,
                 tabs = pages.keys.toList(),
                 onCurrentPositionTabClick = { index, title ->
-                    if (title == "Статьи") {
-
-                        articlesLazyListState.scrollToItem(
-                            0,
-                            articlesLazyListState.firstVisibleItemScrollOffset
-                        )
-
-                        articlesLazyListState.animateScrollToItem(0)
-                    }
-                    if (title == "Новости") {
-                        newsLazyListState.scrollToItem(
-                            0,
-                            newsLazyListState.firstVisibleItemScrollOffset
-                        )
-                        newsLazyListState.animateScrollToItem(0)
+                    when (title) {
+                        "Статьи" -> ScrollUpMethods.scrollLazyList(articlesLazyListState)
+                        "Новости" -> ScrollUpMethods.scrollLazyList(newsLazyListState)
+                        "Моя лента" -> ScrollUpMethods.scrollLazyList(myFeedLazyListState)
+                        "Хабы" -> ScrollUpMethods.scrollLazyList(hubsLazyListState)
+                        "Пользователи" -> ScrollUpMethods.scrollLazyList(usersLazyListState)
+                        "Компании" -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
                     }
                 })
             HorizontalPager(

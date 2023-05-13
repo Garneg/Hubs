@@ -46,12 +46,9 @@ class CommentsScreenViewModel : ViewModel() {
             )
 
             CommentsListController.getComments(postId)?.let {
-                commentsData.postValue(newAccess?.let { it1 -> ArticleComments(it.comments, it1) })
+                commentsData.postValue(newAccess?.let { it1 -> ArticleComments(it.comments, it1) } ?: it)
             }
         }
-
-
-
     }
 }
 
