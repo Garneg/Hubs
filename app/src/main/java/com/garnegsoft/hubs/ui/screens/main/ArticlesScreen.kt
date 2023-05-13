@@ -37,6 +37,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
@@ -461,9 +462,11 @@ fun ArticlesScreen(
                 if (isAuthorized) map =
                     mapOf<String, @Composable () -> Unit>(
                         "Моя лента" to {
+                            var refreshing by remember { mutableStateOf(false) }
+                            var scrollAfterRefresh = remember { mutableStateOf(false)}
                             val articles by viewModel.myFeedArticles.observeAsState()
                             if (articles != null) {
-                                PagedHabrSnippetsColumn(
+                                PagedRefreshableHabrSnippetsColumn(
                                     lazyListState = myFeedLazyListState,
                                     data = articles!!,
                                     onNextPageLoad = {
@@ -479,6 +482,18 @@ fun ArticlesScreen(
                                                     articles!! + it
                                                 )
                                             }
+                                        }
+                                    },
+                                    refreshing = refreshing,
+                                    readyToScrollUpAfterRefresh = scrollAfterRefresh,
+                                    onRefresh = {
+                                        refreshing = true
+                                        viewModel.viewModelScope.launch(Dispatchers.IO) {
+                                            ArticlesListController.getArticlesSnippets("articles", mapOf("custom" to "true"))?.let{
+                                                viewModel.myFeedArticles.postValue(it)
+                                                scrollAfterRefresh.value = true
+                                            }
+                                            refreshing = false
                                         }
                                     }
                                 ) {

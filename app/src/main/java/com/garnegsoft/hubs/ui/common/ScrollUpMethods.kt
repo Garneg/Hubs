@@ -10,7 +10,6 @@ sealed interface ScrollUpMethods {
                 0,
                 lazyListState.firstVisibleItemScrollOffset
             )
-
             lazyListState.animateScrollToItem(0)
         }
 
