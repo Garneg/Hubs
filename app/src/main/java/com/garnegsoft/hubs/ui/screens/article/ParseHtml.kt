@@ -559,38 +559,76 @@ fun parseElement(
 val LanguagesMap = mapOf<String, String>(
     "" to "Язык неизвестен",
     "plaintext" to "Текст",
+
     "1c" to "1C",
+
     "assembly" to "Assembly",
-    "kotlin" to "Kotlin",
+
+    "bash" to "BASH",
+
+    "css" to "CSS",
+    "cmake" to "CMake",
+    "cpp" to "C++",
+    "cs" to "C#",
+
+    "dart" to "Dart",
+    "delphi" to "Delphi",
+    "diff" to "Diff",
+    "django" to "Django",
+
+    "elixir" to "Elixir",
+    "erlang" to "Erlang",
+
+    "fs" to "F#",
+
+    "go" to "Go",
+
+    "html" to "HTML",
+
     "java" to "Java",
     "javascript" to "JavaScript",
     "json" to "JSON",
-    "html" to "HTML",
+    "julia" to "Julia",
+
+    "kotlin" to "Kotlin",
+
+    "lisp" to "Lisp",
+    "lua" to "Lua",
+
+    "markdown" to "Markdown",
+    "matlab" to "Matlab",
+
+    "nginx" to "NGINX",
+
+    "objectivec" to "Objective C",
+
+    "perl" to "Perl",
+    "pgsql" to "pgSQL",
+    "php" to "PHP",
+    "powershell" to "PowerShell",
+    "python" to "Python",
+
     "r" to "R",
     "ruby" to "Ruby",
     "rust" to "Rust",
-    "bash" to "BASH",
-    "cpp" to "C++",
-    "cs" to "C#",
-    "css" to "CSS",
-    "cmake" to "CMake",
-    "python" to "Python",
-    "php" to "PHP",
-    "perl" to "Perl",
+
     "swift" to "Swift",
     "sql" to "SQL",
     "scala" to "Scala",
-    "markdown" to "Markdown",
-    "objectivec" to "Objective C",
-    "xml" to "XML",
-    "go" to "Go",
+    "smalltalk" to "Smalltalk",
+
     "typescript" to "TypeScript",
-    "yaml" to "YAML",
-    "dart" to "Dart",
-    "lua" to "Lua",
-    "lisp" to "Lisp",
+
+    "vala" to "Vala",
+    "vbscript" to "Vbscript",
     "vhdl" to "VHDL",
-    "fs" to "F#"
+
+    "xml" to "XML",
+
+    "yaml" to "YAML",
+
+    "zig" to "Zig"
+
 )
 
 
@@ -659,12 +697,19 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(
-                text = language,
-                modifier = Modifier.padding(8.dp),
-                fontWeight = FontWeight.W600,
-                fontFamily = FontFamily.SansSerif
-            )
+            DisableSelection {
+                Row(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = language,
+                        fontWeight = FontWeight.W600,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    //Text(text = "⬤", color = if (language == "Go") Color(0xFF29B6F6) else Color.Transparent)
+                }
+            }
+
+            
         }
         Surface(
             color = MaterialTheme.colors.onBackground.copy(0.06f),

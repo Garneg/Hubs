@@ -2,19 +2,30 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Send
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,6 +34,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.ArticleComments
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
@@ -147,6 +159,7 @@ fun CommentsScreen(
                                 onUserClicked(comment.author.alias)
                             },
                             highlight = comment.id == commentId,
+                            showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment ?: false,
                             onShare = {
                                 val intent = Intent(Intent.ACTION_SEND)
                                 intent.putExtra(Intent.EXTRA_TEXT, "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}")
@@ -177,27 +190,59 @@ fun CommentsScreen(
                     }
                 }
             }
+
             if (commentsData?.commentAccess?.canComment == true) {
-                Row(modifier = Modifier.fillMaxWidth()) {
+                Divider()
+                Row(verticalAlignment = Alignment.Bottom, modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colors.surface)) {
                     var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-                    OutlinedTextField(
-                        modifier = Modifier.weight(1f),
-                        placeholder = {
-                            Text(
-                                "Выскажите своё мнение [Markdown]",
-                                style = MaterialTheme.typography.body1
-                            )
-                        },
-                        value = commentTextFieldValue,
-                        onValueChange = {
-                            commentTextFieldValue = it
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp)){
+                        BasicTextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(max = 140.dp),
+                            value = commentTextFieldValue,
+                            onValueChange = {
+                                commentTextFieldValue = it
+
+                            },
+                            decorationBox = {
+                                Box(modifier = Modifier.padding(vertical = 16.dp)){
+                                    it()
+                                }
+                            },
+                            cursorBrush = SolidColor(MaterialTheme.colors.secondary),
+                            textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface)
+                        )
+                        if (commentTextFieldValue.text.isEmpty()) {
+                            Row(modifier = Modifier.align(Alignment.CenterStart),) {
+                                Text(
+                                    text = "Как вам статья?",
+                                    color = MaterialTheme.colors.onSurface.copy(0.25f)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    tint = MaterialTheme.colors.onSurface.copy(0.25f),
+                                    painter = painterResource(id = R.drawable.markdown),
+                                    contentDescription = ""
+                                )
+                            }
 
                         }
-                    )
-                    IconButton(onClick = {
+                    }
+                    
+                    IconButton(
+                        enabled = commentTextFieldValue.text.isNotBlank(),
+                        onClick = {
                         viewModel.comment(commentTextFieldValue.text, parentPostId) }
                     ) {
-                        Icon(imageVector = Icons.Default.Send, contentDescription = "send comment")
+                        val iconTint by animateColorAsState(targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(0.25f))
+                        Icon(
+                            tint = iconTint,
+                            painter = painterResource(id = R.drawable.send), contentDescription = "send comment")
                     }
                 }
 

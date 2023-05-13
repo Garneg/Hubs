@@ -37,6 +37,7 @@ fun CommentItem(
     modifier: Modifier = Modifier,
     comment: Comment,
     highlight: Boolean,
+    showReplyButton: Boolean,
     onAuthorClick: () -> Unit,
     onShare: () -> Unit,
     content: @Composable () -> Unit
@@ -118,23 +119,28 @@ fun CommentItem(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(
-                        modifier = Modifier.size(18.dp),
-                        painter = painterResource(id = R.drawable.rating), contentDescription = ""
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text(
-                        text = if (comment.score > 0) {
-                            "+"
-                        } else {
-                            ""
-                        } + comment.score,
-                        color = when {
-                            comment.score > 0 -> RatingPositive
-                            comment.score < 0 -> RatingNegative
-                            else -> Color.Unspecified
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                modifier = Modifier.size(18.dp),
+                                painter = painterResource(id = R.drawable.rating), contentDescription = ""
+                            )
+                            Spacer(modifier = Modifier.width(2.dp))
+                            Text(
+                                text = if (comment.score > 0) {
+                                    "+"
+                                } else {
+                                    ""
+                                } + comment.score,
+                                color = when {
+                                    comment.score > 0 -> RatingPositive
+                                    comment.score < 0 -> RatingNegative
+                                    else -> Color.Unspecified
+                                }
+                            )
                         }
-                    )
+                    }
+
                 }
 
                 Row(
@@ -146,9 +152,14 @@ fun CommentItem(
                     }
 
                 }
-                
-                IconButton(onClick = { /*TODO*/ }) {
-                    Icon(painter = painterResource(id = R.drawable.reply), contentDescription = "")
+
+                if (showReplyButton) {
+                    IconButton(onClick = { /*TODO*/ }) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.reply),
+                            contentDescription = ""
+                        )
+                    }
                 }
             }
 
