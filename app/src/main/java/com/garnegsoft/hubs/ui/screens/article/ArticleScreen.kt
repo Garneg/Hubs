@@ -490,12 +490,11 @@ fun ArticleScreen(
                         }
                     }
                     if (article.postType == PostType.Megaproject && article.metadata != null) {
-                        AsyncImage(article.metadata.mainImageUrl, "")
+                        AsyncImage(article.metadata.mainImageUrl, "", modifier = Modifier.clip(RoundedCornerShape(8.dp)),)
                         Spacer(Modifier.height(8.dp))
                     }
                     Spacer(modifier = Modifier.size(8.dp))
-                    Column(
-                    ) {
+                    Column {
                         SelectionContainer() {
                             Text(
                                 text = article.title,
@@ -503,7 +502,6 @@ fun ArticleScreen(
                                 fontWeight = FontWeight.W700,
                                 color = MaterialTheme.colors.onBackground
                             )
-
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(

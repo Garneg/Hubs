@@ -180,7 +180,7 @@ fun UserScreen(
             viewModel.loadUserProfile(alias)
         }
         viewModel.user.observeAsState().value?.let { usr ->
-            val tabs = listOf<String>(
+            val tabs = listOf(
                 "Профиль",
                 "Публикации${
                     if (viewModel.user.value!!.articlesCount > 0) " " + formatLongNumbers(

@@ -522,7 +522,9 @@ fun parseElement(
                             imageVector = Icons.Outlined.ArrowDropDown, contentDescription = ""
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text(text = spoilerCaption, color = Color(0xFF5587A3))
+                        DisableSelection {
+                            Text(text = spoilerCaption, color = Color(0xFF5587A3))
+                        }
                     }
                     if (showDetails) {
                         Divider()
