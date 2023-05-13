@@ -40,6 +40,7 @@ fun CommentItem(
     showReplyButton: Boolean,
     onAuthorClick: () -> Unit,
     onShare: () -> Unit,
+    onReplyClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val onSurfaceColor = MaterialTheme.colors.onSurface
@@ -154,7 +155,7 @@ fun CommentItem(
                 }
 
                 if (showReplyButton) {
-                    IconButton(onClick = { /*TODO*/ }) {
+                    IconButton(onClick = onReplyClick) {
                         Icon(
                             painter = painterResource(id = R.drawable.reply),
                             contentDescription = ""

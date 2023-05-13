@@ -6,27 +6,34 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Send
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
@@ -43,6 +50,7 @@ import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jsoup.Jsoup
 
 
 class CommentsScreenViewModel : ViewModel() {
@@ -118,6 +126,9 @@ fun CommentsScreen(
             )
         }
     ) {
+        var parentCommentId by rememberSaveable {
+            mutableStateOf(0)
+        }
         Column(modifier = Modifier
             .padding(it)
             .imePadding()) {
@@ -165,6 +176,9 @@ fun CommentsScreen(
                                 intent.putExtra(Intent.EXTRA_TEXT, "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}")
                                 intent.setType("text/plain")
                                 context.startActivity(Intent.createChooser(intent, null))
+                            },
+                            onReplyClick = {
+                                parentCommentId = comment.id
                             }
                         ) {
                             Column {
@@ -192,14 +206,61 @@ fun CommentsScreen(
             }
 
             if (commentsData?.commentAccess?.canComment == true) {
+                if (parentCommentId > 0){
+                    val comment = viewModel.commentsData.value?.comments?.find { it.id == parentCommentId }
+                    Divider()
+                    val coroutineScope = rememberCoroutineScope()
+                    Row(modifier = Modifier
+                        .clickable {
+                            val index =
+                                viewModel.commentsData.value?.comments?.indexOf(comment) ?: 0
+                            coroutineScope.launch { lazyListState.animateScrollToItem(index + 1) }
+                        }
+                        .background(MaterialTheme.colors.surface)
+                        .padding(4.dp)
+                        .padding(start = 4.dp)
+                        .height(IntrinsicSize.Min),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        
+                        Spacer(modifier = Modifier
+                            .width(4.dp)
+                            .fillMaxHeight()
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colors.secondary))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f),) {
+                            Text(text = comment?.author?.alias ?: "", fontWeight = FontWeight.W500,
+                                color = MaterialTheme.colors.primary.copy(0.9f))
+                            val text = comment?.message ?: ""
+                            Text(
+                                maxLines = 1,
+                                text = Jsoup.parse(text).text(),
+                                overflow = TextOverflow.Ellipsis,
+                                style = MaterialTheme.typography.body2,
+                                color = MaterialTheme.colors.onSurface.copy(0.6f)
+                            )
+
+                        }
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(onClick = { parentCommentId = 0 }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Close,
+                                contentDescription = "",
+                                tint = MaterialTheme.colors.secondary)
+
+                        }
+                    }
+                }
                 Divider()
                 Row(verticalAlignment = Alignment.Bottom, modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colors.surface)) {
+                    .background(MaterialTheme.colors.surface)
+                    .padding(4.dp)) {
                     var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
                     Box(modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 16.dp)){
+                        .padding(horizontal = 8.dp)){
                         BasicTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -210,7 +271,7 @@ fun CommentsScreen(
 
                             },
                             decorationBox = {
-                                Box(modifier = Modifier.padding(vertical = 16.dp)){
+                                Box(modifier = Modifier.padding(vertical = 12.dp)){
                                     it()
                                 }
                             },
@@ -220,12 +281,12 @@ fun CommentsScreen(
                         if (commentTextFieldValue.text.isEmpty()) {
                             Row(modifier = Modifier.align(Alignment.CenterStart),) {
                                 Text(
-                                    text = "Как вам статья?",
-                                    color = MaterialTheme.colors.onSurface.copy(0.25f)
+                                    text = "Комментарий",
+                                    color = MaterialTheme.colors.onSurface.copy(0.4f)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
-                                    tint = MaterialTheme.colors.onSurface.copy(0.25f),
+                                    tint = MaterialTheme.colors.onSurface.copy(0.4f),
                                     painter = painterResource(id = R.drawable.markdown),
                                     contentDescription = ""
                                 )
@@ -239,7 +300,7 @@ fun CommentsScreen(
                         onClick = {
                         viewModel.comment(commentTextFieldValue.text, parentPostId) }
                     ) {
-                        val iconTint by animateColorAsState(targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(0.25f))
+                        val iconTint by animateColorAsState(targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(0.4f))
                         Icon(
                             tint = iconTint,
                             painter = painterResource(id = R.drawable.send), contentDescription = "send comment")
