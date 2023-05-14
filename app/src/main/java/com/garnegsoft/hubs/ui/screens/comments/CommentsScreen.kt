@@ -24,9 +24,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -128,6 +131,8 @@ fun CommentsScreen(
         var parentCommentId by rememberSaveable {
             mutableStateOf(0)
         }
+        val commentTextFieldFocusRequester = remember { FocusRequester() }
+
         Column(modifier = Modifier
             .padding(it)
             .imePadding()) {
@@ -177,6 +182,7 @@ fun CommentsScreen(
                                 context.startActivity(Intent.createChooser(intent, null))
                             },
                             onReplyClick = {
+                                commentTextFieldFocusRequester.requestFocus()
                                 parentCommentId = comment.id
                             }
                         ) {
@@ -279,7 +285,8 @@ fun CommentsScreen(
                         BasicTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .heightIn(max = 140.dp),
+                                .heightIn(max = 140.dp)
+                                .focusRequester(commentTextFieldFocusRequester),
                             value = commentTextFieldValue,
                             onValueChange = {
                                 commentTextFieldValue = it
