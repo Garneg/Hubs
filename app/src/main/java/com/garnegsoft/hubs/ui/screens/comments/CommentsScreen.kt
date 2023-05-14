@@ -59,7 +59,7 @@ class CommentsScreenViewModel : ViewModel() {
     var parentPostSnippet = MutableLiveData<ArticleSnippet>()
     var commentsData = MutableLiveData<ArticleComments?>()
 
-    fun comment(text: String, postId: Int, parentCommentId: Int? = null){
+    fun comment(text: String, postId: Int, parentCommentId: Int? = null) {
         viewModelScope.launch(Dispatchers.IO) {
             val newAccess = CommentsListController.sendComment(
                 articleId = postId,
@@ -68,7 +68,8 @@ class CommentsScreenViewModel : ViewModel() {
             )
 
             CommentsListController.getComments(postId)?.let {
-                commentsData.postValue(newAccess?.let { it1 -> ArticleComments(it.comments, it1) } ?: it)
+                commentsData.postValue(newAccess?.let { it1 -> ArticleComments(it.comments, it1) }
+                    ?: it)
             }
         }
     }
@@ -102,15 +103,16 @@ fun CommentsScreen(
 
     LaunchedEffect(key1 = commentsData, block = {
         commentId?.let { commId ->
-            if (viewModel.commentsData.isInitialized){
-                commentsData?.comments?.indexOf(commentsData.comments.find { it.id == commId })?.let {
-                    if (it > -1)
-                        if (showArticleSnippet)
-                            lazyListState.animateScrollToItem(it + 1)
-                        else
-                            lazyListState.animateScrollToItem(it)
+            if (viewModel.commentsData.isInitialized) {
+                commentsData?.comments?.indexOf(commentsData.comments.find { it.id == commId })
+                    ?.let {
+                        if (it > -1)
+                            if (showArticleSnippet)
+                                lazyListState.animateScrollToItem(it + 1)
+                            else
+                                lazyListState.animateScrollToItem(it)
 
-                }
+                    }
             }
         }
     })
@@ -133,9 +135,11 @@ fun CommentsScreen(
         }
         val commentTextFieldFocusRequester = remember { FocusRequester() }
 
-        Column(modifier = Modifier
-            .padding(it)
-            .imePadding()) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .imePadding()
+        ) {
             LazyColumn(
                 state = lazyListState,
                 modifier = Modifier.weight(1f),
@@ -174,10 +178,14 @@ fun CommentsScreen(
                                 onUserClicked(comment.author.alias)
                             },
                             highlight = comment.id == commentId,
-                            showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment ?: false,
+                            showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment
+                                ?: false,
                             onShare = {
                                 val intent = Intent(Intent.ACTION_SEND)
-                                intent.putExtra(Intent.EXTRA_TEXT, "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}")
+                                intent.putExtra(
+                                    Intent.EXTRA_TEXT,
+                                    "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
+                                )
                                 intent.setType("text/plain")
                                 context.startActivity(Intent.createChooser(intent, null))
                             },
@@ -188,9 +196,12 @@ fun CommentsScreen(
                         ) {
                             Column {
                                 comment.let {
-                                    ((parseElement(it.message, SpanStyle(
-                                        fontSize = 16.sp,
-                                        color = MaterialTheme.colors.onSurface)).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
+                                    ((parseElement(
+                                        it.message, SpanStyle(
+                                            fontSize = 16.sp,
+                                            color = MaterialTheme.colors.onSurface
+                                        )
+                                    ).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
                                 }
 
                             }
@@ -217,9 +228,9 @@ fun CommentsScreen(
                     enter = expandVertically(expandFrom = Alignment.Bottom),
                     exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
 
-                ){
+                ) {
                     Column() {
-                        
+
                         val comment =
                             viewModel.commentsData.value?.comments?.find { it.id == parentCommentId }
                         Divider()
@@ -245,7 +256,7 @@ fun CommentsScreen(
                                     .background(MaterialTheme.colors.secondary)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
-                            Column(modifier = Modifier.weight(1f),) {
+                            Column(modifier = Modifier.weight(1f)) {
                                 Text(
                                     text = comment?.author?.alias ?: "",
                                     fontWeight = FontWeight.W500,
@@ -274,14 +285,18 @@ fun CommentsScreen(
                     }
                 }
                 Divider()
-                Row(verticalAlignment = Alignment.Bottom, modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colors.surface)
-                    .padding(4.dp)) {
+                Row(
+                    verticalAlignment = Alignment.Bottom, modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colors.surface)
+                        .padding(4.dp)
+                ) {
                     var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-                    Box(modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp)){
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp)
+                    ) {
                         BasicTextField(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -293,7 +308,7 @@ fun CommentsScreen(
 
                             },
                             decorationBox = {
-                                Box(modifier = Modifier.padding(vertical = 12.dp)){
+                                Box(modifier = Modifier.padding(vertical = 12.dp)) {
                                     it()
                                 }
                             },
@@ -301,7 +316,7 @@ fun CommentsScreen(
                             textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface)
                         )
                         if (commentTextFieldValue.text.isEmpty()) {
-                            Row(modifier = Modifier.align(Alignment.CenterStart),) {
+                            Row(modifier = Modifier.align(Alignment.CenterStart)) {
                                 Text(
                                     text = "Комментарий",
                                     color = MaterialTheme.colors.onSurface.copy(0.4f)
@@ -316,20 +331,30 @@ fun CommentsScreen(
 
                         }
                     }
-                    
+
                     IconButton(
                         enabled = commentTextFieldValue.text.isNotBlank(),
                         onClick = {
-                        viewModel.comment(
-                            text = commentTextFieldValue.text,
-                            postId = parentPostId,
-                            parentCommentId = if (parentCommentId > 0) parentCommentId else null
-                        ) }
+                            viewModel.comment(
+                                text = commentTextFieldValue.text,
+                                postId = parentPostId,
+                                parentCommentId = if (parentCommentId > 0) parentCommentId else null
+                            )
+                            commentTextFieldValue = TextFieldValue()
+                            parentCommentId = 0
+                            commentTextFieldFocusRequester.freeFocus()
+                        }
                     ) {
-                        val iconTint by animateColorAsState(targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(0.4f))
+                        val iconTint by animateColorAsState(
+                            targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(
+                                0.4f
+                            )
+                        )
                         Icon(
                             tint = iconTint,
-                            painter = painterResource(id = R.drawable.send), contentDescription = "send comment")
+                            painter = painterResource(id = R.drawable.send),
+                            contentDescription = "send comment"
+                        )
                     }
                 }
 
