@@ -2,8 +2,7 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -206,49 +205,65 @@ fun CommentsScreen(
             }
 
             if (commentsData?.commentAccess?.canComment == true) {
-                if (parentCommentId > 0){
-                    val comment = viewModel.commentsData.value?.comments?.find { it.id == parentCommentId }
-                    Divider()
-                    val coroutineScope = rememberCoroutineScope()
-                    Row(modifier = Modifier
-                        .clickable {
-                            val index =
-                                viewModel.commentsData.value?.comments?.indexOf(comment) ?: 0
-                            coroutineScope.launch { lazyListState.animateScrollToItem(index + 1) }
-                        }
-                        .background(MaterialTheme.colors.surface)
-                        .padding(4.dp)
-                        .padding(start = 4.dp)
-                        .height(IntrinsicSize.Min),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+
+                AnimatedVisibility(
+                    visible = parentCommentId > 0,
+                    enter = expandVertically(expandFrom = Alignment.Bottom),
+                    exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
+
+                ){
+                    Column() {
                         
-                        Spacer(modifier = Modifier
-                            .width(4.dp)
-                            .fillMaxHeight()
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colors.secondary))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f),) {
-                            Text(text = comment?.author?.alias ?: "", fontWeight = FontWeight.W500,
-                                color = MaterialTheme.colors.primary.copy(0.9f))
-                            val text = comment?.message ?: ""
-                            Text(
-                                maxLines = 1,
-                                text = Jsoup.parse(text).text(),
-                                overflow = TextOverflow.Ellipsis,
-                                style = MaterialTheme.typography.body2,
-                                color = MaterialTheme.colors.onSurface.copy(0.6f)
+                        val comment =
+                            viewModel.commentsData.value?.comments?.find { it.id == parentCommentId }
+                        Divider()
+                        val coroutineScope = rememberCoroutineScope()
+                        Row(modifier = Modifier
+                            .clickable {
+                                val index =
+                                    viewModel.commentsData.value?.comments?.indexOf(comment) ?: 0
+                                coroutineScope.launch { lazyListState.animateScrollToItem(index + 1) }
+                            }
+                            .background(MaterialTheme.colors.surface)
+                            .padding(4.dp)
+                            .padding(start = 4.dp)
+                            .height(IntrinsicSize.Min),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Spacer(
+                                modifier = Modifier
+                                    .width(4.dp)
+                                    .fillMaxHeight()
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colors.secondary)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(modifier = Modifier.weight(1f),) {
+                                Text(
+                                    text = comment?.author?.alias ?: "",
+                                    fontWeight = FontWeight.W500,
+                                    color = MaterialTheme.colors.primary.copy(0.9f)
+                                )
+                                val text = comment?.message ?: ""
+                                Text(
+                                    maxLines = 1,
+                                    text = Jsoup.parse(text).text(),
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.body2,
+                                    color = MaterialTheme.colors.onSurface.copy(0.6f)
+                                )
 
-                        }
-                        Spacer(modifier = Modifier.width(4.dp))
-                        IconButton(onClick = { parentCommentId = 0 }) {
-                            Icon(
-                                imageVector = Icons.Outlined.Close,
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.secondary)
+                            }
+                            Spacer(modifier = Modifier.width(4.dp))
+                            IconButton(onClick = { parentCommentId = 0 }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Close,
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colors.secondary
+                                )
 
+                            }
                         }
                     }
                 }
@@ -298,7 +313,11 @@ fun CommentsScreen(
                     IconButton(
                         enabled = commentTextFieldValue.text.isNotBlank(),
                         onClick = {
-                        viewModel.comment(commentTextFieldValue.text, parentPostId) }
+                        viewModel.comment(
+                            text = commentTextFieldValue.text,
+                            postId = parentPostId,
+                            parentCommentId = if (parentCommentId > 0) parentCommentId else null
+                        ) }
                     ) {
                         val iconTint by animateColorAsState(targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(0.4f))
                         Icon(
