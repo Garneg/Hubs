@@ -26,8 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
@@ -50,7 +48,6 @@ import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
-import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -143,10 +140,10 @@ fun SearchScreen(
                 title = { Text(text = "Поиск") },
                 elevation = 0.dp,
                 navigationIcon = {
-                IconButton(onClick = onBackClicked) {
-                    Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "")
-                }
-            })
+                    IconButton(onClick = onBackClicked) {
+                        Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "")
+                    }
+                })
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
@@ -155,23 +152,32 @@ fun SearchScreen(
             val focusRequester by remember { mutableStateOf(FocusRequester()) }
             val keyboardController = LocalSoftwareKeyboardController.current
             val coroutineScope = rememberCoroutineScope()
-            val lazyListState = rememberLazyListState()
+
             var pageNumber by rememberSaveable { mutableStateOf(1) }
 
             var currentQuery by rememberSaveable {
                 mutableStateOf(searchTextValue)
             }
 
+            val articlesLazyListState = rememberLazyListState()
+
             val articlesList by viewModel.articles.observeAsState()
 
-            LaunchedEffect(key1 = Unit) { focusRequester.requestFocus() }
+            var doRequestFocus by rememberSaveable {
+                mutableStateOf(true)
+            }
+            LaunchedEffect(key1 = Unit) {
+                if (doRequestFocus) {
+                    focusRequester.requestFocus()
+                    doRequestFocus = false
+                }
+            }
             Row(
                 modifier = Modifier
                     .background(if (currentQuery.isNotEmpty()) MaterialTheme.colors.surface else MaterialTheme.colors.background)
                     .padding(8.dp)
                     .padding(horizontal = 4.dp)
                     .clip(shape = RoundedCornerShape(8.dp))
-//                        .background(Color(0xFFDBDBDB))
                     .border(
                         width = 1.5.dp,
                         color = MaterialTheme.colors.secondary,
@@ -202,7 +208,7 @@ fun SearchScreen(
                         autoCorrect = false,
                         imeAction = ImeAction.Search
                     ),
-                    keyboardActions = KeyboardActions(onSearch = {
+                    keyboardActions = KeyboardActions {
                         keyboardController?.hide()
                         if (searchTextValue.startsWith(".id")) {
                             if (searchTextValue.drop(3).isDigitsOnly())
@@ -212,10 +218,11 @@ fun SearchScreen(
                             coroutineScope.launch(Dispatchers.IO) {
                                 pageNumber = 1
                                 viewModel.loadArticles(currentQuery, 1)
+
                             }
                             showPages = true
                         }
-                    }),
+                    },
                     singleLine = true,
                     cursorBrush = SolidColor(MaterialTheme.colors.secondary)
                 )
@@ -225,7 +232,11 @@ fun SearchScreen(
                             searchTextValue = ""
                             showClearAllButton = false
                         }) {
-                        Icon(imageVector = Icons.Outlined.Close, contentDescription = "")
+                        Icon(
+                            tint = MaterialTheme.colors.secondary,
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = ""
+                        )
                     }
 
             }
@@ -248,7 +259,7 @@ fun SearchScreen(
                                     data = articlesList!!,
                                     contentPadding = PaddingValues(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    lazyListState = lazyListState,
+                                    lazyListState = articlesLazyListState,
                                     onNextPageLoad = {
                                         viewModel.loadArticles(currentQuery, it)
                                     }
@@ -330,9 +341,6 @@ fun SearchScreen(
                 }
 
             }
-//            LaunchedEffect(key1 = articlesList?.list?.first()) {
-//                lazyListState.scrollToItem(0)
-//            }
         }
 
     }

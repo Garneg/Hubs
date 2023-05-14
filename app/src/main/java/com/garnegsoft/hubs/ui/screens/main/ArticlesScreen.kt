@@ -3,21 +3,13 @@ package com.garnegsoft.hubs.ui.screens.main
 
 import ArticleController
 import ArticlesListController
-import android.graphics.DiscretePathEffect
-import android.util.Log
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -27,11 +19,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.MutableLiveData
@@ -39,7 +28,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.HabrList
@@ -50,13 +38,11 @@ import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
-import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.authDataStoreFlow
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.sync.Mutex
 
 
 class ArticlesScreenViewModel : ViewModel() {
