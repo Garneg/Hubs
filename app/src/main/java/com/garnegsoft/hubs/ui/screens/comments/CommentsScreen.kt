@@ -324,7 +324,7 @@ fun CommentsScreen(
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Icon(
                                     tint = MaterialTheme.colors.onSurface.copy(0.4f),
-                                    painter = painterResource(id = R.drawable.markdown),
+                                    painter = painterResource(id = R.drawable.foreground_filled),
                                     contentDescription = ""
                                 )
                             }

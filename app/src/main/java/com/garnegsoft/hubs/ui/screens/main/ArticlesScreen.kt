@@ -173,7 +173,7 @@ fun ArticlesScreen(
             val articlesLazyListState = rememberLazyListState()
             val newsLazyListState = rememberLazyListState()
             val hubsLazyListState = rememberLazyListState()
-            val usersLazyListState = rememberLazyListState()
+            val authorsLazyListState = rememberLazyListState()
             val companiesLazyListState = rememberLazyListState()
 
             val pages = remember(key1 = isAuthorized) {
@@ -389,7 +389,7 @@ fun ArticlesScreen(
                         val authors by viewModel.authors.observeAsState()
                         if (authors != null) {
                             PagedHabrSnippetsColumn(
-                                lazyListState = usersLazyListState,
+                                lazyListState = authorsLazyListState,
                                 data = authors!!,
                                 onNextPageLoad = {
                                     launch(Dispatchers.IO) {
@@ -530,11 +530,11 @@ fun ArticlesScreen(
                 tabs = pages.keys.toList(),
                 onCurrentPositionTabClick = { index, title ->
                     when (title) {
+                        "Моя лента" -> ScrollUpMethods.scrollLazyList(myFeedLazyListState)
                         "Статьи" -> ScrollUpMethods.scrollLazyList(articlesLazyListState)
                         "Новости" -> ScrollUpMethods.scrollLazyList(newsLazyListState)
-                        "Моя лента" -> ScrollUpMethods.scrollLazyList(myFeedLazyListState)
                         "Хабы" -> ScrollUpMethods.scrollLazyList(hubsLazyListState)
-                        "Пользователи" -> ScrollUpMethods.scrollLazyList(usersLazyListState)
+                        "Авторы" -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
                         "Компании" -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
                     }
                 })
