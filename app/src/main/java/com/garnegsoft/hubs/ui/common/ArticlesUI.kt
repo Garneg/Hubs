@@ -597,7 +597,7 @@ fun ArticleCard(
                     }
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 4.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp),
                         verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             painter = painterResource(id = R.drawable.comments_icon),

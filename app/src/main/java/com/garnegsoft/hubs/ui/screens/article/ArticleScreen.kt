@@ -13,6 +13,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
@@ -348,28 +349,45 @@ fun ArticleScreen(
                         )
                     }
                     Spacer(Modifier.width(4.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable(onClick = onCommentsClicked)
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(18.dp),
-                            painter = painterResource(id = R.drawable.comments_icon),
-                            contentDescription = "",
-                            tint = statisticsColor
+                    Box(modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight()
+                        .clickable(onClick = onCommentsClicked)) {
+                        BadgedBox(
+                            modifier = Modifier.align(Alignment.Center),
+                            badge = {
+                                article.relatedData?.let {
+                                    if (it.unreadComments > 0){
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(CircleShape)
+                                                .background(RatingPositive)
+                                        )
+                                    }
+                                }
+                            }) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
+                            ) {
+                                Icon(
+                                    modifier = Modifier.size(18.dp),
+                                    painter = painterResource(id = R.drawable.comments_icon),
+                                    contentDescription = "",
+                                    tint = statisticsColor
 
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = article.statistics.commentsCount,
-                            color = statisticsColor,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(
+                                    text = article.statistics.commentsCount,
+                                    color = statisticsColor,
+                                    fontWeight = FontWeight.W500
+                                )
+                            }
+                        }
+                     }
                 }
                 Divider()
             }
