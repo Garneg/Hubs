@@ -142,6 +142,7 @@ class ArticlesListController {
                                 complexity = PostComplexity.fromString(it.complexity),
                                 readingTime = it.readingTime,
                                 relatedData = it.relatedData?.let { com.garnegsoft.hubs.api.article.Article.RelatedData(
+                                    unreadComments = it.unreadCommentsCount,
                                     bookmarked = it.bookmarked,
                                     canVoteMinus = it.canVoteMinus,
                                     canVotePlus = it.canVotePlus
@@ -214,7 +215,7 @@ class ArticlesListController {
 
     @Serializable
     data class RelatedData(
-        var unreadCommentsCount: Int?,
+        var unreadCommentsCount: Int,
         var vote: RelatedDataVote,
         var bookmarked: Boolean,
         var canComment: Boolean,

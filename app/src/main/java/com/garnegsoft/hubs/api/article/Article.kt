@@ -92,6 +92,7 @@ class Article(
     )
 
     data class RelatedData(
+        val unreadComments: Int,
         val bookmarked: Boolean,
         val canVotePlus: Boolean,
         val canVoteMinus: Boolean

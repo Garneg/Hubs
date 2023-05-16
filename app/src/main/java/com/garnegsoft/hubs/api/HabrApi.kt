@@ -46,15 +46,37 @@ class HabrApi {
             version: Int = 2
         ): Response {
             val token = getCsrfToken()
-//            val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
-//            if (args != null) {
-//                finalArgs.putAll(args)
-//            }
+            val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
+            if (args != null) {
+                finalArgs.putAll(args)
+            }
             val paramsString = StringBuilder()
-//            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&") })
+            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&") })
             val request = Request
                 .Builder()
                 .post(requestBody)
+                .url("$baseAddress/kek/v$version/$path")
+                .addHeader("csrf-token", token ?: "")
+                .build()
+            return HttpClient.newCall(request).execute()
+        }
+
+        fun delete(
+            path: String,
+            args: Map<String, String>? = null,
+            requestBody: RequestBody = String().toRequestBody(),
+            version: Int = 2
+        ): Response {
+            val token = getCsrfToken()
+            val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
+            if (args != null) {
+                finalArgs.putAll(args)
+            }
+            val paramsString = StringBuilder()
+            finalArgs.keys.forEach({ paramsString.append("$it=${finalArgs[it]}&") })
+            val request = Request
+                .Builder()
+                .delete(requestBody)
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()

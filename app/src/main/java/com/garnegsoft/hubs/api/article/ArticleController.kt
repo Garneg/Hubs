@@ -98,6 +98,7 @@ class ArticleController {
                     readingTime = it.readingTime,
                     relatedData = it.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
+                            unreadComments = it.unreadCommentsCount,
                             bookmarked = it.bookmarked,
                             canVoteMinus = it.canVoteMinus,
                             canVotePlus = it.canVotePlus
@@ -190,6 +191,7 @@ class ArticleController {
                     readingTime = it.readingTime,
                     relatedData = it.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
+                            unreadComments = it.unreadCommentsCount,
                             bookmarked = it.bookmarked,
                             canVoteMinus = it.canVoteMinus,
                             canVotePlus = it.canVotePlus
@@ -204,14 +206,14 @@ class ArticleController {
         }
 
         fun addToBookmarks(id: Int): Boolean {
-            val response = HabrApi.post("articles/$id/bookmarks/add", version = 1)
+            val response = HabrApi.post("articles/$id/bookmarks")
             if (response.code != 200)
                 return false
             return true
         }
 
         fun removeFromBookmarks(id: Int): Boolean {
-            val response = HabrApi.post("articles/$id/bookmarks/remove", version = 1)
+            val response = HabrApi.delete("articles/$id/bookmarks")
             if (response.code != 200)
                 return false
             return true
@@ -350,7 +352,7 @@ class ArticleController {
 
         @Serializable
         data class ArticleRelatedData(
-            var unreadCommentsCount: Int?,
+            var unreadCommentsCount: Int,
             var vote: RelatedDataVote,
             var bookmarked: Boolean,
             var canComment: Boolean,

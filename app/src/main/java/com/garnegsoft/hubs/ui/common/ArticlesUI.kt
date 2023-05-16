@@ -4,6 +4,7 @@ import ArticleController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -293,7 +294,7 @@ fun ArticleCard(
                 fontWeight = FontWeight.W500,
                 fontSize = 14.sp
             )
-            if (article.isTranslation){
+            if (article.isTranslation) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Icon(
                     modifier = Modifier.size(14.dp),
@@ -447,10 +448,11 @@ fun ArticleCard(
                 )
             }
             val favoriteCoroutineScope = rememberCoroutineScope()
-            var addedToBookmarks by rememberSaveable(article) {
+
+            var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
                 mutableStateOf(article.relatedData?.bookmarked ?: false)
             }
-            var addedToBookmarksCount by rememberSaveable(article) {
+            var addedToBookmarksCount by rememberSaveable(article.relatedData?.bookmarked) {
                 mutableStateOf(article.statistics.favoritesCount.toInt())
             }
             //Added to bookmarks
@@ -579,19 +581,42 @@ fun ArticleCard(
                     )
             ) {
 
-                Icon(
-                    painter = painterResource(id = R.drawable.comments_icon),
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = style.statisticsColor
-                )
-                Spacer(modifier = Modifier.padding(2.dp))
-                Text(
-                    text = article.statistics.commentsCount,
-                    style = style.statisticsTextStyle,
-                    overflow = TextOverflow.Clip,
-                    maxLines = 1
-                )
+                BadgedBox(
+                    badge = {
+                        article.relatedData?.let {
+                            if (it.unreadComments > 0){
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(RatingPositive)
+                                )
+                            }
+                        }
+
+                    }
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.comments_icon),
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp),
+                            tint = style.statisticsColor
+                        )
+                        Spacer(modifier = Modifier.padding(2.dp))
+                        Text(
+                            text = article.statistics.commentsCount,
+                            style = style.statisticsTextStyle,
+                            overflow = TextOverflow.Clip,
+                            maxLines = 1
+                        )
+                    }
+
+                }
+
+
 
             }
         }

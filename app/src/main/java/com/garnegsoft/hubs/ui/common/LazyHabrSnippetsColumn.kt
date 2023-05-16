@@ -33,6 +33,8 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     snippet: @Composable (T) -> Unit,
 ) {
 
+
+
     val derivedItemsCount by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
     val isLastDerived by remember {
         derivedStateOf {
@@ -52,7 +54,7 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     LaunchedEffect(key1 = derivedItemsCount) {
         doPageLoad = true
     }
-    
+
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
@@ -73,6 +75,7 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
         }
     }
 }
+
 
 @Composable
 @SuppressLint("ModifierParameter")
