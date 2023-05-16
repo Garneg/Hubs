@@ -126,6 +126,7 @@ class CommentsListController {
                     deleted = true,
                     message = comment.message,
                     score = comment.score,
+                    votesCount = comment.votesCount,
                     isArticleAuthor = comment.isPostAuthor,
                     parentCommentId = comment.parentId?.toInt(),
                     edited = comment.timeChanged != null,
@@ -146,12 +147,13 @@ class CommentsListController {
                 deleted = false,
                 message = comment.message,
                 score = comment.score,
+                votesCount = comment.votesCount,
                 isArticleAuthor = comment.isPostAuthor,
                 parentCommentId = comment.parentId?.toInt(),
                 edited = comment.timeChanged != null,
                 isNew = comment.isNew ?: false,
                 isUserAuthor = comment.isAuthor,
-                inModeration = inModeration
+                inModeration = inModeration,
             )
         }
 

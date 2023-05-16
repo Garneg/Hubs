@@ -578,6 +578,7 @@ fun ArticleCard(
                         onClick = onCommentsClick
                     )
             ) {
+
                 Icon(
                     painter = painterResource(id = R.drawable.comments_icon),
                     contentDescription = null,

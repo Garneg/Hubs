@@ -9,6 +9,7 @@ class Comment (
     val publishedTime: String,
     val message: String,
     val score: Int?,
+    val votesCount: Int?,
     val deleted: Boolean,
     val author: Article.Author,
     val isArticleAuthor: Boolean,

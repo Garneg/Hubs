@@ -94,6 +94,7 @@ fun CommentsScreen(
     val lazyListState = rememberLazyListState()
 
     LaunchedEffect(key1 = Unit) {
+        if (!viewModel.commentsData.isInitialized)
         launch(Dispatchers.IO) {
             if (showArticleSnippet)
                 viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
@@ -222,142 +223,145 @@ fun CommentsScreen(
             }
 
             if (commentsData?.commentAccess?.canComment == true) {
+                Column(modifier = Modifier) {
 
-                AnimatedVisibility(
-                    visible = parentCommentId > 0,
-                    enter = expandVertically(expandFrom = Alignment.Bottom),
-                    exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
 
-                ) {
-                    Column() {
+                    AnimatedVisibility(
+                        visible = parentCommentId > 0,
+                        enter = expandVertically(expandFrom = Alignment.Bottom),
+                        exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
 
-                        val comment =
-                            viewModel.commentsData.value?.comments?.find { it.id == parentCommentId }
-                        Divider()
-                        val coroutineScope = rememberCoroutineScope()
-                        Row(modifier = Modifier
-                            .clickable {
-                                val index =
-                                    viewModel.commentsData.value?.comments?.indexOf(comment) ?: 0
-                                coroutineScope.launch { lazyListState.animateScrollToItem(index + 1) }
+                    ) {
+                        Column() {
+
+                            val comment =
+                                viewModel.commentsData.value?.comments?.find { it.id == parentCommentId }
+                            Divider()
+                            val coroutineScope = rememberCoroutineScope()
+                            Row(modifier = Modifier
+                                .clickable {
+                                    val index =
+                                        viewModel.commentsData.value?.comments?.indexOf(comment)
+                                            ?: 0
+                                    coroutineScope.launch {
+                                        lazyListState.animateScrollToItem(
+                                            index + 1
+                                        )
+                                    }
+                                }
+                                .background(MaterialTheme.colors.surface)
+                                .padding(4.dp)
+                                .padding(start = 4.dp)
+                                .height(IntrinsicSize.Min),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Spacer(
+                                    modifier = Modifier
+                                        .width(4.dp)
+                                        .fillMaxHeight()
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colors.secondary)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = comment?.author?.alias ?: "",
+                                        fontWeight = FontWeight.W500,
+                                        color = MaterialTheme.colors.primary.copy(0.9f)
+                                    )
+                                    val text = comment?.message ?: ""
+                                    Text(
+                                        maxLines = 1,
+                                        text = Jsoup.parse(text).text(),
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = MaterialTheme.typography.body2,
+                                        color = MaterialTheme.colors.onSurface.copy(0.6f)
+                                    )
+
+                                }
+                                Spacer(modifier = Modifier.width(4.dp))
+                                IconButton(onClick = { parentCommentId = 0 }) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Close,
+                                        contentDescription = "",
+                                        tint = MaterialTheme.colors.secondary
+                                    )
+
+                                }
                             }
+                        }
+                    }
+                    Divider()
+                    Row(
+                        verticalAlignment = Alignment.Bottom, modifier = Modifier
+                            .fillMaxWidth()
                             .background(MaterialTheme.colors.surface)
                             .padding(4.dp)
-                            .padding(start = 4.dp)
-                            .height(IntrinsicSize.Min),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-
-                            Spacer(
-                                modifier = Modifier
-                                    .width(4.dp)
-                                    .fillMaxHeight()
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colors.secondary)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = comment?.author?.alias ?: "",
-                                    fontWeight = FontWeight.W500,
-                                    color = MaterialTheme.colors.primary.copy(0.9f)
-                                )
-                                val text = comment?.message ?: ""
-                                Text(
-                                    maxLines = 1,
-                                    text = Jsoup.parse(text).text(),
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.body2,
-                                    color = MaterialTheme.colors.onSurface.copy(0.6f)
-                                )
-
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            IconButton(onClick = { parentCommentId = 0 }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Close,
-                                    contentDescription = "",
-                                    tint = MaterialTheme.colors.secondary
-                                )
-
-                            }
-                        }
-                    }
-                }
-                Divider()
-                Row(
-                    verticalAlignment = Alignment.Bottom, modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colors.surface)
-                        .padding(4.dp)
-                ) {
-                    var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .padding(horizontal = 8.dp)
                     ) {
-                        BasicTextField(
+                        var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
+                        Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(max = 140.dp)
-                                .focusRequester(commentTextFieldFocusRequester),
-                            value = commentTextFieldValue,
-                            onValueChange = {
-                                commentTextFieldValue = it
+                                .weight(1f)
+                                .padding(horizontal = 8.dp)
+                        ) {
+                            BasicTextField(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp)
+                                    .heightIn(max = 140.dp)
+                                    .focusRequester(commentTextFieldFocusRequester),
+                                value = commentTextFieldValue,
+                                onValueChange = {
+                                    commentTextFieldValue = it
 
-                            },
-                            decorationBox = {
-                                Box(modifier = Modifier.padding(vertical = 12.dp)) {
-                                    it()
+                                },
+                                cursorBrush = SolidColor(MaterialTheme.colors.secondary),
+                                textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface)
+                            )
+                            if (commentTextFieldValue.text.isEmpty()) {
+                                Row(modifier = Modifier.align(Alignment.CenterStart)) {
+                                    Text(
+                                        text = "Комментарий",
+                                        color = MaterialTheme.colors.onSurface.copy(0.4f)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Icon(
+                                        tint = MaterialTheme.colors.onSurface.copy(0.4f),
+                                        painter = painterResource(id = R.drawable.markdown),
+                                        contentDescription = ""
+                                    )
                                 }
-                            },
-                            cursorBrush = SolidColor(MaterialTheme.colors.secondary),
-                            textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface)
-                        )
-                        if (commentTextFieldValue.text.isEmpty()) {
-                            Row(modifier = Modifier.align(Alignment.CenterStart)) {
-                                Text(
-                                    text = "Комментарий",
-                                    color = MaterialTheme.colors.onSurface.copy(0.4f)
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(
-                                    tint = MaterialTheme.colors.onSurface.copy(0.4f),
-                                    painter = painterResource(id = R.drawable.markdown),
-                                    contentDescription = ""
-                                )
+
                             }
-
                         }
-                    }
 
-                    IconButton(
-                        enabled = commentTextFieldValue.text.isNotBlank(),
-                        onClick = {
-                            viewModel.comment(
-                                text = commentTextFieldValue.text,
-                                postId = parentPostId,
-                                parentCommentId = if (parentCommentId > 0) parentCommentId else null
+                        IconButton(
+                            enabled = commentTextFieldValue.text.isNotBlank(),
+                            onClick = {
+                                viewModel.comment(
+                                    text = commentTextFieldValue.text,
+                                    postId = parentPostId,
+                                    parentCommentId = if (parentCommentId > 0) parentCommentId else null
+                                )
+                                commentTextFieldValue = TextFieldValue()
+                                parentCommentId = 0
+                                commentTextFieldFocusRequester.freeFocus()
+                            }
+                        ) {
+                            val iconTint by animateColorAsState(
+                                targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(
+                                    0.4f
+                                )
                             )
-                            commentTextFieldValue = TextFieldValue()
-                            parentCommentId = 0
-                            commentTextFieldFocusRequester.freeFocus()
+                            Icon(
+                                tint = iconTint,
+                                painter = painterResource(id = R.drawable.send),
+                                contentDescription = "send comment"
+                            )
                         }
-                    ) {
-                        val iconTint by animateColorAsState(
-                            targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(
-                                0.4f
-                            )
-                        )
-                        Icon(
-                            tint = iconTint,
-                            painter = painterResource(id = R.drawable.send),
-                            contentDescription = "send comment"
-                        )
                     }
                 }
-
             }
 
         }
