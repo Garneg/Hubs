@@ -94,11 +94,12 @@ fun CommentsScreen(
     val lazyListState = rememberLazyListState()
 
     LaunchedEffect(key1 = Unit) {
-        if (!viewModel.commentsData.isInitialized)
-        launch(Dispatchers.IO) {
-            if (showArticleSnippet)
-                viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
-            viewModel.commentsData.postValue(CommentsListController.getComments("articles/$parentPostId/comments"))
+        if (!viewModel.commentsData.isInitialized) {
+            launch(Dispatchers.IO) {
+                if (showArticleSnippet)
+                    viewModel.parentPostSnippet.postValue(ArticleController.getSnippet("articles/$parentPostId"))
+                viewModel.commentsData.postValue(CommentsListController.getComments("articles/$parentPostId/comments"))
+            }
         }
     }
 

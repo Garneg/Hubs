@@ -659,7 +659,7 @@ fun TextList(
     startNumber: Int = 1
 ) {
     var itemNumber = startNumber
-    Column(modifier = modifier) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         items.forEach {
 
             Row() {

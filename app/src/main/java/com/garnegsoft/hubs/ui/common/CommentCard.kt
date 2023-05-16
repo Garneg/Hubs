@@ -31,7 +31,12 @@ import com.garnegsoft.hubs.ui.theme.RatingPositive
 private fun defaultCommentCardStyle(): CommentCardStyle {
     return CommentCardStyle(
         background = MaterialTheme.colors.surface,
-        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
+        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
+        messageTextStyle = TextStyle(
+            fontSize = MaterialTheme.typography.body1.fontSize,
+            color = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
+            lineHeight = MaterialTheme.typography.body1.fontSize * 1.25f
+        )
     )
 }
 
@@ -185,7 +190,9 @@ data class CommentCardStyle(
         color = textColor,
         fontWeight = FontWeight.W500
     ),
-    val messageTextStyle: TextStyle = TextStyle.Default.copy(color = textColor),
+    val messageTextStyle: TextStyle = TextStyle.Default.copy(
+        color = textColor,
+    ),
     val publishedTimeTextStyle: TextStyle = TextStyle(
         color = Color.Gray,
         fontWeight = FontWeight.W400,

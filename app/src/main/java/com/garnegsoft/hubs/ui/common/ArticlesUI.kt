@@ -569,7 +569,6 @@ fun ArticleCard(
                         top = style.innerPadding.calculateTopPadding(),
                         bottom = style.innerPadding.calculateBottomPadding()
                     )
-
                     .fillMaxHeight()
                     .absolutePadding(4.dp)
                     .clip(style.innerElementsShape)
