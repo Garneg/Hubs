@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
@@ -131,6 +132,8 @@ fun CommentItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
 
+                    val densityFactor = LocalDensity.current.density
+
                     val positionProvider = object : PopupPositionProvider {
                         override fun calculatePosition(
                             anchorBounds: IntRect,
@@ -139,8 +142,8 @@ fun CommentItem(
                             popupContentSize: IntSize
                         ): IntOffset {
                             return IntOffset(
-                                anchorBounds.left,
-                                anchorBounds.top - popupContentSize.height - 10
+                                (anchorBounds.left - (12 * densityFactor)).toInt(),
+                                anchorBounds.top - popupContentSize.height
                             )
                         }
 
