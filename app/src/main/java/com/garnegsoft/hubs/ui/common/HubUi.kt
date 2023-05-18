@@ -48,6 +48,7 @@ fun HubCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Max)
             .clip(style.shape)
             .background(style.backgroundColor)
             .clickable(onClick = onClick)
@@ -83,7 +84,10 @@ fun HubCard(
                         overflow = TextOverflow.Ellipsis
                     )
             }
-            indicator(hub)
+            Box(modifier = Modifier.padding(start = 4.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                indicator(hub)
+            }
+
         }
     }
 }
@@ -104,5 +108,5 @@ data class HubCardStyle(
     val shape: Shape = RoundedCornerShape(26.dp),
     val innerPadding: Dp = 16.dp,
     val descriptionMaxLines: Int = 1,
-    val showDescription: Boolean = true
+    val showDescription: Boolean = false
 )

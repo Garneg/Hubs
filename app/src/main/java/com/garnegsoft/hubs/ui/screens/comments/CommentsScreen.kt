@@ -46,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.ArticleComments
+import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
@@ -92,6 +93,17 @@ fun CommentsScreen(
     val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
 
     val lazyListState = rememberLazyListState()
+
+    var commentsById = remember(commentsData?.comments) {
+
+        val map = mutableMapOf<Int, Comment>()
+        if (commentsData?.comments != null) {
+            commentsData?.comments?.forEach {
+                map.put(it.id, it)
+            }
+        }
+        map
+    }
 
     LaunchedEffect(key1 = Unit) {
         if (!viewModel.commentsData.isInitialized) {
@@ -163,13 +175,16 @@ fun CommentsScreen(
                         )
                     }
                 }
+
                 if (commentsData != null) {
                     items(
                         count = commentsData.comments.size,
-                        key = { commentsData.comments[it].id },
+                        key = { commentsData.comments[it].id }
                     ) {
                         val comment = commentsData.comments[it]
                         val context = LocalContext.current
+//                        val parentComment = commentsById.
+
                         CommentItem(
                             modifier = Modifier
                                 .padding(
@@ -180,6 +195,7 @@ fun CommentsScreen(
                                 onUserClicked(comment.author.alias)
                             },
                             highlight = comment.id == commentId,
+                            parentComment = commentsById.get(comment.parentCommentId),
                             showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment
                                 ?: false,
                             onShare = {

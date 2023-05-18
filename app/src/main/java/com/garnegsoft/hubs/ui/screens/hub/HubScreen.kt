@@ -42,8 +42,11 @@ import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 class HubScreenViewModel : ViewModel() {
     var articles = MutableLiveData<HabrList<ArticleSnippet>>()
@@ -176,7 +179,18 @@ fun HubScreen(
                                     }
                                 }
                             ) {
-                                UserCard(user = it, onClick = {onUserClick(it.alias)})
+                                UserCard(
+                                    user = it,
+                                    onClick = {onUserClick(it.alias)},
+                                    indicator = {
+                                        it.investment?.let {
+                                            Text(
+                                                text = if (it < 1000f) it.toString() else formatLongNumbers(it.roundToInt()),
+                                                color = RatingPositive
+                                            )
+                                        }
+                                    }
+                                )
                             }
                         }
                         else{
@@ -202,7 +216,20 @@ fun HubScreen(
                                     }
                                 }
                             ) {
-                                CompanyCard(company = it, onClick = { onCompanyClick(it.alias)})
+
+                                CompanyCard(
+                                    company = it,
+                                    onClick = { onCompanyClick(it.alias)},
+                                    indicator = {
+                                        it.statistics.investment?.let {
+                                            Text(
+                                                text = if (it < 1000f) it.toString() else formatLongNumbers(it.roundToInt()),
+                                                color = RatingPositive
+                                            )
+                                        }
+
+                                    }
+                                )
                             }
                         }
                         else{

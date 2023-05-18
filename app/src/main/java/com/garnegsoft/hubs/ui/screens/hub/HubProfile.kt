@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.hub.Hub
 import com.garnegsoft.hubs.api.hub.HubController
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.ui.common.BasicTitledColumn
+import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -49,14 +52,16 @@ fun HubProfile(hub: Hub) {
         ) {
 
             Row(
-                horizontalArrangement = Arrangement.Center, modifier = Modifier
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 12.dp)
             ) {
                 AsyncImage(
                     modifier = Modifier
+                        .padding(top = 12.dp)
                         .size(65.dp)
-                        .clip(RoundedCornerShape(8.dp))
+                        .clip(RoundedCornerShape(12.dp))
                         .background(Color.White),
                     model = hub.avatarUrl,
                     contentDescription = ""
@@ -73,7 +78,9 @@ fun HubProfile(hub: Hub) {
             Text(
                 color = MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
                 text = hub.description,
-                modifier = Modifier.fillMaxWidth().padding(8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
                 textAlign = TextAlign.Center
             )
             Row(
@@ -134,52 +141,44 @@ fun HubProfile(hub: Hub) {
                 .background(MaterialTheme.colors.surface)
                 .padding(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(text = "Статистика", fontSize = 20.sp, fontWeight = FontWeight.W500)
-            }
-            Divider(modifier = Modifier.padding(8.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Постов", modifier = Modifier.weight(1f))
+            BasicTitledColumn(title = {
                 Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.postsCount.toString(),
-                    textAlign = TextAlign.Right
+                    modifier = Modifier.padding(12.dp),
+                    text = "Статистика", style = MaterialTheme.typography.subtitle1
                 )
-            }
+            }, divider = {
+//                    Divider()
+            }) {
+                Column(
+                    modifier = Modifier.padding(
+                        start = 12.dp,
+                        end = 12.dp,
+                        bottom = 12.dp,
+                        top = 4.dp
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    TitledColumn(title = "Постов") {
+                        Text(
+                            text = formatLongNumbers(hub.statistics.postsCount),
+                        )
+                    }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Авторов", modifier = Modifier.weight(1f))
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.authorsCount.toString(),
-                    textAlign = TextAlign.Right
-                )
-            }
+                    TitledColumn(title = "Авторов") {
+                        Text(
+                            text = formatLongNumbers(hub.statistics.authorsCount),
+                        )
+                    }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(text = "Подписчиков")
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = hub.statistics.subscribersCount.toString(),
-                    textAlign = TextAlign.Right
-                )
+                    TitledColumn(title = "Подписчиков") {
+                        Text(
+                            text = formatLongNumbers(hub.statistics.subscribersCount ),
+                        )
+                    }
+                }
+
+
             }
         }
 

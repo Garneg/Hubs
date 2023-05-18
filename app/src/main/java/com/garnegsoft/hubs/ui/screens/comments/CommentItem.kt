@@ -26,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
@@ -37,11 +39,13 @@ import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.delay
+import org.jsoup.Jsoup
 
 @Composable
 fun CommentItem(
     modifier: Modifier = Modifier,
     comment: Comment,
+    parentComment: Comment? = null,
     highlight: Boolean,
     showReplyButton: Boolean,
     onAuthorClick: () -> Unit,
@@ -67,6 +71,35 @@ fun CommentItem(
             .background(MaterialTheme.colors.surface)
             .padding(16.dp)
     ) {
+        parentComment?.let {
+            Row(modifier = Modifier.height(IntrinsicSize.Max)) {
+                Spacer(
+                    modifier = Modifier
+                        .width(4.dp)
+                        .fillMaxHeight()
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colors.secondary)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Column {
+                    Text(
+                        text = it.author.alias,
+                        color = MaterialTheme.colors.secondary,
+                        fontWeight = FontWeight.W500
+                    )
+                    Text(
+                        text = Jsoup.parse(it.message).text(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+            }
+            
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -148,6 +181,7 @@ fun CommentItem(
                         }
 
                     }
+
                     var showVotesCounter by remember { mutableStateOf(false) }
                     var visible by remember { mutableStateOf(false) }
                     LaunchedEffect(key1 = showVotesCounter, block = {
@@ -189,7 +223,8 @@ fun CommentItem(
                                             .padding(8.dp)
                                     ) {
                                         comment.votesCount?.let {
-                                            val votesMinus = (comment.votesCount - comment.score) / 2
+                                            val votesMinus =
+                                                (comment.votesCount - comment.score) / 2
                                             val votesPlus = comment.votesCount - votesMinus
 
                                             Text(

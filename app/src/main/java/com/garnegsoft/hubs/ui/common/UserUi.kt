@@ -37,7 +37,7 @@ data class UserCardStyle(
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val cardShape: Shape = RoundedCornerShape(26.dp),
     val padding: PaddingValues = PaddingValues(16.dp),
-    val showSpeciality: Boolean = true,
+    val showSpeciality: Boolean = false,
     val specialityTextStyle: TextStyle = TextStyle(color = Color.Gray)
 )
 
@@ -61,6 +61,7 @@ fun UserCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .height(IntrinsicSize.Max)
             .clip(shape = style.cardShape)
             .background(color = style.backgroundColor)
             .clickable { onClick() }
@@ -116,6 +117,9 @@ fun UserCard(
                 )
             }
         }
-        indicator()
+        Box(modifier = Modifier.padding(start = 4.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+            indicator()
+
+        }
     }
 }

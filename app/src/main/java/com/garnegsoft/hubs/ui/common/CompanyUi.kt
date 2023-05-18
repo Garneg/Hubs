@@ -57,6 +57,7 @@ fun CompanyCard(
 ) {
     Row(
         modifier = Modifier
+            .height(IntrinsicSize.Max)
             .clip(style.shape)
             .background(style.backgroundColor)
             .clickable { onClick() }
@@ -109,7 +110,9 @@ fun CompanyCard(
                     )
                 }
         }
-        indicator()
+        Box(modifier = Modifier.fillMaxHeight().padding(start = 4.dp), contentAlignment = Alignment.Center) {
+            indicator()
+        }
     }
 }
 
@@ -125,6 +128,6 @@ data class CompanyCardStyle(
     ),
     val descriptionTextStyle: TextStyle = TextStyle.Default.copy(color = Color.Gray),
     val indicatorValueTextStyle: TextStyle = TextStyle.Default.copy(color = Color.DarkGray),
-    val showDescription: Boolean = true,
+    val showDescription: Boolean = false,
     val descriptionMaxLines: Int = 1
 )
