@@ -51,6 +51,7 @@ fun CommentItem(
     onAuthorClick: () -> Unit,
     onShare: () -> Unit,
     onReplyClick: () -> Unit,
+    onParentCommentSnippetClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val onSurfaceColor = MaterialTheme.colors.onSurface
@@ -72,7 +73,10 @@ fun CommentItem(
             .padding(16.dp)
     ) {
         parentComment?.let {
-            Row(modifier = Modifier.height(IntrinsicSize.Max)) {
+            Row(modifier = Modifier.height(IntrinsicSize.Max)
+                .clip(RoundedCornerShape(2.dp))
+                .clickable(onClick = onParentCommentSnippetClick)
+            ) {
                 Spacer(
                     modifier = Modifier
                         .width(4.dp)
@@ -96,7 +100,7 @@ fun CommentItem(
 
             }
             
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
 

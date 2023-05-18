@@ -11,6 +11,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.selection.DisableSelection
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -96,7 +98,7 @@ fun CommentsScreen(
 
     var commentsById = remember(commentsData?.comments) {
 
-        val map = mutableMapOf<Int, Comment>()
+        val map = hashMapOf<Int, Comment>()
         if (commentsData?.comments != null) {
             commentsData?.comments?.forEach {
                 map.put(it.id, it)
@@ -148,7 +150,7 @@ fun CommentsScreen(
             mutableStateOf(0)
         }
         val commentTextFieldFocusRequester = remember { FocusRequester() }
-
+        val randomCoroutineScope = rememberCoroutineScope()
         Column(
             modifier = Modifier
                 .padding(it)
@@ -188,14 +190,18 @@ fun CommentsScreen(
                         CommentItem(
                             modifier = Modifier
                                 .padding(
-                                    start = 16.dp.times(comment.level.coerceAtMost(5))
+                                    start = 20.dp.times(comment.level.coerceAtMost(5))
                                 ),
                             comment = comment,
                             onAuthorClick = {
                                 onUserClicked(comment.author.alias)
                             },
                             highlight = comment.id == commentId,
-                            parentComment = commentsById.get(comment.parentCommentId),
+                            parentComment =
+                            if ((commentsData.comments.getOrNull(it - 1)?.id ?: 0) != comment.parentCommentId || comment.level > 5)
+                                commentsById.get(comment.parentCommentId)
+                            else
+                                null,
                             showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment
                                 ?: false,
                             onShare = {
@@ -210,16 +216,26 @@ fun CommentsScreen(
                             onReplyClick = {
                                 commentTextFieldFocusRequester.requestFocus()
                                 parentCommentId = comment.id
+                            },
+                            onParentCommentSnippetClick = {
+                                randomCoroutineScope.launch {
+
+                                    lazyListState.animateScrollToItem(commentsData.comments.indexOfFirst { it.id == comment.parentCommentId } + 1)
+
+                                }
                             }
                         ) {
+
                             Column {
                                 comment.let {
-                                    ((parseElement(
-                                        it.message, SpanStyle(
-                                            fontSize = 16.sp,
-                                            color = MaterialTheme.colors.onSurface
-                                        )
-                                    ).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
+                                    SelectionContainer {
+                                        ((parseElement(
+                                            it.message, SpanStyle(
+                                                fontSize = 16.sp,
+                                                color = MaterialTheme.colors.onSurface
+                                            )
+                                        ).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
+                                    }
                                 }
 
                             }
