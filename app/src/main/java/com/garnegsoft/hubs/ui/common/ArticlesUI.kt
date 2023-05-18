@@ -43,7 +43,7 @@ import kotlinx.coroutines.launch
 /**
  * Style of the [ArticleCard]
  */
-//@Immutable
+@Immutable
 data class ArticleCardStyle(
     val innerPadding: PaddingValues = PaddingValues(16.dp),
     val innerElementsShape: Shape = RoundedCornerShape(10.dp),
@@ -116,11 +116,12 @@ data class ArticleCardStyle(
 )
 
 @Composable
+@ReadOnlyComposable
 fun defaultArticleCardStyle(): ArticleCardStyle {
     return ArticleCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
-        textColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface),
-        statisticsColor = contentColorFor(backgroundColor = MaterialTheme.colors.surface)
+        textColor = MaterialTheme.colors.onSurface,
+        statisticsColor = MaterialTheme.colors.onSurface
             .copy(
                 alpha = if (MaterialTheme.colors.isLight) {
                     0.75f
@@ -131,6 +132,7 @@ fun defaultArticleCardStyle(): ArticleCardStyle {
             ),
     )
 }
+
 
 @Composable
 fun ArticleCard(
@@ -455,42 +457,48 @@ fun ArticleCard(
             var addedToBookmarksCount by rememberSaveable(article.relatedData?.bookmarked) {
                 mutableStateOf(article.statistics.favoritesCount.toInt())
             }
+
+            val bookmarkButtonClickLambda: () -> Unit = remember {
+                {
+                    article.relatedData?.let {
+                        favoriteCoroutineScope.launch(Dispatchers.IO) {
+                            if (addedToBookmarks) {
+                                addedToBookmarks = false
+                                addedToBookmarksCount--
+                                addedToBookmarksCount =
+                                    addedToBookmarksCount.coerceAtLeast(0)
+                                if (!ArticleController.removeFromBookmarks(article.id)) {
+                                    addedToBookmarks = true
+                                    addedToBookmarksCount++
+                                    addedToBookmarksCount =
+                                        addedToBookmarksCount.coerceAtLeast(0)
+                                }
+
+                            } else {
+                                addedToBookmarks = true
+                                addedToBookmarksCount++
+                                if (!ArticleController.addToBookmarks(article.id)) {
+                                    addedToBookmarks = false
+                                    addedToBookmarksCount--
+                                    addedToBookmarksCount =
+                                        addedToBookmarksCount.coerceAtLeast(0)
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
             //Added to bookmarks
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clickable(
+                        onClick = bookmarkButtonClickLambda,
+                        enabled = style.addToBookmarksButtonEnabled,
                         interactionSource = addToBookmarksInteractionSource,
-                        indication = null,
-                        enabled = style.addToBookmarksButtonEnabled
-                    ) {
-                        article.relatedData?.let {
-                            favoriteCoroutineScope.launch(Dispatchers.IO) {
-                                if (addedToBookmarks) {
-                                    addedToBookmarks = false
-                                    addedToBookmarksCount--
-                                    addedToBookmarksCount =
-                                        addedToBookmarksCount.coerceAtLeast(0)
-                                    if (!ArticleController.removeFromBookmarks(article.id)) {
-                                        addedToBookmarks = true
-                                        addedToBookmarksCount++
-                                        addedToBookmarksCount =
-                                            addedToBookmarksCount.coerceAtLeast(0)
-                                    }
-
-                                } else {
-                                    addedToBookmarks = true
-                                    addedToBookmarksCount++
-                                    if (!ArticleController.addToBookmarks(article.id)) {
-                                        addedToBookmarks = false
-                                        addedToBookmarksCount--
-                                        addedToBookmarksCount =
-                                            addedToBookmarksCount.coerceAtLeast(0)
-                                    }
-                                }
-                            }
-                        }
-                    }
+                        indication = null
+                    )
                     .absolutePadding(
                         top = style.innerPadding.calculateTopPadding(),
                         bottom = style.innerPadding.calculateBottomPadding()
@@ -500,37 +508,10 @@ fun ArticleCard(
                     .padding(0.dp, 0.dp)
                     .clip(style.innerElementsShape)
                     .clickable(
-                        addToBookmarksInteractionSource,
-                        rememberRipple(color = style.rippleColor),
+                        onClick = bookmarkButtonClickLambda,
                         enabled = style.addToBookmarksButtonEnabled,
-                        onClick = {
-                            article.relatedData?.let {
-                                favoriteCoroutineScope.launch(Dispatchers.IO) {
-                                    if (addedToBookmarks) {
-                                        addedToBookmarks = false
-                                        addedToBookmarksCount--
-                                        addedToBookmarksCount =
-                                            addedToBookmarksCount.coerceAtLeast(0)
-                                        if (!ArticleController.removeFromBookmarks(article.id)) {
-                                            addedToBookmarks = true
-                                            addedToBookmarksCount++
-                                            addedToBookmarksCount =
-                                                addedToBookmarksCount.coerceAtLeast(0)
-                                        }
-
-                                    } else {
-                                        addedToBookmarks = true
-                                        addedToBookmarksCount++
-                                        if (!ArticleController.addToBookmarks(article.id)) {
-                                            addedToBookmarks = false
-                                            addedToBookmarksCount--
-                                            addedToBookmarksCount =
-                                                addedToBookmarksCount.coerceAtLeast(0)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        interactionSource = addToBookmarksInteractionSource,
+                        indication = rememberRipple(color = style.rippleColor),
                     ),
                 horizontalArrangement = Arrangement.Center
             ) {
