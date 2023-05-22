@@ -72,6 +72,7 @@ class MainActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
 
+
         CookieManager.getInstance().removeAllCookies(null)
         val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
         val isAuthorizedFlow =

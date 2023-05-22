@@ -55,6 +55,7 @@ fun CommentItem(
     onParentCommentSnippetClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
+
     val onSurfaceColor = MaterialTheme.colors.onSurface
     val commentFlagColor = remember {
         when {
@@ -74,7 +75,7 @@ fun CommentItem(
             .padding(16.dp)
     ) {
         parentComment?.let {
-            Row(modifier = Modifier.height(IntrinsicSize.Max)
+            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max)
                 .clip(RoundedCornerShape(2.dp))
                 .clickable(onClick = onParentCommentSnippetClick)
             ) {
