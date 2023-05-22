@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
@@ -213,6 +214,7 @@ fun CommentItem(
                         IconButton(onClick = { showVotesCounter = !showVotesCounter }) {
                             if (showVotesCounter) {
                                 Popup(
+                                    properties = PopupProperties(focusable = true),
                                     popupPositionProvider = positionProvider,
                                     onDismissRequest = { visible = false }
                                 ) {

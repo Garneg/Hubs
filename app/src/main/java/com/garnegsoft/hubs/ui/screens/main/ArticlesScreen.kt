@@ -165,6 +165,7 @@ fun ArticlesScreen(
             val pages = remember(key1 = isAuthorized) {
                 var map = mapOf<String, @Composable () -> Unit>(
                     "Статьи" to {
+
                         val articles by viewModel.articles.observeAsState()
 
                         var updateFeedCoroutineScope = rememberCoroutineScope()

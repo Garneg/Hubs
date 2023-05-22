@@ -19,6 +19,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -134,6 +136,7 @@ fun defaultArticleCardStyle(): ArticleCardStyle {
 }
 
 
+
 @Composable
 fun ArticleCard(
     article: ArticleSnippet,
@@ -142,12 +145,13 @@ fun ArticleCard(
     onCommentsClick: () -> Unit,
     style: ArticleCardStyle = defaultArticleCardStyle().copy(addToBookmarksButtonEnabled = article.relatedData != null)
 ) {
+    val ripple = rememberRipple(color = style.rippleColor)
     Column(
         modifier = Modifier
             .clip(style.cardShape)
             .clickable(
-                interactionSource = remember { mutableStateOf(MutableInteractionSource()) }.value,
-                indication = rememberRipple(color = style.rippleColor), onClick = onClick
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple, onClick = onClick
             )
             .background(style.backgroundColor)
     ) {
@@ -180,7 +184,7 @@ fun ArticleCard(
                             .clip(style.innerElementsShape)
                             .clickable(
                                 interactionSource = authorInteractionSource,
-                                indication = rememberRipple(color = style.rippleColor),
+                                indication = ripple,
                                 onClick = onAuthorClick
                             )
                     ) {
@@ -444,10 +448,7 @@ fun ArticleCard(
                     style = style.statisticsTextStyle
                 )
             }
-            val addToBookmarksInteractionSource by remember {
-                mutableStateOf(
-                    MutableInteractionSource()
-                )
+            val addToBookmarksInteractionSource = remember { MutableInteractionSource()
             }
             val favoriteCoroutineScope = rememberCoroutineScope()
 
@@ -511,7 +512,7 @@ fun ArticleCard(
                         onClick = bookmarkButtonClickLambda,
                         enabled = style.addToBookmarksButtonEnabled,
                         interactionSource = addToBookmarksInteractionSource,
-                        indication = rememberRipple(color = style.rippleColor),
+                        indication = ripple,
                     ),
                 horizontalArrangement = Arrangement.Center
             ) {
@@ -533,7 +534,7 @@ fun ArticleCard(
                 )
             }
 
-            val commentsInteractionSource by remember { mutableStateOf(MutableInteractionSource()) }
+            val commentsInteractionSource = remember { MutableInteractionSource() }
             //Comments
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -555,7 +556,7 @@ fun ArticleCard(
                     .clip(style.innerElementsShape)
                     .clickable(
                         interactionSource = commentsInteractionSource,
-                        rememberRipple(color = style.rippleColor),
+                        ripple,
                         enabled = style.commentsButtonEnabled,
                         onClick = onCommentsClick
                     )
