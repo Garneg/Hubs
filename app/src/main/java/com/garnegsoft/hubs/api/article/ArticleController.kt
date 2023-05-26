@@ -240,7 +240,7 @@ class ArticleController {
         var tags: List<ArticleTag>? = null,
         var metadata: ArticleMetadata? = null,
         var polls: List<Poll>,
-        var commentsEnabled: Boolean,
+//        var commentsEnabled: Boolean,
         var rulesRemindEnabled: Boolean?,
         var votesEnabled: Boolean?,
         var status: String?,

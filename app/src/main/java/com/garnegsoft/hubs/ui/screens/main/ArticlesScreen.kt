@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.main
 
 import ArticleController
 import ArticlesListController
+import android.os.Build
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -28,6 +29,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.ImageLoader
+import coil.memory.MemoryCache
+import coil.request.CachePolicy
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.HabrList
@@ -453,6 +457,8 @@ fun ArticlesScreen(
                             var scrollAfterRefresh = remember { mutableStateOf(false)}
                             val articles by viewModel.myFeedArticles.observeAsState()
                             if (articles != null) {
+
+
                                 PagedRefreshableHabrSnippetsColumn(
                                     lazyListState = myFeedLazyListState,
                                     data = articles!!,
@@ -488,7 +494,8 @@ fun ArticlesScreen(
                                         article = it,
                                         onClick = { onArticleClicked(it.id) },
                                         onAuthorClick = { onUserClicked(it.author!!.alias) },
-                                        onCommentsClick = { onCommentsClicked(it.id) })
+                                        onCommentsClick = { onCommentsClicked(it.id) },
+                                    )
                                 }
                             } else {
                                 Box(modifier = Modifier.fillMaxSize()) {

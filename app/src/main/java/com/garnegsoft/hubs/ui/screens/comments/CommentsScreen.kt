@@ -8,6 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -179,13 +180,13 @@ fun CommentsScreen(
                 }
 
                 if (commentsData != null) {
+
                     items(
-                        count = commentsData.comments.size,
-                        key = { commentsData.comments[it].id }
+                        items = commentsData.comments,
+                        key = { it.id }
                     ) {
-                        val comment = commentsData.comments[it]
+                        val comment = it
                         val context = LocalContext.current
-//                        val parentComment = commentsById.
 
                         CommentItem(
                             modifier = Modifier
@@ -197,11 +198,7 @@ fun CommentsScreen(
                                 onUserClicked(comment.author.alias)
                             },
                             highlight = comment.id == commentId,
-                            parentComment =
-                            if ((commentsData.comments.getOrNull(it - 1)?.id ?: 0) != comment.parentCommentId || comment.level > 5)
-                                commentsById.get(comment.parentCommentId)
-                            else
-                                null,
+                            parentComment = commentsById.get(comment.parentCommentId),
                             showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment
                                 ?: false,
                             onShare = {

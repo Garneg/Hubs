@@ -10,7 +10,7 @@ import coil.compose.AsyncImage
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 
-val colorMatrix = floatArrayOf(
+private val colorMatrix = floatArrayOf(
     -0.7f, 0f, 0f, 0f, 255f,
     0f, -0.7f, 0f, 0f, 255f,
     0f, 0f, -0.7f, 0f, 255f,
@@ -33,9 +33,7 @@ fun AsyncSvgImage(
             .build(),
         contentDescription = contentDescription,
         colorFilter = if (MaterialTheme.colors.isLight) null else ColorFilter
-            .colorMatrix(ColorMatrix(colorMatrix))
-
-        ,
+            .colorMatrix(ColorMatrix(colorMatrix)),
         contentScale = contentScale
     )
 }

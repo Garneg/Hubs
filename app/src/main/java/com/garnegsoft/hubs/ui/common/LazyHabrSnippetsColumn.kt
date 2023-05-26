@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.*
@@ -32,9 +33,6 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     },
     snippet: @Composable (T) -> Unit,
 ) {
-
-
-
     val derivedItemsCount by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
     val isLastDerived by remember {
         derivedStateOf {
@@ -62,13 +60,11 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment
     ) {
-
         items(
-            count = data.list.size,
-            key = { data.list[it].id },
-            contentType = { data.list[it] }
+            items = data.list,
+            key = { it.id },
         ) {
-            snippet(data.list[it])
+            snippet(it)
         }
         item {
             nextPageLoadingIndicator()

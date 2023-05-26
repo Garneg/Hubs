@@ -1,6 +1,9 @@
 package com.garnegsoft.hubs.ui.common
 
 import ArticleController
+import android.os.Build
+import android.text.TextUtils.SimpleStringSplitter
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -22,6 +25,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,8 +34,18 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.ImageLoader
 import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
+import coil.decode.GifDecoder
+import coil.decode.ImageDecoderDecoder
+import coil.disk.DiskCache
+import coil.imageLoader
+import coil.memory.MemoryCache
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import coil.size.Size
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
@@ -47,7 +61,7 @@ import kotlinx.coroutines.launch
  */
 @Immutable
 data class ArticleCardStyle(
-    val innerPadding: PaddingValues = PaddingValues(16.dp),
+    val innerPadding: Dp = 16.dp,
     val innerElementsShape: Shape = RoundedCornerShape(10.dp),
     val cardShape: Shape = RoundedCornerShape(26.dp),
 
@@ -121,18 +135,18 @@ data class ArticleCardStyle(
 @ReadOnlyComposable
 fun defaultArticleCardStyle(): ArticleCardStyle {
     return ArticleCardStyle(
-        backgroundColor = MaterialTheme.colors.surface,
-        textColor = MaterialTheme.colors.onSurface,
-        statisticsColor = MaterialTheme.colors.onSurface
-            .copy(
-                alpha = if (MaterialTheme.colors.isLight) {
-                    0.75f
-                } else {
-                    0.5f
-                }
+            backgroundColor = MaterialTheme.colors.surface,
+            textColor = MaterialTheme.colors.onSurface,
+            statisticsColor = MaterialTheme.colors.onSurface
+                .copy(
+                    alpha = if (MaterialTheme.colors.isLight) {
+                        0.75f
+                    } else {
+                        0.5f
+                    }
 
-            ),
-    )
+                ),
+        )
 }
 
 
@@ -145,6 +159,7 @@ fun ArticleCard(
     onCommentsClick: () -> Unit,
     style: ArticleCardStyle = defaultArticleCardStyle().copy(addToBookmarksButtonEnabled = article.relatedData != null)
 ) {
+
     val ripple = rememberRipple(color = style.rippleColor)
     Column(
         modifier = Modifier
@@ -166,12 +181,11 @@ fun ArticleCard(
                     onClick = onAuthorClick
                 )
                 .absolutePadding(
-                    left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                    top = style.innerPadding.calculateTopPadding(),
-                    right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr)
+                    left = style.innerPadding,
+                    top = style.innerPadding,
+                    right = style.innerPadding
                 )
-        )
-        {
+        ) {
             Row(
                 modifier = Modifier
                     .height(style.authorAvatarSize)
@@ -192,9 +206,7 @@ fun ArticleCard(
                             Icon(
                                 modifier = Modifier
                                     .size(style.authorAvatarSize)
-                                    .clip(
-                                        style.innerElementsShape
-                                    )
+                                    .clip(style.innerElementsShape)
                                     .background(Color.White)
                                     .border(
                                         BorderStroke(2.dp, placeholderColor(article.author.alias)),
@@ -236,24 +248,16 @@ fun ArticleCard(
             )
         }
 
-        Spacer(modifier = Modifier.height(style.innerPadding.calculateTopPadding() / 2))
+        Spacer(modifier = Modifier.height(style.innerPadding / 2))
         // Title
         Text(
-            modifier = Modifier.absolutePadding(
-                left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr)
-            ),
+            modifier = Modifier.padding(horizontal = style.innerPadding),
             text = article.title,
             style = style.titleTextStyle
         )
         Spacer(modifier = Modifier.height(0.dp))
         Row(
-            modifier = Modifier.padding(
-                horizontal = style.innerPadding.calculateStartPadding(
-                    LayoutDirection.Ltr
-                ),
-                vertical = 0.dp
-            ),
+            modifier = Modifier.padding(horizontal = style.innerPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (article.complexity != PostComplexity.None) {
@@ -318,28 +322,30 @@ fun ArticleCard(
             }
         }
 
-        // Hubs
-        if (style.showHubsList)
-            Text(
-                modifier = Modifier.absolutePadding(
-                    left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                    right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr)
-                ),
-                text = article.hubs!!.joinToString(separator = ", ") {
+        var hubsText by remember { mutableStateOf("")}
+
+        LaunchedEffect(key1 = Unit, block = {
+            if (hubsText == "") {
+                hubsText = article.hubs!!.joinToString(separator = ", ") {
                     if (it.isProfiled)
                         (it.title + "*").replace(" ", "\u00A0")
                     else
                         it.title.replace(" ", "\u00A0")
-                }, style = style.hubsTextStyle
+                }
+            }
+        })
+        // Hubs
+        if (style.showHubsList)
+            Text(
+                modifier = Modifier.padding(horizontal = style.innerPadding),
+                text = hubsText, style = style.hubsTextStyle
             )
+
 
         // Snippet
         if (style.showTextSnippet)
             Text(
-                modifier = Modifier.absolutePadding(
-                    left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                    right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr)
-                ),
+                modifier = Modifier.padding(horizontal = style.innerPadding),
                 text = article.textSnippet,
                 maxLines = style.snippetMaxLines,
                 overflow = TextOverflow.Ellipsis,
@@ -349,35 +355,25 @@ fun ArticleCard(
         // Image to draw attention (a.k.a. KDPV)
         if (style.showImage && !article.imageUrl.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(4.dp))
-            var showLoadingIndication by remember { mutableStateOf(true) }
             AsyncImage(
                 modifier = Modifier
-                    .absolutePadding(
-                        left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr),
-                        right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr)
-                    )
+                    .padding(horizontal = style.innerPadding)
                     .fillMaxWidth()
                     .clip(style.innerElementsShape)
-                    .aspectRatio(16f / 9f)
+                    .aspectRatio(1.8f)
                     .background(MaterialTheme.colors.onSurface.copy(0.1f)),
                 model = article.imageUrl,
                 contentScale = ContentScale.Crop,
-                onState = { state ->
-                    if (state is AsyncImagePainter.State.Success)
-                        showLoadingIndication = false
-                },
                 contentDescription = "",
             )
+
         }
 
         //Stats
         Row(
             modifier = Modifier
-                .absolutePadding(
-                    right = style.innerPadding.calculateRightPadding(LayoutDirection.Ltr),
-                    left = style.innerPadding.calculateLeftPadding(LayoutDirection.Ltr)
-                )
-                .height(38.dp + style.innerPadding.calculateBottomPadding() * 2)
+                .padding(horizontal = style.innerPadding)
+                .height(38.dp + style.innerPadding * 2)
                 .fillMaxWidth()
                 .clip(style.innerElementsShape),
             verticalAlignment = Alignment.CenterVertically,
@@ -389,10 +385,7 @@ fun ArticleCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
-                    .absolutePadding(
-                        top = style.innerPadding.calculateTopPadding(),
-                        bottom = style.innerPadding.calculateBottomPadding()
-                    ),
+                    .padding(vertical = style.innerPadding),
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
@@ -429,10 +422,7 @@ fun ArticleCard(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .weight(1f)
-                    .absolutePadding(
-                        top = style.innerPadding.calculateTopPadding(),
-                        bottom = style.innerPadding.calculateBottomPadding()
-                    ),
+                    .padding(vertical = style.innerPadding),
                 horizontalArrangement = Arrangement.Center
 
             ) {
@@ -448,8 +438,7 @@ fun ArticleCard(
                     style = style.statisticsTextStyle
                 )
             }
-            val addToBookmarksInteractionSource = remember { MutableInteractionSource()
-            }
+            val addToBookmarksInteractionSource = remember { MutableInteractionSource() }
             val favoriteCoroutineScope = rememberCoroutineScope()
 
             var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
@@ -500,10 +489,7 @@ fun ArticleCard(
                         interactionSource = addToBookmarksInteractionSource,
                         indication = null
                     )
-                    .absolutePadding(
-                        top = style.innerPadding.calculateTopPadding(),
-                        bottom = style.innerPadding.calculateBottomPadding()
-                    )
+                    .padding(vertical = style.innerPadding)
                     .weight(1f)
                     .fillMaxHeight()
                     .padding(0.dp, 0.dp)
@@ -547,10 +533,7 @@ fun ArticleCard(
                         enabled = style.commentsButtonEnabled,
                         onClick = onCommentsClick
                     )
-                    .absolutePadding(
-                        top = style.innerPadding.calculateTopPadding(),
-                        bottom = style.innerPadding.calculateBottomPadding()
-                    )
+                    .padding(vertical = style.innerPadding)
                     .fillMaxHeight()
                     .absolutePadding(4.dp)
                     .clip(style.innerElementsShape)

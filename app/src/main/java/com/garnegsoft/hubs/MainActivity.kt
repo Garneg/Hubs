@@ -71,8 +71,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-
-
         CookieManager.getInstance().removeAllCookies(null)
         val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
         val isAuthorizedFlow =
@@ -137,7 +135,9 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 NavHost(
-                    modifier = Modifier.statusBarsPadding().navigationBarsPadding().background(MaterialTheme.colors.background),
+                    modifier = Modifier
+                        .statusBarsPadding()
+                        .navigationBarsPadding(),
                     navController = navController,
                     startDestination = "articles",
                     builder = {
@@ -167,7 +167,9 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("hub/$it")
                                 },
                                 menu = {
-                                    val authorizedMenu by isAuthorizedFlow.collectAsState(initial = false)
+                                    val authorizedMenu by isAuthorizedFlow.collectAsState(
+                                        initial = false
+                                    )
                                     if (authorizedMenu && userInfo != null) {
                                         AuthorizedMenu(
                                             userAlias = userInfo!!.alias,
@@ -190,8 +192,8 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             )
-
                         }
+
                         composable(
                             route = "article/{id}",
                             deepLinks = ArticleNavDeepLinks
