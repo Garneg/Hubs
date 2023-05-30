@@ -57,6 +57,7 @@ import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.lastReadDataStoreFlow
+import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -638,22 +639,18 @@ fun ArticleScreen(
                         }
 
                         // Hubs
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier.padding(vertical = 8.dp)
+                        TitledColumn(
+                            title = "Хабы",
+                            titleStyle = MaterialTheme.typography.subtitle2.copy(color = MaterialTheme.colors.onBackground.copy(0.5f))
                         ) {
-                            Text(
-                                text = "Хабы:",
-                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.W500)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-
                             HubsRow(
                                 hubs = article.hubs,
                                 onHubClicked = onHubClicked,
                                 onCompanyClicked = onCompanyClick
                             )
                         }
+
+
 
                     }
                 }

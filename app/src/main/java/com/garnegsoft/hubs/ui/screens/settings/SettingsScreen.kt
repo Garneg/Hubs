@@ -39,7 +39,7 @@ fun SettingsScreen() {
                 Column(modifier = Modifier
                     .padding(8.dp)
                     .clip(RoundedCornerShape(26.dp))
-                    .background(Color.White)
+                    .background(MaterialTheme.colors.surface)
                     .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -47,14 +47,14 @@ fun SettingsScreen() {
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .clickable { }
-                        .padding(vertical = 14.dp, horizontal = 4.dp)) {
+                        .padding(vertical = 20.dp, horizontal = 4.dp)) {
                         Text("Темная тема")
                     }
                     Row(modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .clickable { }
-                        .padding(vertical = 14.dp, horizontal = 4.dp)) {
+                        .padding(vertical = 20.dp, horizontal = 4.dp)) {
                         Text("Показывать изображения в ленте")
                     }
 
@@ -62,7 +62,7 @@ fun SettingsScreen() {
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .clickable { }
-                        .padding(vertical = 14.dp, horizontal = 4.dp)) {
+                        .padding(vertical = 20.dp, horizontal = 4.dp)) {
                         Text(modifier = Modifier.weight(1f), text = "Показывать отрывок статьи в ленте")
                         var isChecked by remember { mutableStateOf(false) }
                         Checkbox(checked = isChecked, onCheckedChange = { isChecked = it})
@@ -71,7 +71,7 @@ fun SettingsScreen() {
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(10.dp))
                         .clickable { }
-                        .padding(vertical = 14.dp, horizontal = 4.dp)) {
+                        .padding(vertical = 20.dp, horizontal = 4.dp)) {
                         Text("Количество строк отрывка статьи в ленте")
                     }
 

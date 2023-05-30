@@ -9,9 +9,12 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontWeight.Companion.W500
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 
@@ -20,25 +23,30 @@ fun HubChip(
     hub: HubSnippet,
     onClick: () -> Unit
 ) {
+    val color = remember {
+        if (hub.relatedData?.isSubscribed == true)
+            Color(0xFF4BB80D)
+        else
+            Color(0xFF0E73B8)
+    }
     Text(
         modifier = Modifier
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .background(hub.relatedData?.let {
-                if (it.isSubscribed)
-                    Color(0x2658F507)
-                else
-                    null
-            } ?: Color(0x260F9AEE))
+            .background(color.copy(0.1f))
             .padding(vertical = 8.dp, horizontal = 12.dp),
         text = hub.title,
-        color = hub.relatedData?.let {
-            if (it.isSubscribed)
-                MaterialTheme.colors.onSurface.copy(ContentAlpha.medium)
-            else
-                null
-        } ?: MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
+        color = color.run {
+                     copy(this.alpha, this.red * 0.4f, this.green * 0.4f, this.blue * 0.4f)
+        },
         style = MaterialTheme.typography.body2
     )
+}
+
+@Composable
+fun HubChip(
+    
+) {
+
 }

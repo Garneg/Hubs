@@ -1,6 +1,7 @@
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.formatTime
@@ -28,6 +29,7 @@ class ArticleController {
             return article
         }
 
+        // TODO: Make private, change usages
         fun get(
             path: String,
             args: Map<String, String>? = null
@@ -115,12 +117,20 @@ class ArticleController {
             return result
         }
 
+        fun get(
+            id: Int,
+            args: Map<String, String>? = null
+        ): com.garnegsoft.hubs.api.article.Article? {
+            return get(path = "articles/$id", args = args)
+        }
+
         fun getSnippet(
             id: Int
         ): ArticleSnippet? {
             return getSnippet("articles/$id")
         }
 
+        // TODO: Make private, change usages
         fun getSnippet(
             path: String,
             args: Map<String, String>? = null
