@@ -58,6 +58,7 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.screens.user.HubChip
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -349,15 +350,17 @@ fun ArticleScreen(
                         )
                     }
                     Spacer(Modifier.width(4.dp))
-                    Box(modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clickable(onClick = onCommentsClicked)) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clickable(onClick = onCommentsClicked)
+                    ) {
                         BadgedBox(
                             modifier = Modifier.align(Alignment.Center),
                             badge = {
                                 article.relatedData?.let {
-                                    if (it.unreadComments > 0){
+                                    if (it.unreadComments > 0) {
                                         Box(
                                             modifier = Modifier
                                                 .size(8.dp)
@@ -387,7 +390,7 @@ fun ArticleScreen(
                                 )
                             }
                         }
-                     }
+                    }
                 }
                 Divider()
             }
@@ -508,7 +511,11 @@ fun ArticleScreen(
                         }
                     }
                     if (article.postType == PostType.Megaproject && article.metadata != null) {
-                        AsyncImage(article.metadata.mainImageUrl, "", modifier = Modifier.clip(RoundedCornerShape(8.dp)),)
+                        AsyncImage(
+                            article.metadata.mainImageUrl,
+                            "",
+                            modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+                        )
                         Spacer(Modifier.height(8.dp))
                     }
                     Spacer(modifier = Modifier.size(8.dp))
@@ -612,43 +619,60 @@ fun ArticleScreen(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
                         // Tags
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = "Теги:",
-                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.W500)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            var tags = String()
-
-                            article.tags.forEach { tags += "$it, " }
-                            if (tags.length > 0) tags = tags.dropLast(2)
-                            Text(
-                                text = tags,
-                                style = TextStyle(
-                                    color = Color.Gray,
-                                    fontWeight = FontWeight.W500
-                                )
-                            )
-                        }
-
+//                        Row(
+//                            verticalAlignment = Alignment.Top,
+//                            modifier = Modifier.padding(vertical = 8.dp)
+//                        ) {
+//                            Text(
+//                                text = "Теги:",
+//                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.W500)
+//                            )
+//                            Spacer(modifier = Modifier.width(8.dp))
+//
+//                            var tags = String()
+//
+//                            article.tags.forEach { tags += "$it, " }
+//                            if (tags.length > 0) tags = tags.dropLast(2)
+//                            Text(
+//                                text = tags,
+//                                style = TextStyle(
+//                                    color = Color.Gray,
+//                                    fontWeight = FontWeight.W500
+//                                )
+//                            )
+//                        }
+                        Divider(modifier = Modifier.padding(vertical = 24.dp))
                         // Hubs
                         TitledColumn(
                             title = "Хабы",
-                            titleStyle = MaterialTheme.typography.subtitle2.copy(color = MaterialTheme.colors.onBackground.copy(0.5f))
-                        ) {
-                            HubsRow(
-                                hubs = article.hubs,
-                                onHubClicked = onHubClicked,
-                                onCompanyClicked = onCompanyClick
+                            titleStyle = MaterialTheme.typography.subtitle2.copy(
+                                color = MaterialTheme.colors.onBackground.copy(
+                                    0.5f
+                                )
                             )
+                        ) {
+//                            HubsRow(
+//                                hubs = article.hubs,
+//                                onHubClicked = onHubClicked,
+//                                onCompanyClicked = onCompanyClick
+//                            )
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                article.hubs.forEach {
+                                    HubChip(
+                                        if (it.isProfiled)
+                                            it.title + "*"
+                                        else
+                                            it.title
+                                    ) {
+                                        if (it.isCorporative)
+                                            onCompanyClick(it.alias)
+                                        else
+                                            onHubClicked(it.alias)
+                                    }
+                                }
+                            }
                         }
-
 
 
                     }

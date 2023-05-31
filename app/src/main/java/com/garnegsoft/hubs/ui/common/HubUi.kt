@@ -70,7 +70,11 @@ fun HubCard(
                 modifier = Modifier.weight(1f),
             ) {
                 Text(
-                    text = hub.title,
+                    text =
+                    if (hub.isProfiled)
+                        hub.title + "*"
+                    else
+                        hub.title,
                     style = style.titleTextStyle,
                     modifier = Modifier.wrapContentHeight(
                         Alignment.Top
@@ -84,7 +88,12 @@ fun HubCard(
                         overflow = TextOverflow.Ellipsis
                     )
             }
-            Box(modifier = Modifier.padding(start = 4.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .padding(start = 4.dp)
+                    .fillMaxHeight(),
+                contentAlignment = Alignment.Center
+            ) {
                 indicator(hub)
             }
 
@@ -102,7 +111,10 @@ data class HubCardStyle(
         fontWeight = FontWeight.W700,
         fontSize = 20.sp
     ),
-    val descriptionTextStyle: TextStyle = TextStyle(color = textColor.copy(alpha = 0.5f), fontSize = 14.sp),
+    val descriptionTextStyle: TextStyle = TextStyle(
+        color = textColor.copy(alpha = 0.5f),
+        fontSize = 14.sp
+    ),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val shape: Shape = RoundedCornerShape(26.dp),
