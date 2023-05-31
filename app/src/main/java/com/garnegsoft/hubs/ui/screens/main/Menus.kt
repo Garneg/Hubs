@@ -49,7 +49,6 @@ fun AuthorizedMenu(
                 modifier = Modifier
                     .size(32.dp)
                     .clip(RoundedCornerShape(8.dp))
-
                     .border(
                         width = 2.dp, color = placeholderColor(userAlias),
                         shape = RoundedCornerShape(8.dp)

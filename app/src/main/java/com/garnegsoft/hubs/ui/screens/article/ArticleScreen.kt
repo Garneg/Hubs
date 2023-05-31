@@ -220,7 +220,6 @@ fun ArticleScreen(
                             ) {
                                 Box(
                                     modifier = Modifier
-
                                         .offset(0.dp, offset.dp)
                                         .alpha(alpha)
                                         .padding(2.dp)

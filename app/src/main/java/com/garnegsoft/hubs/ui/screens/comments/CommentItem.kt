@@ -10,10 +10,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.*
@@ -23,6 +20,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -75,9 +73,12 @@ fun CommentItem(
             .padding(16.dp)
     ) {
         parentComment?.let {
-            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max)
-                .clip(RoundedCornerShape(2.dp))
-                .clickable(onClick = onParentCommentSnippetClick)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max)
+                    .clip(RoundedCornerShape(2.dp))
+                    .clickable(onClick = onParentCommentSnippetClick)
             ) {
                 Spacer(
                     modifier = Modifier
@@ -101,7 +102,7 @@ fun CommentItem(
                 }
 
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -173,19 +174,21 @@ fun CommentItem(
 
                     val densityFactor = LocalDensity.current.density
 
-                    val positionProvider = object : PopupPositionProvider {
-                        override fun calculatePosition(
-                            anchorBounds: IntRect,
-                            windowSize: IntSize,
-                            layoutDirection: LayoutDirection,
-                            popupContentSize: IntSize
-                        ): IntOffset {
-                            return IntOffset(
-                                (anchorBounds.left - (12 * densityFactor)).toInt(),
-                                anchorBounds.top - popupContentSize.height
-                            )
-                        }
+                    val positionProvider = remember(densityFactor) {
+                        object : PopupPositionProvider {
+                            override fun calculatePosition(
+                                anchorBounds: IntRect,
+                                windowSize: IntSize,
+                                layoutDirection: LayoutDirection,
+                                popupContentSize: IntSize
+                            ): IntOffset {
+                                return IntOffset(
+                                    (anchorBounds.left - (24 * densityFactor)).toInt(),
+                                    anchorBounds.top - popupContentSize.height + (8 * densityFactor).toInt()
+                                )
+                            }
 
+                        }
                     }
 
                     var showVotesCounter by remember { mutableStateOf(false) }
@@ -219,34 +222,38 @@ fun CommentItem(
                                     popupPositionProvider = positionProvider,
                                     onDismissRequest = { visible = false }
                                 ) {
-                                    Box(
+                                    Surface(
                                         modifier = Modifier
                                             .offset(0.dp, offset.dp)
                                             .alpha(alpha)
-                                            .padding(4.dp)
-                                            .shadow(4.dp, shape = RoundedCornerShape(8.dp))
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(MaterialTheme.colors.surface)
-                                            .padding(8.dp)
+                                            .padding(16.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        color = MaterialTheme.colors.surface,
+                                        elevation = 4.dp
                                     ) {
-                                        comment.votesCount?.let {
-                                            val votesMinus =
-                                                (comment.votesCount - comment.score) / 2
-                                            val votesPlus = comment.votesCount - votesMinus
+                                        Box(
+                                            modifier = Modifier.padding(8.dp)
+                                        ) {
+                                            comment.votesCount?.let {
+                                                val votesMinus =
+                                                    (comment.votesCount - comment.score) / 2
+                                                val votesPlus = comment.votesCount - votesMinus
 
-                                            Text(
-                                                text = "Всего голосов " +
-                                                        "${comment.votesCount}: " +
-                                                        "￪${votesPlus} и " +
-                                                        "￬${votesMinus}",
-                                                color = statisticsColor
-                                            )
+                                                Text(
+                                                    text = "Всего голосов " +
+                                                            "${comment.votesCount}: " +
+                                                            "￪${votesPlus} и " +
+                                                            "￬${votesMinus}",
+                                                    color = statisticsColor
+                                                )
 
+                                            }
                                         }
-
                                     }
 
+
                                 }
+
 
                             }
 

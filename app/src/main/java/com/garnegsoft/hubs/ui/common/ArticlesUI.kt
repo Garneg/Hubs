@@ -548,7 +548,7 @@ fun ArticleCard(
                 BadgedBox(
                     badge = {
                         article.relatedData?.let {
-                            if (it.unreadComments > 0){
+                            if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount.toInt()){
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)

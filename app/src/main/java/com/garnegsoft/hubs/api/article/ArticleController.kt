@@ -1,8 +1,10 @@
+import androidx.annotation.WorkerThread
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.article.offline.ArticleEntity
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.screens.article.parseElement
@@ -227,6 +229,26 @@ class ArticleController {
             if (response.code != 200)
                 return false
             return true
+        }
+
+
+        fun getArticleEntity(id: Int): ArticleEntity? {
+            val article = get(id)
+
+            return article?.let {
+                ArticleEntity(
+                    articleId = it.id,
+                    authorName = it.author?.alias,
+                    authorAvatarBase64 = null,
+                    timePublished = it.timePublished,
+                    title = it.title,
+                    readingTime = it.readingTime,
+                    isTranslation = it.translationData.isTranslation,
+                    contentHtml = it.contentHtml,
+                    thumbnailImageBase64 = null
+                )
+            }
+
         }
     }
 

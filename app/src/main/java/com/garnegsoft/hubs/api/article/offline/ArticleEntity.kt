@@ -11,11 +11,9 @@ private const val TABLE_NAME = "offline_articles"
 
 @Entity(
     tableName = TABLE_NAME,
-    indices = [Index(name = "id", unique = true)]
+    indices = [Index("article_id", unique = true),]
 )
 data class ArticleEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
 
     @ColumnInfo("article_id")
     val articleId: Int,
@@ -26,13 +24,32 @@ data class ArticleEntity(
     @ColumnInfo("author_avatar_base64")
     val authorAvatarBase64: String?,
 
+    @ColumnInfo("time_published")
+    val timePublished: String,
+
+    val title: String,
+
+    @ColumnInfo("reading_time")
+    val readingTime: Int,
+
+    @ColumnInfo("is_translation")
+    val isTranslation: Boolean,
+
     @ColumnInfo("content_html")
     val contentHtml: String,
 
     @ColumnInfo("thumbnail_image_base64")
     val thumbnailImageBase64: String?,
 
+    @ColumnInfo
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
 )
+
+
+val Context.offlineArticlesDatabase: OfflineArticlesDatabase
+    get() = OfflineArticlesDatabase.getDb(this)
+
 
 @Dao
 interface OfflineArticlesDao{
@@ -40,8 +57,11 @@ interface OfflineArticlesDao{
     /**
      * @return article entity by **article_id**, not just by id
      */
-    @Query("SELECT * FROM $TABLE_NAME WHERE article_id = :id")
-    suspend fun getArticleById(id: Int): ArticleEntity
+    @Query("SELECT * FROM $TABLE_NAME WHERE article_id = :articleId")
+    suspend fun _getArticleById(articleId: Int): ArticleEntity
+
+    @Query("SELECT EXISTS (SELECT * FROM $TABLE_NAME WHERE article_id = :articleId)")
+    suspend fun exists(articleId: Int): Boolean
 
     @Upsert
     suspend fun upsert(entity: ArticleEntity)
@@ -52,13 +72,13 @@ interface OfflineArticlesDao{
     /**
      * @return list of article entities from older to newer
      */
-    @Query("SELECT * FROM $TABLE_NAME BY id ASC")
+    @Query("SELECT * FROM $TABLE_NAME ORDER BY id ASC")
     fun getAllSortedByIdAsc(): Flow<List<ArticleEntity>>
 
     /**
      * @return list of article entities from newer to older
      */
-    @Query("SELECT * FROM $TABLE_NAME BY id DESC")
+    @Query("SELECT * FROM $TABLE_NAME ORDER BY id DESC")
     fun getAllSortedByIdDesc(): Flow<List<ArticleEntity>>
 
 }
