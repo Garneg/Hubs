@@ -151,7 +151,7 @@ fun CommentItem(
                 ) {
                     Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
                     if (comment.edited)
-                        Text(text = " (изменено)", fontSize = 12.sp, color = Color.Gray)
+                        Text(text = " (изм.)", fontSize = 12.sp, color = Color.Gray)
                 }
             }
         }

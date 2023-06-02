@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.api.article.offline
 
 import android.content.Context
 import androidx.room.*
+import com.garnegsoft.hubs.api.HabrSnippet
 import kotlinx.coroutines.flow.Flow
 
 
@@ -20,7 +21,7 @@ data class ArticleEntity(
     val authorName: String?,
 
     @ColumnInfo("author_avatar_data", typeAffinity = ColumnInfo.BLOB)
-    val authorAvatarBase64: ByteArray?,
+    val authorAvatarData: ByteArray?,
 
     @ColumnInfo("time_published")
     val timePublished: String,
@@ -41,7 +42,7 @@ data class ArticleEntity(
 
     @ColumnInfo
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    val id: Int = 0,
 )
 
 

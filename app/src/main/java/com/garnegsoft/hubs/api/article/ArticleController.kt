@@ -237,7 +237,7 @@ class ArticleController {
                 ArticleEntity(
                     articleId = it.id,
                     authorName = it.author?.alias,
-                    authorAvatarBase64 = null,
+                    authorAvatarData = null,
                     timePublished = it.timePublished,
                     title = it.title,
                     readingTime = it.readingTime,
