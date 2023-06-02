@@ -13,6 +13,7 @@ class Company(
     val habrCareerAlias: String?,
     val location: String?,
     val statistics: Statistics,
+    val branding: Branding?,
     val relatedData: RelatedData?
 ) {
     class Statistics(
@@ -24,4 +25,9 @@ class Company(
     )
 
     class RelatedData(val isSubscribed: Boolean)
+
+    class Branding(
+        val bannerImageUrl: String?,
+        val bannerLinkUrl: String?,
+    )
 }

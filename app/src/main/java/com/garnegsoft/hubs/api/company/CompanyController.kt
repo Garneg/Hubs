@@ -25,6 +25,9 @@ class CompanyController {
                 result.imageUrl?.let {
                     result.imageUrl = "https:$it"
                 }
+                result.settings.branding?.imageUrl?.let {
+                    result.settings.branding?.imageUrl = "https:$it"
+                }
                 result.registrationDate = formatTime(result.registrationDate).split(' ').run { "${this[0]} ${this[1]} ${this[2]}" }
                 result.descriptionHtml?.let { it1 -> result.descriptionHtml = Jsoup.parse(it1).text() }
                 return result
@@ -56,6 +59,7 @@ class CompanyController {
                         newsCount = it.statistics.newsCount,
                         employees = it.statistics.employeesCount
                     ),
+                    branding = Company.Branding(bannerImageUrl = it.settings.branding?.imageUrl, bannerLinkUrl = it.settings.branding?.linkUrl),
                     relatedData = it.relatedData?.let { Company.RelatedData(it.isSubscribed) }
                 )
             }
@@ -90,6 +94,7 @@ class CompanyController {
         var siteUrl: String?,
         var staffNumber: String,
         var registrationDate: String,
+//        var representativeUser: RepresentativeUser?,
         var contacts: List<Contact>,
         var settings: Settings,
         var metadata: Metadata,

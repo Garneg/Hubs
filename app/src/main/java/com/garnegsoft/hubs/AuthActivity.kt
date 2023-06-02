@@ -4,12 +4,14 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import android.os.Bundle
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import okhttp3.internal.userAgent
 
 class AuthActivity : AppCompatActivity() {
 
@@ -26,6 +28,7 @@ class AuthActivity : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
+            settings.userAgentString = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
 
             webViewClient = AuthWebViewClient() {
                 this@AuthActivity.setResult(Activity.RESULT_OK, Intent().apply
@@ -40,6 +43,7 @@ class AuthActivity : AppCompatActivity() {
             webChromeClient = WebChromeClient()
 
             loadUrl("https://habr.com/kek/v1/auth/habrahabr/?back=/ru/all/&hl=ru")
+
         }
     }
 

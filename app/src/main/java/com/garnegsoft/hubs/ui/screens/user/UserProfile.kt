@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -14,6 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -24,6 +27,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.user.User
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -40,7 +44,6 @@ internal fun UserProfile(
     onHubClick: (alias: String) -> Unit,
     viewModel: UserScreenViewModel
 ) {
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -252,7 +255,7 @@ internal fun UserProfile(
                                 )
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    MaterialTheme.colors.onSurface.copy(0.05f)
+                                    MaterialTheme.colors.onSurface.copy(0.045f)
                                 )
                                 .padding(8.dp)
                         ) {
@@ -328,6 +331,58 @@ internal fun UserProfile(
                             }
                         }
                         val hubs by viewModel.subscribedHubs.observeAsState()
+                        val whoIs by viewModel.whoIs.observeAsState()
+
+
+                        whoIs?.let {
+                            if (it.contacts.size > 0) {
+                                TitledColumn(title = "Контакты") {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ){
+                                        it.contacts.forEach {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(MaterialTheme.colors.onSurface.copy(0.045f))
+                                                    .clickable {
+
+                                                    }
+                                                    .padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                if (it.faviconUrl != null && it.faviconUrl.isNotBlank()) {
+                                                    AsyncSvgImage(
+                                                        modifier = Modifier
+                                                            .size(24.dp)
+                                                            .clip(
+                                                                RoundedCornerShape(8.dp)
+                                                            )
+                                                            .background(if (MaterialTheme.colors.isLight) Color.Transparent else MaterialTheme.colors.onSurface),
+                                                        data = it.faviconUrl,
+                                                        revertColorsOnDarkTheme = false,
+                                                        contentDescription = it.title,
+                                                        contentScale = ContentScale.Fit
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        modifier = Modifier.size(24.dp),
+                                                        painter = painterResource(id = R.drawable.website_favicon_placeholder),
+                                                        contentDescription = "website"
+                                                    )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(12.dp))
+
+                                                Text(it.title)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         hubs?.let {
                             if (it.list.size > 0) {
                                 Column() {

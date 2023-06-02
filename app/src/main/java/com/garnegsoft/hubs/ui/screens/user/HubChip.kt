@@ -24,12 +24,13 @@ fun HubChip(
     hub: HubSnippet,
     onClick: () -> Unit
 ) {
-    val color = remember {
+    val isLightColor = MaterialTheme.colors.isLight
+    val color = if (isLightColor) remember {
         if (hub.relatedData?.isSubscribed == true)
             Color(0xFF4BB80D)
         else
             Color(0xFF0E73B8)
-    }
+    } else MaterialTheme.colors.onSurface
     Text(
         modifier = Modifier
             .padding(vertical = 4.dp)
@@ -39,7 +40,7 @@ fun HubChip(
             .padding(vertical = 8.dp, horizontal = 12.dp),
         text = hub.title,
         color = color.run {
-                     copy(this.alpha, this.red * 0.4f, this.green * 0.4f, this.blue * 0.4f)
+            copy(this.alpha, this.red * 0.4f, this.green * 0.4f, this.blue * 0.4f)
         },
         style = MaterialTheme.typography.body2
     )

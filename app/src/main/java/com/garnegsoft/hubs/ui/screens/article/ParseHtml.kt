@@ -43,9 +43,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.compose.AsyncImage
-import coil.decode.SvgDecoder
-import coil.request.ImageRequest
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -55,7 +52,7 @@ import org.jsoup.nodes.TextNode
 
 val STRONG_FONT_WEIGHT = FontWeight.W600
 val HEADER_FONT_WEIGHT = FontWeight.W700
-val LINE_HEIGHT = 1.5.sp
+val LINE_HEIGHT_FACTOR = 1.5F
 
 fun parseElement(
     html: String,
@@ -245,7 +242,7 @@ fun parseElement(
                         var context = LocalContext.current
                         ClickableText(
                             text = thisElementCurrentText,
-                            style = LocalTextStyle.current.copy(lineHeight = LINE_HEIGHT.times(LocalTextStyle.current.fontSize.value)),
+                            style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize.times(LINE_HEIGHT_FACTOR)),
                             onClick = {
                                 thisElementCurrentText.getStringAnnotations(it, it)
                                     .find { it.tag == "url" }
@@ -291,7 +288,7 @@ fun parseElement(
             val context = LocalContext.current
             ClickableText(
                 text = currentText,
-                style = LocalTextStyle.current.copy(lineHeight = LINE_HEIGHT.times(LocalTextStyle.current.fontSize.value)),
+                style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize.times(LINE_HEIGHT_FACTOR)),
                 onClick = {
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
                         if (it.item.startsWith("http")) {
@@ -339,9 +336,29 @@ fun parseElement(
             null
         "figcaption" -> if (element.text().isNotEmpty())
             { localSpanStyle ->
-                Column(Modifier.padding(bottom = 12.dp)) {
-                    childrenComposables.forEach { it(localSpanStyle) }
-                }
+                val context = LocalContext.current
+                ClickableText(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
+                    text = currentText,
+                    style = LocalTextStyle.current.copy(
+                        lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
+                        textAlign = TextAlign.Center
+                    ),
+                    onClick = {
+                        currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
+                            if (it.item.startsWith("http")) {
+                                Log.e(
+                                    "URL Clicked",
+                                    it.item
+                                )
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
+                                context.startActivity(intent)
+                            }
+                        }
+                    })
+//                Column(Modifier.padding(bottom = 12.dp)) {
+//                    childrenComposables.forEach { it(localSpanStyle) }
+//                }
             }
         else null
         "img" -> if (element.hasClass("formula")) {
@@ -365,7 +382,12 @@ fun parseElement(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(4.dp)),
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(
+                            if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
+                                0.75f
+                            ) else Color.Transparent
+                        ),
                     contentScale = ContentScale.FillWidth
                 )
             }
@@ -681,23 +703,17 @@ fun TextList(
     }
 }
 
+const val CODE_ALPHA_VALUE = 0.035f
 
 @Composable
 fun Code(code: String, language: String, modifier: Modifier = Modifier) {
     Column(
         modifier
             .clip(RoundedCornerShape(4.dp))
-            .border(
-                0.4.dp,
-                MaterialTheme.colors.onBackground.copy(0.1f),
-                shape = RoundedCornerShape(4.dp)
-            )
     ) {
         Surface(
-            color = MaterialTheme.colors.onBackground.copy(0.05f),
-            border = BorderStroke(.4.dp, MaterialTheme.colors.onBackground.copy(0.1f)),
-            modifier = Modifier
-                .fillMaxWidth()
+            color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
+            modifier = Modifier.fillMaxWidth()
         ) {
             DisableSelection {
                 Row(modifier = Modifier.padding(8.dp)) {
@@ -714,14 +730,12 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
             
         }
         Surface(
-            color = MaterialTheme.colors.onBackground.copy(0.06f),
-            border = BorderStroke(.4.dp, MaterialTheme.colors.onBackground.copy(0.1f)),
+            color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
             modifier = Modifier.fillMaxWidth()
         ) {
             Row() {
                 Surface(
-                    color = MaterialTheme.colors.onBackground.copy(0.02f),
-                    border = BorderStroke(.4.dp, MaterialTheme.colors.onBackground.copy(0.1f))
+                    color = MaterialTheme.colors.onBackground.copy(0f),
                 ) {
                     Column(Modifier.padding(8.dp)) {
                         var linesIndicator = String()

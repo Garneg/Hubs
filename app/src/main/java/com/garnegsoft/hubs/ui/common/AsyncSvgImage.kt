@@ -22,6 +22,7 @@ fun AsyncSvgImage(
     modifier: Modifier = Modifier,
     data: Any?,
     contentScale: ContentScale,
+    revertColorsOnDarkTheme: Boolean = true,
     contentDescription: String? = null
 ) {
     val context = LocalContext.current
@@ -32,7 +33,7 @@ fun AsyncSvgImage(
             .decoderFactory(SvgDecoder.Factory())
             .build(),
         contentDescription = contentDescription,
-        colorFilter = if (MaterialTheme.colors.isLight) null else ColorFilter
+        colorFilter = if (MaterialTheme.colors.isLight || !revertColorsOnDarkTheme) null else ColorFilter
             .colorMatrix(ColorMatrix(colorMatrix)),
         contentScale = contentScale
     )

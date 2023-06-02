@@ -33,7 +33,6 @@ fun AsyncGifImage(
             }
         }
         .build()
-
     Image(
         painter = rememberAsyncImagePainter(
             ImageRequest.Builder(context)

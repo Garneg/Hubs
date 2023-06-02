@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 fun CompanyProfile(
     company: Company
 ) {
+    val context = LocalContext.current
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -47,6 +48,28 @@ fun CompanyProfile(
             modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            company.branding?.bannerImageUrl?.let {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(4.3f) // aspect ratio of banners (1320 / 300)
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(MaterialTheme.colors.onBackground.copy(0.1f))
+                        .clickable(
+                        enabled = company.branding.bannerLinkUrl != null
+                    ) {
+                        context.startActivity(
+                            Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse(company.branding.bannerLinkUrl!!)
+                            )
+                        )
+                    },
+                    model = it,
+                    contentScale = ContentScale.Crop,
+                    contentDescription = "${company.title} branding banner"
+                )
+            }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -218,7 +241,6 @@ fun CompanyProfile(
 
             }
             if (company.siteUrl != null) {
-                val context = LocalContext.current
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

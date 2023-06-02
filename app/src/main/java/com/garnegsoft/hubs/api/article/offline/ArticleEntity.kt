@@ -2,8 +2,6 @@ package com.garnegsoft.hubs.api.article.offline
 
 import android.content.Context
 import androidx.room.*
-import androidx.room.util.TableInfo
-import com.garnegsoft.hubs.api.article.Article
 import kotlinx.coroutines.flow.Flow
 
 
@@ -21,8 +19,8 @@ data class ArticleEntity(
     @ColumnInfo("author_name")
     val authorName: String?,
 
-    @ColumnInfo("author_avatar_base64")
-    val authorAvatarBase64: String?,
+    @ColumnInfo("author_avatar_data", typeAffinity = ColumnInfo.BLOB)
+    val authorAvatarBase64: ByteArray?,
 
     @ColumnInfo("time_published")
     val timePublished: String,
@@ -38,8 +36,8 @@ data class ArticleEntity(
     @ColumnInfo("content_html")
     val contentHtml: String,
 
-    @ColumnInfo("thumbnail_image_base64")
-    val thumbnailImageBase64: String?,
+    @ColumnInfo("thumbnail_image_data", typeAffinity = ColumnInfo.BLOB)
+    val thumbnailImageData: ByteArray?,
 
     @ColumnInfo
     @PrimaryKey(autoGenerate = true)
@@ -83,10 +81,11 @@ interface OfflineArticlesDao{
 
 }
 
-@Database(entities = [ArticleEntity::class], version = 1)
+@Database(entities = [ArticleEntity::class, InArticleImageEntity::class], version = 1)
 abstract class OfflineArticlesDatabase : RoomDatabase() {
 
-    abstract fun dao(): OfflineArticlesDao
+    abstract fun articlesDao(): OfflineArticlesDao
+    abstract fun imagesDao(): InArticleImagesDao
 
     companion object {
         @Volatile

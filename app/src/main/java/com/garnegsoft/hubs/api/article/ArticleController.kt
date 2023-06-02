@@ -1,8 +1,6 @@
-import androidx.annotation.WorkerThread
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
-import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.ArticleEntity
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
@@ -245,7 +243,7 @@ class ArticleController {
                     readingTime = it.readingTime,
                     isTranslation = it.translationData.isTranslation,
                     contentHtml = it.contentHtml,
-                    thumbnailImageBase64 = null
+                    thumbnailImageData = null
                 )
             }
 
