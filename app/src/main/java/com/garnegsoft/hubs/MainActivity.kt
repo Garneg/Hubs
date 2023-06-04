@@ -46,6 +46,7 @@ import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
+import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 
 var cookies: String = ""
@@ -178,6 +179,7 @@ class MainActivity : ComponentActivity() {
                                             onArticlesClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Articles}") },
                                             onCommentsClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Comments}") },
                                             onBookmarksClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}") },
+                                            onSavedArticlesClick = { navController.navigate("savedArticles")},
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     } else {
@@ -187,6 +189,7 @@ class MainActivity : ComponentActivity() {
                                                 authActivityLauncher.launch(Unit)
                                                 lifecycle.coroutineScope.launch(Dispatchers.IO) { userInfoUpdateBlock() }
                                             },
+                                            onSavedArticlesClick = { navController.navigate("savedArticles")},
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     }
@@ -195,10 +198,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(
-                            route = "article/{id}",
+                            route = "article/{id}?offline={offline}",
                             deepLinks = ArticleNavDeepLinks
                         ) {
                             val id = it.arguments?.getString("id")?.toIntOrNull()
+                            val offline = it.arguments?.getString("offline")?.toBooleanStrict()
 
                             val clearLastArticle = remember {
                                 {
@@ -218,6 +222,7 @@ class MainActivity : ComponentActivity() {
                             }
                             ArticleScreen(
                                 articleId = id!!,
+                                isOffline = offline ?: false,
                                 onBackButtonClicked = {
                                     clearLastArticle()
                                     navController.navigateUp()
@@ -351,6 +356,13 @@ class MainActivity : ComponentActivity() {
                             AboutScreen {
                                 navController.popBackStack()
                             }
+                        }
+
+                        composable("savedArticles"){
+                            OfflineArticlesScreen(
+                                onBack = { navController.popBackStack() },
+                                onArticleClick = { navController.navigate("article/$it?offline=true")}
+                            )
                         }
 
                     })

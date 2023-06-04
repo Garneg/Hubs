@@ -1,5 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.user
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -333,13 +335,13 @@ internal fun UserProfile(
                         val hubs by viewModel.subscribedHubs.observeAsState()
                         val whoIs by viewModel.whoIs.observeAsState()
 
-
                         whoIs?.let {
                             if (it.contacts.size > 0) {
                                 TitledColumn(title = "Контакты") {
                                     Column(
                                         verticalArrangement = Arrangement.spacedBy(4.dp)
                                     ){
+                                        val context = LocalContext.current
                                         it.contacts.forEach {
                                             Row(
                                                 modifier = Modifier
@@ -347,7 +349,7 @@ internal fun UserProfile(
                                                     .clip(RoundedCornerShape(8.dp))
                                                     .background(MaterialTheme.colors.onSurface.copy(0.045f))
                                                     .clickable {
-
+                                                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.url)))
                                                     }
                                                     .padding(12.dp),
                                                 verticalAlignment = Alignment.CenterVertically

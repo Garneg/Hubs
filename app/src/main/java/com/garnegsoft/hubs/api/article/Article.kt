@@ -22,9 +22,6 @@ class Article(
 
     val author: Author?,
 
-    val content: @Composable (SpanStyle) -> Unit,
-
-    // TODO: remove
     val contentHtml: String,
 
     val isCorporative: Boolean,
@@ -79,9 +76,9 @@ class Article(
      * Stats of article. If value is greater than 1000, it will be shorten to 1k
      */
     data class Statistics(
-        val commentsCount: String,
-        val favoritesCount: String,
-        val readingCount: String,
+        val commentsCount: Int,
+        val favoritesCount: Int,
+        val readingCount: Int,
         val score: Int,
         val votesCountPlus: Int,
         val votesCountMinus: Int

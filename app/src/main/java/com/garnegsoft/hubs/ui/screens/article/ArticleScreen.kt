@@ -1,9 +1,12 @@
 package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
@@ -19,6 +22,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
@@ -39,7 +44,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -53,10 +57,13 @@ import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.article.offline.HubsList
+import com.garnegsoft.hubs.api.article.offline.OfflineArticle
+import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
+import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
-import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -64,6 +71,7 @@ import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
@@ -73,11 +81,81 @@ class ArticleScreenViewModel : ViewModel() {
     private var _article = MutableLiveData<Article?>()
     val article: LiveData<Article?> get() = _article
 
+    private var _offlineArticle = MutableLiveData<OfflineArticle?>()
+    val offlineArticle: LiveData<OfflineArticle?> get() = _offlineArticle
+
     fun loadArticle(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             ArticleController.get("articles/$id")?.let {
                 _article.postValue(it)
 
+            }
+        }
+    }
+
+    fun loadArticleFromLocalDatabase(id: Int, context: Context) {
+        viewModelScope.launch(Dispatchers.IO){
+            val dao = context.offlineArticlesDatabase.articlesDao()
+            if (dao.exists(id)) {
+                _offlineArticle.postValue(dao._getArticleById(id))
+
+            } else {
+                withContext(Dispatchers.Main){
+                    Toast.makeText(context, "Статья не найдена в скачанных\nПопробуйте скачать ее заново", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    fun saveArticle(id: Int, context: Context){
+        viewModelScope.launch(Dispatchers.IO){
+            val dao = context.offlineArticlesDatabase.articlesDao()
+            ArticleController.getSnippet(id)?.let {
+                dao.insertSnippet(
+                    OfflineArticleSnippet(
+                        articleId = it.id,
+                        authorName = it.author?.alias,
+                        authorAvatarUrl = it.author?.avatarUrl,
+                        timePublished = it.timePublished,
+                        title = it.title,
+                        readingTime = it.readingTime,
+                        isTranslation = it.isTranslation,
+                        textSnippet = it.textSnippet,
+                        hubs = HubsList(it.hubs?.map { if (it.isProfiled) it.title + "*" else it.title } ?: emptyList()),
+                        thumbnailUrl = it.imageUrl
+                    )
+                )
+            }
+
+            ArticleController.get(id)?.let {
+                dao.insert(
+                    OfflineArticle(
+                        articleId = it.id,
+                        authorName = it.author?.alias,
+                        authorAvatarUrl = it.author?.avatarUrl,
+                        timePublished = it.timePublished,
+                        title = it.title,
+                        readingTime = it.readingTime,
+                        isTranslation = it.translationData.isTranslation,
+                        hubs = HubsList(it.hubs.map { if (it.isProfiled) it.title + "*" else it.title }),
+                        contentHtml = it.contentHtml
+                    )
+                )
+            }
+            withContext(Dispatchers.Main){
+                Toast.makeText(context, "Статья скачана!", Toast.LENGTH_SHORT).show()
+            }
+            Log.e("offlineArticle", "loading done")
+        }
+    }
+
+    fun deleteSavedArticle(id: Int, context: Context){
+        viewModelScope.launch(Dispatchers.IO) {
+            val dao = context.offlineArticlesDatabase.articlesDao()
+            dao.delete(id)
+            dao.deleteSnippet(id)
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Статья удалена!", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -93,15 +171,22 @@ fun ArticleScreen(
     onAuthorClicked: (alias: String) -> Unit,
     onHubClicked: (alias: String) -> Unit,
     onCompanyClick: (alias: String) -> Unit,
+    isOffline: Boolean = false
 ) {
     val context = LocalContext.current
 
     val viewModel = viewModel<ArticleScreenViewModel>()
     val article by viewModel.article.observeAsState()
+    val offlineArticle by viewModel.offlineArticle.observeAsState()
 
     LaunchedEffect(key1 = Unit, block = {
-        if (!viewModel.article.isInitialized)
-            viewModel.loadArticle(articleId)
+        if (!viewModel.article.isInitialized) {
+            if (isOffline) {
+                viewModel.loadArticleFromLocalDatabase(articleId, context)
+            } else {
+                viewModel.loadArticle(articleId)
+            }
+        }
     })
 
     val scrollState = rememberScrollState()
@@ -122,12 +207,12 @@ fun ArticleScreen(
 //    })
 
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
-    val shareIntent = remember(article?.title) {
+    val shareIntent = remember(article?.title, offlineArticle?.title) {
         val sendIntent = Intent(Intent.ACTION_SEND)
 
         sendIntent.putExtra(
             Intent.EXTRA_TEXT,
-            "${article?.title} — https://habr.com/p/${articleId}/"
+            "${article?.title ?: offlineArticle?.title} — https://habr.com/p/${articleId}/"
         )
         sendIntent.setType("text/plain")
         Intent.createChooser(sendIntent, null)
@@ -148,9 +233,25 @@ fun ArticleScreen(
                     Text(text = "Публикация")
                 },
                 actions = {
+                    if (isOffline){
+                        IconButton(
+                            onClick = { viewModel.deleteSavedArticle(id = articleId, context = context) },
+                            enabled = offlineArticle != null
+                        ) {
+                            Icon(Icons.Outlined.Delete, contentDescription = "")
+                        }
+                    } else {
+                        IconButton(
+                            onClick = { viewModel.saveArticle(id = articleId, context = context) },
+                            enabled = article != null
+                        ) {
+                            Icon(painterResource(id = R.drawable.download), contentDescription = "")
+                        }
+                    }
+                    
                     IconButton(
                         onClick = { context.startActivity(shareIntent) },
-                        enabled = article != null
+                        enabled = article != null || offlineArticle != null
                     ) {
                         Icon(Icons.Outlined.Share, contentDescription = "")
                     }
@@ -289,7 +390,7 @@ fun ArticleScreen(
                         mutableStateOf(article.relatedData?.bookmarked ?: false)
                     }
                     var addedToBookmarksCount by rememberSaveable(article.statistics.favoritesCount) {
-                        mutableStateOf(article.statistics.favoritesCount.toInt())
+                        mutableStateOf(article.statistics.favoritesCount)
                     }
                     val favoriteCoroutineScope = rememberCoroutineScope()
 
@@ -344,7 +445,7 @@ fun ArticleScreen(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            addedToBookmarksCount.toString(),
+                            text = addedToBookmarksCount.toString(),
                             color = statisticsColor,
                             fontWeight = FontWeight.W500
                         )
@@ -360,7 +461,7 @@ fun ArticleScreen(
                             modifier = Modifier.align(Alignment.Center),
                             badge = {
                                 article.relatedData?.let {
-                                    if (it.unreadComments > 0) {
+                                    if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
                                         Box(
                                             modifier = Modifier
                                                 .size(8.dp)
@@ -384,7 +485,7 @@ fun ArticleScreen(
                                 )
                                 Spacer(Modifier.width(4.dp))
                                 Text(
-                                    text = article.statistics.commentsCount,
+                                    text = formatLongNumbers(article.statistics.commentsCount),
                                     color = statisticsColor,
                                     fontWeight = FontWeight.W500
                                 )
@@ -396,230 +497,169 @@ fun ArticleScreen(
             }
         }
     ) {
-        article?.let { article ->
-            LaunchedEffect(key1 = Unit, block = {
-                context.lastReadDataStore.edit {
-                    it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
-                }
-            })
-            Row(
-                Modifier.padding(
-                    top = it.calculateTopPadding(),
-                    bottom = it.calculateBottomPadding()
-                )
-            ) {
+        if (isOffline){
+            offlineArticle?.let { article ->
                 val flingSpec = rememberSplineBasedDecay<Float>()
+                Row() {
 
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(
-                            state = scrollState,
-                            flingBehavior = object : FlingBehavior {
-                                override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-                                    if (abs(initialVelocity) <= 1f)
-                                        return initialVelocity
 
-                                    val performedInitialVelocity = initialVelocity * 1.2f
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(
+                                state = scrollState,
+                                flingBehavior = object : FlingBehavior {
+                                    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                                        if (abs(initialVelocity) <= 1f)
+                                            return initialVelocity
 
-                                    var velocityLeft = performedInitialVelocity
-                                    var lastValue = 0f
-                                    AnimationState(
-                                        initialValue = 0f,
-                                        initialVelocity = performedInitialVelocity
-                                    ).animateDecay(flingSpec) {
-                                        val delta = value - lastValue
-                                        val consumed = scrollBy(delta)
-                                        lastValue = value
-                                        velocityLeft = velocity
+                                        val performedInitialVelocity = initialVelocity * 1.2f
 
-                                        if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
+                                        var velocityLeft = performedInitialVelocity
+                                        var lastValue = 0f
+                                        AnimationState(
+                                            initialValue = 0f,
+                                            initialVelocity = performedInitialVelocity
+                                        ).animateDecay(flingSpec) {
+                                            val delta = value - lastValue
+                                            val consumed = scrollBy(delta)
+                                            lastValue = value
+                                            velocityLeft = velocity
+
+                                            if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
+
+                                        }
+                                        return velocityLeft
 
                                     }
-                                    return velocityLeft
 
                                 }
-
-                            }
-                        )
-                        .padding(bottom = 12.dp)
-                        .padding(16.dp)
-                ) {
-                    if (article.editorVersion == EditorVersion.FirstVersion) {
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colors.error.copy(alpha = 0.75f))
-                                .padding(8.dp), verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Warning,
-                                contentDescription = "",
-                                tint = MaterialTheme.colors.onError
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                "Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
-                                color = MaterialTheme.colors.onError
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                    }
-                    if (article.author != null) {
-                        Row(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .clickable(onClick = { onAuthorClicked(article.author.alias) }),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            if (article.author.avatarUrl != null)
-                                AsyncImage(
-                                    modifier = Modifier
-                                        .size(34.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(Color.White),
-                                    model = article.author.avatarUrl,
-                                    contentDescription = ""
-                                )
-                            else
-                                Icon(
-                                    modifier = Modifier
-                                        .size(34.dp)
-                                        .border(
-                                            width = 2.dp,
-                                            color = placeholderColor(article.author.alias),
-                                            shape = RoundedCornerShape(8.dp)
-                                        )
-                                        .background(Color.White, shape = RoundedCornerShape(8.dp))
-                                        .padding(2.dp),
-                                    painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                                    contentDescription = "",
-                                    tint = placeholderColor(article.author.alias)
-                                )
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = article.author.alias, fontWeight = FontWeight.W600,
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colors.onBackground
-                            )
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                article.timePublished, color = Color.Gray,
-                                fontSize = 12.sp, fontWeight = FontWeight.W400
-                            )
-                        }
-                    }
-                    if (article.postType == PostType.Megaproject && article.metadata != null) {
-                        AsyncImage(
-                            article.metadata.mainImageUrl,
-                            "",
-                            modifier = Modifier.clip(RoundedCornerShape(8.dp)),
-                        )
-                        Spacer(Modifier.height(8.dp))
-                    }
-                    Spacer(modifier = Modifier.size(8.dp))
-                    Column {
-                        SelectionContainer() {
-                            Text(
-                                text = article.title,
-                                fontSize = 22.sp,
-                                fontWeight = FontWeight.W700,
-                                color = MaterialTheme.colors.onBackground
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            if (article.complexity != PostComplexity.None) {
-                                Icon(
-                                    modifier = Modifier.size(height = 10.dp, width = 20.dp),
-                                    painter = painterResource(id = R.drawable.speedmeter_hard),
-                                    contentDescription = "",
-                                    tint = when (article.complexity) {
-                                        PostComplexity.Low -> Color(0xFF4CBE51)
-                                        PostComplexity.Medium -> Color(0xFFEEBC25)
-                                        PostComplexity.High -> Color(0xFFEB3B2E)
-                                        else -> Color.Red
-                                    }
-                                )
-                                Spacer(modifier = Modifier.width(2.dp))
+                            .padding(bottom = 12.dp)
+                            .padding(16.dp)
+                    ) {
+                        if (article.authorName != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (article.authorAvatarUrl != null)
+                                    AsyncImage(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color.White),
+                                        model = article.authorAvatarUrl,
+                                        contentDescription = ""
+                                    )
+                                else
+                                    Icon(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .border(
+                                                width = 2.dp,
+                                                color = placeholderColor(article.authorName),
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .background(
+                                                Color.White,
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(2.dp),
+                                        painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                                        contentDescription = "",
+                                        tint = placeholderColor(article.authorName)
+                                    )
+                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = when (article.complexity) {
-                                        PostComplexity.Low -> "Простой"
-                                        PostComplexity.Medium -> "Средний"
-                                        PostComplexity.High -> "Сложный"
-                                        else -> ""
-                                    },
-                                    color = when (article.complexity) {
-                                        PostComplexity.Low -> Color(0xFF4CBE51)
-                                        PostComplexity.Medium -> Color(0xFFEEBC25)
-                                        PostComplexity.High -> Color(0xFFEB3B2E)
-                                        else -> Color.Red
-                                    },
+                                    text = article.authorName, fontWeight = FontWeight.W600,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = article.timePublished, color = Color.Gray,
+                                    fontSize = 12.sp, fontWeight = FontWeight.W400
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Column {
+                            SelectionContainer() {
+                                Text(
+                                    text = article.title,
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.W700,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+
+                                Icon(
+                                    painter = painterResource(id = R.drawable.clock_icon),
+                                    modifier = Modifier.size(14.dp),
+                                    contentDescription = "",
+                                    tint = statisticsColor
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${article.readingTime} мин",
+                                    color = statisticsColor,
                                     fontWeight = FontWeight.W500,
                                     fontSize = 14.sp
-
                                 )
-
                                 Spacer(modifier = Modifier.width(12.dp))
-                            }
-                            Icon(
-                                painter = painterResource(id = R.drawable.clock_icon),
-                                modifier = Modifier.size(14.dp),
-                                contentDescription = "",
-                                tint = statisticsColor
-                            )
-                            Spacer(modifier = Modifier.width(2.dp))
-                            Text(
-                                text = "${article.readingTime} мин",
-                                color = statisticsColor,
-                                fontWeight = FontWeight.W500,
-                                fontSize = 14.sp
-                            )
-                        }
-                        Spacer(Modifier.height(4.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
 
-                        HubsRow(
-                            hubs = article.hubs,
-                            onHubClicked = onHubClicked,
-                            onCompanyClicked = onCompanyClick
-                        )
-
-                        TranslationMessage(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            translationInfo = article.translationData
-                        ) {
-                            val intent = Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(article.translationData.originUrl)
-                            )
-                            context.startActivity(intent)
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        SelectionContainer() {
-                            parseElement(
-                                Jsoup.parse(
-                                    article.contentHtml
-                                ),
-                                SpanStyle(
-                                    color = MaterialTheme.colors.onSurface,
-                                    fontSize = MaterialTheme.typography.body1.fontSize,
-
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.offline),
+                                        modifier = Modifier.size(14.dp),
+                                        contentDescription = "",
+                                        tint = statisticsColor
                                     )
-                            ).second?.let { it1 ->
-                                it1(
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "оффлайн режим",
+                                        color = statisticsColor,
+                                        fontWeight = FontWeight.W500,
+                                        fontSize = 14.sp
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.height(4.dp))
+
+
+
+//                        HubsRow(
+//                            hubs = article.hubs,
+//                            onHubClicked = onHubClicked,
+//                            onCompanyClicked = onCompanyClick
+//                        )
+
+
+                            SelectionContainer() {
+                                parseElement(
+                                    Jsoup.parse(
+                                        article.contentHtml
+                                    ),
                                     SpanStyle(
                                         color = MaterialTheme.colors.onSurface,
-                                        fontSize = MaterialTheme.typography.body1.fontSize
+                                        fontSize = MaterialTheme.typography.body1.fontSize,
+
+                                        )
+                                ).second?.let { it1 ->
+                                    it1(
+                                        SpanStyle(
+                                            color = MaterialTheme.colors.onSurface,
+                                            fontSize = MaterialTheme.typography.body1.fontSize
+                                        )
                                     )
-                                )
+                                }
                             }
-                        }
-                        // Tags
+                            // Tags
 //                        Row(
 //                            verticalAlignment = Alignment.Top,
 //                            modifier = Modifier.padding(vertical = 8.dp)
@@ -642,49 +682,342 @@ fun ArticleScreen(
 //                                )
 //                            )
 //                        }
-                        Divider(modifier = Modifier.padding(vertical = 24.dp))
-                        // Hubs
-                        TitledColumn(
-                            title = "Хабы",
-                            titleStyle = MaterialTheme.typography.subtitle2.copy(
-                                color = MaterialTheme.colors.onBackground.copy(
-                                    0.5f
+                            Divider(modifier = Modifier.padding(vertical = 24.dp))
+                            // Hubs
+                            TitledColumn(
+                                title = "Хабы",
+                                titleStyle = MaterialTheme.typography.subtitle2.copy(
+                                    color = MaterialTheme.colors.onBackground.copy(
+                                        0.5f
+                                    )
                                 )
-                            )
-                        ) {
+                            ) {
 //                            HubsRow(
 //                                hubs = article.hubs,
 //                                onHubClicked = onHubClicked,
 //                                onCompanyClicked = onCompanyClick
 //                            )
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                article.hubs.forEach {
-                                    HubChip(
-                                        if (it.isProfiled)
-                                            it.title + "*"
-                                        else
-                                            it.title
-                                    ) {
-                                        if (it.isCorporative)
-                                            onCompanyClick(it.alias)
-                                        else
-                                            onHubClicked(it.alias)
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    article.hubs.hubsList.forEach {
+                                        HubChip(it) { }
                                     }
                                 }
                             }
+
+
                         }
-
-
                     }
+                    ScrollBar(scrollState = scrollState)
                 }
-                ScrollBar(scrollState = scrollState)
             }
-        } ?: Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
-        ) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+        } else {
+            article?.let { article ->
+                LaunchedEffect(key1 = Unit, block = {
+                    context.lastReadDataStore.edit {
+                        it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
+                    }
+                })
+                Row(
+                    Modifier.padding(
+                        top = it.calculateTopPadding(),
+                        bottom = it.calculateBottomPadding()
+                    )
+                ) {
+                    val flingSpec = rememberSplineBasedDecay<Float>()
 
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(
+                                state = scrollState,
+                                flingBehavior = object : FlingBehavior {
+                                    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                                        if (abs(initialVelocity) <= 1f)
+                                            return initialVelocity
+
+                                        val performedInitialVelocity = initialVelocity * 1.2f
+
+                                        var velocityLeft = performedInitialVelocity
+                                        var lastValue = 0f
+                                        AnimationState(
+                                            initialValue = 0f,
+                                            initialVelocity = performedInitialVelocity
+                                        ).animateDecay(flingSpec) {
+                                            val delta = value - lastValue
+                                            val consumed = scrollBy(delta)
+                                            lastValue = value
+                                            velocityLeft = velocity
+
+                                            if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
+
+                                        }
+                                        return velocityLeft
+
+                                    }
+
+                                }
+                            )
+                            .padding(bottom = 12.dp)
+                            .padding(16.dp)
+                    ) {
+                        if (article.editorVersion == EditorVersion.FirstVersion) {
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(MaterialTheme.colors.error.copy(alpha = 0.75f))
+                                    .padding(8.dp), verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Warning,
+                                    contentDescription = "",
+                                    tint = MaterialTheme.colors.onError
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    "Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
+                                    color = MaterialTheme.colors.onError
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        if (article.author != null) {
+                            Row(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .clickable(onClick = { onAuthorClicked(article.author.alias) }),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (article.author.avatarUrl != null)
+                                    AsyncImage(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(Color.White),
+                                        model = article.author.avatarUrl,
+                                        contentDescription = ""
+                                    )
+                                else
+                                    Icon(
+                                        modifier = Modifier
+                                            .size(34.dp)
+                                            .border(
+                                                width = 2.dp,
+                                                color = placeholderColor(article.author.alias),
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .background(
+                                                Color.White,
+                                                shape = RoundedCornerShape(8.dp)
+                                            )
+                                            .padding(2.dp),
+                                        painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                                        contentDescription = "",
+                                        tint = placeholderColor(article.author.alias)
+                                    )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = article.author.alias, fontWeight = FontWeight.W600,
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    article.timePublished, color = Color.Gray,
+                                    fontSize = 12.sp, fontWeight = FontWeight.W400
+                                )
+                            }
+                        }
+                        if (article.postType == PostType.Megaproject && article.metadata != null) {
+                            AsyncImage(
+                                article.metadata.mainImageUrl,
+                                "",
+                                modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+                            )
+                            Spacer(Modifier.height(8.dp))
+                        }
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Column {
+                            SelectionContainer() {
+                                Text(
+                                    text = article.title,
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.W700,
+                                    color = MaterialTheme.colors.onBackground
+                                )
+                            }
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                if (article.complexity != PostComplexity.None) {
+                                    Icon(
+                                        modifier = Modifier.size(height = 10.dp, width = 20.dp),
+                                        painter = painterResource(id = R.drawable.speedmeter_hard),
+                                        contentDescription = "",
+                                        tint = when (article.complexity) {
+                                            PostComplexity.Low -> Color(0xFF4CBE51)
+                                            PostComplexity.Medium -> Color(0xFFEEBC25)
+                                            PostComplexity.High -> Color(0xFFEB3B2E)
+                                            else -> Color.Red
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = when (article.complexity) {
+                                            PostComplexity.Low -> "Простой"
+                                            PostComplexity.Medium -> "Средний"
+                                            PostComplexity.High -> "Сложный"
+                                            else -> ""
+                                        },
+                                        color = when (article.complexity) {
+                                            PostComplexity.Low -> Color(0xFF4CBE51)
+                                            PostComplexity.Medium -> Color(0xFFEEBC25)
+                                            PostComplexity.High -> Color(0xFFEB3B2E)
+                                            else -> Color.Red
+                                        },
+                                        fontWeight = FontWeight.W500,
+                                        fontSize = 14.sp
+
+                                    )
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                }
+                                Icon(
+                                    painter = painterResource(id = R.drawable.clock_icon),
+                                    modifier = Modifier.size(14.dp),
+                                    contentDescription = "",
+                                    tint = statisticsColor
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "${article.readingTime} мин",
+                                    color = statisticsColor,
+                                    fontWeight = FontWeight.W500,
+                                    fontSize = 14.sp
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Icon(
+                                    painter = painterResource(id = R.drawable.translate),
+                                    modifier = Modifier.size(14.dp),
+                                    contentDescription = "",
+                                    tint = statisticsColor
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = "Перевод",
+                                    color = statisticsColor,
+                                    fontWeight = FontWeight.W500,
+                                    fontSize = 14.sp
+                                )
+
+                            }
+                            Spacer(Modifier.height(4.dp))
+
+                            HubsRow(
+                                hubs = article.hubs,
+                                onHubClicked = onHubClicked,
+                                onCompanyClicked = onCompanyClick
+                            )
+
+                            TranslationMessage(
+                                modifier = Modifier.padding(vertical = 8.dp),
+                                translationInfo = article.translationData
+                            ) {
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(article.translationData.originUrl)
+                                )
+                                context.startActivity(intent)
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            SelectionContainer() {
+                                parseElement(
+                                    Jsoup.parse(
+                                        article.contentHtml
+                                    ),
+                                    SpanStyle(
+                                        color = MaterialTheme.colors.onSurface,
+                                        fontSize = MaterialTheme.typography.body1.fontSize,
+
+                                        )
+                                ).second?.let { it1 ->
+                                    it1(
+                                        SpanStyle(
+                                            color = MaterialTheme.colors.onSurface,
+                                            fontSize = MaterialTheme.typography.body1.fontSize
+                                        )
+                                    )
+                                }
+                            }
+                            // Tags
+//                        Row(
+//                            verticalAlignment = Alignment.Top,
+//                            modifier = Modifier.padding(vertical = 8.dp)
+//                        ) {
+//                            Text(
+//                                text = "Теги:",
+//                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.W500)
+//                            )
+//                            Spacer(modifier = Modifier.width(8.dp))
+//
+//                            var tags = String()
+//
+//                            article.tags.forEach { tags += "$it, " }
+//                            if (tags.length > 0) tags = tags.dropLast(2)
+//                            Text(
+//                                text = tags,
+//                                style = TextStyle(
+//                                    color = Color.Gray,
+//                                    fontWeight = FontWeight.W500
+//                                )
+//                            )
+//                        }
+                            Divider(modifier = Modifier.padding(vertical = 24.dp))
+                            // Hubs
+                            TitledColumn(
+                                title = "Хабы",
+                                titleStyle = MaterialTheme.typography.subtitle2.copy(
+                                    color = MaterialTheme.colors.onBackground.copy(
+                                        0.5f
+                                    )
+                                )
+                            ) {
+//                            HubsRow(
+//                                hubs = article.hubs,
+//                                onHubClicked = onHubClicked,
+//                                onCompanyClicked = onCompanyClick
+//                            )
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    article.hubs.forEach {
+                                        HubChip(
+                                            if (it.isProfiled)
+                                                it.title + "*"
+                                            else
+                                                it.title
+                                        ) {
+                                            if (it.isCorporative)
+                                                onCompanyClick(it.alias)
+                                            else
+                                                onHubClicked(it.alias)
+                                        }
+                                    }
+                                }
+                            }
+
+
+                        }
+                    }
+                    ScrollBar(scrollState = scrollState)
+                }
+            } ?: Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(it)
+            ) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+        }
 
     }
 }

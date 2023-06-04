@@ -49,6 +49,7 @@ import coil.size.Size
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
@@ -434,7 +435,7 @@ fun ArticleCard(
                 )
                 Spacer(modifier = Modifier.padding(2.dp))
                 Text(
-                    text = article.statistics.readingCount,
+                    text = formatLongNumbers(article.statistics.readingCount),
                     style = style.statisticsTextStyle
                 )
             }
@@ -445,7 +446,7 @@ fun ArticleCard(
                 mutableStateOf(article.relatedData?.bookmarked ?: false)
             }
             var addedToBookmarksCount by rememberSaveable(article.relatedData?.bookmarked) {
-                mutableStateOf(article.statistics.favoritesCount.toInt())
+                mutableStateOf(article.statistics.favoritesCount)
             }
 
             val bookmarkButtonClickLambda: () -> Unit = remember {
@@ -548,7 +549,7 @@ fun ArticleCard(
                 BadgedBox(
                     badge = {
                         article.relatedData?.let {
-                            if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount.toInt()){
+                            if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount){
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)
@@ -571,7 +572,7 @@ fun ArticleCard(
                         )
                         Spacer(modifier = Modifier.padding(2.dp))
                         Text(
-                            text = article.statistics.commentsCount,
+                            text = formatLongNumbers(article.statistics.commentsCount),
                             style = style.statisticsTextStyle,
                             overflow = TextOverflow.Clip,
                             maxLines = 1

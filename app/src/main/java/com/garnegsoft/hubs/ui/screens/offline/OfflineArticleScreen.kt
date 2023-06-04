@@ -25,7 +25,7 @@ fun OfflineArticlesScreen(
 ) {
     val articlesDao = LocalContext.current.offlineArticlesDatabase.articlesDao()
 
-    val articles by articlesDao.getAllSortedByIdDesc().collectAsState(initial = emptyList())
+    val articles by articlesDao.getAllSnippetsSortedByIdDesc().collectAsState(initial = emptyList())
 
     Scaffold(
         topBar = {
@@ -47,8 +47,11 @@ fun OfflineArticlesScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             contentPadding = PaddingValues(8.dp)
         ) {
-            items(items = articles, key = { it.articleId }) {
-                Text(text = it.title, style = MaterialTheme.typography.h3)
+            items(
+                items = articles,
+                key = { it.articleId }
+            ) {
+                OfflineArticleCard(article = it, onClick = { onArticleClick(it.articleId) })
             }
         }
     }

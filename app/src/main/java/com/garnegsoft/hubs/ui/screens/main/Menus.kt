@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.utils.placeholderColor
@@ -31,6 +30,7 @@ fun AuthorizedMenu(
     onArticlesClick: () -> Unit,
     onCommentsClick: () -> Unit,
     onBookmarksClick: () -> Unit,
+    onSavedArticlesClick: () -> Unit,
     onAboutClick: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -110,6 +110,11 @@ fun AuthorizedMenu(
             Icon(painter = painterResource(id = R.drawable.bookmark), contentDescription = "")
         }, onClick = onBookmarksClick)
 
+        MenuItem(title = "Скачанные", icon = {
+            Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
+        }, onClick = onSavedArticlesClick)
+
+
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
         MenuItem(title = "О приложении", icon = {
@@ -121,7 +126,8 @@ fun AuthorizedMenu(
 @Composable
 fun UnauthorizedMenu(
     onLoginClick: () -> Unit,
-    onAboutClick: () -> Unit
+    onAboutClick: () -> Unit,
+    onSavedArticlesClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     IconButton(onClick = { expanded = true }) {
@@ -136,6 +142,11 @@ fun UnauthorizedMenu(
         MenuItem(title = "Войти", icon = {
             Icon(imageVector = Icons.Outlined.ExitToApp, contentDescription = "")
         }, onClick = onLoginClick)
+
+        MenuItem(title = "Скачанные", icon = {
+            Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
+        }, onClick = onSavedArticlesClick)
+
 
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 

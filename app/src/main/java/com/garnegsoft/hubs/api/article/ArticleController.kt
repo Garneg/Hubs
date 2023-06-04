@@ -1,11 +1,8 @@
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.ArticleEntity
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.api.article.offline.HubsList
+import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
-import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.serialization.Serializable
 import org.jsoup.Jsoup
 
@@ -53,20 +50,17 @@ class ArticleController {
                         null
                     },
                     isCorporative = it.isCorporative,
-                    content = parseElement(
-                        Jsoup.parse(it.textHtml),
-                        SpanStyle(fontSize = 16.sp)
-                    ).second!!,
                     editorVersion = EditorVersion.fromString(it.editorVersion),
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
-                        commentsCount = it.statistics.commentsCount.toString(),
-                        favoritesCount = it.statistics.favoritesCount.toString(),
-                        readingCount = it.statistics.readingCount.toString(),
+                        commentsCount = it.statistics.commentsCount,
+                        favoritesCount = it.statistics.favoritesCount,
+                        readingCount = it.statistics.readingCount,
                         score = it.statistics.score,
                         votesCountMinus = it.statistics.votesCountMinus,
                         votesCountPlus = it.statistics.votesCountPlus
                     ),
+                    // TODO: Refactor with map()
                     hubs = it.hubs.run {
                         val hubs = arrayListOf<com.garnegsoft.hubs.api.article.Article.Hub>()
                         this.forEach {
@@ -87,11 +81,7 @@ class ArticleController {
                         }
                         hubs
                     },
-                    tags = arrayListOf<String>().apply {
-                        it.tags?.forEach {
-                            add(it.titleHtml)
-                        }
-                    },
+                    tags = it.tags?.map { it.titleHtml } ?: emptyList(),
                     postType = PostType.fromString(it.postType),
                     metadata = if (it.metadata != null) com.garnegsoft.hubs.api.article.Article.Metadata(
                         it.metadata!!.mainImageUrl
@@ -130,7 +120,7 @@ class ArticleController {
             return getSnippet("articles/$id")
         }
 
-        // TODO: Make private, change usages
+        // TODO: Make private, change usages, use map()
         fun getSnippet(
             path: String,
             args: Map<String, String>? = null
@@ -158,9 +148,9 @@ class ArticleController {
                         null
                     },
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
-                        commentsCount = formatLongNumbers(it.statistics.commentsCount),
-                        favoritesCount = it.statistics.favoritesCount.toString(),
-                        readingCount = formatLongNumbers(it.statistics.readingCount),
+                        commentsCount = it.statistics.commentsCount,
+                        favoritesCount = it.statistics.favoritesCount,
+                        readingCount = it.statistics.readingCount,
                         score = it.statistics.score,
                         votesCountMinus = it.statistics.votesCountMinus,
                         votesCountPlus = it.statistics.votesCountPlus
@@ -230,24 +220,6 @@ class ArticleController {
         }
 
 
-        fun getArticleEntity(id: Int): ArticleEntity? {
-            val article = get(id)
-
-            return article?.let {
-                ArticleEntity(
-                    articleId = it.id,
-                    authorName = it.author?.alias,
-                    authorAvatarData = null,
-                    timePublished = it.timePublished,
-                    title = it.title,
-                    readingTime = it.readingTime,
-                    isTranslation = it.translationData.isTranslation,
-                    contentHtml = it.contentHtml,
-                    thumbnailImageData = null
-                )
-            }
-
-        }
     }
 
     @Serializable
