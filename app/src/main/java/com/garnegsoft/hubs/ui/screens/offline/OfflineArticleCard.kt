@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,7 +44,22 @@ fun OfflineArticleCard(
             Spacer(modifier = Modifier.height(8.dp))
         }
 
+
         Text(text = article.title, style = style.titleTextStyle)
+
+        var hubsText by remember { mutableStateOf("") }
+
+        LaunchedEffect(key1 = Unit, block = {
+            if (hubsText == "") {
+                hubsText = article.hubs.hubsList.joinToString(separator = ", ") {
+                    it.replace(" ", "\u00A0")
+                }
+            }
+        })
+        // Hubs
+        Text(
+            text = hubsText, style = style.hubsTextStyle
+        )
         if (article.thumbnailUrl != null) {
             AsyncImage(
                 model = Modifier

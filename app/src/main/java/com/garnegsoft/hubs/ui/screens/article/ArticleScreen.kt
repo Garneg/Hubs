@@ -630,7 +630,22 @@ fun ArticleScreen(
                                 }
                             }
                             Spacer(Modifier.height(4.dp))
+                            var hubsText by remember { mutableStateOf("") }
 
+                            LaunchedEffect(key1 = Unit, block = {
+                                if (hubsText == "") {
+                                    hubsText = article.hubs.hubsList.joinToString(separator = ", ") {
+                                        it.replace(" ", "\u00A0")
+                                    }
+                                }
+                            })
+                            // Hubs
+                            Text(
+                                text = hubsText, style = TextStyle(
+                                    color = Color.Gray,
+                                    fontWeight = FontWeight.W500
+                                )
+                            )
 
 
 //                        HubsRow(

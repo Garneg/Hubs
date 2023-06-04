@@ -29,10 +29,7 @@ fun HubsRow(
 
             Text(
                 modifier = Modifier
-
-                    .clip(
-                        RoundedCornerShape(2.dp)
-                    )
+                    .clip(RoundedCornerShape(2.dp))
                     .clickable { if (it.isCorporative) onCompanyClicked(it.alias) else onHubClicked(it.alias) }
                     .padding(horizontal = 2.dp),
                 text = hubTitle,
