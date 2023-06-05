@@ -501,8 +501,6 @@ fun ArticleScreen(
             offlineArticle?.let { article ->
                 val flingSpec = rememberSplineBasedDecay<Float>()
                 Row() {
-
-
                     Column(
                         modifier = Modifier
                             .verticalScroll(
@@ -573,11 +571,6 @@ fun ArticleScreen(
                                     text = article.authorName, fontWeight = FontWeight.W600,
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colors.onBackground
-                                )
-                                Spacer(modifier = Modifier.weight(1f))
-                                Text(
-                                    text = article.timePublished, color = Color.Gray,
-                                    fontSize = 12.sp, fontWeight = FontWeight.W400
                                 )
                             }
                         }

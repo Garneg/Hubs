@@ -58,7 +58,9 @@ val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/articles/{id}"),
     NavDeepLink("https://habr.com/{lang}/articles/{id}/"),
     NavDeepLink("https://habr.com/{lang}/amp/publications/{id}"),
-    NavDeepLink("https://habr.com/{lang}/amp/publications/{id}/")
+    NavDeepLink("https://habr.com/{lang}/amp/publications/{id}/"),
+    NavDeepLink("https://habr.com/{lang}/specials/{id}"),
+    NavDeepLink("https://habr.com/{lang}/specials/{id}/"),
 
 )
 

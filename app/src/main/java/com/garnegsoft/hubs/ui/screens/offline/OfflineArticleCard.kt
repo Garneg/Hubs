@@ -1,8 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -10,9 +12,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
+import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 
@@ -32,19 +37,34 @@ fun OfflineArticleCard(
     ) {
         article.authorName?.let {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AsyncImage(
-                    modifier = Modifier
-                        .size(style.authorAvatarSize)
-                        .clip(style.innerElementsShape),
-                    model = article.authorAvatarUrl, contentDescription = ""
-                )
+                if (article.authorAvatarUrl != null) {
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(style.authorAvatarSize)
+                            .clip(style.innerElementsShape),
+                        model = article.authorAvatarUrl, contentDescription = ""
+                    )
+                } else {
+                    Icon(
+                        modifier = Modifier
+                            .size(style.authorAvatarSize)
+                            .border(
+                                width = 2.dp,
+                                color = placeholderColor(it),
+                                shape = style.innerElementsShape
+                            )
+                            .background(Color.White, shape = style.innerElementsShape)
+                            .padding(2.dp),
+                        painter = painterResource(id = R.drawable.user_avatar_placeholder),
+                        contentDescription = "",
+                        tint = placeholderColor(it)
+                    )
+                }
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = it, style = style.authorTextStyle)
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
-
-
         Text(text = article.title, style = style.titleTextStyle)
 
         var hubsText by remember { mutableStateOf("") }
