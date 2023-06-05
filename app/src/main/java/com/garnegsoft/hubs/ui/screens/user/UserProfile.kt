@@ -257,7 +257,7 @@ internal fun UserProfile(
                                 )
                                 .clip(RoundedCornerShape(10.dp))
                                 .background(
-                                    MaterialTheme.colors.onSurface.copy(0.045f)
+                                    MaterialTheme.colors.onSurface.copy(0.04f)
                                 )
                                 .padding(8.dp)
                         ) {
@@ -347,7 +347,7 @@ internal fun UserProfile(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .clip(RoundedCornerShape(8.dp))
-                                                    .background(MaterialTheme.colors.onSurface.copy(0.045f))
+                                                    .background(MaterialTheme.colors.onSurface.copy(0.04f))
                                                     .clickable {
                                                         context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.url)))
                                                     }
@@ -359,7 +359,7 @@ internal fun UserProfile(
                                                         modifier = Modifier
                                                             .size(24.dp)
                                                             .clip(
-                                                                RoundedCornerShape(8.dp)
+                                                                RoundedCornerShape(4.dp)
                                                             )
                                                             .background(if (MaterialTheme.colors.isLight) Color.Transparent else MaterialTheme.colors.onSurface),
                                                         data = it.faviconUrl,
@@ -371,7 +371,8 @@ internal fun UserProfile(
                                                     Icon(
                                                         modifier = Modifier.size(24.dp),
                                                         painter = painterResource(id = R.drawable.website_favicon_placeholder),
-                                                        contentDescription = "website"
+                                                        contentDescription = "website",
+                                                        tint = MaterialTheme.colors.onSurface.copy(0.4f)
                                                     )
                                                 }
 

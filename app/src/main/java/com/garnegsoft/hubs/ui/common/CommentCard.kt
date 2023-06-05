@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -23,6 +24,7 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 
@@ -139,10 +141,14 @@ fun CommentCard(
             }
 
             Spacer(modifier = Modifier.height(style.padding.calculateTopPadding().div(3)))
-            Text(
-                text = comment.text,
-                style = style.messageTextStyle
-            )
+            parseElement(comment.text, SpanStyle(
+                color = MaterialTheme.colors.onSurface,
+                fontSize = MaterialTheme.typography.body1.fontSize,)
+            ).second?.invoke(
+                SpanStyle(
+                color = MaterialTheme.colors.onSurface,
+                fontSize = MaterialTheme.typography.body1.fontSize,
+                ))
             Spacer(modifier = Modifier.height(style.padding.calculateBottomPadding()))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(

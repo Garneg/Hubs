@@ -177,7 +177,7 @@ class CommentsListController {
                                     id = it.post!!.id,
                                     title = it.post!!.title
                                 ),
-                                text = Jsoup.parse(it.message).text(),
+                                text = it.message,
                                 timePublished = it.timePublished,
                                 score = it.score ?: 0,
                                 author = Article.Author(

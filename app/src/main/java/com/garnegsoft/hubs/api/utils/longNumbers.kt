@@ -6,13 +6,13 @@ fun formatLongNumbers(number: Int): String {
             return String.format(
                 "%.1f",
                 (number.toFloat() / 1_000f)
-            ).replace(',', '.') + "K"
+            ).replace(',', '.').replace(".0", "") + "K"
         }
         if (number < 1_000_000) {
             return String.format(
                 "%.0f",
                 (number.toFloat() / 1_000f)
-            ).replace(',', '.') + "K"
+            ).replace(',', '.').replace(".0", "") + "K"
         }
     }
     if (number > 1_000_000) {
@@ -20,12 +20,12 @@ fun formatLongNumbers(number: Int): String {
             return String.format(
                 "%.1f",
                 (number.toFloat() / 1_000_000f)
-            ).replace(',', '.') + "M"
+            ).replace(',', '.').replace(".0", "") + "M"
         }
         return String.format(
             "%.0f",
             (number.toFloat() / 1_000_000f)
-        ).replace(',', '.') + "M"
+        ).replace(',', '.').replace(".0", "") + "M"
     }
     return number.toString()
 

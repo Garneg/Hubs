@@ -363,7 +363,9 @@ fun ArticleCard(
                     .clip(style.innerElementsShape)
                     .aspectRatio(1.8f)
                     .background(MaterialTheme.colors.onSurface.copy(0.1f)),
-                model = article.imageUrl,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .crossfade(true)
+                    .data(article.imageUrl).build(),
                 contentScale = ContentScale.Crop,
                 contentDescription = "",
             )

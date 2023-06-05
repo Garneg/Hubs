@@ -338,7 +338,9 @@ fun parseElement(
             { localSpanStyle ->
                 val context = LocalContext.current
                 ClickableText(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 14.dp),
                     text = currentText,
                     style = LocalTextStyle.current.copy(
                         lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
@@ -363,13 +365,16 @@ fun parseElement(
         else null
         "img" -> if (element.hasClass("formula")) {
             {
-                AsyncSvgImage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
-                    data = element.attr("src"),
-                    contentScale = ContentScale.Inside
-                )
+                Box(
+                    modifier = Modifier.height(50.dp).fillMaxWidth()
+                ) {
+                    AsyncSvgImage(
+                        modifier = Modifier.align(Alignment.Center),
+                        data = element.attr("src"),
+                        contentScale = ContentScale.Inside
+                    )
+                }
+
             }
         } else {
             { it: SpanStyle ->
