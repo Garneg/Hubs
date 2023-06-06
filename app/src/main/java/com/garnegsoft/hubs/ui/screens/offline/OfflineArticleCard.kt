@@ -19,9 +19,12 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.ArticleCardStyle
@@ -82,6 +85,40 @@ fun OfflineArticleCard(
                 }
             }
         })
+        Row(
+            modifier = Modifier.padding(horizontal = style.innerPadding),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                modifier = Modifier.size(14.dp),
+                painter = painterResource(id = R.drawable.clock_icon),
+                contentDescription = "",
+                tint = style.statisticsColor
+            )
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(
+                text = "${article.readingTime} мин",
+                color = style.statisticsColor,
+                fontWeight = FontWeight.W500,
+                fontSize = 14.sp
+            )
+            if (article.isTranslation) {
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    modifier = Modifier.size(14.dp),
+                    painter = painterResource(id = R.drawable.translate),
+                    contentDescription = "",
+                    tint = style.statisticsColor
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    text = "Перевод",
+                    color = style.statisticsColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.W500
+                )
+            }
+        }
         // Hubs
         Text(
             text = hubsText, style = style.hubsTextStyle
