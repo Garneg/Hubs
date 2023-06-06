@@ -1,11 +1,9 @@
 package com.garnegsoft.hubs.ui.screens.user
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -13,9 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.FontWeight.Companion.W500
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 
@@ -25,23 +20,40 @@ fun HubChip(
     onClick: () -> Unit
 ) {
     val isLightColor = MaterialTheme.colors.isLight
-    val color = if (isLightColor) remember {
+    val backgroundColor = if (isLightColor) remember {
         if (hub.relatedData?.isSubscribed == true)
-            Color(0xFF4BB80D)
+            Color(0x1A4BB80D)
         else
-            Color(0xFF0E73B8)
-    } else MaterialTheme.colors.onSurface
+            Color(0x1A0E73B8)
+    } else {
+        if (hub.relatedData?.isSubscribed == true)
+            MaterialTheme.colors.onSurface.copy(0.1f)
+        else
+            MaterialTheme.colors.onSurface.copy(0.05f)
+
+    }
+    val textColor = if (isLightColor) remember {
+        if (hub.relatedData?.isSubscribed == true)
+            Color(0xFF194600)
+        else
+            Color(0xFF003255)
+    } else {
+        if (hub.relatedData?.isSubscribed == true)
+            MaterialTheme.colors.onSurface.copy(0.85f)
+        else
+            MaterialTheme.colors.onSurface.copy(0.65f)
+
+    }
+
     Text(
         modifier = Modifier
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .background(color.copy(0.1f))
+            .background(backgroundColor)
             .padding(vertical = 8.dp, horizontal = 12.dp),
         text = hub.title,
-        color = color.run {
-            copy(this.alpha, this.red * 0.4f, this.green * 0.4f, this.blue * 0.4f)
-        },
+        color = textColor,
         style = MaterialTheme.typography.body2
     )
 }

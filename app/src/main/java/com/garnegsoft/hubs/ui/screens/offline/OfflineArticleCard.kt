@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
-import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
