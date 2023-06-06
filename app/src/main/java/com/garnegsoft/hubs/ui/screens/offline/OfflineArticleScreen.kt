@@ -31,6 +31,7 @@ fun OfflineArticlesScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Сохраненные публикации")},
+                elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")

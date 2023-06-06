@@ -134,7 +134,7 @@ class ArticleScreenViewModel : ViewModel() {
                         articleId = it.id,
                         authorName = it.author?.alias,
                         authorAvatarUrl = it.author?.avatarUrl,
-                        timePublished = it.timePublished,
+                        timePublished = "",
                         title = it.title,
                         readingTime = it.readingTime,
                         isTranslation = it.translationData.isTranslation,
