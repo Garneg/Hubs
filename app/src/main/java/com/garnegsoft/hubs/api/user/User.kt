@@ -30,6 +30,7 @@ class User(
 ){
 
     class WhoIs(
+        val aboutHtml: String?,
         val badges: List<Badge>,
         val invite: Invite?,
         val contacts: List<Contact>

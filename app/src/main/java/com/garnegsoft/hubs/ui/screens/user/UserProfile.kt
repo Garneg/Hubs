@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,8 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.screens.article.RenderHtml
+import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -268,6 +271,139 @@ internal fun UserProfile(
                     }
                 }
             }
+            val whoIs by viewModel.whoIs.observeAsState()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(MaterialTheme.colors.surface)
+                    .padding(8.dp)
+            ) {
+                BasicTitledColumn(title = {
+                    Text(
+                        modifier = Modifier.padding(12.dp),
+                        text = "Описание", style = MaterialTheme.typography.subtitle1
+                    )
+                }, divider = {
+//                    Divider()
+                }) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 12.dp,
+                            end = 12.dp,
+                            bottom = 12.dp,
+                            top = 4.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        whoIs?.aboutHtml?.let{
+                            if (it.isNotBlank()) {
+                                TitledColumn(title = "О Себе") {
+                                    RenderHtml(html = it)
+                                }
+                            }
+                        }
+
+                        whoIs?.invite?.let {
+                            TitledColumn(title = "Приглашен") {
+                                Text(text = "${it.inviteDate} по приглашению от ${it.inviterAlias ?: "НЛО"}")
+                            }
+                        }
+
+                        whoIs?.let {
+                            if (it.contacts.size > 0) {
+                                TitledColumn(title = "Контакты") {
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                                    ){
+                                        val context = LocalContext.current
+                                        it.contacts.forEach {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .clip(RoundedCornerShape(8.dp))
+                                                    .background(
+                                                        MaterialTheme.colors.onSurface.copy(
+                                                            0.04f
+                                                        )
+                                                    )
+                                                    .clickable {
+                                                        context.startActivity(
+                                                            Intent(
+                                                                Intent.ACTION_VIEW,
+                                                                Uri.parse(it.url)
+                                                            )
+                                                        )
+                                                    }
+                                                    .padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                if (it.faviconUrl != null && it.faviconUrl.isNotBlank()) {
+                                                    AsyncSvgImage(
+                                                        modifier = Modifier
+                                                            .size(24.dp)
+                                                            .clip(
+                                                                RoundedCornerShape(4.dp)
+                                                            )
+                                                            .background(if (MaterialTheme.colors.isLight) Color.Transparent else MaterialTheme.colors.onSurface),
+                                                        data = it.faviconUrl,
+                                                        revertColorsOnDarkTheme = false,
+                                                        contentDescription = it.title,
+                                                        contentScale = ContentScale.Fit
+                                                    )
+                                                } else {
+                                                    Icon(
+                                                        modifier = Modifier.size(24.dp),
+                                                        painter = painterResource(id = R.drawable.website_favicon_placeholder),
+                                                        contentDescription = "website",
+                                                        tint = MaterialTheme.colors.onSurface.copy(0.4f)
+                                                    )
+                                                }
+
+                                                Spacer(modifier = Modifier.width(12.dp))
+
+                                                Text(it.title)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        val hubs by viewModel.subscribedHubs.observeAsState()
+                        hubs?.let {
+                            if (it.list.size > 0) {
+                                Column() {
+                                    TitledColumn(title = "Состоит в хабах") {
+                                        FlowRow(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            it.list.forEach {
+                                                HubChip(hub = it) {
+                                                    onHubClick(it.alias)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    if (viewModel.moreHubsAvailable) {
+                                        TextButton(
+                                            onClick = {
+                                                viewModel.loadSubscribedHubs()
+                                            }
+                                        ) {
+                                            Text(
+                                                "Показать ещё",
+                                                color = MaterialTheme.colors.secondary,
+                                                letterSpacing = 0.sp
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -332,90 +468,11 @@ internal fun UserProfile(
                                 )
                             }
                         }
-                        val hubs by viewModel.subscribedHubs.observeAsState()
-                        val whoIs by viewModel.whoIs.observeAsState()
 
-                        whoIs?.let {
-                            if (it.contacts.size > 0) {
-                                TitledColumn(title = "Контакты") {
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ){
-                                        val context = LocalContext.current
-                                        it.contacts.forEach {
-                                            Row(
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .clip(RoundedCornerShape(8.dp))
-                                                    .background(MaterialTheme.colors.onSurface.copy(0.04f))
-                                                    .clickable {
-                                                        context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.url)))
-                                                    }
-                                                    .padding(12.dp),
-                                                verticalAlignment = Alignment.CenterVertically
-                                            ) {
-                                                if (it.faviconUrl != null && it.faviconUrl.isNotBlank()) {
-                                                    AsyncSvgImage(
-                                                        modifier = Modifier
-                                                            .size(24.dp)
-                                                            .clip(
-                                                                RoundedCornerShape(4.dp)
-                                                            )
-                                                            .background(if (MaterialTheme.colors.isLight) Color.Transparent else MaterialTheme.colors.onSurface),
-                                                        data = it.faviconUrl,
-                                                        revertColorsOnDarkTheme = false,
-                                                        contentDescription = it.title,
-                                                        contentScale = ContentScale.Fit
-                                                    )
-                                                } else {
-                                                    Icon(
-                                                        modifier = Modifier.size(24.dp),
-                                                        painter = painterResource(id = R.drawable.website_favicon_placeholder),
-                                                        contentDescription = "website",
-                                                        tint = MaterialTheme.colors.onSurface.copy(0.4f)
-                                                    )
-                                                }
 
-                                                Spacer(modifier = Modifier.width(12.dp))
 
-                                                Text(it.title)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
 
-                        hubs?.let {
-                            if (it.list.size > 0) {
-                                Column() {
-                                    TitledColumn(title = "Состоит в хабах") {
-                                        FlowRow(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            it.list.forEach {
-                                                HubChip(hub = it) {
-                                                    onHubClick(it.alias)
-                                                }
-                                            }
-                                        }
-                                    }
-                                    if (viewModel.moreHubsAvailable) {
-                                        TextButton(
-                                            onClick = {
-                                                viewModel.loadSubscribedHubs()
-                                            }
-                                        ) {
-                                            Text(
-                                                "Показать ещё",
-                                                color = MaterialTheme.colors.secondary,
-                                                letterSpacing = 0.sp
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
+
 
 
                     }

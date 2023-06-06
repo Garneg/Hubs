@@ -51,6 +51,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.HubsDataStore
@@ -171,6 +172,7 @@ fun ArticleScreen(
     onAuthorClicked: (alias: String) -> Unit,
     onHubClicked: (alias: String) -> Unit,
     onCompanyClick: (alias: String) -> Unit,
+    onViewImageRequest: (url: String) -> Unit,
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
@@ -650,14 +652,12 @@ fun ArticleScreen(
 
                             SelectionContainer() {
                                 parseElement(
-                                    Jsoup.parse(
-                                        article.contentHtml
-                                    ),
-                                    SpanStyle(
+                                    element = Jsoup.parse(article.contentHtml),
+                                    spanStyle = SpanStyle(
                                         color = MaterialTheme.colors.onSurface,
                                         fontSize = MaterialTheme.typography.body1.fontSize,
-
-                                        )
+                                        ),
+                                    onViewImageRequest = onViewImageRequest
                                 ).second?.let { it1 ->
                                     it1(
                                         SpanStyle(
@@ -950,7 +950,9 @@ fun ArticleScreen(
                                         color = MaterialTheme.colors.onSurface,
                                         fontSize = MaterialTheme.typography.body1.fontSize,
 
-                                        )
+                                        ),
+                                    onViewImageRequest = onViewImageRequest
+
                                 ).second?.let { it1 ->
                                     it1(
                                         SpanStyle(

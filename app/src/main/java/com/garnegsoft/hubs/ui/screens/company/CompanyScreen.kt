@@ -36,6 +36,7 @@ import kotlinx.coroutines.launch
 
 class CompanyScreenViewModel : ViewModel() {
     var companyProfile = MutableLiveData<Company>()
+    var companyWhoIs = MutableLiveData<Company.WhoIs>()
     var blogArticles = MutableLiveData<HabrList<ArticleSnippet>>()
     var blogNews = MutableLiveData<HabrList<ArticleSnippet>>()
     var followers = MutableLiveData<HabrList<UserSnippet>>()

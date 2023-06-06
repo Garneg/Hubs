@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId "com.garnegsoft.hubs"
-        minSdk 21
+        minSdk 23
         targetSdk 33
-        versionCode 6
-        versionName "2.1.2"
+        versionCode 7
+        versionName "2.2.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -54,6 +54,8 @@ kapt {
 dependencies {
 
     implementation "androidx.compose.runtime:runtime-livedata:1.4.3"
+
+    implementation "me.saket.telephoto:zoomable-image-coil:0.4.0"
 
     implementation 'org.jsoup:jsoup:1.15.3'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.4.1'

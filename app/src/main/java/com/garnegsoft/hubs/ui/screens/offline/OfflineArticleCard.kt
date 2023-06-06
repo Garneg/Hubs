@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,6 +13,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -81,8 +87,9 @@ fun OfflineArticleCard(
             text = hubsText, style = style.hubsTextStyle
         )
         if (article.thumbnailUrl != null) {
+            Spacer(modifier = Modifier.height(4.dp))
             AsyncImage(
-                model = Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)
                     .clip(style.innerElementsShape)
@@ -92,8 +99,11 @@ fun OfflineArticleCard(
                         else
                             MaterialTheme.colors.onSurface.copy(0.2f)
                     ),
+                model = article.thumbnailUrl,
+                contentScale = ContentScale.Crop,
                 contentDescription = ""
             )
+
         }
 
     }

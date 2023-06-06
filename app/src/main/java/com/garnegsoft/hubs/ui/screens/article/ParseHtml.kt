@@ -14,11 +14,8 @@ import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -57,14 +54,38 @@ val LINE_HEIGHT_FACTOR = 1.5F
 fun parseElement(
     html: String,
     spanStyle: SpanStyle
-): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> = parseElement(Jsoup.parse(html), spanStyle)
+): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> =
+    parseElement(Jsoup.parse(html), spanStyle)
+
+@Composable
+fun RenderHtml(
+    html: String,
+    spanStyle: SpanStyle =
+        SpanStyle(
+            color = MaterialTheme.colors.onSurface,
+            fontSize = MaterialTheme.typography.body1.fontSize
+        )
+) {
+    val result = remember {
+        parseElement(
+            html = html,
+            spanStyle = spanStyle
+        )
+    }
+    Column {
+        result.first?.let { Text(it) }
+        result.second?.let { it.invoke(spanStyle) }
+    }
+
+}
 
 /**
  * WARNING! Specify fontSize with **spanStyle** or you will get exception
  */
 fun parseElement(
     element: Element,
-    spanStyle: SpanStyle
+    spanStyle: SpanStyle,
+    onViewImageRequest: ((imageUrl: String) -> Unit)? = null,
 ): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> {
     var isBlock = element.isHabrBlock()
     var resultAnnotatedString: AnnotatedString = buildAnnotatedString { }
@@ -197,7 +218,7 @@ fun parseElement(
     var childrenElementsResult: ArrayList<Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?>> =
         ArrayList()
     element.children().forEach {
-        childrenElementsResult.add(parseElement(it, ChildrenSpanStyle))
+        childrenElementsResult.add(parseElement(it, ChildrenSpanStyle, onViewImageRequest))
     }
     var mainComposable: (@Composable (SpanStyle) -> Unit)? = null
 
@@ -242,7 +263,11 @@ fun parseElement(
                         var context = LocalContext.current
                         ClickableText(
                             text = thisElementCurrentText,
-                            style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize.times(LINE_HEIGHT_FACTOR)),
+                            style = LocalTextStyle.current.copy(
+                                lineHeight = LocalTextStyle.current.fontSize.times(
+                                    LINE_HEIGHT_FACTOR
+                                )
+                            ),
                             onClick = {
                                 thisElementCurrentText.getStringAnnotations(it, it)
                                     .find { it.tag == "url" }
@@ -288,7 +313,11 @@ fun parseElement(
             val context = LocalContext.current
             ClickableText(
                 text = currentText,
-                style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize.times(LINE_HEIGHT_FACTOR)),
+                style = LocalTextStyle.current.copy(
+                    lineHeight = LocalTextStyle.current.fontSize.times(
+                        LINE_HEIGHT_FACTOR
+                    )
+                ),
                 onClick = {
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
                         if (it.item.startsWith("http")) {
@@ -366,7 +395,9 @@ fun parseElement(
         "img" -> if (element.hasClass("formula")) {
             {
                 Box(
-                    modifier = Modifier.height(50.dp).fillMaxWidth()
+                    modifier = Modifier
+                        .height(50.dp)
+                        .fillMaxWidth()
                 ) {
                     AsyncSvgImage(
                         modifier = Modifier.align(Alignment.Center),
@@ -378,16 +409,22 @@ fun parseElement(
             }
         } else {
             { it: SpanStyle ->
-                AsyncGifImage(
-                    model = if (element.hasAttr("data-src")) {
+                val sourceUrl = remember {
+                    if (element.hasAttr("data-src")) {
                         element.attr("data-src")
                     } else {
                         element.attr("src")
-                    },
+                    }
+                }
+                AsyncGifImage(
+                    model = sourceUrl,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
                         .clip(RoundedCornerShape(4.dp))
+                        .clickable(enabled = onViewImageRequest != null) {
+                            onViewImageRequest?.invoke(sourceUrl)
+                        }
                         .background(
                             if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
                                 0.75f
@@ -487,7 +524,9 @@ fun parseElement(
                     .fillMaxWidth()
             ) {
                 val blockQuoteColor =
-                    if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(0.75f)
+                    if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
+                        0.75f
+                    )
                 Column(modifier = Modifier
                     .drawWithContent {
                         drawContent()
@@ -732,7 +771,7 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
                 }
             }
 
-            
+
         }
         Surface(
             color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),

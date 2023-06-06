@@ -1,6 +1,14 @@
 package com.garnegsoft.hubs
 
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDeepLink
+import me.saket.telephoto.zoomable.ZoomSpec
+import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
+import me.saket.telephoto.zoomable.rememberZoomableImageState
+import me.saket.telephoto.zoomable.rememberZoomableState
 
 
 val UserScreenNavDeepLinks = listOf(
@@ -10,30 +18,30 @@ val UserScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}/"),
     NavDeepLink("https://habr.com/users/{alias}"),
     NavDeepLink("https://habr.com/users/{alias}/"),
-    )
+)
 
 val HubScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/hub/{alias}"),
     NavDeepLink("https://habr.com/{lang}/hub/{alias}/"),
     NavDeepLink("https://habr.com/{lang}/hub/{alias}/{page}"),
     NavDeepLink("https://habr.com/{lang}/hub/{alias}/{page}/"),
-    )
+)
 
 val CompanyScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/companies/{alias}"),
     NavDeepLink("https://habr.com/{lang}/companies/{alias}/"),
     NavDeepLink("https://habr.com/{lang}/companies/{alias}/{page}"),
     NavDeepLink("https://habr.com/{lang}/companies/{alias}/{page}/"),
-    )
+)
 
 val CommentsScreenNavDeepLinks = listOf(
-    NavDeepLink("https://habr.com/ru/articles/{postId}/comments/#comment_{commentId}"),
-    NavDeepLink("https://habr.com/ru/articles/{postId}/comments/#comment_{commentId}/"),
-    NavDeepLink("https://habr.com/ru/companies/{company}/articles/{postId}/comments/#comment_{commentId}"),
-    NavDeepLink("https://habr.com/ru/companies/{company}/articles/{postId}/comments/#comment_{commentId}/"),
-    NavDeepLink("https://habr.com/ru/companies/{company}/articles/{postId}/#comment_{commentId}"),
-    NavDeepLink("https://habr.com/ru/companies/{company}/articles/{postId}/#comment_{commentId}/"),
-    NavDeepLink("https://habr.com/ru/companies/{company}/articles/{postId}/comments/"),
+    NavDeepLink("https://habr.com/{lang}/articles/{postId}/comments/#comment_{commentId}"),
+    NavDeepLink("https://habr.com/{lang}/articles/{postId}/comments/#comment_{commentId}/"),
+    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/comments/#comment_{commentId}"),
+    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/comments/#comment_{commentId}/"),
+//    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/#comment_{commentId}"),
+//    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/#comment_{commentId}/"),
+    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/comments/"),
     NavDeepLink("https://habr.com/p/{postId}/comments/#comment_{commentId}"),
     NavDeepLink("https://habr.com/p/{postId}/comments/#comment_{commentId}/")
 )
@@ -41,12 +49,12 @@ val CommentsScreenNavDeepLinks = listOf(
 val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/p/{id}"),
     NavDeepLink("https://habr.com/p/{id}/"),
-    NavDeepLink("https://{domain}/{lang}/post/{id}"),
-    NavDeepLink("https://{domain}/{lang}/post/{id}/"),
-    NavDeepLink("https://{domain}/article/{id}"),
-    NavDeepLink("https://{domain}/article/{id}/"),
-    NavDeepLink("https://{domain}/company/{company}/blog/{id}"),
-    NavDeepLink("https://{domain}/company/{company}/blog/{id}/"),
+    NavDeepLink("{protocol}://{domain}/{lang}/post/{id}"),
+    NavDeepLink("{protocol}://{domain}/{lang}/post/{id}/"),
+    NavDeepLink("{protocol}://{domain}/article/{id}"),
+    NavDeepLink("{protocol}://{domain}/article/{id}/"),
+    NavDeepLink("{protocol}://{domain}/company/{company}/blog/{id}"),
+    NavDeepLink("{protocol}://{domain}/company/{company}/blog/{id}/"),
     NavDeepLink("https://habr.com/{lang}/news/t/{id}"),
     NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
     NavDeepLink("https://habr.com/{lang}/news/{id}"),
@@ -62,5 +70,7 @@ val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/specials/{id}"),
     NavDeepLink("https://habr.com/{lang}/specials/{id}/"),
 
-)
+    )
+
+
 

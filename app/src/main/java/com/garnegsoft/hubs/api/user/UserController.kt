@@ -136,6 +136,7 @@ class UserController {
 
             raw?.let {
                 return User.WhoIs(
+                    aboutHtml = it.aboutHtml,
                     badges = it.badgets.map { User.WhoIs.Badge(it.title, it.description) },
                     invite = it.invitedBy?.let { User.WhoIs.Invite(it.issuerLogin, it.timeCreated) },
                     contacts = it.contacts.map { User.WhoIs.Contact(it.title, it.url, it.favicon) }

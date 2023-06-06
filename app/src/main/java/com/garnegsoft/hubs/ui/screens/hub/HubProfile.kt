@@ -83,6 +83,7 @@ fun HubProfile(hub: Hub) {
                     .padding(8.dp),
                 textAlign = TextAlign.Center
             )
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

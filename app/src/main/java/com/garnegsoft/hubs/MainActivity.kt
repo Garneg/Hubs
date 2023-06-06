@@ -41,13 +41,17 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.Preferences
+import androidx.navigation.Navigator
+import androidx.navigation.navOptions
 import com.garnegsoft.hubs.api.me.Me
 import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
+import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
+import java.net.URLEncoder
 
 var cookies: String = ""
 var authorized: Boolean = false
@@ -242,6 +246,10 @@ class MainActivity : ComponentActivity() {
                                 onCompanyClick = {
                                     clearLastArticle()
                                     navController.navigate("company/$it")
+                                },
+                                onViewImageRequest = {
+                                    navController.navigate(route = "imageViewer?imageUrl=$it")
+
                                 }
                             )
 
@@ -365,6 +373,10 @@ class MainActivity : ComponentActivity() {
                             )
                         }
 
+                        composable("imageViewer?imageUrl={imageUrl}"){
+                            val url = it.arguments?.getString("imageUrl")
+                            ImageViewScreen(model = url!!, onBack = { navController.popBackStack() })
+                        }
                     })
                 if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
                     window.statusBarColor = Color.parseColor("#FF313131")
