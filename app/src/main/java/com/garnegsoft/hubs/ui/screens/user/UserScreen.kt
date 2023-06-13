@@ -134,6 +134,7 @@ fun UserScreen(
     onUserClicked: (alias: String) -> Unit,
     onCommentsClicked: (postId: Int) -> Unit,
     onHubClicked: (alias: String) -> Unit,
+    onCompanyClick: (alias: String) -> Unit,
     initialPage: UserScreenPages = UserScreenPages.Profile,
     isAppUser: Boolean = false,
     onLogout: (() -> Unit)? = null,
@@ -229,7 +230,8 @@ fun UserScreen(
                                         isAppUser,
                                         onLogout,
                                         onHubClicked,
-                                        viewModel
+                                        onCompanyClick,
+                                        viewModel,
                                     )
                                 else
                                     LaunchedEffect(key1 = Unit, block = {

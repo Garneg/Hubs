@@ -249,7 +249,6 @@ fun CompanyProfile(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
 
-
                         TitledColumn(title = "Рейтинг") {
                             Text(
                                 text = company.statistics.rating.toString(),

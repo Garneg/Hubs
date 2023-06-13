@@ -309,6 +309,7 @@ class MainActivity : ComponentActivity() {
                                         "comments/$postId?commentId=$commentId"
                                     )
                                 },
+                                onCompanyClick = { navController.navigate("company/$it")},
                                 viewModelStoreOwner = it,
                                 onLogout = {
                                     logoutCoroutineScope.launch {

@@ -47,6 +47,7 @@ internal fun UserProfile(
     isAppUser: Boolean,
     onUserLogout: (() -> Unit)? = null,
     onHubClick: (alias: String) -> Unit,
+    onWorkPlaceClick: (alias: String) -> Unit,
     viewModel: UserScreenViewModel
 ) {
     Column(
@@ -369,6 +370,7 @@ internal fun UserProfile(
                                 }
                             }
                         }
+
                         val hubs by viewModel.subscribedHubs.observeAsState()
                         hubs?.let {
                             if (it.list.size > 0) {
@@ -437,11 +439,37 @@ internal fun UserProfile(
                             )
                         }
 
-                        if (user.location != null) {
+                        user.location?.let{
                             TitledColumn(title = "Откуда") {
                                 Text(
-                                    text = user.location,
+                                    text = it,
                                 )
+                            }
+                        }
+
+                        if (user.workPlaces.size > 0){
+                            TitledColumn(title = "Работает в") {
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    user.workPlaces.forEach {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(
+                                                    MaterialTheme.colors.onSurface.copy(
+                                                        0.04f
+                                                    )
+                                                )
+                                                .clickable {
+                                                    onWorkPlaceClick(it.alias)
+                                                }
+                                                .padding(12.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(it.title)
+                                        }
+                                    }
+                                }
                             }
                         }
 
