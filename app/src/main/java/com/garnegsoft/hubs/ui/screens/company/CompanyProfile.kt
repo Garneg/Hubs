@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowForward
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,13 +23,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.Company
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.screens.article.RenderHtml
+import com.garnegsoft.hubs.ui.screens.user.HubChip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -37,6 +42,7 @@ fun CompanyProfile(
     company: Company
 ) {
     val context = LocalContext.current
+    val viewModel = viewModel<CompanyScreenViewModel>()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -56,15 +62,15 @@ fun CompanyProfile(
                         .clip(RoundedCornerShape(26.dp))
                         .background(MaterialTheme.colors.onBackground.copy(0.1f))
                         .clickable(
-                        enabled = company.branding.bannerLinkUrl != null
-                    ) {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse(company.branding.bannerLinkUrl!!)
+                            enabled = company.branding.bannerLinkUrl != null
+                        ) {
+                            context.startActivity(
+                                Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse(company.branding.bannerLinkUrl!!)
+                                )
                             )
-                        )
-                    },
+                        },
                     model = it,
                     contentScale = ContentScale.Crop,
                     contentDescription = "${company.title} branding banner"
@@ -179,6 +185,42 @@ fun CompanyProfile(
                     }
                 }
             }
+            val whoIs by viewModel.companyWhoIs.observeAsState()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(MaterialTheme.colors.surface)
+                    .padding(8.dp)
+            ) {
+                BasicTitledColumn(title = {
+                    Text(
+                        modifier = Modifier.padding(12.dp),
+                        text = "Описание", style = MaterialTheme.typography.subtitle1
+                    )
+                }, divider = {
+//                    Divider()
+                }) {
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 12.dp,
+                            end = 12.dp,
+                            bottom = 12.dp,
+                            top = 4.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
+                        whoIs?.aboutHtml?.let{
+                            if (it.isNotBlank()) {
+                                TitledColumn(title = "О Компании") {
+                                    RenderHtml(html = it)
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
 
             Column(
                 modifier = Modifier
@@ -191,18 +233,21 @@ fun CompanyProfile(
                     title = {
                         Text(
                             modifier = Modifier.padding(12.dp),
-                            text = "Информация", style = MaterialTheme.typography.subtitle1)
+                            text = "Информация", style = MaterialTheme.typography.subtitle1
+                        )
                     },
-                    divider = {  }
+                    divider = { }
                 ) {
 
-                    Column(modifier = Modifier.padding(
-                        top = 4.dp,
-                        bottom = 12.dp,
-                        start = 12.dp,
-                        end = 12.dp
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)) {
+                    Column(
+                        modifier = Modifier.padding(
+                            top = 4.dp,
+                            bottom = 12.dp,
+                            start = 12.dp,
+                            end = 12.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(20.dp)
+                    ) {
 
 
                         TitledColumn(title = "Рейтинг") {

@@ -38,10 +38,8 @@ class CompanyController {
         fun get(alias: String): Company? {
             val raw = getPrivate("companies/$alias/card")
 
-            var result: Company? = null
-
-            raw?.let {
-                result = Company(
+            return raw?.let {
+                Company(
                     alias = it.alias,
                     avatarUrl = it.imageUrl,
                     title = it.titleHtml,
@@ -63,7 +61,7 @@ class CompanyController {
                     relatedData = it.relatedData?.let { Company.RelatedData(it.isSubscribed) }
                 )
             }
-            return result
+
         }
 
         /**
@@ -80,7 +78,28 @@ class CompanyController {
             throw UnsupportedOperationException("User is not authorized")
 
         }
+
+        private fun _whoIs(alias: String): CompanyWhoIs?{
+            val response = HabrApi.get("companies/$alias/whoIs")
+
+            if (response?.code != 200)
+                return null
+
+            return response.body?.string()?.let {
+                return HabrDataParser.parseJson<CompanyWhoIs>(it)
+            }
+
+        }
+
+        fun getWhoIs(alias: String): Company.WhoIs? {
+            val raw = _whoIs(alias)
+
+            return raw?.let {
+                Company.WhoIs(it.aboutHtml)
+            }
+        }
     }
+
     @Serializable
     private data class CompanyProfile (
         var alias: String,
@@ -158,6 +177,48 @@ class CompanyController {
             var vacanciesCount: Int,
             var employeesCount: Int,
             var careerRating: Float? = null
+        )
+    }
+
+    @Serializable
+    data class CompanyWhoIs (
+        val aboutHtml: String,
+        val sectors: List<Sector>,
+        val teamMembers: List<TeamMember>,
+        val developmentStages: List<DevelopmentStage>,
+        val tags: List<Tag>,
+        val badges: List<Badge>
+    ) {
+        @Serializable
+        data class DevelopmentStage(
+            val date: String,
+            val descriptionHtml: String
+        )
+
+        @Serializable
+        data class TeamMember(
+            val name: String,
+            val position: String
+        )
+
+        @Serializable
+        data class Badge(
+            val id: String,
+            val title: String,
+            val description: String,
+            val url: String? = null,
+            val isRemovable: Boolean
+        )
+
+        @Serializable
+        data class Sector(
+            val title: String,
+            val alias: String
+        )
+
+        @Serializable
+        data class Tag(
+            val titleHtml: String
         )
     }
 }

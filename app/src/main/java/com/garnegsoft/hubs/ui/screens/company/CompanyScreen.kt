@@ -55,6 +55,7 @@ fun CompanyScreen(
 ) {
     val viewModel = viewModel<CompanyScreenViewModel>(viewModelStoreOwner)
     val companyProfile by viewModel.companyProfile.observeAsState()
+    val whoIs by viewModel.companyWhoIs.observeAsState()
     val articles by viewModel.blogArticles.observeAsState()
     val employees by viewModel.employees.observeAsState()
     val news by viewModel.blogNews.observeAsState()
@@ -102,13 +103,16 @@ fun CompanyScreen(
             HorizontalPager(state = pagerState, pageCount = 5) {
                 when (it) {
                     0 -> {
-                        if (companyProfile != null) {
+                        if (companyProfile != null && whoIs != null) {
                             CompanyProfile(company = companyProfile!!)
                         } else {
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     viewModel.companyProfile.postValue(
                                         CompanyController.get(alias)
+                                    )
+                                    viewModel.companyWhoIs.postValue(
+                                        CompanyController.getWhoIs(alias)
                                     )
                                 }
                             })

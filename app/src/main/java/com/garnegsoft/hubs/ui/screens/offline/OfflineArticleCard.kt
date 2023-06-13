@@ -85,7 +85,6 @@ fun OfflineArticleCard(
             }
         })
         Row(
-            modifier = Modifier.padding(horizontal = style.innerPadding),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(

@@ -33,12 +33,5 @@ class Company(
 
     data class WhoIs(
         val aboutHtml: String?,
-        val sectors: List<Sector>?,
-
-    ){
-        data class Sector(
-            val title: String,
-            val alias: String,
-        )
-    }
+    )
 }
