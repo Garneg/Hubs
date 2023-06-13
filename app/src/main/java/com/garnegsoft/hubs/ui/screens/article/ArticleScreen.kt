@@ -36,6 +36,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -71,6 +72,7 @@ import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -78,7 +80,7 @@ import org.jsoup.nodes.*
 import kotlin.math.abs
 
 
-class ArticleScreenViewModel : ViewModel() {
+class ArticleScreenViewModel() : ViewModel() {
     private var _article = MutableLiveData<Article?>()
     val article: LiveData<Article?> get() = _article
 
@@ -161,6 +163,10 @@ class ArticleScreenViewModel : ViewModel() {
         }
     }
 
+    fun articleExists(context: Context, articleId: Int): Flow<Boolean> {
+        return context.offlineArticlesDatabase.articlesDao().existsFlow(articleId)
+    }
+
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -219,6 +225,7 @@ fun ArticleScreen(
         sendIntent.setType("text/plain")
         Intent.createChooser(sendIntent, null)
     }
+    val articleSaved by viewModel.articleExists(LocalContext.current, articleId).collectAsState(false)
 
     Scaffold(
         topBar = {
@@ -235,22 +242,22 @@ fun ArticleScreen(
                     Text(text = "Публикация")
                 },
                 actions = {
-                    if (isOffline){
+                    if (articleSaved){
                         IconButton(
                             onClick = { viewModel.deleteSavedArticle(id = articleId, context = context) },
-                            enabled = offlineArticle != null
+                            enabled = true
                         ) {
                             Icon(Icons.Outlined.Delete, contentDescription = "")
                         }
                     } else {
                         IconButton(
                             onClick = { viewModel.saveArticle(id = articleId, context = context) },
-                            enabled = article != null
+                            enabled = true
                         ) {
                             Icon(painterResource(id = R.drawable.download), contentDescription = "")
                         }
                     }
-                    
+
                     IconButton(
                         onClick = { context.startActivity(shareIntent) },
                         enabled = article != null || offlineArticle != null
@@ -642,14 +649,6 @@ fun ArticleScreen(
                                 )
                             )
 
-
-//                        HubsRow(
-//                            hubs = article.hubs,
-//                            onHubClicked = onHubClicked,
-//                            onCompanyClicked = onCompanyClick
-//                        )
-
-
                             SelectionContainer() {
                                 parseElement(
                                     element = Jsoup.parse(article.contentHtml),
@@ -962,29 +961,6 @@ fun ArticleScreen(
                                     )
                                 }
                             }
-                            // Tags
-//                        Row(
-//                            verticalAlignment = Alignment.Top,
-//                            modifier = Modifier.padding(vertical = 8.dp)
-//                        ) {
-//                            Text(
-//                                text = "Теги:",
-//                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.W500)
-//                            )
-//                            Spacer(modifier = Modifier.width(8.dp))
-//
-//                            var tags = String()
-//
-//                            article.tags.forEach { tags += "$it, " }
-//                            if (tags.length > 0) tags = tags.dropLast(2)
-//                            Text(
-//                                text = tags,
-//                                style = TextStyle(
-//                                    color = Color.Gray,
-//                                    fontWeight = FontWeight.W500
-//                                )
-//                            )
-//                        }
                             Divider(modifier = Modifier.padding(vertical = 24.dp))
                             // Hubs
                             TitledColumn(
@@ -995,11 +971,6 @@ fun ArticleScreen(
                                     )
                                 )
                             ) {
-//                            HubsRow(
-//                                hubs = article.hubs,
-//                                onHubClicked = onHubClicked,
-//                                onCompanyClicked = onCompanyClick
-//                            )
                                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     article.hubs.forEach {
                                         HubChip(

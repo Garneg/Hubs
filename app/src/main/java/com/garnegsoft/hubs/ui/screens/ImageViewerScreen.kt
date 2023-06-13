@@ -10,6 +10,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
@@ -67,9 +68,12 @@ fun ImageViewScreen(
             clipToBounds = false
         )
         Row(modifier = Modifier
+            .fillMaxWidth()
             .height(55.dp)
             .padding(horizontal = 4.dp),
-            verticalAlignment = Alignment.CenterVertically) {
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End
+        ) {
             CompositionLocalProvider(LocalRippleTheme provides customRippleTheme) {
                 Box(modifier = Modifier
                     .size(48.dp)
@@ -78,10 +82,9 @@ fun ImageViewScreen(
                     .background(Color.Black.copy(0.5f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "", tint = Color.White)
+                    Icon(imageVector = Icons.Default.Close, contentDescription = "", tint = Color.White)
                 }
             }
-
         }
     }
 }

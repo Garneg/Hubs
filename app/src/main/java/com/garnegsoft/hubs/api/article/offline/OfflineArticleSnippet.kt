@@ -121,6 +121,9 @@ interface OfflineArticlesDao{
     @Query("SELECT EXISTS (SELECT * FROM $ARTICLES_TABLE_NAME WHERE article_id = :articleId)")
     suspend fun exists(articleId: Int): Boolean
 
+    @Query("SELECT EXISTS (SELECT * FROM $ARTICLES_TABLE_NAME WHERE article_id = :articleId)")
+    fun existsFlow(articleId: Int): Flow<Boolean>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSnippet(entity: OfflineArticleSnippet)
 

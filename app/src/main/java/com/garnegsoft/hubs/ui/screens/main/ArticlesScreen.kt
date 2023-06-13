@@ -86,9 +86,7 @@ fun ArticlesScreen(
     val scaffoldState = rememberScaffoldState()
 
     val lastArticleRead by context.lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
-        .collectAsState(
-            initial = -1
-        )
+        .collectAsState(initial = -1)
 
     var showSnackBar by rememberSaveable {
         mutableStateOf(true)

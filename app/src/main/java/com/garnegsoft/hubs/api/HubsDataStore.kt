@@ -22,6 +22,12 @@ object HubsDataStore {
                 Dark,
                 SystemDefined
             }
+            object ArticleScreenPreferences {
+                val FontSize = intPreferencesKey("article_font_size")
+                val TextWrapMode = intPreferencesKey("")
+            }
+
+
         }
     }
     object Auth {

@@ -74,7 +74,7 @@ fun RenderHtml(
     }
     Column {
         result.first?.let { Text(it) }
-        result.second?.let { it.invoke(spanStyle) }
+        result.second?.invoke(spanStyle)
     }
 
 }
@@ -305,8 +305,8 @@ fun parseElement(
             }
         } else
             resultAnnotatedString += currentText
-
     }
+
     if (!currentText.text.isBlank() && isBlock)
         childrenComposables.add {
             //Text(text = currentText)
