@@ -57,6 +57,7 @@ fun parseElement(
 ): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> =
     parseElement(Jsoup.parse(html), spanStyle)
 
+@Stable
 @Composable
 fun RenderHtml(
     html: String,
@@ -308,6 +309,7 @@ fun parseElement(
     }
 
     if (!currentText.text.isBlank() && isBlock)
+
         childrenComposables.add {
             //Text(text = currentText)
             val context = LocalContext.current
