@@ -33,6 +33,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -60,6 +63,7 @@ import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
+import kotlin.math.roundToInt
 
 
 class CommentsScreenViewModel : ViewModel() {
@@ -156,6 +160,7 @@ fun CommentsScreen(
         val showArticleHeader by remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }
         val commentTextFieldFocusRequester = remember { FocusRequester() }
         val randomCoroutineScope = rememberCoroutineScope()
+        var articleHeaderOffset by remember { mutableStateOf(0f) }
         Box {
             Column(
                 modifier = Modifier
@@ -185,7 +190,6 @@ fun CommentsScreen(
                     }
 
                     if (commentsData != null) {
-
                         items(
                             items = commentsData.comments,
                             key = { it.id }
@@ -221,8 +225,10 @@ fun CommentsScreen(
                                 },
                                 onParentCommentSnippetClick = {
                                     randomCoroutineScope.launch {
-
-                                        lazyListState.animateScrollToItem(commentsData.comments.indexOfFirst { it.id == comment.parentCommentId } + 1)
+                                        lazyListState.animateScrollToItem(
+                                            index = commentsData.comments.indexOfFirst { it.id == comment.parentCommentId } + 1,
+                                            scrollOffset = -articleHeaderOffset.roundToInt()
+                                        )
 
                                     }
                                 }
@@ -259,8 +265,6 @@ fun CommentsScreen(
 
                 if (commentsData?.commentAccess?.canComment == true) {
                     Column(modifier = Modifier) {
-
-
                         AnimatedVisibility(
                             visible = parentCommentId > 0,
                             enter = expandVertically(expandFrom = Alignment.Bottom),
@@ -412,6 +416,9 @@ fun CommentsScreen(
                                         lazyListState.animateScrollToItem(0)
                                     }
                                 }
+                                .onGloballyPositioned {
+                                    articleHeaderOffset = it.boundsInRoot().height
+                                }
                                 .background(MaterialTheme.colors.surface)
                                 .fillMaxWidth()
 //                    .height(50.dp)
@@ -431,9 +438,9 @@ fun CommentsScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                             }
 
-                            Column {
-                                with(it) {  }
+                            Column(
 
+                            ) {
                                 it.author?.run {
                                     Text(
                                         text = alias,

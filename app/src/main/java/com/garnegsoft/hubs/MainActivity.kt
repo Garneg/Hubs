@@ -85,12 +85,10 @@ class MainActivity : ComponentActivity() {
                 .collect {
                     cookies = it
                 }
-
         }
 
         runBlocking {
             authorized = isAuthorizedFlow.first()
-
         }
 
         val authActivityLauncher =
@@ -106,7 +104,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 }
-
             }
 
         intent.dataString?.let { Log.e("intentData", it) }
@@ -120,7 +117,6 @@ class MainActivity : ComponentActivity() {
             })
             .addInterceptor(NoConnectionInterceptor(this))
             .build()
-
 
         setContent {
             var userInfo: Me? by remember { mutableStateOf(null) }
@@ -187,7 +183,6 @@ class MainActivity : ComponentActivity() {
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     } else {
-
                                         UnauthorizedMenu(
                                             onLoginClick = {
                                                 authActivityLauncher.launch(Unit)

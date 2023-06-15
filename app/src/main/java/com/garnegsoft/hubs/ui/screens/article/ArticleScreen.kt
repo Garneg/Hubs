@@ -119,7 +119,7 @@ class ArticleScreenViewModel() : ViewModel() {
                         articleId = it.id,
                         authorName = it.author?.alias,
                         authorAvatarUrl = it.author?.avatarUrl,
-                        timePublished = it.timePublished,
+                        timePublished = "",
                         title = it.title,
                         readingTime = it.readingTime,
                         isTranslation = it.isTranslation,
@@ -230,16 +230,12 @@ fun ArticleScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier
-                    .height(55.dp),
+                title = { Text(text = "Публикация") },
                 elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = { onBackButtonClicked() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
                     }
-                },
-                title = {
-                    Text(text = "Публикация")
                 },
                 actions = {
                     if (articleSaved){
@@ -269,7 +265,6 @@ fun ArticleScreen(
         backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
         bottomBar = {
             article?.let { article ->
-
                 BottomAppBar(
                     elevation = 0.dp,
                     backgroundColor = MaterialTheme.colors.surface,
@@ -509,7 +504,7 @@ fun ArticleScreen(
         if (isOffline){
             offlineArticle?.let { article ->
                 val flingSpec = rememberSplineBasedDecay<Float>()
-                Row() {
+                Row {
                     Column(
                         modifier = Modifier
                             .verticalScroll(

@@ -612,6 +612,47 @@ fun parseElement(
 
         }
 
+        "table" -> { localSpanStyle ->
+            val backgroundColor = MaterialTheme.colors.background
+            val textColor = MaterialTheme.colors.onBackground
+
+            AndroidView(modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+                .clip(RoundedCornerShape(4.dp)),
+                factory = {
+                    WebView(it).apply {
+                        this.setBackgroundColor(android.graphics.Color.TRANSPARENT)
+
+                        val bodyElement = Element("body")
+                            .attr(
+
+                                "style",
+                                "color: rgb(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f});" +
+                                        "background-color: rgb(${backgroundColor.red * 255f}, ${backgroundColor.green * 255f}, ${backgroundColor.blue * 255f});"
+                            )
+                            .appendChild(
+                                Element("style").appendText(
+                                    """
+                                        td { 
+                                            padding: 10px;
+                                            border: 1px solid black;
+                                            border-collapse: collapse
+                                        }
+                                        table { 
+                                            border: 1px solid black;
+                                            border-collapse: collapse;
+                                        }
+                                    """.trimIndent()
+                                )
+                            )
+                            .appendChild(element)
+
+                        loadData(bodyElement.outerHtml(), "text/html; charset=utf-8", "UTF-8")
+                    }
+                })
+        }
+
         else -> if (childrenComposables.size == 0) {
             null
         } else {

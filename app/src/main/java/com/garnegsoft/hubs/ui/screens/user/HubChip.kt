@@ -30,7 +30,6 @@ fun HubChip(
             MaterialTheme.colors.onSurface.copy(0.1f)
         else
             MaterialTheme.colors.onSurface.copy(0.05f)
-
     }
     val textColor = if (isLightColor) remember {
         if (hub.relatedData?.isSubscribed == true)
