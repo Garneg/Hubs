@@ -254,6 +254,8 @@ fun SearchScreen(
                     when (it) {
                         0 -> {
                             if (articlesList != null) {
+
+
                                 PagedHabrSnippetsColumn(
                                     modifier = Modifier.fillMaxHeight(),
                                     data = articlesList!!,
@@ -271,6 +273,7 @@ fun SearchScreen(
                                         onCommentsClick = { onCommentsClicked(it.id) }
                                     )
                                 }
+
                             }
                         }
                         1 -> {

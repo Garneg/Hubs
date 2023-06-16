@@ -42,8 +42,8 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
                 false
         }
     }
-    var doPageLoad by remember { mutableStateOf(true) }
-    LaunchedEffect(key1 = isLastDerived) {
+    var doPageLoad by remember(data.list.first().id) { mutableStateOf(true) }
+    LaunchedEffect(key1 = isLastDerived, data.list.first().id) {
         if (isLastDerived && doPageLoad) {
             doPageLoad = false
             onScrollEnd()
