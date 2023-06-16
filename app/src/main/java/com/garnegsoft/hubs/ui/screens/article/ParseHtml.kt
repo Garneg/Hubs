@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -613,44 +614,52 @@ fun parseElement(
         }
 
         "table" -> { localSpanStyle ->
-            val backgroundColor = MaterialTheme.colors.background
+            val backgroundColor =
+                if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background
             val textColor = MaterialTheme.colors.onBackground
-
+            val fontSize = LocalDensity.current.fontScale * MaterialTheme.typography.body1.fontSize.value
             AndroidView(modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 4.dp)
-                .clip(RoundedCornerShape(4.dp)),
+//                    .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .clip(RoundedCornerShape(0.dp)),
                 factory = {
                     WebView(it).apply {
-                        this.setBackgroundColor(android.graphics.Color.TRANSPARENT)
-
+                        this.setBackgroundColor(backgroundColor.toArgb())
+                        this.isScrollContainer = false
+                        isFocusable = true
+                        isLongClickable = true
+                        isVerticalScrollBarEnabled = false
                         val bodyElement = Element("body")
                             .attr(
-
                                 "style",
-                                "color: rgb(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f});" +
-                                        "background-color: rgb(${backgroundColor.red * 255f}, ${backgroundColor.green * 255f}, ${backgroundColor.blue * 255f});"
+                                "color: rgb(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f}); " +
+//                                            "background-color: rgb(${backgroundColor.red * 255f}, ${backgroundColor.green * 255f}, ${backgroundColor.blue * 255f}); " +
+                                        "font-size: ${fontSize}px;" +
+                                        "margin: 0px;"
                             )
                             .appendChild(
                                 Element("style").appendText(
                                     """
                                         td { 
                                             padding: 10px;
-                                            border: 1px solid black;
-                                            border-collapse: collapse
-                                        }
-                                        table { 
-                                            border: 1px solid black;
+                                            border: 1px solid rgba(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f}, 0.5);
                                             border-collapse: collapse;
+                                        }
+                                        table {
+                                            border-collapse: collapse;
+                                            min-width: 100%;
+                                            table-layout: fixed;
+                                            width: auto;
                                         }
                                     """.trimIndent()
                                 )
                             )
                             .appendChild(element)
 
-                        loadData(bodyElement.outerHtml(), "text/html; charset=utf-8", "UTF-8")
+                        loadData(bodyElement.outerHtml(), "text/html; charset=utf-8", "utf-8")
                     }
                 })
+
         }
 
         else -> if (childrenComposables.size == 0) {
@@ -667,7 +676,7 @@ fun parseElement(
 }
 
 
-val LanguagesMap = mapOf<String, String>(
+val LanguagesMap = mapOf(
     "" to "Язык неизвестен",
     "plaintext" to "Текст",
 
