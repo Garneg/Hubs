@@ -50,6 +50,7 @@ import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
+import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import java.net.URLEncoder
 
@@ -180,6 +181,7 @@ class MainActivity : ComponentActivity() {
                                             onCommentsClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Comments}") },
                                             onBookmarksClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}") },
                                             onSavedArticlesClick = { navController.navigate("savedArticles")},
+                                            onSettingsClick = { navController.navigate("settings") },
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     } else {
@@ -189,6 +191,7 @@ class MainActivity : ComponentActivity() {
                                                 lifecycle.coroutineScope.launch(Dispatchers.IO) { userInfoUpdateBlock() }
                                             },
                                             onSavedArticlesClick = { navController.navigate("savedArticles")},
+                                            onSettingsClick = { navController.navigate("settings") },
                                             onAboutClick = { navController.navigate("about") }
                                         )
                                     }
@@ -260,6 +263,12 @@ class MainActivity : ComponentActivity() {
                                 onCommentsClicked = { navController.navigate("comments/$it") },
                                 onBackClicked = { navController.navigateUp() }
                             )
+                        }
+
+                        composable(route = "settings") {
+                            SettingsScreen {
+                                navController.popBackStack()
+                            }
                         }
 
                         composable(

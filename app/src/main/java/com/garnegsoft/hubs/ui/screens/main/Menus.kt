@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ fun AuthorizedMenu(
     onCommentsClick: () -> Unit,
     onBookmarksClick: () -> Unit,
     onSavedArticlesClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     onAboutClick: () -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -114,6 +116,9 @@ fun AuthorizedMenu(
             Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
         }, onClick = onSavedArticlesClick)
 
+        MenuItem(title = "Настройки", icon = {
+            Icon(imageVector = Icons.Outlined.Settings, contentDescription = "")
+        }, onClick = onSettingsClick)
 
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
@@ -127,6 +132,7 @@ fun AuthorizedMenu(
 fun UnauthorizedMenu(
     onLoginClick: () -> Unit,
     onAboutClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     onSavedArticlesClick: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -147,6 +153,9 @@ fun UnauthorizedMenu(
             Icon(painter = painterResource(id = R.drawable.download), contentDescription = "")
         }, onClick = onSavedArticlesClick)
 
+        MenuItem(title = "Настройки", icon = {
+            Icon(imageVector = Icons.Outlined.Settings, contentDescription = "")
+        }, onClick = onSettingsClick)
 
         Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 
