@@ -27,9 +27,9 @@ fun HubChip(
             Color(0x1A0E73B8)
     } else {
         if (hub.relatedData?.isSubscribed == true)
-            MaterialTheme.colors.onSurface.copy(0.1f)
+            MaterialTheme.colors.onSurface.copy(0.25f)
         else
-            MaterialTheme.colors.onSurface.copy(0.05f)
+            MaterialTheme.colors.onSurface.copy(0.1f)
     }
     val textColor = if (isLightColor) remember {
         if (hub.relatedData?.isSubscribed == true)
@@ -38,9 +38,9 @@ fun HubChip(
             Color(0xFF003255)
     } else {
         if (hub.relatedData?.isSubscribed == true)
-            MaterialTheme.colors.onSurface.copy(0.85f)
+            MaterialTheme.colors.onSurface.copy(1f)
         else
-            MaterialTheme.colors.onSurface.copy(0.65f)
+            MaterialTheme.colors.onSurface.copy(0.8f)
 
     }
 
