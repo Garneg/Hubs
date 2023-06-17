@@ -35,6 +35,7 @@ import okhttp3.*
 import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
@@ -110,7 +111,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-
+// TODO: refactor this crap
         intent.dataString?.let { Log.e("intentData", it) }
         HabrApi.HttpClient = OkHttpClient.Builder()
             .addInterceptor(Interceptor {
@@ -124,6 +125,12 @@ class MainActivity : ComponentActivity() {
             .build()
 
         setContent {
+            val themeMode by settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).collectAsState(initial = HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal)
+
+            val theme by remember(themeMode) { mutableStateOf(
+                HubsDataStore.Settings.Keys.ThemeMode.values().get(themeMode!!)
+            ) }
+
             var userInfo: Me? by remember { mutableStateOf(null) }
             val userInfoUpdateBlock = remember {
                 {
@@ -137,7 +144,14 @@ class MainActivity : ComponentActivity() {
                     launch(Dispatchers.IO, block = { userInfoUpdateBlock() })
                 })
 
-            HubsTheme {
+            HubsTheme(
+                darkTheme = when(theme){
+                    HubsDataStore.Settings.Keys.ThemeMode.Undetermined -> isSystemInDarkTheme()
+                    HubsDataStore.Settings.Keys.ThemeMode.SystemDefined -> isSystemInDarkTheme()
+                    HubsDataStore.Settings.Keys.ThemeMode.Dark -> true
+                    else -> false
+                }
+            ) {
                 val navController = rememberNavController()
 
                 NavHost(
@@ -387,11 +401,7 @@ class MainActivity : ComponentActivity() {
                             ImageViewScreen(model = url!!, onBack = { navController.popBackStack() })
                         }
                     })
-                if (resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
-                    window.statusBarColor = Color.parseColor("#FF313131")
-                } else {
-                    window.statusBarColor = resources.getColor(R.color.habrTopColor)
-                }
+
             }
         }
 

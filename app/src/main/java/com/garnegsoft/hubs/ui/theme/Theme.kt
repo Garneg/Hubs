@@ -7,6 +7,7 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
     primary = Color(0xFFE7E7E7),
@@ -45,9 +46,12 @@ private val LightColorPalette = lightColors(
 // TODO add support for dark theme
 @Composable
 fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
+    val systemUiController = rememberSystemUiController()
     val colors = if (darkTheme) {
+        systemUiController.setSystemBarsColor(DarkColorPalette.surface)
         DarkColorPalette
     } else {
+        systemUiController.setSystemBarsColor(LightColorPalette.primary)
         LightColorPalette
     }
 
