@@ -607,6 +607,22 @@ fun ArticleScreen(
                                     fontSize = 14.sp
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
+                                if (article.isTranslation) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.translate),
+                                        modifier = Modifier.size(14.dp),
+                                        contentDescription = "",
+                                        tint = statisticsColor
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Перевод",
+                                        color = statisticsColor,
+                                        fontWeight = FontWeight.W500,
+                                        fontSize = 14.sp
+                                    )
+                                    Spacer(modifier = Modifier.width(12.dp))
+                                }
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -899,19 +915,21 @@ fun ArticleScreen(
                                     fontSize = 14.sp
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
-                                Icon(
-                                    painter = painterResource(id = R.drawable.translate),
-                                    modifier = Modifier.size(14.dp),
-                                    contentDescription = "",
-                                    tint = statisticsColor
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "Перевод",
-                                    color = statisticsColor,
-                                    fontWeight = FontWeight.W500,
-                                    fontSize = 14.sp
-                                )
+                                if (article.translationData.isTranslation) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.translate),
+                                        modifier = Modifier.size(14.dp),
+                                        contentDescription = "",
+                                        tint = statisticsColor
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "Перевод",
+                                        color = statisticsColor,
+                                        fontWeight = FontWeight.W500,
+                                        fontSize = 14.sp
+                                    )
+                                }
 
                             }
                             Spacer(Modifier.height(4.dp))

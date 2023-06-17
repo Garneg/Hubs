@@ -26,7 +26,7 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     onScrollEnd: () -> Unit = { },
-    nextPageLoadingIndicator: @Composable () -> Unit = {
+    nextPageLoadingIndicator: (@Composable () -> Unit)? = {
         Box(modifier = Modifier.fillMaxWidth()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
@@ -42,8 +42,8 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
                 false
         }
     }
-    var doPageLoad by remember(data.list.first().id) { mutableStateOf(true) }
-    LaunchedEffect(key1 = isLastDerived, data.list.first().id) {
+    var doPageLoad by remember(data.list.firstOrNull()?.id) { mutableStateOf(true) }
+    LaunchedEffect(key1 = isLastDerived, data.list.firstOrNull()?.id) {
         if (isLastDerived && doPageLoad) {
             doPageLoad = false
             onScrollEnd()
@@ -66,8 +66,10 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
         ) {
             snippet(it)
         }
-        item {
-            nextPageLoadingIndicator()
+        nextPageLoadingIndicator?.let {
+            item {
+                nextPageLoadingIndicator()
+            }
         }
     }
 }
@@ -75,7 +77,7 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
 
 @Composable
 @SuppressLint("ModifierParameter")
-fun <T: HabrSnippet> PagedHabrSnippetsColumn(
+fun <T : HabrSnippet> PagedHabrSnippetsColumn(
     data: HabrList<T>,
     modifier: Modifier = Modifier.fillMaxSize(),
     lazyListState: LazyListState = rememberLazyListState(),
@@ -103,16 +105,15 @@ fun <T: HabrSnippet> PagedHabrSnippetsColumn(
         horizontalAlignment = horizontalAlignment,
         snippet = snippet,
         onScrollEnd = {
-            if (page.value < data.pagesCount){
+            if (page.value < data.pagesCount) {
                 page.value++
                 scrollEndCoroutineScope.launch(block = { onNextPageLoad(this, page.value) })
 
             }
         },
-        nextPageLoadingIndicator = {
-            if (page.value < data.pagesCount)
-                nextPageLoadingIndicator()
-        }
+        nextPageLoadingIndicator =
+        if (page.value < data.pagesCount) nextPageLoadingIndicator
+        else null
 
     )
 }

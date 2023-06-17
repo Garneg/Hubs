@@ -65,6 +65,10 @@ fun <T> Context.lastReadDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
     return lastReadDataStore.data.map { it[key] }
 }
 
+fun <T> Context.settingsDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
+    return settingsDataStore.data.map { it[key] }
+}
+
 fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
     return authDataStore.data.map { it[key] }
 }
