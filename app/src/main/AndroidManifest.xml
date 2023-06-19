@@ -14,7 +14,7 @@
 
         android:supportsRtl="false"
         android:theme="@style/Theme.Hubs"
-        tools:targetApi="33">
+        tools:targetApi="34">
         <activity
             android:windowSoftInputMode="adjustResize"
             android:name=".MainActivity"

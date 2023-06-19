@@ -41,9 +41,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
+import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.Navigator
 import androidx.navigation.navOptions
+import androidx.room.Database
 import com.garnegsoft.hubs.api.me.Me
 import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
@@ -75,9 +77,8 @@ fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
 }
 
 
+
 class MainActivity : ComponentActivity() {
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -92,9 +93,12 @@ class MainActivity : ComponentActivity() {
                     cookies = it
                 }
         }
+        var theme: HubsDataStore.Settings.Keys.ThemeMode? = null
 
         runBlocking {
             authorized = isAuthorizedFlow.first()
+            val themeInt = settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).first() ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal
+            theme = HubsDataStore.Settings.Keys.ThemeMode.values()[themeInt]
         }
 
         val authActivityLauncher =
@@ -128,7 +132,10 @@ class MainActivity : ComponentActivity() {
             val themeMode by settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).collectAsState(initial = HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal)
 
             val theme by remember(themeMode) { mutableStateOf(
-                HubsDataStore.Settings.Keys.ThemeMode.values().get(themeMode!!)
+                themeMode?.let {
+                    HubsDataStore.Settings.Keys.ThemeMode.values()[it]
+                } ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined
+
             ) }
 
             var userInfo: Me? by remember { mutableStateOf(null) }

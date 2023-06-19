@@ -7,6 +7,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -22,6 +23,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
@@ -98,7 +100,6 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     BasicTitledColumn(
-
                         title = {
                             Text(
                                 modifier = Modifier.padding(bottom = 12.dp),
@@ -112,10 +113,12 @@ fun SettingsScreen(
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
+                            // TODO: Create special item for settings. Replace checkboxes with switches in Material3
                             val isSystemInDarkTheme = isSystemInDarkTheme()
                             var useSystemDefinedTheme by rememberSaveable {
                                 mutableStateOf(
-                                    it == HubsDataStore.Settings.Keys.ThemeMode.SystemDefined
+                                    it == HubsDataStore.Settings.Keys.ThemeMode.SystemDefined ||
+                                            it == HubsDataStore.Settings.Keys.ThemeMode.Undetermined
                                 )
                             }
                             val sharedInteractionSource = remember { MutableInteractionSource() }
@@ -147,8 +150,8 @@ fun SettingsScreen(
                                         }
                                     )
                                 }
-                                .padding(vertical = 8.dp, horizontal = 4.dp)
-                                .height(50.dp),
+                                .padding(start = 4.dp)
+                                .height(48.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(modifier = Modifier.weight(1f), text = "Системная тема")
@@ -193,6 +196,7 @@ fun SettingsScreen(
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(10.dp))
                                 .clickable(
+                                    enabled = !useSystemDefinedTheme,
                                     interactionSource = isDarkThemeInteractionSource,
                                     indication = rememberRipple()
                                 ) {
@@ -205,17 +209,18 @@ fun SettingsScreen(
                                             HubsDataStore.Settings.Keys.ThemeMode.Light
                                     )
                                 }
-                                .padding(vertical = 8.dp, horizontal = 4.dp)
-                                .height(50.dp),
+                                .padding(start = 4.dp)
+                                .heightIn(min = 48.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
                                     modifier = Modifier
                                         .weight(1f)
                                         .alpha(if (useSystemDefinedTheme) 0.5f else 1f),
-                                    text = "Темная тема"
+                                    text = "Тёмная тема"
                                 )
                                 CompositionLocalProvider(LocalRippleTheme provides noRipple) {
+
                                     Checkbox(
                                         checked = useDarkTheme,
                                         enabled = !useSystemDefinedTheme,
