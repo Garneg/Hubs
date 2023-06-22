@@ -4,11 +4,35 @@
     <string name="about_app_text">"Unofficial mobile client for Habr - IT website by TechMedia.\n\nIf you like using this app, contribute to its development by writing your suggestions and bug reports to developer on email - "</string>
     <string name="developer_email" translatable="false">garnegsoft@gmail.com</string>
     <string name="version">version</string>
-    <string name="about_app">About</string>
+    <string name="about_app_screen_title">About</string>
     <string name="publication">Publication</string>
     <string name="bookmarks">Bookmarks</string>
     <string name="feedback_is_important">Your feedback is very important to developer!</string>
     <string name="continue_reading">Do you want to continue reading</string>
     <string name="write_developer">Email developer</string>
+    <string name="search_screen_title">Search</string>
+    <string name="article_screen_title">Publication</string>
+    <string name="settings_screen_title">Settings</string>
+    <string name="hub_screen_title">Hub</string>
+    <string name="user_screen_title">User</string>
+    <string name="company_screen_title">Company</string>
+    <string name="comments_screen_title">Comments</string>
+    <string name="offline_articles_list_screen_title">Saved Articles</string>
+    <string name="my_feed_tab">My feed</string>
+    <string name="articles_tab">Articles</string>
+    <string name="news_tab">News</string>
+    <string name="hubs_tab">Hubs</string>
+    <string name="authors_tab">Authors</string>
+    <string name="companies_tab">Companies</string>
+    <string name="proflie_tab">Profile</string>
+    <string name="comments_tab">Comments</string>
+    <string name="bookmarks_tab">Bookmarks</string>
+    <string name="folowers_tab">Followers</string>
+    <string name="follows_tab">Follows</string>
+    <string name="blog_tab">Blog</string>
+    <string name="employees_tab">Employees</string>
+    <string name="publications_tab">Publications</string>
+    <string name="follow_button_label">Follow</string>
+    <string name="following_button_label">Following</string>
 
 </resources>

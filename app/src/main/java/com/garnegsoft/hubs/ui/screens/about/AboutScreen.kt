@@ -8,8 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,8 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.android.style.LetterSpacingSpanEm
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.BuildConfig
@@ -39,7 +35,7 @@ fun AboutScreen(
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "")
                     }
                 },
-                title = { Text(text = stringResource(id = R.string.about_app))})
+                title = { Text(text = stringResource(id = R.string.about_app_screen_title))})
         }
     ) {
         Box(modifier = Modifier

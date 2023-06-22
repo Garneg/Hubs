@@ -626,7 +626,6 @@ fun ArticleScreen(
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
-
                                     Icon(
                                         painter = painterResource(id = R.drawable.offline),
                                         modifier = Modifier.size(14.dp),
@@ -659,6 +658,8 @@ fun ArticleScreen(
                                     fontWeight = FontWeight.W500
                                 )
                             )
+
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             SelectionContainer() {
                                 parseElement(

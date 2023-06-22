@@ -247,6 +247,7 @@ class MainActivity : ComponentActivity() {
                                 clearLastArticle()
                                 navController.navigateUp()
                             }
+
                             ArticleScreen(
                                 articleId = id!!,
                                 isOffline = offline ?: false,
