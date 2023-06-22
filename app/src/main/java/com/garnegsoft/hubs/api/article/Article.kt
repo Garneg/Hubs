@@ -72,9 +72,7 @@ class Article(
         data class RelatedData(val isSubscribed: Boolean)
     }
 
-    /**
-     * Stats of article. If value is greater than 1000, it will be shorten to 1k
-     */
+
     data class Statistics(
         val commentsCount: Int,
         val favoritesCount: Int,

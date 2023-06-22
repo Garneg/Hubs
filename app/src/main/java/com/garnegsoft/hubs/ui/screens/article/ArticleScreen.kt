@@ -89,7 +89,7 @@ class ArticleScreenViewModel() : ViewModel() {
 
     fun loadArticle(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-            ArticleController.get("articles/$id")?.let {
+            ArticleController.get(id)?.let {
                 _article.postValue(it)
 
             }

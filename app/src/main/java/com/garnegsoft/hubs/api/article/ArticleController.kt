@@ -10,33 +10,36 @@ import org.jsoup.Jsoup
 class ArticleController {
 
     companion object {
-        private fun getArticle(path: String, args: Map<String, String>? = null): Article? {
-            val response = HabrApi.get(path, args)
 
-            var article: Article? = null
-
-            if (response?.body != null && response.code == 200) {
-                article = HabrDataParser.parseJson<Article>(response.body!!.string())
-                article!!.timePublished = formatTime(article.timePublished)
-                article.author?.avatarUrl?.let {
-                    article.author!!.avatarUrl = "https:" + article.author!!.avatarUrl
-                }
-            }
-
-            return article
+        /**
+         * Get Article object.
+         * @return Article object with full info
+         */
+        fun get(
+            id: Int,
+            args: Map<String, String>? = null
+        ): com.garnegsoft.hubs.api.article.Article? {
+            return get(path = "articles/$id", args = args)
         }
 
-        // TODO: Make private, change usages
-        fun get(
+        /**
+         * Get snippet of article. Snippets are objects that used to be in lists
+         * @return snippet of article
+         */
+        fun getSnippet(
+            id: Int
+        ): ArticleSnippet? {
+            return getSnippet("articles/$id")
+        }
+
+        private fun get(
             path: String,
             args: Map<String, String>? = null
         ): com.garnegsoft.hubs.api.article.Article? {
-            var raw = this.getArticle(path, args)
+            val raw = this.getArticle(path, args)
 
-            var result: com.garnegsoft.hubs.api.article.Article? = null
-
-            raw?.let {
-                result = com.garnegsoft.hubs.api.article.Article(
+            return raw?.let {
+                com.garnegsoft.hubs.api.article.Article(
                     id = it.id.toInt(),
                     title = it.titleHtml,
                     timePublished = it.timePublished,
@@ -60,26 +63,19 @@ class ArticleController {
                         votesCountMinus = it.statistics.votesCountMinus,
                         votesCountPlus = it.statistics.votesCountPlus
                     ),
-                    // TODO: Refactor with map()
-                    hubs = it.hubs.run {
-                        val hubs = arrayListOf<com.garnegsoft.hubs.api.article.Article.Hub>()
-                        this.forEach {
-                            hubs.add(
-                                com.garnegsoft.hubs.api.article.Article.Hub(
-                                    alias = it.alias,
-                                    title = it.title,
-                                    isProfiled = it.isProfiled,
-                                    isCorporative = it.type == "corporative",
-                                    relatedData = it.relatedData?.let {
-                                        com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(
-                                            it.isSubscribed
-                                        )
-                                    }
-
+                    hubs = it.hubs.map {
+                        com.garnegsoft.hubs.api.article.Article.Hub(
+                            alias = it.alias,
+                            title = it.title,
+                            isProfiled = it.isProfiled,
+                            isCorporative = it.type == "corporative",
+                            relatedData = it.relatedData?.let {
+                                com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(
+                                    it.isSubscribed
                                 )
-                            )
-                        }
-                        hubs
+                            }
+
+                        )
                     },
                     tags = it.tags?.map { it.titleHtml } ?: emptyList(),
                     postType = PostType.fromString(it.postType),
@@ -104,33 +100,16 @@ class ArticleController {
                     )
                 )
             }
-            return result
         }
 
-        fun get(
-            id: Int,
-            args: Map<String, String>? = null
-        ): com.garnegsoft.hubs.api.article.Article? {
-            return get(path = "articles/$id", args = args)
-        }
 
-        fun getSnippet(
-            id: Int
-        ): ArticleSnippet? {
-            return getSnippet("articles/$id")
-        }
-
-        // TODO: Make private, change usages, use map()
-        fun getSnippet(
+        private fun getSnippet(
             path: String,
             args: Map<String, String>? = null
         ): ArticleSnippet? {
             val raw = this.getArticle(path, args)
-
-            var result: ArticleSnippet? = null
-
-            raw?.let {
-                result = ArticleSnippet(
+            return raw?.let {
+                ArticleSnippet(
                     id = it.id.toInt(),
                     timePublished = it.timePublished,
                     isCorporative = it.isCorporative,
@@ -168,24 +147,19 @@ class ArticleController {
                     },
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
                     textSnippet = it.leadData.textHtml,
-                    hubs = it.hubs.run {
-                        val hubs = arrayListOf<com.garnegsoft.hubs.api.article.Article.Hub>()
-                        this.forEach {
-                            hubs.add(
-                                com.garnegsoft.hubs.api.article.Article.Hub(
-                                    alias = it.alias,
-                                    title = it.title,
-                                    isProfiled = it.isProfiled,
-                                    isCorporative = it.type == "corporative",
-                                    relatedData = it.relatedData?.let {
-                                        com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(
-                                            it.isSubscribed
-                                        )
-                                    }
+                    hubs = it.hubs.map {
+                        com.garnegsoft.hubs.api.article.Article.Hub(
+                            alias = it.alias,
+                            title = it.title,
+                            isProfiled = it.isProfiled,
+                            isCorporative = it.type == "corporative",
+                            relatedData = it.relatedData?.let {
+                                com.garnegsoft.hubs.api.article.Article.Hub.RelatedData(
+                                    it.isSubscribed
                                 )
-                            )
-                        }
-                        hubs
+                            }
+                        )
+
                     },
                     complexity = PostComplexity.fromString(it.complexity),
                     readingTime = it.readingTime,
@@ -201,8 +175,22 @@ class ArticleController {
                 )
 
             }
+        }
 
-            return result
+        private fun getArticle(path: String, args: Map<String, String>? = null): Article? {
+            val response = HabrApi.get(path, args)
+
+            var article: Article? = null
+
+            if (response?.body != null && response.code == 200) {
+                article = HabrDataParser.parseJson<Article>(response.body!!.string())
+                article!!.timePublished = formatTime(article.timePublished)
+                article.author?.avatarUrl?.let {
+                    article.author!!.avatarUrl = "https:" + article.author!!.avatarUrl
+                }
+            }
+
+            return article
         }
 
         fun addToBookmarks(id: Int): Boolean {
