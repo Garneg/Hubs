@@ -1,13 +1,21 @@
 package com.garnegsoft.hubs.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.Switch
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import androidx.compose.material3.MaterialTheme as Material3Theme
 
 private val DarkColorPalette = darkColors(
     primary = Color(0xFFE7E7E7),
@@ -61,4 +69,30 @@ fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
         shapes = Shapes,
         content = content
     )
+}
+
+val m3LightColorScheme = lightColorScheme(
+    primary = PrimaryColor,
+    inversePrimary = Color(0xFFFF0000),
+    secondary = SecondaryColor,
+    primaryContainer = PrimaryVariantColor,
+    surfaceVariant = Color(0xFFEBF0F7),
+    outline = Color(0xFFB3B7BB)
+)
+
+@Preview
+@Composable
+fun HubsM3Theme() {
+    Material3Theme(
+        m3LightColorScheme
+    ) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            var checked by remember {
+                mutableStateOf(false)
+            }
+            Switch(checked = checked, onCheckedChange = { checked = !checked })
+
+        }
+
+    }
 }

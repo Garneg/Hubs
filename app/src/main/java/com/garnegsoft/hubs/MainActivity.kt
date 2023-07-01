@@ -57,6 +57,8 @@ import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import java.net.URLEncoder
 
+
+// TODO: shouldn't be singleton
 var cookies: String = ""
 var authorized: Boolean = false
 
@@ -115,18 +117,11 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
-// TODO: refactor this crap
+
+
         intent.dataString?.let { Log.e("intentData", it) }
-        HabrApi.HttpClient = OkHttpClient.Builder()
-            .addInterceptor(Interceptor {
-                val req = it.request()
-                    .newBuilder()
-                    .addHeader("Cookie", cookies)
-                    .build()
-                it.proceed(req)
-            })
-            .addInterceptor(NoConnectionInterceptor(this))
-            .build()
+        HabrApi.initialize(this)
+
 
         setContent {
             val themeMode by settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).collectAsState(initial = HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal)

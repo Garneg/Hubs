@@ -366,6 +366,8 @@ fun parseElement(
         }
         else
             null
+        "a" -> if (element.hasClass("anchor"))
+        { localSpanStyle -> } else null
         "figcaption" -> if (element.text().isNotEmpty())
             { localSpanStyle ->
                 val context = LocalContext.current
@@ -443,6 +445,7 @@ fun parseElement(
 
                 AndroidView(modifier = Modifier
                     .fillMaxWidth()
+                    .aspectRatio(16f/9f)
                     .padding(vertical = 4.dp)
                     .clip(RoundedCornerShape(4.dp)),
                     factory = {

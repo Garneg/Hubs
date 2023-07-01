@@ -46,15 +46,9 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.datastore.preferences.core.edit
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
@@ -79,95 +73,6 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
 
-
-class ArticleScreenViewModel() : ViewModel() {
-    private var _article = MutableLiveData<Article?>()
-    val article: LiveData<Article?> get() = _article
-
-    private var _offlineArticle = MutableLiveData<OfflineArticle?>()
-    val offlineArticle: LiveData<OfflineArticle?> get() = _offlineArticle
-
-    fun loadArticle(id: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            ArticleController.get(id)?.let {
-                _article.postValue(it)
-
-            }
-        }
-    }
-
-    fun loadArticleFromLocalDatabase(id: Int, context: Context) {
-        viewModelScope.launch(Dispatchers.IO){
-            val dao = context.offlineArticlesDatabase.articlesDao()
-            if (dao.exists(id)) {
-                _offlineArticle.postValue(dao._getArticleById(id))
-
-            } else {
-                withContext(Dispatchers.Main){
-                    Toast.makeText(context, "Статья не найдена в скачанных\nПопробуйте скачать ее заново", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
-    fun saveArticle(id: Int, context: Context){
-        viewModelScope.launch(Dispatchers.IO){
-            val dao = context.offlineArticlesDatabase.articlesDao()
-            ArticleController.getSnippet(id)?.let {
-                dao.insertSnippet(
-                    OfflineArticleSnippet(
-                        articleId = it.id,
-                        authorName = it.author?.alias,
-                        authorAvatarUrl = it.author?.avatarUrl,
-                        timePublished = "",
-                        title = it.title,
-                        readingTime = it.readingTime,
-                        isTranslation = it.isTranslation,
-                        textSnippet = it.textSnippet,
-                        hubs = HubsList(it.hubs?.map { if (it.isProfiled) it.title + "*" else it.title } ?: emptyList()),
-                        thumbnailUrl = it.imageUrl
-                    )
-                )
-            }
-
-            ArticleController.get(id)?.let {
-                dao.insert(
-                    OfflineArticle(
-                        articleId = it.id,
-                        authorName = it.author?.alias,
-                        authorAvatarUrl = it.author?.avatarUrl,
-                        timePublished = "",
-                        title = it.title,
-                        readingTime = it.readingTime,
-                        isTranslation = it.translationData.isTranslation,
-                        hubs = HubsList(it.hubs.map { if (it.isProfiled) it.title + "*" else it.title }),
-                        contentHtml = it.contentHtml
-                    )
-                )
-            }
-            withContext(Dispatchers.Main){
-                Toast.makeText(context, "Статья скачана!", Toast.LENGTH_SHORT).show()
-            }
-            Log.e("offlineArticle", "loading done")
-        }
-    }
-
-    fun deleteSavedArticle(id: Int, context: Context){
-        viewModelScope.launch(Dispatchers.IO) {
-            val dao = context.offlineArticlesDatabase.articlesDao()
-            dao.delete(id)
-            dao.deleteSnippet(id)
-            withContext(Dispatchers.Main) {
-                Toast.makeText(context, "Статья удалена!", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    fun articleExists(context: Context, articleId: Int): Flow<Boolean> {
-        return context.offlineArticlesDatabase.articlesDao().existsFlow(articleId)
-    }
-
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -198,21 +103,6 @@ fun ArticleScreen(
     })
 
     val scrollState = rememberScrollState()
-
-    //TODO: save position of last read article
-//    LaunchedEffect(key1 = Unit, block = {
-//        launch(Dispatchers.IO) {
-//            while (true) {
-//                delay(2000)
-//                if (!scrollState.isScrollInProgress && viewModel.article.isInitialized){
-//                    context.lastReadDataStore.edit {
-//                        it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] = scrollState.value
-//                    }
-//                }
-//            }
-//        }
-//
-//    })
 
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val shareIntent = remember(article?.title, offlineArticle?.title) {
@@ -501,7 +391,7 @@ fun ArticleScreen(
             }
         }
     ) {
-        if (isOffline){
+        if (isOffline) {
             offlineArticle?.let { article ->
                 val flingSpec = rememberSplineBasedDecay<Float>()
                 Row {
@@ -730,283 +620,18 @@ fun ArticleScreen(
                 }
             }
         } else {
-            article?.let { article ->
+            article?.let {
                 LaunchedEffect(key1 = Unit, block = {
                     context.lastReadDataStore.edit {
                         it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
                     }
                 })
-                Row(
-                    Modifier.padding(
-                        top = it.calculateTopPadding(),
-                        bottom = it.calculateBottomPadding()
-                    )
-                ) {
-                    val flingSpec = rememberSplineBasedDecay<Float>()
-
-                    Column(
-                        modifier = Modifier
-                            .verticalScroll(
-                                state = scrollState,
-                                flingBehavior = object : FlingBehavior {
-                                    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-                                        if (abs(initialVelocity) <= 1f)
-                                            return initialVelocity
-
-                                        val performedInitialVelocity = initialVelocity * 1.2f
-
-                                        var velocityLeft = performedInitialVelocity
-                                        var lastValue = 0f
-                                        AnimationState(
-                                            initialValue = 0f,
-                                            initialVelocity = performedInitialVelocity
-                                        ).animateDecay(flingSpec) {
-                                            val delta = value - lastValue
-                                            val consumed = scrollBy(delta)
-                                            lastValue = value
-                                            velocityLeft = velocity
-
-                                            if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
-
-                                        }
-                                        return velocityLeft
-
-                                    }
-
-                                }
-                            )
-                            .padding(bottom = 12.dp)
-                            .padding(16.dp)
-                    ) {
-                        if (article.editorVersion == EditorVersion.FirstVersion) {
-                            Row(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colors.error.copy(alpha = 0.75f))
-                                    .padding(8.dp), verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Warning,
-                                    contentDescription = "",
-                                    tint = MaterialTheme.colors.onError
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    "Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
-                                    color = MaterialTheme.colors.onError
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                        if (article.author != null) {
-                            Row(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable(onClick = { onAuthorClicked(article.author.alias) }),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                if (article.author.avatarUrl != null)
-                                    AsyncImage(
-                                        modifier = Modifier
-                                            .size(34.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(Color.White),
-                                        model = article.author.avatarUrl,
-                                        contentDescription = ""
-                                    )
-                                else
-                                    Icon(
-                                        modifier = Modifier
-                                            .size(34.dp)
-                                            .border(
-                                                width = 2.dp,
-                                                color = placeholderColor(article.author.alias),
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                            .background(
-                                                Color.White,
-                                                shape = RoundedCornerShape(8.dp)
-                                            )
-                                            .padding(2.dp),
-                                        painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                                        contentDescription = "",
-                                        tint = placeholderColor(article.author.alias)
-                                    )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = article.author.alias, fontWeight = FontWeight.W600,
-                                    fontSize = 14.sp,
-                                    color = MaterialTheme.colors.onBackground
-                                )
-                                Spacer(modifier = Modifier.weight(1f))
-                                Text(
-                                    article.timePublished, color = Color.Gray,
-                                    fontSize = 12.sp, fontWeight = FontWeight.W400
-                                )
-                            }
-                        }
-                        if (article.postType == PostType.Megaproject && article.metadata != null) {
-                            AsyncImage(
-                                article.metadata.mainImageUrl,
-                                "",
-                                modifier = Modifier.clip(RoundedCornerShape(8.dp)),
-                            )
-                            Spacer(Modifier.height(8.dp))
-                        }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Column {
-                            SelectionContainer() {
-                                Text(
-                                    text = article.title,
-                                    fontSize = 22.sp,
-                                    fontWeight = FontWeight.W700,
-                                    color = MaterialTheme.colors.onBackground
-                                )
-                            }
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                if (article.complexity != PostComplexity.None) {
-                                    Icon(
-                                        modifier = Modifier.size(height = 10.dp, width = 20.dp),
-                                        painter = painterResource(id = R.drawable.speedmeter_hard),
-                                        contentDescription = "",
-                                        tint = when (article.complexity) {
-                                            PostComplexity.Low -> Color(0xFF4CBE51)
-                                            PostComplexity.Medium -> Color(0xFFEEBC25)
-                                            PostComplexity.High -> Color(0xFFEB3B2E)
-                                            else -> Color.Red
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = when (article.complexity) {
-                                            PostComplexity.Low -> "Простой"
-                                            PostComplexity.Medium -> "Средний"
-                                            PostComplexity.High -> "Сложный"
-                                            else -> ""
-                                        },
-                                        color = when (article.complexity) {
-                                            PostComplexity.Low -> Color(0xFF4CBE51)
-                                            PostComplexity.Medium -> Color(0xFFEEBC25)
-                                            PostComplexity.High -> Color(0xFFEB3B2E)
-                                            else -> Color.Red
-                                        },
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 14.sp
-
-                                    )
-
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                }
-                                Icon(
-                                    painter = painterResource(id = R.drawable.clock_icon),
-                                    modifier = Modifier.size(14.dp),
-                                    contentDescription = "",
-                                    tint = statisticsColor
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = "${article.readingTime} мин",
-                                    color = statisticsColor,
-                                    fontWeight = FontWeight.W500,
-                                    fontSize = 14.sp
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                if (article.translationData.isTranslation) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.translate),
-                                        modifier = Modifier.size(14.dp),
-                                        contentDescription = "",
-                                        tint = statisticsColor
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(
-                                        text = "Перевод",
-                                        color = statisticsColor,
-                                        fontWeight = FontWeight.W500,
-                                        fontSize = 14.sp
-                                    )
-                                }
-
-                            }
-                            Spacer(Modifier.height(4.dp))
-
-                            HubsRow(
-                                hubs = article.hubs,
-                                onHubClicked = onHubClicked,
-                                onCompanyClicked = onCompanyClick
-                            )
-
-                            TranslationMessage(
-                                modifier = Modifier.padding(vertical = 8.dp),
-                                translationInfo = article.translationData
-                            ) {
-                                val intent = Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse(article.translationData.originUrl)
-                                )
-                                context.startActivity(intent)
-                            }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            SelectionContainer() {
-                                parseElement(
-                                    Jsoup.parse(
-                                        article.contentHtml
-                                    ),
-                                    SpanStyle(
-                                        color = MaterialTheme.colors.onSurface,
-                                        fontSize = MaterialTheme.typography.body1.fontSize,
-
-                                        ),
-                                    onViewImageRequest = onViewImageRequest
-
-                                ).second?.let { it1 ->
-                                    it1(
-                                        SpanStyle(
-                                            color = MaterialTheme.colors.onSurface,
-                                            fontSize = MaterialTheme.typography.body1.fontSize
-                                        )
-                                    )
-                                }
-                            }
-                            Divider(modifier = Modifier.padding(vertical = 24.dp))
-                            // Hubs
-                            TitledColumn(
-                                title = "Хабы",
-                                titleStyle = MaterialTheme.typography.subtitle2.copy(
-                                    color = MaterialTheme.colors.onBackground.copy(
-                                        0.5f
-                                    )
-                                )
-                            ) {
-                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    article.hubs.forEach {
-                                        HubChip(
-                                            if (it.isProfiled)
-                                                it.title + "*"
-                                            else
-                                                it.title
-                                        ) {
-                                            if (it.isCorporative)
-                                                onCompanyClick(it.alias)
-                                            else
-                                                onHubClicked(it.alias)
-                                        }
-                                    }
-                                }
-                            }
-
-
-                        }
-                    }
-                    ScrollBar(scrollState = scrollState)
-                }
+                ArticleContent(article = it,
+                    onAuthorClicked = { onAuthorClicked(it.author!!.alias) },
+                    onHubClicked = onHubClicked,
+                    onCompanyClick = onCompanyClick,
+                    onViewImageRequest = onViewImageRequest
+                )
             } ?: Box(
                 modifier = Modifier
                     .fillMaxSize()

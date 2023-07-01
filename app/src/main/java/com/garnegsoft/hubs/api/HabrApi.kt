@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.api
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import com.garnegsoft.hubs.cookies
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_RESPONSE
@@ -16,8 +17,23 @@ class HabrApi {
     companion object {
 
         private const val baseAddress = "https://habr.com"
-        lateinit var HttpClient: OkHttpClient
+        private lateinit var HttpClient: OkHttpClient
         private var csrfToken: String? = null
+
+        fun initialize(context: Context){
+            HttpClient = OkHttpClient.Builder()
+                .addInterceptor(Interceptor {
+                    val req = it.request()
+                        .newBuilder()
+                        .addHeader("Cookie", cookies)
+                        .build()
+                    it.proceed(req)
+                })
+                .addInterceptor(NoConnectionInterceptor(context))
+
+                .build()
+
+        }
 
         fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
@@ -163,3 +179,4 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
             get() = "No internet available, please check your connected WIFi or Data"
     }
 }
+

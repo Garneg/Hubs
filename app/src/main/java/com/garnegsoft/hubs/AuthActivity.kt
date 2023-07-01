@@ -28,7 +28,6 @@ class AuthActivity : AppCompatActivity() {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
-            settings.userAgentString = "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.91 Mobile Safari/537.36"
 
             webViewClient = AuthWebViewClient() {
                 this@AuthActivity.setResult(Activity.RESULT_OK, Intent().apply

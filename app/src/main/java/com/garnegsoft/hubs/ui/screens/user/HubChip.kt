@@ -70,7 +70,7 @@ fun HubChip(
             .background(MaterialTheme.colors.onSurface.copy(0.05f))
             .padding(vertical = 8.dp, horizontal = 12.dp),
         text = title,
-        color = MaterialTheme.colors.onSurface.copy(0.65f),
+        color = MaterialTheme.colors.onSurface.copy(0.85f),
         style = MaterialTheme.typography.body2
     )
 }

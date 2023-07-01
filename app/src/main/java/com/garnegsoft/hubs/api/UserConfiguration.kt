@@ -77,11 +77,15 @@ fun FilterShitExperimental() {
 
     }
 
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection)
-            .scrollable(rememberScrollableState(consumeScrollDelta = { it }), orientation = Orientation.Vertical)
+            .scrollable(
+                rememberScrollableState(consumeScrollDelta = { it }),
+                orientation = Orientation.Vertical
+            )
 
     ) {
         val density = LocalDensity.current

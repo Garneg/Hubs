@@ -8,7 +8,6 @@
     <string name="company_screen_title">Компания</string>
     <string name="comments_screen_title">Комментарии</string>
     <string name="offline_articles_list_screen_title">Сохраненные статьи</string>
-    <string name="offline_articles_list_screen_title">Сохраненные статьи</string>
     <string name="about_app_screen_title">О приложении</string>
     <string name="publication">Публикация</string>
     <string name="bookmarks">Закладки</string>
@@ -16,7 +15,6 @@
     <string name="continue_reading">"Хотите дочитать "</string>
     <string name="write_developer">Написать разработчику</string>
     <string name="search_screen_title">Поиск</string>
-    <string name="article_screen_title">Публикация</string>
     <string name="article_screen_title">Публикация</string>
     <string name="settings_screen_title">Настройки</string>
     <string name="my_feed_tab">Моя лента</string>
