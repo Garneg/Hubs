@@ -33,6 +33,7 @@ import coil.ImageLoader
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
@@ -156,7 +157,6 @@ fun ArticlesScreen(
         Column(
             Modifier.padding(it)
         ) {
-
             val myFeedLazyListState = rememberLazyListState()
             val articlesLazyListState = rememberLazyListState()
             val newsLazyListState = rememberLazyListState()
@@ -178,56 +178,64 @@ fun ArticlesScreen(
                         if (articles != null) {
 
                             var refreshing by remember { mutableStateOf(false) }
-                            PagedRefreshableHabrSnippetsColumn(
-                                data = articles!!,
-                                lazyListState = articlesLazyListState,
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                contentPadding = PaddingValues(8.dp),
-                                onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
-                                        ArticlesListController
-                                            .getArticlesSnippets(
-                                                "articles",
-                                                mapOf(
-                                                    "sort" to "rating",
-                                                    "page" to it.toString()
-                                                )
-                                            )?.let {
-                                                viewModel.articles.postValue(articles!! + it)
+                            CollapsingContent(collapsingContent = {
+                                Text(modifier = Modifier
+                                    .background(Color.Red)
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                    text = "filter")
+                            }) {
+                                PagedRefreshableHabrSnippetsColumn(
+                                    data = articles!!,
+                                    lazyListState = articlesLazyListState,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    contentPadding = PaddingValues(8.dp),
+                                    onNextPageLoad = {
+                                        launch(Dispatchers.IO) {
+                                            ArticlesListController
+                                                .getArticlesSnippets(
+                                                    "articles",
+                                                    mapOf(
+                                                        "sort" to "rating",
+                                                        "page" to it.toString()
+                                                    )
+                                                )?.let {
+                                                    viewModel.articles.postValue(articles!! + it)
 
-                                            }
-
-                                    }
-
-                                },
-                                page = pageNumber,
-                                refreshing = refreshing,
-                                onRefresh = {
-                                    updateFeedCoroutineScope.launch(Dispatchers.IO) {
-                                        refreshing = true
-                                        pageNumber.value = 1
-                                        val newArticlesList =
-                                            ArticlesListController.getArticlesSnippets(
-                                                "articles",
-                                                mapOf("sort" to "rating")
-                                            )
-                                        if (newArticlesList != null) {
-                                            viewModel.articles.postValue(newArticlesList)
-                                            readyToScrollUp.value = true
+                                                }
 
                                         }
-                                        refreshing = false
-                                    }
-                                },
-                                readyToScrollUpAfterRefresh = readyToScrollUp
-                            ) {
-                                ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClicked(it.id) },
-                                    onCommentsClick = { onCommentsClicked(it.id) },
-                                    onAuthorClick = { onUserClicked(it.author!!.alias) }
-                                )
+
+                                    },
+                                    page = pageNumber,
+                                    refreshing = refreshing,
+                                    onRefresh = {
+                                        updateFeedCoroutineScope.launch(Dispatchers.IO) {
+                                            refreshing = true
+                                            pageNumber.value = 1
+                                            val newArticlesList =
+                                                ArticlesListController.getArticlesSnippets(
+                                                    "articles",
+                                                    mapOf("sort" to "rating")
+                                                )
+                                            if (newArticlesList != null) {
+                                                viewModel.articles.postValue(newArticlesList)
+                                                readyToScrollUp.value = true
+
+                                            }
+                                            refreshing = false
+                                        }
+                                    },
+                                    readyToScrollUpAfterRefresh = readyToScrollUp
+                                ) {
+                                    ArticleCard(
+                                        article = it,
+                                        onClick = { onArticleClicked(it.id) },
+                                        onCommentsClick = { onCommentsClicked(it.id) },
+                                        onAuthorClick = { onUserClicked(it.author!!.alias) }
+                                    )
+                                }
                             }
 
 

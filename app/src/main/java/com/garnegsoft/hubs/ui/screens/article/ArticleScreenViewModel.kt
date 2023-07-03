@@ -3,6 +3,8 @@ package com.garnegsoft.hubs.ui.screens.article
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,7 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 
-class ArticleScreenViewModel() : ViewModel() {
+class ArticleScreenViewModel : ViewModel() {
     private var _article = MutableLiveData<Article?>()
     val article: LiveData<Article?> get() = _article
 
@@ -104,5 +106,7 @@ class ArticleScreenViewModel() : ViewModel() {
     fun articleExists(context: Context, articleId: Int): Flow<Boolean> {
         return context.offlineArticlesDatabase.articlesDao().existsFlow(articleId)
     }
+
+
 
 }

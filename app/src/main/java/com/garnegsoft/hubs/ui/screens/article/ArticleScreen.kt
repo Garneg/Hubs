@@ -620,18 +620,21 @@ fun ArticleScreen(
                 }
             }
         } else {
-            article?.let {
+            article?.let { article ->
                 LaunchedEffect(key1 = Unit, block = {
                     context.lastReadDataStore.edit {
                         it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
                     }
                 })
-                ArticleContent(article = it,
-                    onAuthorClicked = { onAuthorClicked(it.author!!.alias) },
-                    onHubClicked = onHubClicked,
-                    onCompanyClick = onCompanyClick,
-                    onViewImageRequest = onViewImageRequest
-                )
+                Box(modifier = Modifier.padding(it)) {
+                    ArticleContent(
+                        article = article,
+                        onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
+                        onHubClicked = onHubClicked,
+                        onCompanyClick = onCompanyClick,
+                        onViewImageRequest = onViewImageRequest
+                    )
+                }
             } ?: Box(
                 modifier = Modifier
                     .fillMaxSize()

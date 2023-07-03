@@ -68,7 +68,7 @@ fun LazyListArticleTest() {
             }
         })
 
-        SelectionContainer() {
+        SelectionContainer {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 state = state,

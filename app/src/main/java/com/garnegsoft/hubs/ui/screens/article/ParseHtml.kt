@@ -364,8 +364,7 @@ fun parseElement(
                 }
             }
         }
-        else
-            null
+        else null
         "a" -> if (element.hasClass("anchor"))
         { localSpanStyle -> } else null
         "figcaption" -> if (element.text().isNotEmpty())
