@@ -88,7 +88,7 @@ fun ArticleContent(
         ) {
             if (article.editorVersion == EditorVersion.FirstVersion) {
                 Row(
-                    Modifier
+                    modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colors.error.copy(alpha = 0.75f))

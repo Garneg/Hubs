@@ -37,6 +37,9 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
     page: MutableState<Int> = rememberSaveable {
         mutableStateOf(1)
     },
+    isInProgress: MutableState<Boolean> = remember {
+        mutableStateOf(false)
+    },
     onRefresh: () -> Unit,
     refreshing: Boolean,
     readyToScrollUpAfterRefresh: MutableState<Boolean>,
@@ -56,6 +59,8 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
         refreshThreshold = 50.dp,
         onRefresh = onRefresh
     )
+
+    isInProgress.value = remember { derivedStateOf { state.progress > 0f } }.value
     Box(modifier = Modifier.pullRefresh(state)) {
         PagedHabrSnippetsColumn(
             modifier = modifier,

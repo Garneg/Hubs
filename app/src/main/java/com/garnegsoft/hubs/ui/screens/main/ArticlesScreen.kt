@@ -3,7 +3,6 @@ package com.garnegsoft.hubs.ui.screens.main
 
 import ArticleController
 import ArticlesListController
-import android.os.Build
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -29,9 +28,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.ImageLoader
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.HubsDataStore
@@ -51,14 +47,12 @@ import kotlinx.coroutines.*
 
 
 class ArticlesScreenViewModel : ViewModel() {
-
     var myFeedArticles = MutableLiveData<HabrList<ArticleSnippet>>()
     var articles = MutableLiveData<HabrList<ArticleSnippet>>()
     var news = MutableLiveData<HabrList<ArticleSnippet>>()
     var hubs = MutableLiveData<HabrList<HubSnippet>>()
     var authors = MutableLiveData<HabrList<UserSnippet>>()
     var companies = MutableLiveData<HabrList<CompanySnippet>>()
-
 }
 
 
@@ -175,16 +169,27 @@ fun ArticlesScreen(
 
                         var readyToScrollUp = remember { mutableStateOf(false) }
 
+                        var isUpdatingInProgress = remember { mutableStateOf(false) }
+
                         if (articles != null) {
 
                             var refreshing by remember { mutableStateOf(false) }
-                            CollapsingContent(collapsingContent = {
-                                Text(modifier = Modifier
-                                    .background(Color.Red)
-                                    .fillMaxWidth()
-                                    .padding(8.dp),
-                                    text = "filter")
-                            }) {
+                            CollapsingContent(
+                                collapsingContent = {
+                                    Box(modifier = Modifier.fillMaxWidth().padding(top = 8.dp, end = 8.dp)) {
+                                        Text(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(26.dp))
+                                                .background(Color.White)
+                                                .align(Alignment.CenterEnd)
+                                                .padding(8.dp),
+                                            text = "filter"
+                                        )
+
+                                    }
+                                },
+                                doCollapse = !isUpdatingInProgress.value
+                            ) {
                                 PagedRefreshableHabrSnippetsColumn(
                                     data = articles!!,
                                     lazyListState = articlesLazyListState,
@@ -210,6 +215,7 @@ fun ArticlesScreen(
                                     },
                                     page = pageNumber,
                                     refreshing = refreshing,
+                                    isInProgress = isUpdatingInProgress,
                                     onRefresh = {
                                         updateFeedCoroutineScope.launch(Dispatchers.IO) {
                                             refreshing = true
@@ -460,7 +466,7 @@ fun ArticlesScreen(
                     mapOf<String, @Composable () -> Unit>(
                         "Моя лента" to {
                             var refreshing by remember { mutableStateOf(false) }
-                            var scrollAfterRefresh = remember { mutableStateOf(false)}
+                            var scrollAfterRefresh = remember { mutableStateOf(false) }
                             val articles by viewModel.myFeedArticles.observeAsState()
                             if (articles != null) {
 
@@ -488,7 +494,10 @@ fun ArticlesScreen(
                                     onRefresh = {
                                         refreshing = true
                                         viewModel.viewModelScope.launch(Dispatchers.IO) {
-                                            ArticlesListController.getArticlesSnippets("articles", mapOf("custom" to "true"))?.let{
+                                            ArticlesListController.getArticlesSnippets(
+                                                "articles",
+                                                mapOf("custom" to "true")
+                                            )?.let {
                                                 viewModel.myFeedArticles.postValue(it)
                                                 scrollAfterRefresh.value = true
                                             }

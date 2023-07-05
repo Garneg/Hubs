@@ -14,12 +14,11 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -39,11 +38,11 @@ fun FilterShitExperimental() {
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
-    var filterHeight by remember { mutableStateOf(0.dp) }
+    var filterHeight by rememberSaveable { mutableStateOf(0.dp) }
     val density = LocalDensity.current
     val filterHeightPx =
-        remember(filterHeight) { with(density) { filterHeight.roundToPx().toFloat() } }
-    var filterOffsetPx by remember { mutableStateOf(0f) }
+        rememberSaveable(filterHeight) { with(density) { filterHeight.roundToPx().toFloat() } }
+    var filterOffsetPx by rememberSaveable { mutableStateOf(0f) }
     val nestedScrollConnection = object : NestedScrollConnection {
 
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -146,53 +145,37 @@ fun FilterShitExperimental() {
 @Composable
 fun CollapsingContent(
     collapsingContent: @Composable () -> Unit,
+    doCollapse: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    var collapsedContentHeight by remember { mutableStateOf(0.dp) }
+    var collapsingContentHeightDp by rememberSaveable { mutableStateOf(0f) }
     val density = LocalDensity.current
-    val collapsedContentHeightPx = remember(collapsedContentHeight) {
+    val collapsingContentHeightPx = rememberSaveable(collapsingContentHeightDp) {
         with(density) {
-            collapsedContentHeight.roundToPx().toFloat()
+            collapsingContentHeightDp.dp.roundToPx().toFloat()
         }
     }
 
-    var collapsedContentOffsetPx by remember { mutableStateOf(0f) }
+    var collapsingContentOffsetPx by rememberSaveable { mutableStateOf(0f) }
 
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            if (available.y > 0 && collapsedContentOffsetPx > 0f) {
-                collapsedContentOffsetPx -= available.y
-                collapsedContentOffsetPx = collapsedContentOffsetPx.coerceIn(0f, collapsedContentHeightPx)
-                return available
-            }
-            if (available.y < 0 && collapsedContentOffsetPx < collapsedContentHeightPx) {
-                collapsedContentOffsetPx -= available.y
-                collapsedContentOffsetPx = collapsedContentOffsetPx.coerceIn(0f, collapsedContentHeightPx)
-                return available
+            if (doCollapse) {
+                if (available.y > 0 && collapsingContentOffsetPx > 0f) {
+                    collapsingContentOffsetPx -= available.y
+                    collapsingContentOffsetPx =
+                        collapsingContentOffsetPx.coerceIn(0f, collapsingContentHeightPx)
+                    return available
+                }
+                if (available.y < 0 && collapsingContentOffsetPx < collapsingContentHeightPx) {
+                    collapsingContentOffsetPx -= available.y
+                    collapsingContentOffsetPx =
+                        collapsingContentOffsetPx.coerceIn(0f, collapsingContentHeightPx)
+                    return available
+                }
             }
 
             return Offset.Zero
-        }
-
-        override fun onPostScroll(
-            consumed: Offset,
-            available: Offset,
-            source: NestedScrollSource
-        ): Offset {
-            return super.onPostScroll(consumed, available, source)
-        }
-
-        override suspend fun onPreFling(available: Velocity): Velocity {
-            Log.e("so pre fling_a", available.toString())
-
-            return super.onPreFling(available)
-        }
-
-        override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-            Log.e("so post fling_c", consumed.toString())
-            Log.e("so post fling_a", available.toString())
-
-            return super.onPostFling(consumed, available)
         }
 
     }
@@ -200,17 +183,17 @@ fun CollapsingContent(
     Box(
         modifier = Modifier.nestedScroll(nestedScrollConnection)
     ) {
-        Box(Modifier.padding(top = collapsedContentHeight - Dp(collapsedContentOffsetPx / density.density))) {
+        Box(Modifier.padding(top = collapsingContentHeightDp.dp - Dp(collapsingContentOffsetPx / density.density))) {
             content()
         }
         Box(
             modifier = Modifier
                 .clip(RectangleShape)
                 .offset {
-                    IntOffset(0, -collapsedContentOffsetPx.roundToInt())
+                    IntOffset(0, -collapsingContentOffsetPx.roundToInt())
                 }
                 .onGloballyPositioned {
-                    collapsedContentHeight = (it.size.height.toFloat() / density.density).dp
+                    collapsingContentHeightDp = it.size.height.toFloat() / density.density
                 }
 
         ) {

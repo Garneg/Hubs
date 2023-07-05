@@ -1,12 +1,10 @@
 package com.garnegsoft.hubs.ui.common
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -15,26 +13,37 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BasicTitledColumn(
     modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     title: @Composable () -> Unit,
-    divider: @Composable () -> Unit,
+    divider: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(modifier = modifier) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = verticalArrangement,
+        horizontalAlignment = horizontalAlignment
+
+    ) {
         title()
-        divider()
+        divider?.invoke()
         this.content()
     }
 }
 
 @Composable
 fun TitledColumn(
-    modifier: Modifier = Modifier,
     title: String,
+    modifier: Modifier = Modifier,
+    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     titleStyle: TextStyle = MaterialTheme.typography.subtitle2,
     content: @Composable ColumnScope.() -> Unit
 ) {
     BasicTitledColumn(
         modifier = modifier,
+        horizontalAlignment = horizontalAlignment,
+        verticalArrangement = verticalArrangement,
         title = { Text(text = title, style = titleStyle) },
         divider = { Spacer(modifier = Modifier.height(6.dp)) },
         content = content
