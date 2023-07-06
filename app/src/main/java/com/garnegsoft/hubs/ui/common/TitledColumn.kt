@@ -19,15 +19,17 @@ fun BasicTitledColumn(
     divider: (@Composable () -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = verticalArrangement,
-        horizontalAlignment = horizontalAlignment
-
-    ) {
+    Column {
         title()
         divider?.invoke()
-        this.content()
+        Column(
+            modifier = modifier,
+            verticalArrangement = verticalArrangement,
+            horizontalAlignment = horizontalAlignment
+        ) {
+            this.content()
+        }
+
     }
 }
 
@@ -37,7 +39,7 @@ fun TitledColumn(
     modifier: Modifier = Modifier,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
-    titleStyle: TextStyle = MaterialTheme.typography.subtitle2,
+    titleStyle: TextStyle = MaterialTheme.typography.subtitle2.copy(color = MaterialTheme.colors.onSurface),
     content: @Composable ColumnScope.() -> Unit
 ) {
     BasicTitledColumn(
