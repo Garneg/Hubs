@@ -1,9 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,33 +8,41 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import androidx.navigation.compose.DialogHost
-import androidx.navigation.compose.DialogNavigator
-import coil.compose.AsyncImage
+import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 
-@OptIn(ExperimentalMaterialApi::class)
-@Preview
+
 @Composable
-fun FilterDialog() {
+fun FilterDialog(
+    defaultValues: ArticlesFilterDialogResult,
+    onDismiss: () -> Unit,
+    onDone: (ArticlesFilterDialogResult) -> Unit
+) {
     HubsTheme() {
-
-
         Box() {
             Dialog(
                 properties = DialogProperties(true, true),
-                onDismissRequest = { Log.e("aboboa", "adlajflsd") }) {
-
+                onDismissRequest = onDismiss) {
+                var showLast by rememberSaveable {
+                    mutableStateOf(defaultValues.showLast)
+                }
+                var minRating by rememberSaveable {
+                    mutableStateOf(defaultValues.minRating)
+                }
+                var period by rememberSaveable {
+                    mutableStateOf(defaultValues.period)
+                }
+                var complexity by rememberSaveable {
+                    mutableStateOf(defaultValues.complexity)
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -51,9 +56,10 @@ fun FilterDialog() {
                             color = MaterialTheme.colors.onSurface,
                             style = MaterialTheme.typography.subtitle1)
                         Spacer(dp = 12.dp)
-                        var showLast by remember { mutableStateOf(true) }
                         Column(
-                            modifier = Modifier.verticalScroll(rememberScrollState()).weight(1f),
+                            modifier = Modifier
+                                .verticalScroll(rememberScrollState())
+                                .weight(1f),
                             verticalArrangement = Arrangement.spacedBy(9.dp)
                         ) {
 
@@ -79,33 +85,33 @@ fun FilterDialog() {
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         HubsFilterChip(
-                                            selected = showLast,
-                                            onClick = { showLast = true }) {
+                                            selected = minRating == -1,
+                                            onClick = { minRating = -1 }) {
                                             Text(text = "Все")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = minRating == 0,
+                                            onClick = { minRating = 0 }) {
                                             Text(text = "≥0")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = minRating == 10,
+                                            onClick = { minRating = 10 }) {
                                             Text(text = "≥10")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = minRating == 25,
+                                            onClick = { minRating = 25 }) {
                                             Text(text = "≥25")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = minRating == 50,
+                                            onClick = { minRating = 50 }) {
                                             Text(text = "≥50")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = minRating == 100,
+                                            onClick = { minRating = 100 }) {
                                             Text(text = "≥100")
                                         }
                                     }
@@ -118,28 +124,28 @@ fun FilterDialog() {
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
                                         HubsFilterChip(
-                                            selected = showLast,
-                                            onClick = { showLast = true }) {
+                                            selected = period == FilterPeriod.Day,
+                                            onClick = { period = FilterPeriod.Day }) {
                                             Text(text = "Сутки")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = period == FilterPeriod.Week,
+                                            onClick = { period = FilterPeriod.Week }) {
                                             Text(text = "Неделя")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = period == FilterPeriod.Month,
+                                            onClick = { period = FilterPeriod.Month }) {
                                             Text(text = "Месяц")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = period == FilterPeriod.Year,
+                                            onClick = { period = FilterPeriod.Year }) {
                                             Text(text = "Год")
                                         }
                                         HubsFilterChip(
-                                            selected = !showLast,
-                                            onClick = { showLast = false }) {
+                                            selected = period == FilterPeriod.AllTime,
+                                            onClick = { period = FilterPeriod.AllTime }) {
                                             Text(text = "Все время")
                                         }
 
@@ -151,22 +157,24 @@ fun FilterDialog() {
                                 Row(modifier = Modifier.horizontalScroll(rememberScrollState()),
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    HubsFilterChip(selected = showLast, onClick = { showLast = true }) {
+                                    HubsFilterChip(
+                                        selected = complexity == PostComplexity.None,
+                                        onClick = { complexity = PostComplexity.None }) {
                                         Text(text = "Все")
                                     }
                                     HubsFilterChip(
-                                        selected = !showLast,
-                                        onClick = { showLast = false }) {
+                                        selected = complexity == PostComplexity.Low,
+                                        onClick = { complexity = PostComplexity.Low }) {
                                         Text(text = "Простой")
                                     }
                                     HubsFilterChip(
-                                        selected = !showLast,
-                                        onClick = { showLast = false }) {
+                                        selected = complexity == PostComplexity.Medium,
+                                        onClick = { complexity = PostComplexity.Medium }) {
                                         Text(text = "Средний")
                                     }
                                     HubsFilterChip(
-                                        selected = !showLast,
-                                        onClick = { showLast = false }) {
+                                        selected = complexity == PostComplexity.High,
+                                        onClick = { complexity = PostComplexity.High }) {
                                         Text(text = "Сложный")
                                     }
 
@@ -178,11 +186,11 @@ fun FilterDialog() {
                         }
                         Spacer(dp = 12.dp)
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-                            TextButton(onClick = { /*TODO*/ }) {
+                            TextButton(onClick = { ArticlesFilterDialogResult(showLast, minRating, period, complexity) }) {
                                 Text(text = "Применить")
                             }
                             Spacer(modifier = Modifier.width(8.dp))
-                            TextButton(onClick = { /*TODO*/ }) {
+                            TextButton(onClick = onDismiss) {
                                 Text(text = "Отмена")
                             }
                         }
@@ -192,6 +200,21 @@ fun FilterDialog() {
             }
         }
     }
+}
+
+data class ArticlesFilterDialogResult(
+    val showLast: Boolean,
+    val minRating: Int = -1,
+    val period: FilterPeriod = FilterPeriod.Day,
+    val complexity: PostComplexity
+)
+
+enum class FilterPeriod {
+    Day,
+    Week,
+    Month,
+    Year,
+    AllTime
 }
 
 @Composable
