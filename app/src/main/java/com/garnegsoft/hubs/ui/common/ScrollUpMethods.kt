@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ sealed interface ScrollUpMethods {
             lazyListState.animateScrollToItem(0)
         }
 
-        suspend fun scrollNormal(scrollState: ScrollState) {
+        suspend fun scrollNormalList(scrollState: ScrollState) {
             scrollState.scrollTo(0)
         }
     }
