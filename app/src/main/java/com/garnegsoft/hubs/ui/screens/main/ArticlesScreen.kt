@@ -52,25 +52,31 @@ class ArticlesScreenViewModel : ViewModel() {
     var myFeedArticles = MutableLiveData<HabrList<ArticleSnippet>>()
 
     var articles = MutableLiveData<HabrList<ArticleSnippet>?>()
-    var articlesFilter = MutableLiveData<ArticlesFilterDialogResult>(ArticlesFilterDialogResult(showLast = true, complexity = PostComplexity.None))
+    var articlesFilter = MutableLiveData<ArticlesFilterDialogResult>(
+        ArticlesFilterDialogResult(
+            showLast = true,
+            complexity = PostComplexity.None
+        )
+    )
 
     fun updateFilter(newFilter: ArticlesFilterDialogResult) {
-        if (articlesFilter.value?.hasChanged(newFilter) ?: false){
+        if (articlesFilter.value?.hasChanged(newFilter) ?: false) {
             articles.postValue(null)
             articlesFilter.postValue(newFilter)
             viewModelScope.launch(Dispatchers.IO) {
                 var argsMap: Map<String, String> =
-                    if (newFilter.showLast){
+                    if (newFilter.showLast) {
                         if (newFilter.minRating == -1) {
                             mapOf(
                                 "sort" to "rating",
                             )
                         } else {
-                            mapOf("sort" to "rating",
-                            "score" to newFilter.minRating.toString())
+                            mapOf(
+                                "sort" to "rating",
+                                "score" to newFilter.minRating.toString()
+                            )
                         }
-                    }
-                    else {
+                    } else {
                         mapOf(
                             "sort" to "date",
                             "period" to when (newFilter.period) {
@@ -80,12 +86,12 @@ class ArticlesScreenViewModel : ViewModel() {
                                 FilterPeriod.Year -> "yearly"
                                 FilterPeriod.AllTime -> "alltime"
                             },
-                            )
+                        )
                     }
 
-                if (newFilter.complexity != PostComplexity.None){
+                if (newFilter.complexity != PostComplexity.None) {
                     argsMap += mapOf(
-                        "complexity" to when(newFilter.complexity) {
+                        "complexity" to when (newFilter.complexity) {
                             PostComplexity.Low -> "easy"
                             PostComplexity.Medium -> "medium"
                             PostComplexity.High -> "hard"
@@ -102,15 +108,75 @@ class ArticlesScreenViewModel : ViewModel() {
         }
     }
 
-    fun ArticlesFilterDialogResult.hasChanged(newFilter: ArticlesFilterDialogResult): Boolean{
+    val isLoadingArticles = MutableLiveData<Boolean>(false)
+
+    fun loadArticles(page: Int) {
+
+        viewModelScope.launch(Dispatchers.IO) {
+            isLoadingArticles.postValue(true)
+            val filter = articlesFilter.value ?: ArticlesFilterDialogResult(
+                showLast = true,
+                complexity = PostComplexity.None
+            )
+            var argsMap: Map<String, String> =
+                if (filter.showLast) {
+                    if (filter.minRating == -1) {
+                        mapOf(
+                            "sort" to "rating",
+                        )
+                    } else {
+                        mapOf(
+                            "sort" to "rating",
+                            "score" to filter.minRating.toString()
+                        )
+                    }
+                } else {
+                    mapOf(
+                        "sort" to "date",
+                        "period" to when (filter.period) {
+                            FilterPeriod.Day -> "daily"
+                            FilterPeriod.Week -> "weekly"
+                            FilterPeriod.Month -> "monthly"
+                            FilterPeriod.Year -> "yearly"
+                            FilterPeriod.AllTime -> "alltime"
+                        },
+                    )
+                }
+
+            if (filter.complexity != PostComplexity.None) {
+                argsMap += mapOf(
+                    "complexity" to when (filter.complexity) {
+                        PostComplexity.Low -> "easy"
+                        PostComplexity.Medium -> "medium"
+                        PostComplexity.High -> "hard"
+                        else -> throw IllegalArgumentException("mapping of this complexity is not supported")
+                    }
+                )
+            }
+            argsMap += mapOf("page" to page.toString())
+            ArticlesListController.getArticlesSnippets("articles", argsMap)?.let {
+                if (page > 1) {
+                    articles.value?.let { firstArticles ->
+                        articles.postValue(firstArticles + it)
+                    }
+                } else {
+                    articles.postValue(it)
+                }
+            }
+            isLoadingArticles.postValue(false)
+
+
+        }
+    }
+
+    fun ArticlesFilterDialogResult.hasChanged(newFilter: ArticlesFilterDialogResult): Boolean {
         if (showLast != newFilter.showLast)
             return true
         if (complexity != newFilter.complexity)
             return true
-        if (showLast){
+        if (showLast) {
             return minRating != newFilter.minRating
-        }
-        else
+        } else
             return period != newFilter.period
     }
 
@@ -216,6 +282,7 @@ fun ArticlesScreen(
         Column(
             Modifier.padding(it)
         ) {
+            val commonCoroutineScope = rememberCoroutineScope()
             val myFeedLazyListState = rememberLazyListState()
             val articlesLazyListState = rememberLazyListState()
             val newsLazyListState = rememberLazyListState()
@@ -236,24 +303,34 @@ fun ArticlesScreen(
 
                         var isUpdatingInProgress = remember { mutableStateOf(false) }
 
+
+
                         val filter by viewModel.articlesFilter.observeAsState()
 
                         var showFilterDialog by remember { mutableStateOf(false) }
-                        if (showFilterDialog && filter != null){
-                            FilterDialog(defaultValues = filter!!, onDismiss = { showFilterDialog = false }, onDone = {
-                                updateFeedCoroutineScope.launch {
-                                    articlesLazyListState.scrollToItem(0)
+                        if (showFilterDialog && filter != null) {
+                            FilterDialog(
+                                defaultValues = filter!!,
+                                onDismiss = { showFilterDialog = false },
+                                onDone = {
+                                    updateFeedCoroutineScope.launch {
+                                        articlesLazyListState.scrollToItem(0)
 
-                                }
-                                viewModel.updateFilter(it)
-                                showFilterDialog = false
-                            })
+                                    }
+                                    viewModel.updateFilter(it)
+                                    showFilterDialog = false
+                                })
                         }
+                        var refreshing by remember { mutableStateOf(false) }
 
                         if (articles != null) {
+                            LaunchedEffect(key1 = viewModel.isLoadingArticles.value, block = {
+                                if (viewModel.isLoadingArticles.value == false){
+                                    refreshing = false
+                                }
+                            })
 
 
-                            var refreshing by remember { mutableStateOf(false) }
                             CollapsingContent(
                                 collapsingContent = {
                                     Box(modifier = Modifier.fillMaxWidth()) {
@@ -277,23 +354,7 @@ fun ArticlesScreen(
                                     verticalArrangement = Arrangement.spacedBy(8.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally,
                                     contentPadding = PaddingValues(8.dp),
-                                    onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
-                                            ArticlesListController
-                                                .getArticlesSnippets(
-                                                    "articles",
-                                                    mapOf(
-                                                        "sort" to "rating",
-                                                        "page" to it.toString()
-                                                    )
-                                                )?.let {
-                                                    viewModel.articles.postValue(articles!! + it)
-
-                                                }
-
-                                        }
-
-                                    },
+                                    onNextPageLoad = viewModel::loadArticles,
                                     page = pageNumber,
                                     refreshing = refreshing,
                                     isInProgress = isUpdatingInProgress,
@@ -301,17 +362,9 @@ fun ArticlesScreen(
                                         updateFeedCoroutineScope.launch(Dispatchers.IO) {
                                             refreshing = true
                                             pageNumber.value = 1
-                                            val newArticlesList =
-                                                ArticlesListController.getArticlesSnippets(
-                                                    "articles",
-                                                    mapOf("sort" to "rating")
-                                                )
-                                            if (newArticlesList != null) {
-                                                viewModel.articles.postValue(newArticlesList)
-                                                readyToScrollUp.value = true
-
-                                            }
-                                            refreshing = false
+                                            viewModel.loadArticles(1)
+                                            //readyToScrollUp.value = true
+//                                            refreshing = false
                                         }
                                     },
                                     readyToScrollUpAfterRefresh = readyToScrollUp
@@ -332,17 +385,7 @@ fun ArticlesScreen(
                             }
                             LaunchedEffect(key1 = isAuthorized) {
                                 if (!viewModel.articles.isInitialized) {
-                                    launch(Dispatchers.IO) {
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf("sort" to "rating")
-                                        )?.let {
-                                            viewModel.articles.postValue(
-                                                it
-                                            )
-                                        }
-
-                                    }
+                                    viewModel.loadArticles(1)
                                 }
                             }
                         }
@@ -443,7 +486,7 @@ fun ArticlesScreen(
                                 lazyListState = hubsLazyListState,
                                 data = hubs!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         HubsListController.get(
                                             "hubs",
                                             mapOf("page" to it.toString())
@@ -478,7 +521,7 @@ fun ArticlesScreen(
                                 lazyListState = authorsLazyListState,
                                 data = authors!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         UsersListController.get(
                                             "users",
                                             mapOf("page" to it.toString())
@@ -512,7 +555,7 @@ fun ArticlesScreen(
                                 lazyListState = companiesLazyListState,
                                 data = companies!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         CompaniesListController.get(
                                             "companies",
                                             mapOf("order" to "rating", "page" to it.toString())
@@ -558,7 +601,7 @@ fun ArticlesScreen(
                                     lazyListState = myFeedLazyListState,
                                     data = articles!!,
                                     onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
                                             ArticlesListController.getArticlesSnippets(
                                                 "articles",
                                                 mapOf(

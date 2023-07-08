@@ -42,6 +42,7 @@ import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.rememberCoroutineScope
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +85,7 @@ fun HubScreen(
     onBackClick: () -> Unit
 ) {
     var viewModel = viewModel<HubScreenViewModel>(viewModelStoreOwner)
+    val commonCoroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -172,7 +174,7 @@ fun HubScreen(
                             PagedHabrSnippetsColumn(
                                 data = authors,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         viewModel.authors.postValue(
                                             authors + UsersListController.get("hubs/$alias/authors", mapOf("page" to it.toString()))!!
                                         )
@@ -209,7 +211,7 @@ fun HubScreen(
                             PagedHabrSnippetsColumn(
                                 data = companies,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         viewModel.companies.postValue(
                                             companies + CompaniesListController.get("hubs/$alias/companies", mapOf("page" to it.toString()))!!
                                         )

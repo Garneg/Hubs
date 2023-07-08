@@ -142,7 +142,7 @@ fun UserScreen(
 ) {
     val viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
     val pagerState = rememberPagerState(initialPage = initialPage.ordinal)
-
+    val commonCoroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             TopAppBar(
@@ -248,7 +248,7 @@ fun UserScreen(
                                 PagedHabrSnippetsColumn(
                                     data = articles!!,
                                     onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
                                             ArticlesListController.getArticlesSnippets(
                                                 "articles",
                                                 mapOf(
@@ -295,7 +295,7 @@ fun UserScreen(
                                 PagedHabrSnippetsColumn(
                                     data = userComments!!,
                                     onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
                                             CommentsListController.getCommentsSnippets(
                                                 "users/${alias}/comments",
                                                 mapOf("page" to it.toString())
@@ -342,7 +342,7 @@ fun UserScreen(
                                 PagedHabrSnippetsColumn(
                                     data = bookmarks!!,
                                     onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
                                             ArticlesListController.getArticlesSnippets(
                                                 path = "articles",
                                                 args = mapOf(
@@ -393,7 +393,7 @@ fun UserScreen(
                                 PagedHabrSnippetsColumn(
                                     data = followers!!,
                                     onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
                                             UsersListController.get(
                                                 "users/${alias}/followers",
                                                 mapOf("page" to it.toString())
@@ -431,7 +431,7 @@ fun UserScreen(
                                 PagedHabrSnippetsColumn(
                                     data = follows!!,
                                     onNextPageLoad = {
-                                        launch(Dispatchers.IO) {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
                                             UsersListController.get(
                                                 "users/${alias}/followed",
                                                 mapOf("page" to it.toString())

@@ -28,7 +28,7 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
     contentPadding: PaddingValues = PaddingValues(8.dp),
     verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
-    onNextPageLoad: suspend CoroutineScope.(pageNumber: Int) -> Unit,
+    onNextPageLoad: (pageNumber: Int) -> Unit,
     nextPageLoadingIndicator: @Composable () -> Unit = {
         Box(modifier = Modifier.fillMaxWidth()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

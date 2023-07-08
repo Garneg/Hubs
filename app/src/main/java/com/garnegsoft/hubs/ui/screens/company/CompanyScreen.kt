@@ -60,6 +60,8 @@ fun CompanyScreen(
     val employees by viewModel.employees.observeAsState()
     val news by viewModel.blogNews.observeAsState()
     val followers by viewModel.followers.observeAsState()
+
+    val commonCoroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             val context = LocalContext.current
@@ -123,7 +125,7 @@ fun CompanyScreen(
                             PagedHabrSnippetsColumn(
                                 data = articles!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         ArticlesListController.getArticlesSnippets(
                                             "articles",
                                             mapOf("company" to alias, "page" to it.toString())
@@ -162,7 +164,7 @@ fun CompanyScreen(
                             PagedHabrSnippetsColumn(
                                 data = news!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         ArticlesListController.getArticlesSnippets(
                                             "articles",
                                             mapOf(
@@ -209,7 +211,7 @@ fun CompanyScreen(
                             PagedHabrSnippetsColumn(
                                 data = followers!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         UsersListController.get("companies/$alias/fans/all",
                                         mapOf("page" to it.toString()))?.let{
                                             viewModel.followers.postValue(
@@ -240,7 +242,7 @@ fun CompanyScreen(
                             PagedHabrSnippetsColumn(
                                 data = employees!!,
                                 onNextPageLoad = {
-                                    launch(Dispatchers.IO) {
+                                    commonCoroutineScope.launch(Dispatchers.IO) {
                                         UsersListController.get("companies/$alias/workers/all",
                                         mapOf("page" to it.toString()))?.let {
                                             viewModel.employees.postValue(

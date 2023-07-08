@@ -254,8 +254,6 @@ fun SearchScreen(
                     when (it) {
                         0 -> {
                             if (articlesList != null) {
-
-
                                 PagedHabrSnippetsColumn(
                                     modifier = Modifier.fillMaxHeight(),
                                     data = articlesList!!,
