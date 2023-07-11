@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.MutableLiveData
@@ -306,6 +307,36 @@ fun ArticlesScreen(
 
 
                         val filter by viewModel.articlesFilter.observeAsState()
+                        val filterTitle = remember(filter) {
+                            filter?.let {
+                                var result = ""
+                                if (it.showLast) {
+                                    if (it.minRating == -1){
+                                        result = "Все подряд"
+                                    } else {
+                                        result = "Новые с рейтингом ≥${it.minRating}"
+                                    }
+                                } else {
+                                    result += "Лучшие за "
+                                    when(it.period){
+                                        FilterPeriod.Day -> result += "сутки"
+                                        FilterPeriod.Week -> result += "неделю"
+                                        FilterPeriod.Month -> result += "месяц"
+                                        FilterPeriod.Year -> result += "год"
+                                        FilterPeriod.AllTime -> result += "все время"
+
+                                    }
+                                }
+                                when(it.complexity){
+                                    PostComplexity.High -> result += ", сложные"
+                                    PostComplexity.Medium -> result += ", средние"
+                                    PostComplexity.Low -> result += ", простые"
+
+                                    else -> {}
+                                }
+                                result
+                            } ?: ""
+                        }
 
                         var showFilterDialog by remember { mutableStateOf(false) }
                         if (showFilterDialog && filter != null) {
@@ -340,10 +371,12 @@ fun ArticlesScreen(
 //                                                .clip(RoundedCornerShape(26.dp))
                                                 .background(MaterialTheme.colors.surface)
                                                 .clickable { showFilterDialog = true }
-                                                .padding(8.dp),
-                                            text = "filter"
+                                                .padding(12.dp),
+                                            text = filterTitle,
+                                            style = MaterialTheme.typography.body2,
+                                            fontWeight = FontWeight.W600
                                         )
-
+                                        Divider(modifier = Modifier.align(Alignment.BottomCenter))
                                     }
                                 },
                                 doCollapse = !isUpdatingInProgress.value
