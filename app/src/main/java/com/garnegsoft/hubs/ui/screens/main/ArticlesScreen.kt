@@ -304,8 +304,6 @@ fun ArticlesScreen(
 
                         var isUpdatingInProgress = remember { mutableStateOf(false) }
 
-
-
                         val filter by viewModel.articlesFilter.observeAsState()
                         val filterTitle = remember(filter) {
                             filter?.let {
@@ -627,8 +625,6 @@ fun ArticlesScreen(
                             var scrollAfterRefresh = remember { mutableStateOf(false) }
                             val articles by viewModel.myFeedArticles.observeAsState()
                             if (articles != null) {
-
-
                                 PagedRefreshableHabrSnippetsColumn(
                                     lazyListState = myFeedLazyListState,
                                     data = articles!!,

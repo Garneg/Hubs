@@ -35,85 +35,6 @@ import com.garnegsoft.hubs.ui.common.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class UserScreenViewModel : ViewModel() {
-    val user = MutableLiveData<User>()
-    val articles = MutableLiveData<HabrList<ArticleSnippet>>()
-    val comments = MutableLiveData<HabrList<CommentSnippet>>()
-    val bookmarks = MutableLiveData<HabrList<ArticleSnippet>>()
-    val followers = MutableLiveData<HabrList<UserSnippet>>()
-    val follow = MutableLiveData<HabrList<UserSnippet>>()
-
-    private val _note = MutableLiveData<User.Note>()
-    val note: LiveData<User.Note> get() = _note
-    fun loadNote() {
-        viewModelScope.launch(Dispatchers.IO) {
-            user.value?.let {
-                UserController.note(it.alias)?.let {
-                    _note.postValue(it)
-                }
-
-            }
-        }
-
-    }
-
-    private val _subscribedHubs = MutableLiveData<HabrList<HubSnippet>>()
-    val subscribedHubs: LiveData<HabrList<HubSnippet>> get() = _subscribedHubs
-
-    private var subscribedHubsPage = 1
-    val moreHubsAvailable: Boolean
-        get() {
-            if (_subscribedHubs.isInitialized)
-                return (subscribedHubs.value?.pagesCount ?: 1) >= subscribedHubsPage
-
-            return true
-        }
-
-    fun loadSubscribedHubs() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (subscribedHubsPage == 1) {
-                HubsListController.get(
-                    "users/${user.value?.alias}/subscriptions/hubs"
-                )?.let {
-                    _subscribedHubs.postValue(it)
-                    subscribedHubsPage++
-                }
-            } else {
-                if (subscribedHubs.isInitialized && moreHubsAvailable)
-                    HubsListController.get(
-                        "users/${user.value?.alias}/subscriptions/hubs",
-                        mapOf("page" to subscribedHubsPage.toString())
-                    )?.let {
-                        _subscribedHubs.postValue(subscribedHubs.value!! + it)
-                        subscribedHubsPage++
-                    }
-            }
-        }
-    }
-
-    private var _whoIs = MutableLiveData<User.WhoIs>()
-    val whoIs: LiveData<User.WhoIs> get() = _whoIs
-
-    fun loadWhoIs() {
-        viewModelScope.launch(Dispatchers.IO) {
-            if (user.value?.relatedData != null) {
-                UserController.whoIs(user.value!!.alias)?.let {
-                    _whoIs.postValue(it)
-                }
-            }
-        }
-    }
-
-    fun loadUserProfile(alias: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            UserController.get(alias)?.let {
-                user.postValue(it)
-            }
-        }
-    }
-
-
-}
 
 enum class UserScreenPages {
     Profile,
@@ -181,288 +102,293 @@ fun UserScreen(
             viewModel.loadUserProfile(alias)
         }
         viewModel.user.observeAsState().value?.let { usr ->
-            val tabs = listOf(
-                "Профиль",
-                "Публикации${
+            var tabs = mapOf<String, @Composable () -> Unit>(
+                "Профиль" to {
+                    val user by viewModel.user.observeAsState()
+                    if (user != null) {
+
+                        val note by viewModel.note.observeAsState()
+                        val hubs by viewModel.subscribedHubs.observeAsState()
+                        val whoIs by viewModel.whoIs.observeAsState()
+
+                        if (hubs != null)
+                            UserProfile(
+                                user!!,
+                                isAppUser,
+                                onLogout,
+                                onHubClicked,
+                                onCompanyClick,
+                                viewModel,
+                            )
+                        else
+                            LaunchedEffect(key1 = Unit, block = {
+                                viewModel.loadNote()
+                                viewModel.loadSubscribedHubs()
+                                viewModel.loadWhoIs()
+                            })
+                    }
+                })
+            if (usr.articlesCount > 0) {
+                tabs += "Публикации${
                     if (viewModel.user.value!!.articlesCount > 0) " " + formatLongNumbers(
                         viewModel.user.value!!.articlesCount
                     ) else ""
-                }",
-                "Комментарии${
+                }" to {
+                    val articles by viewModel.articles.observeAsState()
+
+                    if (articles != null) {
+                        PagedHabrSnippetsColumn(
+                            data = articles!!,
+                            onNextPageLoad = {
+                                commonCoroutineScope.launch(Dispatchers.IO) {
+                                    ArticlesListController.getArticlesSnippets(
+                                        "articles",
+                                        mapOf(
+                                            "user" to viewModel.user.value!!.alias,
+                                            "page" to it.toString()
+                                        )
+                                    )?.let {
+                                        viewModel.articles.postValue(
+                                            articles!! + it
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            ArticleCard(
+                                article = it,
+                                onClick = { onArticleClicked(it.id) },
+                                onCommentsClick = { onCommentsClicked(it.id) },
+                                onAuthorClick = { onUserClicked(it.author!!.alias) }
+                            )
+                        }
+                    } else {
+                        if (!viewModel.articles.isInitialized){
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(
+                                    Alignment.Center))
+                            }
+                        }
+                        LaunchedEffect(key1 = Unit, block = {
+                            launch(Dispatchers.IO) {
+                                viewModel.articles.postValue(
+                                    ArticlesListController.getArticlesSnippets(
+                                        "articles",
+                                        mapOf("user" to viewModel.user.value!!.alias)
+                                    )
+                                )
+                            }
+                        })
+                    }
+                }
+            }
+            if (usr.commentsCount > 0) {
+                tabs += "Комментарии${
                     if (viewModel.user.value!!.commentsCount > 0) " " + formatLongNumbers(
                         viewModel.user.value!!.commentsCount
                     ) else ""
-                }",
-                "Закладки${
+                }" to {
+                    val userComments by viewModel.comments.observeAsState()
+                    if (userComments != null) {
+                        PagedHabrSnippetsColumn(
+                            data = userComments!!,
+                            onNextPageLoad = {
+                                commonCoroutineScope.launch(Dispatchers.IO) {
+                                    CommentsListController.getCommentsSnippets(
+                                        "users/${alias}/comments",
+                                        mapOf("page" to it.toString())
+                                    )?.let {
+                                        viewModel.comments.postValue(
+                                            userComments!! + it
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            CommentCard(
+                                comment = it,
+                                onCommentClick = {
+                                    onCommentClicked(
+                                        it.parentPost.id,
+                                        it.id
+                                    )
+                                },
+                                onAuthorClick = { onUserClicked(it.author.alias) },
+                                onParentPostClick = { onArticleClicked(it.parentPost.id) }
+                            )
+                        }
+                    } else {
+                        if (!viewModel.comments.isInitialized){
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(
+                                    Alignment.Center))
+                            }
+                        }
+                        LaunchedEffect(key1 = Unit, block = {
+                            launch(Dispatchers.IO) {
+                                viewModel.comments.postValue(
+                                    CommentsListController.getCommentsSnippets("users/${alias}/comments")
+                                )
+                            }
+                        })
+                    }
+                }
+            }
+            if (usr.favoritesCount > 0) {
+                tabs += "Закладки${
                     if (viewModel.user.value!!.favoritesCount > 0) " " + formatLongNumbers(
                         viewModel.user.value!!.favoritesCount
                     ) else ""
-                }",
-                "Подписчики${
+                }" to {
+                    val bookmarks by viewModel.bookmarks.observeAsState()
+
+                    if (bookmarks != null) {
+                        PagedHabrSnippetsColumn(
+                            data = bookmarks!!,
+                            onNextPageLoad = {
+                                commonCoroutineScope.launch(Dispatchers.IO) {
+                                    ArticlesListController.getArticlesSnippets(
+                                        path = "articles",
+                                        args = mapOf(
+                                            "user" to alias,
+                                            "user_bookmarks" to "true",
+                                            "page" to it.toString()
+                                        )
+                                    )?.let {
+                                        viewModel.bookmarks.postValue(bookmarks!! + it)
+                                    }
+                                }
+                            }
+                        ) {
+                            ArticleCard(
+                                article = it,
+                                onClick = { onArticleClicked(it.id) },
+                                onCommentsClick = { onCommentsClicked(it.id) },
+                                onAuthorClick = {
+                                    onUserClicked(it.author!!.alias)
+                                }
+                            )
+                        }
+                    } else {
+                        if (!viewModel.bookmarks.isInitialized){
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(
+                                    Alignment.Center))
+                            }
+                        }
+                        LaunchedEffect(key1 = Unit, block = {
+                            launch(Dispatchers.IO) {
+                                ArticlesListController.getArticlesSnippets(
+                                    path = "articles",
+                                    args = mapOf(
+                                        "user" to alias,
+                                        "user_bookmarks" to "true"
+                                    )
+                                )?.let {
+                                    viewModel.bookmarks.postValue(it)
+                                }
+                            }
+                        })
+                    }
+                }
+            }
+            if (usr.followersCount > 0) {
+                tabs += "Подписчики${
                     if (viewModel.user.value!!.followersCount > 0) " " + formatLongNumbers(
                         viewModel.user.value!!.followersCount
                     ) else ""
-                }",
-                "Подписки${
+                }" to {
+                    val followers by viewModel.followers.observeAsState()
+                    if (followers != null) {
+                        PagedHabrSnippetsColumn(
+                            data = followers!!,
+                            onNextPageLoad = {
+                                commonCoroutineScope.launch(Dispatchers.IO) {
+                                    UsersListController.get(
+                                        "users/${alias}/followers",
+                                        mapOf("page" to it.toString())
+                                    )?.let {
+                                        viewModel.followers.postValue(
+                                            followers!! + it
+                                        )
+                                    }
+
+                                }
+                            }
+                        ) {
+                            UserCard(user = it, onClick = { onUserClicked(it.alias) })
+                        }
+                    } else {
+                        if (!viewModel.followers.isInitialized){
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(
+                                    Alignment.Center))
+                            }
+                        }
+                        LaunchedEffect(key1 = Unit, block = {
+                            launch(Dispatchers.IO) {
+                                viewModel.followers.postValue(
+                                    UsersListController.get("users/${alias}/followers")
+                                )
+                            }
+                        })
+                    }
+                }
+            }
+            if (usr.followsCount > 0) {
+                tabs += "Подписки${
                     if (viewModel.user.value!!.followsCount > 0) " " + formatLongNumbers(
                         viewModel.user.value!!.followsCount
                     ) else ""
-                }"
-            )
+                }" to {
+                    val follows by viewModel.follow.observeAsState()
+
+                    if (follows != null) {
+                        PagedHabrSnippetsColumn(
+                            data = follows!!,
+                            onNextPageLoad = {
+                                commonCoroutineScope.launch(Dispatchers.IO) {
+                                    UsersListController.get(
+                                        "users/${alias}/followed",
+                                        mapOf("page" to it.toString())
+                                    )?.let {
+                                        viewModel.follow.postValue(
+                                            follows!! + it
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            UserCard(user = it, onClick = { onUserClicked(it.alias) })
+                        }
+                    } else {
+                        if (!viewModel.follow.isInitialized){
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                CircularProgressIndicator(modifier = Modifier.align(
+                                    Alignment.Center))
+                            }
+                        }
+                        LaunchedEffect(key1 = Unit, block = {
+                            launch(Dispatchers.IO) {
+                                viewModel.follow.postValue(
+                                    UsersListController.get("users/${alias}/followed")
+                                )
+                            }
+                        })
+                    }
+
+                }
+            }
+
             Column(modifier = Modifier.padding(it)) {
-                HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
+                if (tabs.size > 1) {
+                    HabrScrollableTabRow(pagerState = pagerState, tabs = tabs.keys.toList())
+                }
                 HorizontalPager(
                     state = pagerState,
-                    pageCount = 6
+                    pageCount = tabs.size
                 ) { pageIndex ->
-                    when (pageIndex) {
-                        0 -> {
-                            val user by viewModel.user.observeAsState()
-                            if (user != null) {
-
-                                val note by viewModel.note.observeAsState()
-                                val hubs by viewModel.subscribedHubs.observeAsState()
-                                val whoIs by viewModel.whoIs.observeAsState()
-
-                                if (hubs != null)
-                                    UserProfile(
-                                        user!!,
-                                        isAppUser,
-                                        onLogout,
-                                        onHubClicked,
-                                        onCompanyClick,
-                                        viewModel,
-                                    )
-                                else
-                                    LaunchedEffect(key1 = Unit, block = {
-                                        viewModel.loadNote()
-                                        viewModel.loadSubscribedHubs()
-                                        viewModel.loadWhoIs()
-                                    })
-                            }
-                        }
-                        1 -> {
-                            val articles by viewModel.articles.observeAsState()
-
-                            if (articles != null) {
-                                PagedHabrSnippetsColumn(
-                                    data = articles!!,
-                                    onNextPageLoad = {
-                                        commonCoroutineScope.launch(Dispatchers.IO) {
-                                            ArticlesListController.getArticlesSnippets(
-                                                "articles",
-                                                mapOf(
-                                                    "user" to viewModel.user.value!!.alias,
-                                                    "page" to it.toString()
-                                                )
-                                            )?.let {
-                                                viewModel.articles.postValue(
-                                                    articles!! + it
-                                                )
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    ArticleCard(
-                                        article = it,
-                                        onClick = { onArticleClicked(it.id) },
-                                        onCommentsClick = { onCommentsClicked(it.id) },
-                                        onAuthorClick = { onUserClicked(it.author!!.alias) }
-                                    )
-                                }
-                            } else {
-                                if (!viewModel.articles.isInitialized){
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator(modifier = Modifier.align(
-                                            Alignment.Center))
-                                    }
-                                }
-                                LaunchedEffect(key1 = Unit, block = {
-                                    launch(Dispatchers.IO) {
-                                        viewModel.articles.postValue(
-                                            ArticlesListController.getArticlesSnippets(
-                                                "articles",
-                                                mapOf("user" to viewModel.user.value!!.alias)
-                                            )
-                                        )
-                                    }
-                                })
-                            }
-                        }
-                        2 -> {
-                            val userComments by viewModel.comments.observeAsState()
-                            if (userComments != null) {
-                                PagedHabrSnippetsColumn(
-                                    data = userComments!!,
-                                    onNextPageLoad = {
-                                        commonCoroutineScope.launch(Dispatchers.IO) {
-                                            CommentsListController.getCommentsSnippets(
-                                                "users/${alias}/comments",
-                                                mapOf("page" to it.toString())
-                                            )?.let {
-                                                viewModel.comments.postValue(
-                                                    userComments!! + it
-                                                )
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    CommentCard(
-                                        comment = it,
-                                        onCommentClick = {
-                                            onCommentClicked(
-                                                it.parentPost.id,
-                                                it.id
-                                            )
-                                        },
-                                        onAuthorClick = { onUserClicked(it.author.alias) },
-                                        onParentPostClick = { onArticleClicked(it.parentPost.id) }
-                                    )
-                                }
-                            } else {
-                                if (!viewModel.comments.isInitialized){
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator(modifier = Modifier.align(
-                                            Alignment.Center))
-                                    }
-                                }
-                                LaunchedEffect(key1 = Unit, block = {
-                                    launch(Dispatchers.IO) {
-                                        viewModel.comments.postValue(
-                                            CommentsListController.getCommentsSnippets("users/${alias}/comments")
-                                        )
-                                    }
-                                })
-                            }
-                        }
-                        3 -> {
-                            val bookmarks by viewModel.bookmarks.observeAsState()
-
-                            if (bookmarks != null) {
-                                PagedHabrSnippetsColumn(
-                                    data = bookmarks!!,
-                                    onNextPageLoad = {
-                                        commonCoroutineScope.launch(Dispatchers.IO) {
-                                            ArticlesListController.getArticlesSnippets(
-                                                path = "articles",
-                                                args = mapOf(
-                                                    "user" to alias,
-                                                    "user_bookmarks" to "true",
-                                                    "page" to it.toString()
-                                                )
-                                            )?.let {
-                                                viewModel.bookmarks.postValue(bookmarks!! + it)
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    ArticleCard(
-                                        article = it,
-                                        onClick = { onArticleClicked(it.id) },
-                                        onCommentsClick = { onCommentsClicked(it.id) },
-                                        onAuthorClick = {
-                                            onUserClicked(it.author!!.alias)
-                                        }
-                                    )
-                                }
-                            } else {
-                                if (!viewModel.bookmarks.isInitialized){
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator(modifier = Modifier.align(
-                                            Alignment.Center))
-                                    }
-                                }
-                                LaunchedEffect(key1 = Unit, block = {
-                                    launch(Dispatchers.IO) {
-                                        ArticlesListController.getArticlesSnippets(
-                                            path = "articles",
-                                            args = mapOf(
-                                                "user" to alias,
-                                                "user_bookmarks" to "true"
-                                            )
-                                        )?.let {
-                                            viewModel.bookmarks.postValue(it)
-                                        }
-                                    }
-                                })
-                            }
-                        }
-                        4 -> {
-                            val followers by viewModel.followers.observeAsState()
-                            if (followers != null) {
-                                PagedHabrSnippetsColumn(
-                                    data = followers!!,
-                                    onNextPageLoad = {
-                                        commonCoroutineScope.launch(Dispatchers.IO) {
-                                            UsersListController.get(
-                                                "users/${alias}/followers",
-                                                mapOf("page" to it.toString())
-                                            )?.let {
-                                                viewModel.followers.postValue(
-                                                    followers!! + it
-                                                )
-                                            }
-
-                                        }
-                                    }
-                                ) {
-                                    UserCard(user = it, onClick = { onUserClicked(it.alias) })
-                                }
-                            } else {
-                                if (!viewModel.followers.isInitialized){
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator(modifier = Modifier.align(
-                                            Alignment.Center))
-                                    }
-                                }
-                                LaunchedEffect(key1 = Unit, block = {
-                                    launch(Dispatchers.IO) {
-                                        viewModel.followers.postValue(
-                                            UsersListController.get("users/${alias}/followers")
-                                        )
-                                    }
-                                })
-                            }
-                        }
-                        5 -> {
-                            val follows by viewModel.follow.observeAsState()
-
-                            if (follows != null) {
-                                PagedHabrSnippetsColumn(
-                                    data = follows!!,
-                                    onNextPageLoad = {
-                                        commonCoroutineScope.launch(Dispatchers.IO) {
-                                            UsersListController.get(
-                                                "users/${alias}/followed",
-                                                mapOf("page" to it.toString())
-                                            )?.let {
-                                                viewModel.follow.postValue(
-                                                    follows!! + it
-                                                )
-                                            }
-                                        }
-                                    }
-                                ) {
-                                    UserCard(user = it, onClick = { onUserClicked(it.alias) })
-                                }
-                            } else {
-                                if (!viewModel.follow.isInitialized){
-                                    Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator(modifier = Modifier.align(
-                                            Alignment.Center))
-                                    }
-                                }
-                                LaunchedEffect(key1 = Unit, block = {
-                                    launch(Dispatchers.IO) {
-                                        viewModel.follow.postValue(
-                                            UsersListController.get("users/${alias}/followed")
-                                        )
-                                    }
-                                })
-                            }
-
-                        }
-                    }
+                    tabs.values.elementAt(pageIndex).invoke()
                 }
             }
         } ?: Box(modifier = Modifier
