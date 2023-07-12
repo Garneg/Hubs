@@ -361,20 +361,19 @@ fun ArticlesScreen(
                                 }
                             })
 
-
                             CollapsingContent(
                                 collapsingContent = {
                                     Box(modifier = Modifier.fillMaxWidth()) {
                                         Text(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-//                                                .clip(RoundedCornerShape(26.dp))
                                                 .background(MaterialTheme.colors.surface)
                                                 .clickable { showFilterDialog = true }
                                                 .padding(12.dp),
                                             text = filterTitle,
                                             style = MaterialTheme.typography.body2,
-                                            fontWeight = FontWeight.W600
+                                            fontWeight = FontWeight.W500,
+                                            color = MaterialTheme.colors.onSurface.copy(0.75f)
                                         )
                                         Divider(modifier = Modifier.align(Alignment.BottomCenter))
                                     }
