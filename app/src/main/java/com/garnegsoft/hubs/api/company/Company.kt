@@ -19,9 +19,9 @@ class Company(
     class Statistics(
         val subscribersCount: Int,
         val rating: Float,
-        val postsCount: Int,
+        val articlesCount: Int,
         val newsCount: Int,
-        val employees: Int,
+        val employeesCount: Int,
     )
 
     class RelatedData(val isSubscribed: Boolean)

@@ -53,9 +53,9 @@ class CompanyController {
                     statistics = Company.Statistics(
                         subscribersCount = it.statistics.subscribersCount,
                         rating = it.statistics.rating,
-                        postsCount = it.statistics.postsCount,
+                        articlesCount = it.statistics.postsCount,
                         newsCount = it.statistics.newsCount,
-                        employees = it.statistics.employeesCount
+                        employeesCount = it.statistics.employeesCount
                     ),
                     branding = Company.Branding(bannerImageUrl = it.settings.branding?.imageUrl, bannerLinkUrl = it.settings.branding?.linkUrl),
                     relatedData = it.relatedData?.let { Company.RelatedData(it.isSubscribed) }
