@@ -93,10 +93,12 @@ fun CompanyScreen(
         }
     ) {
         LaunchedEffect(key1 = Unit, block = {
-            if (!viewModel.companyProfile.isInitialized) {
-                viewModel.companyProfile.postValue(
-                    CompanyController.get(alias)
-                )
+            launch(Dispatchers.IO) {
+                if (!viewModel.companyProfile.isInitialized) {
+                    viewModel.companyProfile.postValue(
+                        CompanyController.get(alias)
+                    )
+                }
             }
         })
         companyProfile?.let { companyProfile ->
