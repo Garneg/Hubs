@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
@@ -51,6 +52,7 @@ fun ArticleContent(
     onAuthorClicked: () -> Unit,
     onHubClicked: (alias: String) -> Unit,
     onCompanyClick: (alias: String) -> Unit,
+    onArticleClick: (id: Int) -> Unit,
     onViewImageRequest: (url: String) -> Unit
 ) {
     val viewModel = viewModel<ArticleScreenViewModel>()
@@ -58,7 +60,7 @@ fun ArticleContent(
 
     Row {
         val flingSpec = rememberSplineBasedDecay<Float>()
-        var contentNodes: List<(@Composable (SpanStyle) -> Unit)?> by remember {
+        var contentNodes: List<(@Composable (SpanStyle) -> Unit)?> by rememberSaveable {
             mutableStateOf(
                 emptyList()
             )
@@ -307,22 +309,35 @@ fun ArticleContent(
                         ),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        var readMoreMode by remember { mutableStateOf(ReadMoreMode.MostReading) }
+
                         Row(
                             modifier = Modifier.horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            HubsFilterChip(selected = true, onClick = { /*TODO*/ }) {
+                            HubsFilterChip(
+                                selected = readMoreMode == ReadMoreMode.MostReading,
+                                onClick = { readMoreMode = ReadMoreMode.MostReading }) {
                                 Text(text = "Читают сейчас")
                             }
-                            HubsFilterChip(selected = false, onClick = { /*TODO*/ }) {
+                            if (article.isCorporative) {
+                                HubsFilterChip(
+                                    selected = readMoreMode == ReadMoreMode.Blog,
+                                    onClick = { readMoreMode = ReadMoreMode.Blog }) {
+                                    Text(text = "Блог")
+                                }
+                            }
+                            HubsFilterChip(
+                                selected = readMoreMode == ReadMoreMode.News,
+                                onClick = { readMoreMode = ReadMoreMode.News }) {
                                 Text(text = "Новости")
                             }
-                            HubsFilterChip(selected = false, onClick = { /*TODO*/ }) {
+                            HubsFilterChip(
+                                selected = readMoreMode == ReadMoreMode.Similar,
+                                onClick = { readMoreMode = ReadMoreMode.Similar }) {
                                 Text(text = "Похожие")
                             }
-                            HubsFilterChip(selected = false, onClick = { /*TODO*/ }) {
-                                Text(text = "Блог")
-                            }
+
                         }
 
                         viewModel.mostReadingArticles.observeAsState().value?.list?.take(5)
@@ -330,7 +345,7 @@ fun ArticleContent(
                                 Box(modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
                                     .background(MaterialTheme.colors.onBackground.copy(0.0f))
-                                    .clickable { }
+                                    .clickable { onArticleClick(it.id) }
                                     .padding(bottom = 8.dp)
                                     .padding(8.dp)
                                 ) {
@@ -352,11 +367,23 @@ fun ArticleContent(
             )
             val barHeight =
                 this.size.height.roundToInt() / (state.layoutInfo.totalItemsCount / state.layoutInfo.visibleItemsInfo.size).toFloat()
-            drawRoundRect(color = Color.LightGray, topLeft = topLeft, size = Size(width = 3f * density.density, height = barHeight), cornerRadius = CornerRadius(400f, 400f))
+            drawRoundRect(
+                color = Color.LightGray,
+                topLeft = topLeft,
+                size = Size(width = 3f * density.density, height = barHeight),
+                cornerRadius = CornerRadius(400f, 400f)
+            )
 
         })
     }
 
+}
+
+enum class ReadMoreMode {
+    MostReading,
+    News,
+    Similar,
+    Blog
 }
 
 //object : FlingBehavior {

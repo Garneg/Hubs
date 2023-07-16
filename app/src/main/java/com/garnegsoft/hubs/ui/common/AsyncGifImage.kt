@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.ImageLoader
+import coil.compose.AsyncImage
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.decode.GifDecoder
@@ -38,6 +39,7 @@ fun AsyncGifImage(
             ImageRequest.Builder(context)
                 .data(model)
                 .size(Size.ORIGINAL)
+
                 .build(),
             imageLoader = imageLoader,
             onState = onState

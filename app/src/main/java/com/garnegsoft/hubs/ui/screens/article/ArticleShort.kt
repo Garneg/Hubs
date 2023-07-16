@@ -5,6 +5,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -38,14 +39,14 @@ fun ArticleShort(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
         ) {
-            Row() {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(id = R.drawable.rating),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp),
 
                     )
-                Spacer(modifier = Modifier.padding(2.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 if (article.statistics.score > 0) {
                     Text(
                         text = '+' + article.statistics.score.toString(),
@@ -64,24 +65,24 @@ fun ArticleShort(
                     }
                 }
             }
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(id = R.drawable.views_icon),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.padding(2.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = formatLongNumbers(article.statistics.readingCount),
                 )
             }
-            Row {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     painter = painterResource(id = R.drawable.comments_icon),
                     contentDescription = null,
                     modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.padding(2.dp))
+                Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = formatLongNumbers(article.statistics.commentsCount),
                     overflow = TextOverflow.Clip,

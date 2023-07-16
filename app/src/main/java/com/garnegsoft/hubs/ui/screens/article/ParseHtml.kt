@@ -41,6 +41,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.compose.AsyncImagePainter
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -366,7 +367,7 @@ fun parseElement(
         }
         else null
         "a" -> if (element.hasClass("anchor"))
-        { localSpanStyle -> } else null
+            { localSpanStyle -> } else null
         "figcaption" -> if (element.text().isNotEmpty())
             { localSpanStyle ->
                 val context = LocalContext.current
@@ -420,6 +421,10 @@ fun parseElement(
                         element.attr("src")
                     }
                 }
+                var isLoaded by rememberSaveable { mutableStateOf(false) }
+                var aspectRatio by rememberSaveable {
+                    mutableStateOf(16f/9f)
+                }
                 AsyncGifImage(
                     model = sourceUrl,
                     modifier = Modifier
@@ -433,8 +438,19 @@ fun parseElement(
                             if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
                                 0.75f
                             ) else Color.Transparent
-                        ),
-                    contentScale = ContentScale.FillWidth
+                        )
+                        .aspectRatio(aspectRatio),
+                    contentScale = ContentScale.FillWidth,
+                    onState = {
+                        if (it is AsyncImagePainter.State.Success){
+                            isLoaded = true
+                            it.painter.intrinsicSize.let {
+                                Log.e("painter_bounds", it.toString())
+                                aspectRatio = it.width / it.height
+                            }
+
+                        }
+                    }
                 )
             }
         }
@@ -444,7 +460,7 @@ fun parseElement(
 
                 AndroidView(modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(16f/9f)
+                    .aspectRatio(16f / 9f)
                     .padding(vertical = 4.dp)
                     .clip(RoundedCornerShape(4.dp)),
                     factory = {
@@ -619,7 +635,8 @@ fun parseElement(
             val backgroundColor =
                 if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background
             val textColor = MaterialTheme.colors.onBackground
-            val fontSize = LocalDensity.current.fontScale * MaterialTheme.typography.body1.fontSize.value
+            val fontSize =
+                LocalDensity.current.fontScale * MaterialTheme.typography.body1.fontSize.value
             AndroidView(modifier = Modifier
 //                    .fillMaxWidth()
                 .padding(vertical = 8.dp)

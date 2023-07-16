@@ -268,7 +268,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onViewImageRequest = {
                                     navController.navigate(route = "imageViewer?imageUrl=$it")
-
+                                },
+                                onArticleClick = {
+                                    navController.navigate("article/$it")
                                 }
                             )
 

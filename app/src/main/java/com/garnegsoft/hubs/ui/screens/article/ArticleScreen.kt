@@ -84,6 +84,7 @@ fun ArticleScreen(
     onHubClicked: (alias: String) -> Unit,
     onCompanyClick: (alias: String) -> Unit,
     onViewImageRequest: (url: String) -> Unit,
+    onArticleClick: (id: Int) -> Unit,
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
@@ -635,7 +636,8 @@ fun ArticleScreen(
                         onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
                         onHubClicked = onHubClicked,
                         onCompanyClick = onCompanyClick,
-                        onViewImageRequest = onViewImageRequest
+                        onViewImageRequest = onViewImageRequest,
+                        onArticleClick = onArticleClick
                     )
                 }
             } ?: Box(
