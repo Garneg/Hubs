@@ -294,15 +294,14 @@ fun ArticlesScreen(
             val pages = remember(key1 = isAuthorized) {
                 var map = mapOf<String, @Composable () -> Unit>(
                     "Статьи" to {
-
                         val articles by viewModel.articles.observeAsState()
 
-                        var updateFeedCoroutineScope = rememberCoroutineScope()
-                        var pageNumber = rememberSaveable { mutableStateOf(1) }
+                        val updateFeedCoroutineScope = rememberCoroutineScope()
+                        val pageNumber = rememberSaveable { mutableStateOf(1) }
 
-                        var readyToScrollUp = remember { mutableStateOf(false) }
+                        val readyToScrollUp = remember { mutableStateOf(false) }
 
-                        var isUpdatingInProgress = remember { mutableStateOf(false) }
+                        val isUpdatingInProgress = remember { mutableStateOf(false) }
 
                         val filter by viewModel.articlesFilter.observeAsState()
                         val filterTitle = remember(filter) {
@@ -425,9 +424,9 @@ fun ArticlesScreen(
                     "Новости" to {
                         val newsList by viewModel.news.observeAsState()
                         val pageNumber = rememberSaveable { mutableStateOf(1) }
-                        var updateFeedCoroutineScope = rememberCoroutineScope()
+                        val updateFeedCoroutineScope = rememberCoroutineScope()
                         var isRefreshing by rememberSaveable { mutableStateOf(false) }
-                        var swipestate = rememberPullRefreshState(
+                        val swipestate = rememberPullRefreshState(
                             refreshing = isRefreshing,
                             refreshThreshold = 50.dp,
                             onRefresh = {

@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import ArticlesListController
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -9,7 +10,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.HubsList
 import com.garnegsoft.hubs.api.article.offline.OfflineArticle
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
@@ -107,6 +110,15 @@ class ArticleScreenViewModel : ViewModel() {
         return context.offlineArticlesDatabase.articlesDao().existsFlow(articleId)
     }
 
+    private var _mostReadingArticles = MutableLiveData<HabrList<ArticleSnippet>>()
+    val mostReadingArticles: LiveData<HabrList<ArticleSnippet>> get() = _mostReadingArticles
 
+    fun loadMostReading() {
+        viewModelScope.launch(Dispatchers.IO) {
+            ArticlesListController.getArticlesSnippets("articles/most-reading")?.let {
+                _mostReadingArticles.postValue(it)
+            }
+        }
+    }
 
 }

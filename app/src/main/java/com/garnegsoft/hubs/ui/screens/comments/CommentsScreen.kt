@@ -124,10 +124,12 @@ fun CommentsScreen(
             }
         }
     }
-
+    var doScrollToComment by rememberSaveable {
+        mutableStateOf(true)
+    }
     LaunchedEffect(key1 = commentsData, block = {
         commentId?.let { commId ->
-            if (viewModel.commentsData.isInitialized) {
+            if (viewModel.commentsData.isInitialized && doScrollToComment) {
                 commentsData?.comments?.indexOf(commentsData.comments.find { it.id == commId })
                     ?.let {
                         if (it > -1)
@@ -137,6 +139,7 @@ fun CommentsScreen(
                                 lazyListState.animateScrollToItem(it)
 
                     }
+                doScrollToComment = false
             }
         }
     })

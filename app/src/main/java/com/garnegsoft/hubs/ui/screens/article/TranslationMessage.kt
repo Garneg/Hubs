@@ -26,7 +26,7 @@ fun TranslationMessage(
         Box(modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .background(MaterialTheme.colors.secondaryVariant.copy(0.25f))
+            .background(MaterialTheme.colors.onBackground.copy(0.05f))
             .clickable(
                 enabled = translationInfo.originUrl != null,
                 onClick = onOriginClick
@@ -36,7 +36,7 @@ fun TranslationMessage(
                 translationInfo.originalAuthorName != null -> {
                     Text(
                         text = "Автор оригинала: ${translationInfo.originalAuthorName}",
-                        color = MaterialTheme.colors.onSecondary
+                        color = MaterialTheme.colors.onBackground.copy(0.5f)
                     )
                 }
                 else -> {

@@ -67,7 +67,7 @@ fun HubChip(
             .padding(vertical = 4.dp)
             .clip(RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
-            .background(MaterialTheme.colors.onSurface.copy(0.05f))
+            .background(MaterialTheme.colors.onSurface.copy(0.08f))
             .padding(vertical = 8.dp, horizontal = 12.dp),
         text = title,
         color = MaterialTheme.colors.onSurface.copy(0.85f),

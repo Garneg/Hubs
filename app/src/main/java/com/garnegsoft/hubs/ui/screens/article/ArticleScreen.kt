@@ -100,6 +100,9 @@ fun ArticleScreen(
                 viewModel.loadArticle(articleId)
             }
         }
+        if (!viewModel.mostReadingArticles.isInitialized){
+            viewModel.loadMostReading()
+        }
     })
 
     val scrollState = rememberScrollState()

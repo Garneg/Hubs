@@ -1,4 +1,5 @@
 import android.util.Log
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
@@ -153,7 +154,7 @@ class ArticlesListController {
                     }
                 }
 
-                result = HabrList(articles, raw.pagesCount!!)
+                result = HabrList(articles, raw.pagesCount ?: 0)
             }
 
             return result
@@ -260,7 +261,7 @@ class ArticlesListController {
         var type: String,
         var title: String,
         var isProfiled: Boolean,
-        var relatedData: ArticlesListHubRelatedData?
+        var relatedData: ArticlesListHubRelatedData? = null
     )
 
     @Serializable
