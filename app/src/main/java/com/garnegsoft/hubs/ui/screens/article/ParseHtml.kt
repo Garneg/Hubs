@@ -18,6 +18,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
@@ -442,7 +443,7 @@ fun parseElement(
                         .aspectRatio(aspectRatio),
                     contentScale = ContentScale.FillWidth,
                     onState = {
-                        if (it is AsyncImagePainter.State.Success){
+                        if (!isLoaded && it is AsyncImagePainter.State.Success){
                             isLoaded = true
                             it.painter.intrinsicSize.let {
                                 Log.e("painter_bounds", it.toString())

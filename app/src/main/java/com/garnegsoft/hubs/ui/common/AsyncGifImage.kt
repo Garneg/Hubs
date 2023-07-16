@@ -33,6 +33,7 @@ fun AsyncGifImage(
                 add(GifDecoder.Factory())
             }
         }
+        .crossfade(true)
         .build()
     Image(
         painter = rememberAsyncImagePainter(

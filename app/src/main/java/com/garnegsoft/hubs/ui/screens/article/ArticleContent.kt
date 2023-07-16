@@ -73,10 +73,12 @@ fun ArticleContent(
         var elements: Elements? by remember { mutableStateOf(null) }
         val state = rememberLazyListState()
         LaunchedEffect(key1 = Unit, block = {
-            val element =
-                Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!.child(0)
-                    ?: Element("")
-            contentNodes = parseChildElements(element, spanStyle, onViewImageRequest).second
+            if (contentNodes.size == 0) {
+                val element =
+                    Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!.child(0)
+                        ?: Element("")
+                contentNodes = parseChildElements(element, spanStyle, onViewImageRequest).second
+            }
         })
         LazyColumn(
             modifier = Modifier
@@ -296,11 +298,12 @@ fun ArticleContent(
                         }
                     }
                 }
-                Divider(modifier = Modifier.padding(vertical = 24.dp))
             }
-            if (viewModel.mostReadingArticles.isInitialized) {
+
                 item {
-                    TitledColumn(
+                    if (viewModel.mostReadingArticles.isInitialized) {
+                        Divider(modifier = Modifier.padding(vertical = 24.dp))
+                        TitledColumn(
                         title = "Читать ещё",
                         titleStyle = MaterialTheme.typography.subtitle2.copy(
                             color = MaterialTheme.colors.onBackground.copy(
@@ -344,7 +347,6 @@ fun ArticleContent(
                             ?.forEach {
                                 Box(modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colors.onBackground.copy(0.0f))
                                     .clickable { onArticleClick(it.id) }
                                     .padding(bottom = 8.dp)
                                     .padding(8.dp)
