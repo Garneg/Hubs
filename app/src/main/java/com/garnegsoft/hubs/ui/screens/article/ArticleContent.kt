@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import ArticleController
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.*
@@ -39,6 +40,8 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import org.jsoup.select.Elements
@@ -72,6 +75,7 @@ fun ArticleContent(
         val context = LocalContext.current
         var elements: Elements? by remember { mutableStateOf(null) }
         val state = rememberLazyListState()
+        val updatedPolls by viewModel.updatedPolls.observeAsState()
         LaunchedEffect(key1 = Unit, block = {
             if (contentNodes.size == 0) {
                 val element =
@@ -271,6 +275,16 @@ fun ArticleContent(
             items(items = contentNodes) {
                 it?.invoke(spanStyle)
             }
+            items(items = article.polls) {originalPoll ->
+                val poll =
+                    updatedPolls?.find { originalPoll.id == it.id} ?: originalPoll
+                Poll(
+                    poll = poll,
+                    onVote = { variants ->
+                        viewModel.vote(poll.id, variants)
+                    },
+                    onPass = {})
+            }
             item {
                 Divider(modifier = Modifier.padding(vertical = 24.dp))
                 // Hubs
@@ -300,10 +314,11 @@ fun ArticleContent(
                 }
             }
 
-                item {
-                    if (viewModel.mostReadingArticles.isInitialized) {
-                        Divider(modifier = Modifier.padding(vertical = 24.dp))
-                        TitledColumn(
+
+            item {
+                if (viewModel.mostReadingArticles.isInitialized) {
+                    Divider(modifier = Modifier.padding(vertical = 24.dp))
+                    TitledColumn(
                         title = "Читать ещё",
                         titleStyle = MaterialTheme.typography.subtitle2.copy(
                             color = MaterialTheme.colors.onBackground.copy(

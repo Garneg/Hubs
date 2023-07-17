@@ -1,9 +1,14 @@
 import com.garnegsoft.hubs.api.*
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.HubsList
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.jsoup.Jsoup
 
 
@@ -97,7 +102,32 @@ class ArticleController {
                         isTranslation = it.postLabels?.find { it.type == "translation" } != null,
                         originalAuthorName = it.postLabels?.find { it.type == "translation" }?.data?.originalAuthorName,
                         originUrl = it.postLabels?.find { it.type == "translation" }?.data?.originalUrl
-                    )
+                    ),
+                    polls = it.polls.map {
+                        com.garnegsoft.hubs.api.article.Article.Poll(
+                            id = it.id.toInt(),
+                            timeFinish = it.timeElapsed,
+                            answersType = when(it.answersType){
+                                "checkbox" -> com.garnegsoft.hubs.api.article.Article.Poll.PollType.Checkbox
+                                else -> com.garnegsoft.hubs.api.article.Article.Poll.PollType.Radio
+                            },
+                            votesCount = it.votesCount,
+                            passCount = it.passCount,
+                            title = it.textHtml,
+                            relatedData = it.relatedData?.let {
+                                com.garnegsoft.hubs.api.article.Article.Poll.RelatedData(it.canVote)
+                            },
+                            variants = it.variants.map {
+                                com.garnegsoft.hubs.api.article.Article.Poll.Variant(
+                                    id = it.id.toInt(),
+                                    text = it.textHtml,
+                                    votesCount = it.votesCount,
+                                    percent = it.percent,
+                                    selected = it.selected
+                                )
+                            }
+                        )
+                    }
                 )
             }
         }
@@ -205,6 +235,45 @@ class ArticleController {
             if (response.code != 200)
                 return false
             return true
+        }
+
+        @Serializable
+        private data class PollVote(
+            val id: List<Int>
+        )
+
+        fun vote(pollId: Int, variantsIds: List<Int>): com.garnegsoft.hubs.api.article.Article.Poll? {
+            val response = HabrApi.post("polls/$pollId/vote", requestBody = Json.encodeToString(PollVote(variantsIds)).toRequestBody())
+            if (response.code != 200)
+                return null
+            val raw = response.body?.string()?.let {
+                HabrDataParser.parseJson<Article.Poll>(it)
+            }
+            return raw?.let {
+                com.garnegsoft.hubs.api.article.Article.Poll(
+                    id = it.id.toInt(),
+                    timeFinish = it.timeElapsed,
+                    answersType = when(it.answersType){
+                        "checkbox" -> com.garnegsoft.hubs.api.article.Article.Poll.PollType.Checkbox
+                        else -> com.garnegsoft.hubs.api.article.Article.Poll.PollType.Radio
+                    },
+                    votesCount = it.votesCount,
+                    passCount = it.passCount,
+                    title = it.textHtml,
+                    relatedData = it.relatedData?.let {
+                        com.garnegsoft.hubs.api.article.Article.Poll.RelatedData(it.canVote)
+                    },
+                    variants = it.variants.map {
+                        com.garnegsoft.hubs.api.article.Article.Poll.Variant(
+                            id = it.id.toInt(),
+                            text = it.textHtml,
+                            votesCount = it.votesCount,
+                            percent = it.percent,
+                            selected = it.selected
+                        )
+                    }
+                )
+            }
         }
 
 
@@ -382,8 +451,8 @@ class ArticleController {
             var id: String,
             var timeElapsed: String? = null,
             var answersType: String,
-            var votesCount: Long,
-            var passCount: Long,
+            var votesCount: Int,
+            var passCount: Int,
             var textHtml: String,
             var relatedData: RelatedData? = null,
             var variants: List<Variant>
@@ -396,8 +465,8 @@ class ArticleController {
         data class Variant(
             var id: String,
             var textHtml: String,
-            var votesCount: Long,
-            var percent: Double,
+            var votesCount: Int,
+            var percent: Float,
             var selected: Boolean
         )
     }

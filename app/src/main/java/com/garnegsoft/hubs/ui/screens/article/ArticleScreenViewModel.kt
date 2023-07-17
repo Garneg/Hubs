@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import ArticleController
 import ArticlesListController
 import android.content.Context
 import android.util.Log
@@ -19,6 +20,7 @@ import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -117,6 +119,19 @@ class ArticleScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             ArticlesListController.getArticlesSnippets("articles/most-reading")?.let {
                 _mostReadingArticles.postValue(it)
+            }
+        }
+    }
+
+    private val _updatedPolls = MutableLiveData<List<Article.Poll>>()
+    val updatedPolls: LiveData<List<Article.Poll>> get() = _updatedPolls
+
+    fun vote(pollId: Int, variantsIds: List<Int>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            ArticleController.vote(pollId = pollId, variantsIds = variantsIds)?.let { poll ->
+                _updatedPolls.value?.let {
+                    _updatedPolls.postValue(it + poll)
+                }
             }
         }
     }

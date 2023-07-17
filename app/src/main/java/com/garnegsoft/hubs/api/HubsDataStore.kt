@@ -25,7 +25,7 @@ object HubsDataStore {
             object ArticleScreenPreferences {
                 val FontSize = intPreferencesKey("article_font_size")
                 val TextWrapMode = intPreferencesKey("article_text_wrap")
-
+                val Indent = intPreferencesKey("article_indent")
             }
 
 

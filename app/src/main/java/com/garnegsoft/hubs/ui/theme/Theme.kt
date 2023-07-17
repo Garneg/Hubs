@@ -20,12 +20,13 @@ import androidx.compose.material3.MaterialTheme as Material3Theme
 private val DarkColorPalette = darkColors(
     primary = Color(0xFFE7E7E7),
     primaryVariant = Color(0xFFDADEDF),
-    secondary = Color(0xCDFFFFFF),
+    secondary = Color(0xFFECECEC),
     onSecondary = Color(0x88FFFFFF),
     background = Color(32, 32, 32, 255),
     surface = Color(49, 49, 49, 255),
     onSurface = Color(0xFFDADADA),
     onBackground = Color(0xFFC2C2C2),
+    secondaryVariant = Color(0xFFB4B4B4),
     onError = Color.White
 )
 

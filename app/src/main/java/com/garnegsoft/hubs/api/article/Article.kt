@@ -46,7 +46,9 @@ class Article(
 
     val relatedData: RelatedData?,
 
-    val translationData: TranslationData
+    val translationData: TranslationData,
+
+    val polls: List<Poll>
 
 ) {
 
@@ -98,4 +100,32 @@ class Article(
         val originalAuthorName: String?,
         val originUrl: String?
     )
+
+    data class Poll(
+        val id: Int,
+        val timeFinish: String?,
+        val answersType: PollType,
+        val votesCount: Int,
+        val passCount: Int,
+        val title: String,
+        val relatedData: RelatedData?,
+        val variants: List<Variant>
+    ){
+        enum class PollType{
+            Radio,
+            Checkbox
+        }
+
+        data class RelatedData(
+            val canVote: Boolean
+        )
+
+        data class Variant(
+            val id: Int,
+            val text: String,
+            val votesCount: Int,
+            val percent: Float,
+            val selected: Boolean
+        )
+    }
 }
