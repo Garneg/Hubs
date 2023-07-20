@@ -15,8 +15,10 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +29,7 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
@@ -39,6 +42,19 @@ fun ImageViewScreen(
     model: Any,
     onBack: () -> Unit
 ) {
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = MaterialTheme.colors.let {
+        if (it.isLight)
+            it.primary
+        else
+            it.surface
+    }
+    DisposableEffect(key1 = Unit, effect = {
+        systemUiController.setStatusBarColor(Color.Black)
+        onDispose {
+            systemUiController.setStatusBarColor(statusBarColor)
+        }
+    })
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.Black)){

@@ -110,6 +110,7 @@ fun SettingsScreen(
                             //                        Divider()
                         }
                     ) {
+
                         Column(
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {

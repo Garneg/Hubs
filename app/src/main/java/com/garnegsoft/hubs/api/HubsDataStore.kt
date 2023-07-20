@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.api
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
@@ -23,7 +24,7 @@ object HubsDataStore {
                 SystemDefined
             }
             object ArticleScreenPreferences {
-                val FontSize = intPreferencesKey("article_font_size")
+                val FontSize = floatPreferencesKey("article_font_size")
                 val TextWrapMode = intPreferencesKey("article_text_wrap")
                 val Indent = intPreferencesKey("article_indent")
             }

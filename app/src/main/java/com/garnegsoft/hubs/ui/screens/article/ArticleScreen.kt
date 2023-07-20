@@ -60,6 +60,7 @@ import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
+import com.garnegsoft.hubs.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -72,6 +73,7 @@ import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
+
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -88,7 +90,9 @@ fun ArticleScreen(
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
-
+    val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreenPreferences.FontSize).collectAsState(
+        initial = MaterialTheme.typography.body1.fontSize.value
+    )
     val viewModel = viewModel<ArticleScreenViewModel>()
     val article by viewModel.article.observeAsState()
     val offlineArticle by viewModel.offlineArticle.observeAsState()
@@ -560,7 +564,7 @@ fun ArticleScreen(
                                     element = Jsoup.parse(article.contentHtml),
                                     spanStyle = SpanStyle(
                                         color = MaterialTheme.colors.onSurface,
-                                        fontSize = MaterialTheme.typography.body1.fontSize,
+                                        fontSize = fontSize?.sp ?: MaterialTheme.typography.body1.fontSize,
                                         ),
                                     onViewImageRequest = onViewImageRequest
                                 ).second?.let { it1 ->

@@ -239,11 +239,12 @@ class ArticleController {
 
         @Serializable
         private data class PollVote(
-            val id: List<Int>
+            val id: List<String>
         )
 
         fun vote(pollId: Int, variantsIds: List<Int>): com.garnegsoft.hubs.api.article.Article.Poll? {
-            val response = HabrApi.post("polls/$pollId/vote", requestBody = Json.encodeToString(PollVote(variantsIds)).toRequestBody())
+            val requestBody = Json.encodeToString(PollVote(variantsIds.map { it.toString() }))
+            val response = HabrApi.post("polls/$pollId/vote", requestBody = requestBody.toRequestBody())
             if (response.code != 200)
                 return null
             val raw = response.body?.string()?.let {
