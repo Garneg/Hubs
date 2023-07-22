@@ -240,7 +240,12 @@ class MainActivity : ComponentActivity() {
 
                             BackHandler(enabled = true) {
                                 clearLastArticle()
-                                navController.popBackStack()
+                                if (this@MainActivity.intent.data != null){
+                                    this@MainActivity.finish()
+                                }
+                                else {
+                                    navController.popBackStack()
+                                }
                             }
 
                             ArticleScreen(
@@ -248,7 +253,12 @@ class MainActivity : ComponentActivity() {
                                 isOffline = offline ?: false,
                                 onBackButtonClicked = {
                                     clearLastArticle()
-                                    navController.popBackStack()
+                                    if (this@MainActivity.intent.data != null){
+                                        this@MainActivity.finish()
+                                    }
+                                    else {
+                                        navController.popBackStack()
+                                    }
                                 },
                                 onCommentsClicked = {
                                     clearLastArticle()
@@ -271,7 +281,8 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onArticleClick = {
                                     navController.navigate("article/$it")
-                                }
+                                },
+                                viewModelStoreOwner = it
                             )
 
                         }
@@ -304,7 +315,14 @@ class MainActivity : ComponentActivity() {
                                 viewModelStoreOwner = it,
                                 parentPostId = postId.toInt(),
                                 commentId = commentId?.toInt(),
-                                onBackClicked = { navController.navigateUp() },
+                                onBackClicked = {
+                                    if (this@MainActivity.intent.data != null){
+                                        this@MainActivity.finish()
+                                    }
+                                    else {
+                                        navController.popBackStack()
+                                    }
+                                                },
                                 onArticleClicked = { navController.navigate("article/$postId") },
                                 onUserClicked = { navController.navigate("user/$it") }
                             )
@@ -327,7 +345,14 @@ class MainActivity : ComponentActivity() {
                                 isAppUser = alias == userInfo?.alias,
                                 initialPage = page,
                                 alias = alias,
-                                onBack = { navController.popBackStack() },
+                                onBack = {
+                                    if (this@MainActivity.intent.data != null){
+                                        this@MainActivity.finish()
+                                    }
+                                    else {
+                                        navController.popBackStack()
+                                    }
+                                         },
                                 onArticleClicked = { navController.navigate("article/$it") },
                                 onUserClicked = { navController.navigate("user/$it") },
                                 onCommentsClicked = { navController.navigate("comments/$it") },
@@ -366,7 +391,14 @@ class MainActivity : ComponentActivity() {
                         ) {
                             val alias = it.arguments?.getString("alias")
                             HubScreen(alias = alias!!, viewModelStoreOwner = it,
-                                onBackClick = { navController.popBackStack() },
+                                onBackClick = {
+                                    if (this@MainActivity.intent.data != null){
+                                        this@MainActivity.finish()
+                                    }
+                                    else {
+                                        navController.popBackStack()
+                                    }
+                                              },
                                 onArticleClick = { navController.navigate("article/$it") },
                                 onCompanyClick = { navController.navigate("company/$it") },
                                 onUserClick = { navController.navigate("user/$it") },
@@ -381,7 +413,14 @@ class MainActivity : ComponentActivity() {
                             CompanyScreen(
                                 viewModelStoreOwner = it,
                                 alias = alias,
-                                onBack = { navController.popBackStack() },
+                                onBack = {
+                                    if (this@MainActivity.intent.data != null){
+                                        this@MainActivity.finish()
+                                    }
+                                    else {
+                                        navController.popBackStack()
+                                    }
+                                         },
                                 onArticleClick = { navController.navigate("article/$it") },
                                 onCommentsClick = { navController.navigate("comments/$it") },
                                 onUserClick = { navController.navigate("user/$it") }

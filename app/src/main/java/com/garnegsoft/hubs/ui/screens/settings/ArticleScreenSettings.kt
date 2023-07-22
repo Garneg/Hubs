@@ -37,7 +37,7 @@ fun bottomsheettest() {
     var lineHeightFactor by remember { mutableStateOf(1.5f) }
     var justifyText by remember { mutableStateOf(false) }
 
-    HubsTheme() {
+    HubsTheme {
         val state = rememberBottomSheetScaffoldState()
         BottomSheetScaffold(
             scaffoldState = state,
@@ -230,7 +230,7 @@ fun bottomsheettest() {
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "Разработка, Программирование*, Habr", style = TextStyle(
+                    text = "Разработка, Программирование*, Habr, Jetpack Compose*", style = TextStyle(
                         color = Color.Gray,
                         fontWeight = FontWeight.W500
                     )

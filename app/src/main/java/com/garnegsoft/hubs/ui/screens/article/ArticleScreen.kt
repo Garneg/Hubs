@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.datastore.preferences.core.edit
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
@@ -87,13 +88,14 @@ fun ArticleScreen(
     onCompanyClick: (alias: String) -> Unit,
     onViewImageRequest: (url: String) -> Unit,
     onArticleClick: (id: Int) -> Unit,
+    viewModelStoreOwner: ViewModelStoreOwner,
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
-    val fontSize = 16f // by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreenPreferences.FontSize).collectAsState(
-//        initial = MaterialTheme.typography.body1.fontSize.value
-//    )
-    val viewModel = viewModel<ArticleScreenViewModel>()
+    val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreenPreferences.FontSize).collectAsState(
+        initial = MaterialTheme.typography.body1.fontSize.value
+    )
+    val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
     val article by viewModel.article.observeAsState()
     val offlineArticle by viewModel.offlineArticle.observeAsState()
 
