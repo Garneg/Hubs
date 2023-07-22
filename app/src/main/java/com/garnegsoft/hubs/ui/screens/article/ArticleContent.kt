@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.article
 import ArticleController
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*

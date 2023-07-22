@@ -240,7 +240,7 @@ class MainActivity : ComponentActivity() {
 
                             BackHandler(enabled = true) {
                                 clearLastArticle()
-                                navController.navigateUp()
+                                navController.popBackStack()
                             }
 
                             ArticleScreen(
@@ -248,7 +248,7 @@ class MainActivity : ComponentActivity() {
                                 isOffline = offline ?: false,
                                 onBackButtonClicked = {
                                     clearLastArticle()
-                                    navController.navigateUp()
+                                    navController.popBackStack()
                                 },
                                 onCommentsClicked = {
                                     clearLastArticle()

@@ -90,9 +90,9 @@ fun ArticleScreen(
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
-    val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreenPreferences.FontSize).collectAsState(
-        initial = MaterialTheme.typography.body1.fontSize.value
-    )
+    val fontSize = 16f // by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreenPreferences.FontSize).collectAsState(
+//        initial = MaterialTheme.typography.body1.fontSize.value
+//    )
     val viewModel = viewModel<ArticleScreenViewModel>()
     val article by viewModel.article.observeAsState()
     val offlineArticle by viewModel.offlineArticle.observeAsState()

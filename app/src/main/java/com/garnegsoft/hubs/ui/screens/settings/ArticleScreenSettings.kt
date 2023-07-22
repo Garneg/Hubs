@@ -1,16 +1,13 @@
 package com.garnegsoft.hubs.ui.screens.settings
 
 import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,17 +16,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.HubsTheme
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -37,7 +33,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun bottomsheettest() {
     val defaultFontSize = MaterialTheme.typography.body1.fontSize
-    var sliderValue by remember { mutableStateOf(defaultFontSize.value) }
+    var fontSize by remember { mutableStateOf(defaultFontSize.value) }
+    var lineHeightFactor by remember { mutableStateOf(1.5f) }
+    var justifyText by remember { mutableStateOf(false) }
+
     HubsTheme() {
         val state = rememberBottomSheetScaffoldState()
         BottomSheetScaffold(
@@ -72,7 +71,7 @@ fun bottomsheettest() {
                                 .width(32.dp)
                                 .clip(RoundedCornerShape(50))
                                 .background(
-                                    MaterialTheme.colors.onBackground.copy(0.1f)
+                                    MaterialTheme.colors.onBackground.copy(0.15f)
                                 )
                         )
                     }
@@ -80,26 +79,82 @@ fun bottomsheettest() {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
+                        TitledColumn(
+                            title = "Размер шрифта: ${"%.1f".format(fontSize)}"
+                        ) {
 
-                        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                            TitledColumn(
-                                title = "Размер шрифта: ${"%.1f".format(sliderValue)}"
+                            Slider(
+                                value = fontSize,
+                                valueRange = 12f..32f,
+                                steps = 9,
+                                onValueChange = {
+                                    fontSize = it
+                                },
+                                onValueChangeFinished = {
+                                    Log.e("val_fin", fontSize.toString())
+                                },
+                                colors = ArticleScreenSettingsSliderColors
+                            )
+                        }
+
+                        TitledColumn(
+                            title = "Межстрочный интервал"
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
-
-                                Slider(
-                                    value = sliderValue,
-                                    valueRange = 12f..32f,
-                                    steps = 9,
-                                    onValueChange = {
-                                        sliderValue = it
-                                    },
-                                    onValueChangeFinished = {
-                                        Log.e("val_fin", sliderValue.toString())
+                                HubsFilterChip(
+                                    modifier = Modifier.weight(1f),
+                                    selected = lineHeightFactor == 1.15f, 
+                                    onClick = { lineHeightFactor = 1.15f }
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Text(text = "1.15")
                                     }
-                                )
+                                }
+
+                                HubsFilterChip(
+                                    modifier = Modifier.weight(1f),
+                                    selected = lineHeightFactor == 1.5f,
+                                    onClick = { lineHeightFactor = 1.5f }
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Text(text = "1.5")
+                                    }
+                                }
+
+                                HubsFilterChip(
+                                    modifier = Modifier.weight(1f),
+                                    selected = lineHeightFactor == 1.75f,
+                                    onClick = { lineHeightFactor = 1.75f }
+                                ) {
+                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                        Text(text = "1.75")
+                                    }
+                                }
+                                
                             }
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable { }
+                                .padding(start = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 4.dp),
+                                text = "Выровнять текст по ширине экрана"
+                            )
+                            Checkbox(checked = justifyText, onCheckedChange = {
+                                justifyText = it
+                            })
                         }
 
                     }
@@ -181,12 +236,24 @@ fun bottomsheettest() {
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
+                val animatedLineHeightFactor by animateFloatAsState(targetValue = lineHeightFactor)
+                val textAlign = remember(justifyText) {
+                    if (justifyText)
+                        TextAlign.Justify
+                    else
+                        TextAlign.Left
+                }
                 Text(
                     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras pulvinar mattis nunc sed blandit libero volutpat. Lacus sed viverra tellus in hac habitasse platea dictumst vestibulum. Et ligula ullamcorper malesuada proin libero nunc consequat. Vitae justo eget magna fermentum iaculis eu non diam phasellus. Quam adipiscing vitae proin sagittis nisl. Lacus sed viverra tellus in hac habitasse platea dictumst vestibulum. Elit duis tristique sollicitudin nibh. Nisl pretium fusce id velit ut tortor pretium. Mattis aliquam faucibus purus in. In vitae turpis massa sed elementum tempus egestas sed sed.\n" +
                             "\n" +
                             "Est lorem ipsum dolor sit amet consectetur adipiscing. Viverra accumsan in nisl nisi scelerisque eu ultrices. Diam maecenas sed enim ut sem viverra. Id volutpat lacus laoreet non curabitur. Aliquam vestibulum morbi blandit cursus risus. Ac tortor vitae purus faucibus ornare suspendisse sed nisi lacus. Nunc faucibus a pellentesque sit amet porttitor eget. Dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida. Urna nec tincidunt praesent semper feugiat nibh sed pulvinar. Felis eget nunc lobortis mattis aliquam faucibus purus in. Tellus in metus vulputate eu. Quam id leo in vitae turpis. Porta non pulvinar neque laoreet suspendisse interdum consectetur libero id. Mauris augue neque gravida in fermentum et. Massa vitae tortor condimentum lacinia quis vel eros donec ac.",
-                    style = TextStyle(lineHeight = sliderValue.sp * 1.5f),
-                    fontSize = sliderValue.sp,
+                    style = TextStyle(
+                        lineHeight = fontSize.sp * animatedLineHeightFactor,
+                        textAlign = textAlign,
+                    ),
+
+                    fontSize = fontSize.sp,
                     color = MaterialTheme.colors.onBackground
                 )
 
@@ -195,4 +262,12 @@ fun bottomsheettest() {
         }
     }
 }
+
+val ArticleScreenSettingsSliderColors: SliderColors
+    @Composable get() = SliderDefaults.colors(
+        thumbColor = MaterialTheme.colors.secondary,
+        activeTrackColor = MaterialTheme.colors.secondary
+    )
+
+
 
