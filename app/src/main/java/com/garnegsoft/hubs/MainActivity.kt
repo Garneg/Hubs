@@ -53,6 +53,7 @@ import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
+import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import java.net.URLEncoder
@@ -72,6 +73,9 @@ fun <T> Context.lastReadDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
 
 fun <T> Context.settingsDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
     return settingsDataStore.data.map { it[key] }
+}
+fun <T> Context.settingsDataStoreFlow(key: Preferences.Key<T>, defaultValue: T): Flow<T> {
+    return settingsDataStore.data.map { it[key] ?: defaultValue }
 }
 
 fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
@@ -240,7 +244,7 @@ class MainActivity : ComponentActivity() {
 
                             BackHandler(enabled = true) {
                                 clearLastArticle()
-                                if (this@MainActivity.intent.data != null){
+                                if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
                                     this@MainActivity.finish()
                                 }
                                 else {
@@ -253,7 +257,7 @@ class MainActivity : ComponentActivity() {
                                 isOffline = offline ?: false,
                                 onBackButtonClicked = {
                                     clearLastArticle()
-                                    if (this@MainActivity.intent.data != null){
+                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
                                         this@MainActivity.finish()
                                     }
                                     else {
@@ -300,9 +304,20 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable(route = "settings") {
-                            SettingsScreen {
-                                navController.popBackStack()
-                            }
+                            SettingsScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onArticleScreenSettings = {
+                                    navController.navigate("article_settings")
+                                }
+                            )
+                        }
+
+                        composable(route = "article_settings") {
+                            ArticleScreenSettingsScreen(
+                                onBack = { navController.popBackStack() }
+                            )
                         }
 
                         composable(
@@ -316,7 +331,7 @@ class MainActivity : ComponentActivity() {
                                 parentPostId = postId.toInt(),
                                 commentId = commentId?.toInt(),
                                 onBackClicked = {
-                                    if (this@MainActivity.intent.data != null){
+                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
                                         this@MainActivity.finish()
                                     }
                                     else {
@@ -346,7 +361,7 @@ class MainActivity : ComponentActivity() {
                                 initialPage = page,
                                 alias = alias,
                                 onBack = {
-                                    if (this@MainActivity.intent.data != null){
+                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
                                         this@MainActivity.finish()
                                     }
                                     else {
@@ -392,7 +407,7 @@ class MainActivity : ComponentActivity() {
                             val alias = it.arguments?.getString("alias")
                             HubScreen(alias = alias!!, viewModelStoreOwner = it,
                                 onBackClick = {
-                                    if (this@MainActivity.intent.data != null){
+                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
                                         this@MainActivity.finish()
                                     }
                                     else {
@@ -414,7 +429,7 @@ class MainActivity : ComponentActivity() {
                                 viewModelStoreOwner = it,
                                 alias = alias,
                                 onBack = {
-                                    if (this@MainActivity.intent.data != null){
+                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
                                         this@MainActivity.finish()
                                     }
                                     else {

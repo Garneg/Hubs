@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
@@ -24,7 +25,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -60,6 +63,7 @@ class SettingsScreenViewModel : ViewModel() {
 @Composable
 fun SettingsScreen(
     onBack: () -> Unit,
+    onArticleScreenSettings: () -> Unit,
 ) {
     val viewModel = viewModel<SettingsScreenViewModel>()
     val context = LocalContext.current
@@ -238,6 +242,26 @@ fun SettingsScreen(
                                         interactionSource = isDarkThemeInteractionSource
                                     )
                                 }
+                            }
+
+                            Row(modifier = Modifier
+                                .fillMaxWidth()
+                                .clip(RoundedCornerShape(10.dp))
+                                .clickable(onClick = onArticleScreenSettings)
+                                .padding(start = 4.dp)
+                                .heightIn(min = 48.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(text = "Внешний вид статьи")
+                                    Text(
+                                        text = "Размер шрифта, межстрочный интервал и т.д.",
+                                        fontSize = 11.sp,
+                                        color = MaterialTheme.colors.onSurface.copy(0.5f)
+                                    )
+                                }
+                                Icon(modifier = Modifier.padding(12.dp),
+                                    imageVector = Icons.Default.ArrowForward, contentDescription = null)
                             }
                         }
                     }

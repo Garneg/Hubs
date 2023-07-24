@@ -268,7 +268,7 @@ fun parseElement(
                         ClickableText(
                             text = thisElementCurrentText,
                             style = LocalTextStyle.current.copy(
-                                lineHeight = LocalTextStyle.current.fontSize.times(
+                                lineHeight = spanStyle.fontSize.times(
                                     LINE_HEIGHT_FACTOR
                                 )
                             ),
@@ -319,7 +319,7 @@ fun parseElement(
             ClickableText(
                 text = currentText,
                 style = LocalTextStyle.current.copy(
-                    lineHeight = LocalTextStyle.current.fontSize.times(
+                    lineHeight = spanStyle.fontSize.times(
                         LINE_HEIGHT_FACTOR
                     )
                 ),

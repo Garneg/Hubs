@@ -1,12 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
-import android.content.Context
 import android.content.Intent
-import android.net.Uri
-import android.os.Looper
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
@@ -22,10 +17,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -36,7 +29,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -51,13 +43,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HubsDataStore
-import com.garnegsoft.hubs.api.PostComplexity
-import com.garnegsoft.hubs.api.PostType
-import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.article.offline.HubsList
-import com.garnegsoft.hubs.api.article.offline.OfflineArticle
-import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
@@ -68,9 +53,7 @@ import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
@@ -92,7 +75,7 @@ fun ArticleScreen(
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
-    val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreenPreferences.FontSize).collectAsState(
+    val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreen.FontSize).collectAsState(
         initial = MaterialTheme.typography.body1.fontSize.value
     )
     val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)

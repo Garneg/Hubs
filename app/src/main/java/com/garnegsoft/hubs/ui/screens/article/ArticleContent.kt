@@ -34,10 +34,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.EditorVersion
+import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
@@ -59,8 +61,11 @@ fun ArticleContent(
     onArticleClick: (id: Int) -> Unit,
     onViewImageRequest: (url: String) -> Unit
 ) {
+    val context = LocalContext.current
+
     val viewModel = viewModel<ArticleScreenViewModel>()
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+    val mostReadingArticles = viewModel.mostReadingArticles.observeAsState().value?.list
 
     Row {
         val flingSpec = rememberSplineBasedDecay<Float>()
@@ -69,16 +74,22 @@ fun ArticleContent(
                 emptyList()
             )
         }
-        val spanStyle = SpanStyle(
-            color = MaterialTheme.colors.onSurface,
-            fontSize = MaterialTheme.typography.body1.fontSize
+        val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreen.FontSize, MaterialTheme.typography.body1.fontSize.value).collectAsState(
+            initial = null
         )
-        val context = LocalContext.current
+        val color = MaterialTheme.colors.onSurface
+        val spanStyle = remember(fontSize) {
+            SpanStyle(
+                color = color,
+                fontSize = fontSize?.sp ?: 16.sp
+            )
+        }
+
         var elements: Elements? by remember { mutableStateOf(null) }
         val state = rememberLazyListState()
         val updatedPolls by viewModel.updatedPolls.observeAsState()
-        LaunchedEffect(key1 = Unit, block = {
-            if (contentNodes.size == 0) {
+        LaunchedEffect(key1 = fontSize, block = {
+            if (contentNodes.size == 0 && fontSize != null) {
                 val element =
                     Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!.child(0)
                         ?: Element("")
@@ -330,50 +341,52 @@ fun ArticleContent(
                     ) {
                         var readMoreMode by remember { mutableStateOf(ReadMoreMode.MostReading) }
 
-                        Row(
-                            modifier = Modifier.horizontalScroll(rememberScrollState()),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            HubsFilterChip(
-                                selected = readMoreMode == ReadMoreMode.MostReading,
-                                onClick = { readMoreMode = ReadMoreMode.MostReading }) {
-                                Text(text = "Читают сейчас")
-                            }
-                            if (article.isCorporative) {
-                                HubsFilterChip(
-                                    selected = readMoreMode == ReadMoreMode.Blog,
-                                    onClick = { readMoreMode = ReadMoreMode.Blog }) {
-                                    Text(text = "Блог")
-                                }
-                            }
-                            HubsFilterChip(
-                                selected = readMoreMode == ReadMoreMode.News,
-                                onClick = { readMoreMode = ReadMoreMode.News }) {
-                                Text(text = "Новости")
-                            }
-                            HubsFilterChip(
-                                selected = readMoreMode == ReadMoreMode.Similar,
-                                onClick = { readMoreMode = ReadMoreMode.Similar }) {
-                                Text(text = "Похожие")
-                            }
+//                        Row(
+//                            modifier = Modifier.horizontalScroll(rememberScrollState()),
+//                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+//                        ) {
+//                            HubsFilterChip(
+//                                selected = readMoreMode == ReadMoreMode.MostReading,
+//                                onClick = { readMoreMode = ReadMoreMode.MostReading }) {
+//                                Text(text = "Читают сейчас")
+//                            }
+//                            if (article.isCorporative) {
+//                                HubsFilterChip(
+//                                    selected = readMoreMode == ReadMoreMode.Blog,
+//                                    onClick = { readMoreMode = ReadMoreMode.Blog }) {
+//                                    Text(text = "Блог")
+//                                }
+//                            }
+//                            HubsFilterChip(
+//                                selected = readMoreMode == ReadMoreMode.News,
+//                                onClick = { readMoreMode = ReadMoreMode.News }) {
+//                                Text(text = "Новости")
+//                            }
+//                            HubsFilterChip(
+//                                selected = readMoreMode == ReadMoreMode.Similar,
+//                                onClick = { readMoreMode = ReadMoreMode.Similar }) {
+//                                Text(text = "Похожие")
+//                            }
+//
+//                        }
 
-                        }
-
-                        viewModel.mostReadingArticles.observeAsState().value?.list?.take(5)
-                            ?.forEach {
-                                Box(modifier = Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .clickable { onArticleClick(it.id) }
-                                    .padding(bottom = 8.dp)
-                                    .padding(8.dp)
-                                ) {
-                                    ArticleShort(article = it)
-                                }
-                            }
 
                     }
                 }
             }
+            mostReadingArticles?.let {
+                items(it) {
+                    Box(modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .clickable { onArticleClick(it.id) }
+                        .padding(bottom = 8.dp)
+                        .padding(8.dp)
+                    ) {
+                        ArticleShort(article = it)
+                    }
+                }
+            }
+
         }
         val density = LocalDensity.current
         Canvas(modifier = Modifier

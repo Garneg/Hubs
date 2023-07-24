@@ -23,8 +23,9 @@ object HubsDataStore {
                 Dark,
                 SystemDefined
             }
-            object ArticleScreenPreferences {
+            object ArticleScreen {
                 val FontSize = floatPreferencesKey("article_font_size")
+                val LineHeightFactor = floatPreferencesKey("line_height_factor")
                 val TextWrapMode = intPreferencesKey("article_text_wrap")
                 val Indent = intPreferencesKey("article_indent")
             }
