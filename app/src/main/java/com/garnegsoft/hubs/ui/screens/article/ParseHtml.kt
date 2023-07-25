@@ -262,15 +262,16 @@ fun parseElement(
                     && thisNode.previousElementSibling()!!.tagName() != "pre"
                 ) {
                     var thisElementCurrentText = currentText
-                    childrenComposables.add {
+                    childrenComposables.add { localSpanStyle ->
                         //Text(text = thisElementCurrentText)
                         var context = LocalContext.current
                         ClickableText(
                             text = thisElementCurrentText,
                             style = LocalTextStyle.current.copy(
-                                lineHeight = spanStyle.fontSize.times(
+                                lineHeight = localSpanStyle.fontSize.times(
                                     LINE_HEIGHT_FACTOR
-                                )
+                                ),
+                                color = localSpanStyle.color
                             ),
                             onClick = {
                                 thisElementCurrentText.getStringAnnotations(it, it)
@@ -286,7 +287,8 @@ fun parseElement(
                                             context.startActivity(intent)
                                         }
                                     }
-                            })
+                            }
+                        )
                     }
                 }
                 childrenComposables.add(childrenElementsResult[childElementsIndex].second!!)
@@ -313,15 +315,16 @@ fun parseElement(
 
     if (!currentText.text.isBlank() && isBlock)
 
-        childrenComposables.add {
+        childrenComposables.add { localSpanStyle ->
             //Text(text = currentText)
             val context = LocalContext.current
             ClickableText(
                 text = currentText,
                 style = LocalTextStyle.current.copy(
-                    lineHeight = spanStyle.fontSize.times(
+                    lineHeight = localSpanStyle.fontSize.times(
                         LINE_HEIGHT_FACTOR
-                    )
+                    ),
+                    color = localSpanStyle.color
                 ),
                 onClick = {
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
@@ -334,7 +337,8 @@ fun parseElement(
                             context.startActivity(intent)
                         }
                     }
-                })
+                }
+            )
         }
 
     // Fetching composable
@@ -492,7 +496,8 @@ fun parseElement(
                     code = element.text(),
                     language = LanguagesMap.getOrElse(
                         element.attr("class"),
-                        { element.attr("class") })
+                        { element.attr("class") }),
+                    spanStyle = localSpanStyle
                 )
             }
             resultAnnotatedString = buildAnnotatedString { }
@@ -611,7 +616,11 @@ fun parseElement(
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         DisableSelection {
-                            Text(text = spoilerCaption, color = Color(0xFF5587A3))
+                            Text(
+                                text = spoilerCaption,
+                                color = Color(0xFF5587A3),
+                                fontSize = localSpanStyle.fontSize
+                            )
                         }
                     }
                     if (showDetails) {
@@ -822,7 +831,12 @@ fun TextList(
 const val CODE_ALPHA_VALUE = 0.035f
 
 @Composable
-fun Code(code: String, language: String, modifier: Modifier = Modifier) {
+fun Code(
+    code: String,
+    language: String,
+    spanStyle: SpanStyle,
+    modifier: Modifier = Modifier
+) {
     Column(
         modifier
             .clip(RoundedCornerShape(4.dp))
@@ -834,12 +848,11 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
             DisableSelection {
                 Row(modifier = Modifier.padding(8.dp)) {
                     Text(
-                        text = language,
+                        text = buildAnnotatedString { withStyle(spanStyle) { append(language) } },
                         fontWeight = FontWeight.W600,
                         fontFamily = FontFamily.SansSerif
                     )
                     Spacer(modifier = Modifier.width(6.dp))
-                    //Text(text = "⬤", color = if (language == "Go") Color(0xFF29B6F6) else Color.Transparent)
                 }
             }
 
@@ -862,7 +875,9 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
 
                         DisableSelection {
                             Text(
-                                text = linesIndicator, fontFamily = FontFamily.Monospace,
+                                text = buildAnnotatedString { withStyle(spanStyle.copy(color = MaterialTheme.colors.onBackground.copy(0.5f))) { append(linesIndicator) } },
+                                color = MaterialTheme.colors.onBackground.copy(0.5f),
+                                fontFamily = FontFamily.Monospace,
                                 textAlign = TextAlign.End
                             )
                         }
@@ -875,7 +890,8 @@ fun Code(code: String, language: String, modifier: Modifier = Modifier) {
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = code,
+                        text = buildAnnotatedString { withStyle(spanStyle) { append(code) } },
+
                         fontFamily = FontFamily.Monospace,
                     )
                 }

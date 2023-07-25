@@ -5,8 +5,10 @@ import ArticlesListController
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -112,13 +114,13 @@ class ArticleScreenViewModel : ViewModel() {
         return context.offlineArticlesDatabase.articlesDao().existsFlow(articleId)
     }
 
-    private var _mostReadingArticles = MutableLiveData<HabrList<ArticleSnippet>>()
-    val mostReadingArticles: LiveData<HabrList<ArticleSnippet>> get() = _mostReadingArticles
+    private var _mostReadingArticles = MutableLiveData<List<ArticleSnippet>>()
+    val mostReadingArticles: LiveData<List<ArticleSnippet>> get() = _mostReadingArticles
 
     fun loadMostReading() {
         viewModelScope.launch(Dispatchers.IO) {
             ArticlesListController.getArticlesSnippets("articles/most-reading")?.let {
-                _mostReadingArticles.postValue(it)
+                _mostReadingArticles.postValue(it.list.take(5))
             }
         }
     }
@@ -135,5 +137,7 @@ class ArticleScreenViewModel : ViewModel() {
             }
         }
     }
+
+    val parsedArticleContent = MutableLiveData<List<(@Composable (SpanStyle) -> Unit)?>>()
 
 }

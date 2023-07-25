@@ -245,7 +245,10 @@ fun CommentsScreen(
                                                     fontSize = 16.sp,
                                                     color = MaterialTheme.colors.onSurface
                                                 )
-                                            ).second)?.let { it1 -> it1(SpanStyle(color = MaterialTheme.colors.onSurface)) })
+                                            ).second)?.let { it1 -> it1(SpanStyle(
+                                                fontSize = 16.sp,
+                                                color = MaterialTheme.colors.onSurface
+                                            )) })
                                         }
                                     }
 

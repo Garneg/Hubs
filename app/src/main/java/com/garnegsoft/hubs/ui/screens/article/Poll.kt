@@ -45,7 +45,7 @@ fun Poll(
                 fontSize = 20.sp,
                 color = MaterialTheme.colors.onBackground
             )
-            if (!(poll.relatedData?.canVote ?: true)) {
+            if (true) {
                 poll.variants.forEach {
                     PollItem(data = it, isMostVoted = it.id == mostVotedVariantId)
                 }

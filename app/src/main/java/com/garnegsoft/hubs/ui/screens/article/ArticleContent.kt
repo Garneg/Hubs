@@ -65,35 +65,30 @@ fun ArticleContent(
 
     val viewModel = viewModel<ArticleScreenViewModel>()
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
-    val mostReadingArticles = viewModel.mostReadingArticles.observeAsState().value?.list
+    val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
 
     Row {
         val flingSpec = rememberSplineBasedDecay<Float>()
-        var contentNodes: List<(@Composable (SpanStyle) -> Unit)?> by rememberSaveable {
-            mutableStateOf(
-                emptyList()
-            )
-        }
+        val contentNodes by viewModel.parsedArticleContent.observeAsState()
         val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreen.FontSize, MaterialTheme.typography.body1.fontSize.value).collectAsState(
             initial = null
         )
         val color = MaterialTheme.colors.onSurface
-        val spanStyle = remember(fontSize) {
+        val spanStyle = remember(fontSize, color) {
             SpanStyle(
                 color = color,
                 fontSize = fontSize?.sp ?: 16.sp
             )
         }
 
-        var elements: Elements? by remember { mutableStateOf(null) }
         val state = rememberLazyListState()
         val updatedPolls by viewModel.updatedPolls.observeAsState()
         LaunchedEffect(key1 = fontSize, block = {
-            if (contentNodes.size == 0 && fontSize != null) {
+            if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
                 val element =
                     Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!.child(0)
                         ?: Element("")
-                contentNodes = parseChildElements(element, spanStyle, onViewImageRequest).second
+                viewModel.parsedArticleContent.postValue(parseChildElements(element, spanStyle, onViewImageRequest).second)
             }
         })
         LazyColumn(
@@ -284,9 +279,12 @@ fun ArticleContent(
                 Spacer(modifier = Modifier.height(8.dp))
 
             }
-            items(items = contentNodes) {
-                it?.invoke(spanStyle)
+            contentNodes?.let {
+                items(items = it) {
+                    it?.invoke(spanStyle)
+                }
             }
+
             items(items = article.polls) {originalPoll ->
                 val poll =
                     updatedPolls?.find { originalPoll.id == it.id} ?: originalPoll
@@ -331,7 +329,7 @@ fun ArticleContent(
                 if (viewModel.mostReadingArticles.isInitialized) {
                     Divider(modifier = Modifier.padding(vertical = 24.dp))
                     TitledColumn(
-                        title = "Читать ещё",
+                        title = "Читают сейчас",
                         titleStyle = MaterialTheme.typography.subtitle2.copy(
                             color = MaterialTheme.colors.onBackground.copy(
                                 0.5f
