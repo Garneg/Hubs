@@ -32,6 +32,7 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import kotlinx.coroutines.Dispatchers
@@ -213,7 +214,13 @@ fun CompanyProfile(
                         whoIs?.aboutHtml?.let{
                             if (it.isNotBlank()) {
                                 TitledColumn(title = "О Компании") {
-                                    RenderHtml(html = it)
+                                    RenderHtml(html = it, elementSettings = remember {
+                                        ElementSettings(
+                                            fontSize = 16.sp,
+                                            lineHeight = 16.sp,
+                                            fitScreenWidth = false
+                                        )
+                                    })
                                 }
                             }
                         }

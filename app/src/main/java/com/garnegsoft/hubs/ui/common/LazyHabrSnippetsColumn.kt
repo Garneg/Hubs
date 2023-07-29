@@ -22,9 +22,9 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     data: HabrList<T>,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
-    contentPadding: PaddingValues = PaddingValues(),
-    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
-    horizontalAlignment: Alignment.Horizontal = Alignment.Start,
+    contentPadding: PaddingValues = PaddingValues(8.dp),
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
+    horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     onScrollEnd: () -> Unit = { },
     nextPageLoadingIndicator: (@Composable () -> Unit)? = {
         Box(modifier = Modifier.fillMaxWidth()) {

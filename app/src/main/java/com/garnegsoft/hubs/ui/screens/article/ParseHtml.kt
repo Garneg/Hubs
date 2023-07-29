@@ -57,7 +57,7 @@ val LINE_HEIGHT_FACTOR = 1.5F
 fun parseElement(
     html: String,
     spanStyle: SpanStyle
-): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> =
+): Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?> =
     parseElement(Jsoup.parse(html), spanStyle)
 
 @Stable
@@ -68,7 +68,8 @@ fun RenderHtml(
         SpanStyle(
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.body1.fontSize
-        )
+        ),
+    elementSettings: ElementSettings
 ) {
     val result = remember {
         parseElement(
@@ -78,7 +79,7 @@ fun RenderHtml(
     }
     Column {
         result.first?.let { Text(it) }
-        result.second?.invoke(spanStyle)
+        result.second?.invoke(spanStyle, elementSettings)
     }
 
 }
@@ -90,7 +91,7 @@ fun parseElement(
     element: Element,
     spanStyle: SpanStyle,
     onViewImageRequest: ((imageUrl: String) -> Unit)? = null,
-): Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?> {
+): Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?> {
     var isBlock = element.isHabrBlock()
     var resultAnnotatedString: AnnotatedString = buildAnnotatedString { }
     var ChildrenSpanStyle = spanStyle
@@ -219,14 +220,14 @@ fun parseElement(
     }
 
     // Child elements parsing and styling
-    var childrenElementsResult: ArrayList<Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?>> =
+    var childrenElementsResult: ArrayList<Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?>> =
         ArrayList()
     element.children().forEach {
         childrenElementsResult.add(parseElement(it, ChildrenSpanStyle, onViewImageRequest))
     }
-    var mainComposable: (@Composable (SpanStyle) -> Unit)? = null
+    var mainComposable: (@Composable (SpanStyle, ElementSettings) -> Unit)? = null
 
-    var childrenComposables: ArrayList<@Composable (SpanStyle) -> Unit> = ArrayList()
+    var childrenComposables: ArrayList<@Composable (SpanStyle, ElementSettings) -> Unit> = ArrayList()
 
 
     // Text parsing and styling + validating children element
@@ -262,7 +263,7 @@ fun parseElement(
                     && thisNode.previousElementSibling()!!.tagName() != "pre"
                 ) {
                     var thisElementCurrentText = currentText
-                    childrenComposables.add { localSpanStyle ->
+                    childrenComposables.add { localSpanStyle, settings ->
                         //Text(text = thisElementCurrentText)
                         var context = LocalContext.current
                         ClickableText(
@@ -315,7 +316,7 @@ fun parseElement(
 
     if (!currentText.text.isBlank() && isBlock)
 
-        childrenComposables.add { localSpanStyle ->
+        childrenComposables.add { localSpanStyle, settings ->
             //Text(text = currentText)
             val context = LocalContext.current
             ClickableText(
@@ -343,38 +344,38 @@ fun parseElement(
 
     // Fetching composable
     mainComposable = when (element.tagName()) {
-        "h2" -> { localSpanStyle ->
+        "h2" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 8.dp)) {
-                childrenComposables.forEach { it(localSpanStyle) }
+                childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
-        "h3" -> { localSpanStyle ->
+        "h3" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 6.dp)) {
-                childrenComposables.forEach { it(localSpanStyle) }
+                childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
-        "h4" -> { localSpanStyle ->
+        "h4" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 4.dp)) {
-                childrenComposables.forEach { it(localSpanStyle) }
+                childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
-        "h5" -> { localSpanStyle ->
+        "h5" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 3.dp)) {
-                childrenComposables.forEach { it(localSpanStyle) }
+                childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
-        "p" -> if (element.html().isNotEmpty()) { localSpanStyle ->
+        "p" -> if (element.html().isNotEmpty()) { localSpanStyle, settings ->
             Column(Modifier.padding(bottom = 16.dp)) {
                 childrenComposables.forEach {
-                    it(localSpanStyle)
+                    it(localSpanStyle, settings)
                 }
             }
         }
         else null
         "a" -> if (element.hasClass("anchor"))
-            { localSpanStyle -> } else null
+            { localSpanStyle, settings -> } else null
         "figcaption" -> if (element.text().isNotEmpty())
-            { localSpanStyle ->
+            { localSpanStyle, settings ->
                 val context = LocalContext.current
                 ClickableText(
                     modifier = Modifier
@@ -403,7 +404,7 @@ fun parseElement(
             }
         else null
         "img" -> if (element.hasClass("formula")) {
-            {
+            { localSpanStyle, settings ->
                 Box(
                     modifier = Modifier
                         .height(50.dp)
@@ -418,7 +419,7 @@ fun parseElement(
 
             }
         } else {
-            { it: SpanStyle ->
+            { it: SpanStyle, settings ->
                 val sourceUrl = remember {
                     if (element.hasAttr("data-src")) {
                         element.attr("data-src")
@@ -461,7 +462,7 @@ fun parseElement(
         }
 
         "div" -> if (element.hasClass("tm-iframe_temp"))
-            { localSpanStyle ->
+            { localSpanStyle, settings ->
 
                 AndroidView(modifier = Modifier
                     .fillMaxWidth()
@@ -470,8 +471,9 @@ fun parseElement(
                     .clip(RoundedCornerShape(4.dp)),
                     factory = {
                         WebView(it).apply {
-                            settings.javaScriptEnabled = true
-                            settings.databaseEnabled = true
+
+                            this.settings.javaScriptEnabled = true
+                            this.settings.databaseEnabled = true
                             isFocusable = true
                             isLongClickable = true
                             loadUrl(element.attr("data-src"))
@@ -479,25 +481,26 @@ fun parseElement(
                     })
             }
         else
-            { localSpanStyle ->
+            { localSpanStyle, settings ->
                 Column() {
                     //Text(text = element.ownText())
                     childrenComposables.forEach {
-                        it(localSpanStyle)
+                        it(localSpanStyle, settings)
                     }
                 }
             }
 
         "code" -> if (element.parent() != null && element.parent()!!
                 .tagName() == "pre"
-        ) { localSpanStyle ->
+        ) { localSpanStyle, settings ->
             Box(Modifier.padding(bottom = 4.dp)) {
                 Code(
                     code = element.text(),
                     language = LanguagesMap.getOrElse(
                         element.attr("class"),
                         { element.attr("class") }),
-                    spanStyle = localSpanStyle
+                    spanStyle = localSpanStyle,
+                    elementSettings = settings
                 )
             }
             resultAnnotatedString = buildAnnotatedString { }
@@ -507,42 +510,50 @@ fun parseElement(
 
         "ul" ->
             if (element.parent() != null && element.parent()!!.tagName() == "li")
-                { localSpanStyle ->
+                { localSpanStyle, settings ->
                     TextList(
                         modifier = Modifier.padding(bottom = 8.dp),
                         items = childrenComposables,
                         spanStyle = localSpanStyle,
                         ordered = false,
-                        nested = true
+                        nested = true,
+                        elementSettings = settings
                     )
                 }
             else
-                { localSpanStyle ->
+                { localSpanStyle, settings ->
                     TextList(
                         modifier = Modifier.padding(bottom = 8.dp),
-                        items = childrenComposables, spanStyle = localSpanStyle, ordered = false
+                        items = childrenComposables,
+                        spanStyle = localSpanStyle,
+                        ordered = false,
+                        elementSettings = settings
                     )
                 }
 
         "ol" -> if (element.hasAttr("start"))
-            { localSpanStyle ->
+            { localSpanStyle, settings ->
                 TextList(
                     modifier = Modifier.padding(bottom = 8.dp),
                     items = childrenComposables,
                     spanStyle = localSpanStyle,
                     ordered = true,
-                    startNumber = element.attr("start").toIntOrNull() ?: 1
+                    startNumber = element.attr("start").toIntOrNull() ?: 1,
+                    elementSettings = settings
                 )
             }
         else
-            { localSpanStyle ->
+            { localSpanStyle, settings ->
                 TextList(
                     modifier = Modifier.padding(bottom = 8.dp),
-                    items = childrenComposables, spanStyle = localSpanStyle, ordered = true
+                    items = childrenComposables,
+                    spanStyle = localSpanStyle,
+                    ordered = true,
+                    elementSettings = settings
                 )
             }
 
-        "blockquote" -> { localSpanStyle ->
+        "blockquote" -> { localSpanStyle, settings ->
             val quoteWidth = with(LocalDensity.current) { 4.dp.toPx() }
             Surface(
                 color = Color.Transparent,
@@ -565,13 +576,13 @@ fun parseElement(
 
                     }
                     .padding(start = 12.dp)) {
-                    childrenComposables.forEach { it(localSpanStyle.copy(fontStyle = FontStyle.Italic)) }
+                    childrenComposables.forEach { it(localSpanStyle.copy(fontStyle = FontStyle.Italic), settings) }
                 }
             }
 
         }
 
-        "hr" -> { localSpanStyle ->
+        "hr" -> { localSpanStyle, settings ->
             Divider(
                 thickness = 1.dp,
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
@@ -579,7 +590,7 @@ fun parseElement(
 
         }
 
-        "details" -> { localSpanStyle ->
+        "details" -> { localSpanStyle, settings ->
             var spoilerCaption = element.getElementsByTag("summary").first()?.text() ?: "Спойлер"
             var showDetails by rememberSaveable { mutableStateOf(false) }
             Surface(
@@ -633,7 +644,7 @@ fun parseElement(
                                 top = 8.dp
                             )
                         ) {
-                            childrenComposables.forEach { it(localSpanStyle) }
+                            childrenComposables.forEach { it(localSpanStyle, settings) }
                         }
                     }
                 }
@@ -641,7 +652,7 @@ fun parseElement(
 
         }
 
-        "table" -> { localSpanStyle ->
+        "table" -> { localSpanStyle, settings ->
             val backgroundColor =
                 if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background
             val textColor = MaterialTheme.colors.onBackground
@@ -694,9 +705,9 @@ fun parseElement(
         else -> if (childrenComposables.size == 0) {
             null
         } else {
-            { localSpanStyle ->
+            { localSpanStyle, settings ->
                 Column() {
-                    childrenComposables.forEach { it(localSpanStyle) }
+                    childrenComposables.forEach { it(localSpanStyle, settings) }
                 }
             }
         }
@@ -799,8 +810,9 @@ fun Element.isHabrBlock(): Boolean {
 @Composable
 fun TextList(
     modifier: Modifier = Modifier,
-    items: List<@Composable (SpanStyle) -> Unit>,
+    items: List<@Composable (SpanStyle, ElementSettings) -> Unit>,
     spanStyle: SpanStyle,
+    elementSettings: ElementSettings,
     ordered: Boolean,
     nested: Boolean = false,
     startNumber: Int = 1
@@ -821,7 +833,7 @@ fun TextList(
                         }
                 }
                 Spacer(modifier = Modifier.width(4.dp))
-                it(spanStyle)
+                it(spanStyle, elementSettings)
             }
             itemNumber++
         }
@@ -835,6 +847,7 @@ fun Code(
     code: String,
     language: String,
     spanStyle: SpanStyle,
+    elementSettings: ElementSettings,
     modifier: Modifier = Modifier
 ) {
     Column(

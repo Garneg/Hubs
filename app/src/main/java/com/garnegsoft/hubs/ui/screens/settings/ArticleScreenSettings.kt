@@ -29,6 +29,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.settingsDataStore
+import com.garnegsoft.hubs.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
@@ -133,73 +134,73 @@ fun ArticleScreenSettingsScreen(
                         )
                     }
 
-                    TitledColumn(
-                        title = "Межстрочный интервал"
-                    ) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            HubsFilterChip(
-                                modifier = Modifier.weight(1f),
-                                selected = lineHeightFactor == 1.15f,
-                                onClick = { lineHeightFactor = 1.15f }
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "1.15")
-                                }
-                            }
-
-                            HubsFilterChip(
-                                modifier = Modifier.weight(1f),
-                                selected = lineHeightFactor == 1.5f,
-                                onClick = { lineHeightFactor = 1.5f }
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "1.5")
-                                }
-                            }
-
-                            HubsFilterChip(
-                                modifier = Modifier.weight(1f),
-                                selected = lineHeightFactor == 1.75f,
-                                onClick = { lineHeightFactor = 1.75f }
-                            ) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(text = "1.75")
-                                }
-                            }
-
-                        }
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable {
-                                justifyText = !justifyText
-                            }
-                            .padding(start = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(end = 4.dp),
-                            text = "Выровнять текст по ширине экрана"
-                        )
-                        Checkbox(checked = justifyText, onCheckedChange = {
-                            justifyText = it
-                        })
-                    }
+//                    TitledColumn(
+//                        title = "Межстрочный интервал"
+//                    ) {
+//                        Row(
+//                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+//                        ) {
+//                            HubsFilterChip(
+//                                modifier = Modifier.weight(1f),
+//                                selected = lineHeightFactor == 1.15f,
+//                                onClick = { lineHeightFactor = 1.15f }
+//                            ) {
+//                                Box(
+//                                    modifier = Modifier.fillMaxSize(),
+//                                    contentAlignment = Alignment.Center
+//                                ) {
+//                                    Text(text = "1.15")
+//                                }
+//                            }
+//
+//                            HubsFilterChip(
+//                                modifier = Modifier.weight(1f),
+//                                selected = lineHeightFactor == 1.5f,
+//                                onClick = { lineHeightFactor = 1.5f }
+//                            ) {
+//                                Box(
+//                                    modifier = Modifier.fillMaxSize(),
+//                                    contentAlignment = Alignment.Center
+//                                ) {
+//                                    Text(text = "1.5")
+//                                }
+//                            }
+//
+//                            HubsFilterChip(
+//                                modifier = Modifier.weight(1f),
+//                                selected = lineHeightFactor == 1.75f,
+//                                onClick = { lineHeightFactor = 1.75f }
+//                            ) {
+//                                Box(
+//                                    modifier = Modifier.fillMaxSize(),
+//                                    contentAlignment = Alignment.Center
+//                                ) {
+//                                    Text(text = "1.75")
+//                                }
+//                            }
+//
+//                        }
+//                    }
+//                    Row(
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .clip(RoundedCornerShape(8.dp))
+//                            .clickable {
+//                                justifyText = !justifyText
+//                            }
+//                            .padding(start = 4.dp),
+//                        verticalAlignment = Alignment.CenterVertically
+//                    ) {
+//                        Text(
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .padding(end = 4.dp),
+//                            text = "Выровнять текст по ширине экрана"
+//                        )
+//                        Checkbox(checked = justifyText, onCheckedChange = {
+//                            justifyText = it
+//                        })
+//                    }
 
                 }
 

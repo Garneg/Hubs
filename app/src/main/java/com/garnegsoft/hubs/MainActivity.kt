@@ -74,7 +74,7 @@ fun <T> Context.lastReadDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
 fun <T> Context.settingsDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
     return settingsDataStore.data.map { it[key] }
 }
-fun <T> Context.settingsDataStoreFlow(key: Preferences.Key<T>, defaultValue: T): Flow<T> {
+fun <T> Context.settingsDataStoreFlowWithDefault(key: Preferences.Key<T>, defaultValue: T): Flow<T> {
     return settingsDataStore.data.map { it[key] ?: defaultValue }
 }
 

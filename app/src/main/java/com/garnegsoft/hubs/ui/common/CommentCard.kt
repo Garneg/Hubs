@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,6 +25,7 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
@@ -139,7 +141,13 @@ fun CommentCard(
 
                 Text(text = comment.timePublished, style = style.publishedTimeTextStyle)
             }
-
+            val elementsSettings = remember {
+                ElementSettings(
+                    fontSize = 16.sp,
+                    lineHeight = 16.sp,
+                    fitScreenWidth = false
+                )
+            }
             Spacer(modifier = Modifier.height(style.padding.calculateTopPadding().div(3)))
             parseElement(comment.text, SpanStyle(
                 color = MaterialTheme.colors.onSurface,
@@ -148,7 +156,7 @@ fun CommentCard(
                 SpanStyle(
                 color = MaterialTheme.colors.onSurface,
                 fontSize = MaterialTheme.typography.body1.fontSize,
-                ))
+                ), elementsSettings)
             Spacer(modifier = Modifier.height(style.padding.calculateBottomPadding()))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(

@@ -1,0 +1,20 @@
+package com.garnegsoft.hubs.api.article
+
+import com.garnegsoft.hubs.api.HabrList
+import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import kotlinx.coroutines.CoroutineScope
+
+class ArticlesListModel(
+    override val path: String,
+    override val coroutineScope: CoroutineScope,
+    vararg baseArgs: Pair<String, String>,
+
+    ) : AbstractHabrSnippetListModel<ArticleSnippet>(
+    path = path,
+    baseArgs = baseArgs.toMap(),
+    coroutineScope = coroutineScope
+) {
+    override fun load(args: Map<String, String>): HabrList<ArticleSnippet>? =
+        ArticlesListController.getArticlesSnippets(path, args)
+
+}

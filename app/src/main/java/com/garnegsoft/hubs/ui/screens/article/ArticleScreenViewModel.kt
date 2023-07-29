@@ -138,6 +138,6 @@ class ArticleScreenViewModel : ViewModel() {
         }
     }
 
-    val parsedArticleContent = MutableLiveData<List<(@Composable (SpanStyle) -> Unit)?>>()
+    val parsedArticleContent = MutableLiveData<List<(@Composable (SpanStyle, ElementSettings) -> Unit)?>>()
 
 }

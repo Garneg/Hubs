@@ -29,7 +29,7 @@ fun parseChildElements(
     element: Element,
     spanStyle: SpanStyle,
     onViewImageRequest: ((imageUrl: String) -> Unit)? = null,
-): Pair<AnnotatedString?, List<(@Composable (SpanStyle) -> Unit)?>> {
+): Pair<AnnotatedString?, List<(@Composable (SpanStyle, ElementSettings) -> Unit)?>> {
     var isBlock = element.isHabrBlock()
     var resultAnnotatedString: AnnotatedString = buildAnnotatedString { }
     var ChildrenSpanStyle = spanStyle
@@ -158,14 +158,14 @@ fun parseChildElements(
     }
 
     // Child elements parsing and styling
-    var childrenElementsResult: ArrayList<Pair<AnnotatedString?, (@Composable (SpanStyle) -> Unit)?>> =
+    var childrenElementsResult: ArrayList<Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?>> =
         ArrayList()
     element.children().forEach {
         childrenElementsResult.add(parseElement(it, ChildrenSpanStyle, onViewImageRequest))
     }
-    var mainComposable: (@Composable (SpanStyle) -> Unit)? = null
+    var mainComposable: (@Composable (SpanStyle, ElementSettings) -> Unit)? = null
 
-    var childrenComposables: ArrayList<@Composable (SpanStyle) -> Unit> = ArrayList()
+    var childrenComposables: ArrayList<@Composable (SpanStyle, ElementSettings) -> Unit> = ArrayList()
 
 
     // Text parsing and styling + validating children element
@@ -201,7 +201,7 @@ fun parseChildElements(
                     && thisNode.previousElementSibling()!!.tagName() != "pre"
                 ) {
                     var thisElementCurrentText = currentText
-                    childrenComposables.add {
+                    childrenComposables.add { localSpanStyle, settings ->
                         //Text(text = thisElementCurrentText)
                         var context = LocalContext.current
                         ClickableText(
@@ -252,7 +252,7 @@ fun parseChildElements(
 
     if (!currentText.text.isBlank() && isBlock)
 
-        childrenComposables.add {
+        childrenComposables.add { localSpanStyle, settings ->
             //Text(text = currentText)
             val context = LocalContext.current
             ClickableText(

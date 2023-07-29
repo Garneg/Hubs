@@ -1,32 +1,26 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.theme.HubsTheme
 
 
 @Composable
-fun FilterDialog(
-    defaultValues: ArticlesFilterDialogResult,
+fun ArticlesFilterDialog(
+    defaultValues: ArticlesFilterState,
     onDismiss: () -> Unit,
-    onDone: (ArticlesFilterDialogResult) -> Unit
+    onDone: (ArticlesFilterState) -> Unit
 ) {
 
     var showLast by rememberSaveable {
@@ -44,7 +38,7 @@ fun FilterDialog(
 
     BaseFilterDialog(onDismiss = onDismiss, onDone = {
         onDone(
-            ArticlesFilterDialogResult(
+            ArticlesFilterState(
                 showLast,
                 minRating,
                 period,
@@ -185,7 +179,7 @@ fun FilterDialog(
 
 }
 
-data class ArticlesFilterDialogResult(
+data class ArticlesFilterState(
     val showLast: Boolean,
     val minRating: Int = -1,
     val period: FilterPeriod = FilterPeriod.Day,

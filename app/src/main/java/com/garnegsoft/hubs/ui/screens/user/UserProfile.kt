@@ -33,6 +33,7 @@ import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -300,7 +301,13 @@ internal fun UserProfile(
                         whoIs?.aboutHtml?.let{
                             if (it.isNotBlank()) {
                                 TitledColumn(title = "О Себе") {
-                                    RenderHtml(html = it)
+                                    RenderHtml(html = it, elementSettings = remember {
+                                        ElementSettings(
+                                            fontSize = 16.sp,
+                                            lineHeight = 16.sp,
+                                            fitScreenWidth = false
+                                        )
+                                    })
                                 }
                             }
                         }

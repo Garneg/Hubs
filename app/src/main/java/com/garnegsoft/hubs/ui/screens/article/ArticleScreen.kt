@@ -46,6 +46,7 @@ import com.garnegsoft.hubs.api.HubsDataStore
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.lastReadDataStore
+import com.garnegsoft.hubs.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
@@ -543,7 +544,13 @@ fun ArticleScreen(
                             )
 
                             Spacer(modifier = Modifier.height(8.dp))
-
+                            val elementsSettings = remember {
+                                ElementSettings(
+                                    fontSize = fontSize?.sp ?: 16.sp,
+                                    lineHeight = 16.sp,
+                                    fitScreenWidth = false
+                                )
+                            }
                             SelectionContainer() {
                                 parseElement(
                                     element = Jsoup.parse(article.contentHtml),
@@ -557,7 +564,8 @@ fun ArticleScreen(
                                         SpanStyle(
                                             color = MaterialTheme.colors.onSurface,
                                             fontSize = MaterialTheme.typography.body1.fontSize
-                                        )
+                                        ),
+                                        elementsSettings
                                     )
                                 }
                             }

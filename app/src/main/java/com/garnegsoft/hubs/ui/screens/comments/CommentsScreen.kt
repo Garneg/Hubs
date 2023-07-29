@@ -59,6 +59,7 @@ import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
+import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -164,6 +165,13 @@ fun CommentsScreen(
         val commentTextFieldFocusRequester = remember { FocusRequester() }
         val randomCoroutineScope = rememberCoroutineScope()
         var articleHeaderOffset by remember { mutableStateOf(0f) }
+        val elementsSettings = remember {
+            ElementSettings(
+                fontSize = 16.sp,
+                lineHeight = 16.sp,
+                fitScreenWidth = false
+            )
+        }
         Box {
             Column(
                 modifier = Modifier
@@ -248,7 +256,8 @@ fun CommentsScreen(
                                             ).second)?.let { it1 -> it1(SpanStyle(
                                                 fontSize = 16.sp,
                                                 color = MaterialTheme.colors.onSurface
-                                            )) })
+                                            ),
+                                            elementsSettings) })
                                         }
                                     }
 

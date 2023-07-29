@@ -39,6 +39,7 @@ import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
@@ -70,7 +71,10 @@ fun ArticleContent(
     Row {
         val flingSpec = rememberSplineBasedDecay<Float>()
         val contentNodes by viewModel.parsedArticleContent.observeAsState()
-        val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreen.FontSize, MaterialTheme.typography.body1.fontSize.value).collectAsState(
+        val fontSize by context.settingsDataStoreFlowWithDefault(HubsDataStore.Settings.Keys.ArticleScreen.FontSize, MaterialTheme.typography.body1.fontSize.value).collectAsState(
+            initial = null
+        )
+        val lineHeightFactor by context.settingsDataStoreFlowWithDefault(HubsDataStore.Settings.Keys.ArticleScreen.LineHeightFactor, 1.5f).collectAsState(
             initial = null
         )
         val color = MaterialTheme.colors.onSurface
@@ -80,9 +84,17 @@ fun ArticleContent(
                 fontSize = fontSize?.sp ?: 16.sp
             )
         }
+        val elementsSettings = remember {
+            ElementSettings(
+                fontSize = fontSize?.sp ?: 16.sp,
+                lineHeight = 16.sp,
+                fitScreenWidth = false
+            )
+        }
 
         val state = rememberLazyListState()
         val updatedPolls by viewModel.updatedPolls.observeAsState()
+
         LaunchedEffect(key1 = fontSize, block = {
             if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
                 val element =
@@ -281,7 +293,7 @@ fun ArticleContent(
             }
             contentNodes?.let {
                 items(items = it) {
-                    it?.invoke(spanStyle)
+                    it?.invoke(spanStyle, elementsSettings)
                 }
             }
 
