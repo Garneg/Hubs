@@ -474,10 +474,19 @@ fun ArticlesScreen(
                     mapOf<String, @Composable () -> Unit>(
                         "Моя лента" to {
                             val refreshing by viewModel.myFeedArticlesModel.isRefreshing.observeAsState(initial = false)
-                            var scrollAfterRefresh = remember { mutableStateOf(false) }
                             val articles by viewModel.myFeedArticlesModel.data.observeAsState()
+                            var doScrollToTop by rememberSaveable() { mutableStateOf(false)}
+                            LaunchedEffect(key1 = articles?.list?.first(), block = {
+                                if (doScrollToTop)
+                                    myFeedLazyListState.scrollToItem(0)
+                                doScrollToTop = false
+                            })
+
                             if (articles != null) {
-                                RefreshableContainer(onRefresh = viewModel.myFeedArticlesModel::refresh, refreshing = refreshing) {
+                                RefreshableContainer(onRefresh = {
+                                    doScrollToTop = true
+                                    viewModel.myFeedArticlesModel.refresh()
+                                                                 }, refreshing = refreshing) {
                                     LazyHabrSnippetsColumn(
                                         lazyListState = myFeedLazyListState,
                                         data = articles!!,

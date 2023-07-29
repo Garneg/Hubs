@@ -81,7 +81,7 @@ abstract class AbstractHabrSnippetListModel<T>(
 
     override fun loadFirstPage() {
         coroutineScope.launch(Dispatchers.IO) {
-            _data.postValue(_load())
+            _data.postValue(_load()?.let { HabrList(it.list.drop(1), it.pagesCount) })
         }
     }
 
