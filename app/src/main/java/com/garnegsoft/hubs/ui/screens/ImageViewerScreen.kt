@@ -88,11 +88,12 @@ fun ImageViewScreen(
                 isDragging = true
             },
             onDragStopped = {
-                if (it.absoluteValue > 10000f || offset.absoluteValue > screenHeight / 3){
+                if (it.absoluteValue > 8000f || offset.absoluteValue > screenHeight / 3){
                     onBack()
+                } else {
+                    isDragging = false
+                    offset = 0f
                 }
-                isDragging = false
-                offset = 0f
             }
         )
         .background(Color.Black)){

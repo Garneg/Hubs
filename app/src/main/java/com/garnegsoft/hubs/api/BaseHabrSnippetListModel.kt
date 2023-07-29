@@ -45,7 +45,7 @@ abstract class AbstractHabrSnippetListModel<T>(
 
     private fun _load(additionalArgs: Map<String, String> = mapOf()): HabrList<T>? {
         _isLoading.postValue(true)
-        val result = load(filterMap + baseArgs)
+        val result = load(filterMap + baseArgs + additionalArgs)
         _isLoading.postValue(false)
         return result
     }
@@ -81,7 +81,7 @@ abstract class AbstractHabrSnippetListModel<T>(
 
     override fun loadFirstPage() {
         coroutineScope.launch(Dispatchers.IO) {
-            _data.postValue(_load()?.let { HabrList(it.list.drop(1), it.pagesCount) })
+            _data.postValue(_load())
         }
     }
 

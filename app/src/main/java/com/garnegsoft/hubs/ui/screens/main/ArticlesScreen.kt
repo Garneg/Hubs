@@ -483,10 +483,10 @@ fun ArticlesScreen(
                             })
 
                             if (articles != null) {
-                                RefreshableContainer(onRefresh = {
-                                    doScrollToTop = true
-                                    viewModel.myFeedArticlesModel.refresh()
-                                                                 }, refreshing = refreshing) {
+//                                RefreshableContainer(onRefresh = {
+//                                    doScrollToTop = true
+//                                    viewModel.myFeedArticlesModel.refresh()
+//                                                                 }, refreshing = refreshing) {
                                     LazyHabrSnippetsColumn(
                                         lazyListState = myFeedLazyListState,
                                         data = articles!!,
@@ -499,7 +499,7 @@ fun ArticlesScreen(
                                             onCommentsClick = { onCommentsClicked(it.id) },
                                         )
                                     }
-                                }
+
                             } else {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
