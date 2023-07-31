@@ -5,16 +5,17 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import kotlinx.coroutines.CoroutineScope
 
 class ArticlesListModel(
-    override val path: String,
-    override val coroutineScope: CoroutineScope,
-    vararg baseArgs: Pair<String, String>,
-
-    ) : AbstractHabrSnippetListModel<ArticleSnippet>(
-    path = path,
-    baseArgs = baseArgs.toMap(),
-    coroutineScope = coroutineScope
+        override val path: String,
+        override val coroutineScope: CoroutineScope,
+        vararg baseArgs: Pair<String, String>,
+        initialFilter: Map<String, String> = emptyMap(),
+) : AbstractHabrSnippetListModel<ArticleSnippet>(
+        path = path,
+        baseArgs = baseArgs.toMap(),
+        coroutineScope = coroutineScope,
+        initialFilter = initialFilter
 ) {
     override fun load(args: Map<String, String>): HabrList<ArticleSnippet>? =
-        ArticlesListController.getArticlesSnippets(path, args)
+            ArticlesListController.getArticlesSnippets(path, args)
 
 }

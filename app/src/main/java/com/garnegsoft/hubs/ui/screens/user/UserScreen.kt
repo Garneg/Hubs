@@ -5,6 +5,7 @@ import ArticlesListController
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
@@ -19,6 +20,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
@@ -39,56 +41,56 @@ enum class UserScreenPages {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UserScreen(
-    alias: String,
-    onBack: () -> Unit,
-    onArticleClicked: (articleId: Int) -> Unit,
-    onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit,
-    onUserClicked: (alias: String) -> Unit,
-    onCommentsClicked: (postId: Int) -> Unit,
-    onHubClicked: (alias: String) -> Unit,
-    onCompanyClick: (alias: String) -> Unit,
-    initialPage: UserScreenPages = UserScreenPages.Profile,
-    isAppUser: Boolean = false,
-    onLogout: (() -> Unit)? = null,
-    viewModelStoreOwner: ViewModelStoreOwner,
+        alias: String,
+        onBack: () -> Unit,
+        onArticleClicked: (articleId: Int) -> Unit,
+        onCommentClicked: (parentArticleId: Int, commentId: Int) -> Unit,
+        onUserClicked: (alias: String) -> Unit,
+        onCommentsClicked: (postId: Int) -> Unit,
+        onHubClicked: (alias: String) -> Unit,
+        onCompanyClick: (alias: String) -> Unit,
+        initialPage: UserScreenPages = UserScreenPages.Profile,
+        isAppUser: Boolean = false,
+        onLogout: (() -> Unit)? = null,
+        viewModelStoreOwner: ViewModelStoreOwner,
 ) {
-    val viewModel = viewModel<UserScreenViewModel>(viewModelStoreOwner)
+    val viewModel = viewModel<UserScreenViewModel> { UserScreenViewModel(alias) }
 
     val commonCoroutineScope = rememberCoroutineScope()
     Scaffold(
-        topBar = {
-            TopAppBar(
-                elevation = 0.dp,
-                title = { Text("Пользователь") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, "")
-                    }
-                },
-                actions = {
-                    val context = LocalContext.current
-                    val enabled =
-                        remember(viewModel.user.isInitialized) { viewModel.user.isInitialized }
-                    IconButton(
-                        enabled = enabled,
-                        onClick = {
-                            val sendIntent = Intent(Intent.ACTION_SEND)
-                            sendIntent.putExtra(
-                                Intent.EXTRA_TEXT,
-                                if (viewModel.user.value?.fullname != null)
-                                    "${viewModel.user.value!!.fullname} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
-                                else
-                                    "${viewModel.user.value!!.alias} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
-                            )
-                            sendIntent.setType("text/plain")
-                            val shareIntent = Intent.createChooser(sendIntent, null)
-                            context.startActivity(shareIntent)
-                        }) {
-                        Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
-                    }
-                }
-            )
-        }
+            topBar = {
+                TopAppBar(
+                        elevation = 0.dp,
+                        title = { Text("Пользователь") },
+                        navigationIcon = {
+                            IconButton(onClick = onBack) {
+                                Icon(imageVector = Icons.Default.ArrowBack, "")
+                            }
+                        },
+                        actions = {
+                            val context = LocalContext.current
+                            val enabled =
+                                    remember(viewModel.user.isInitialized) { viewModel.user.isInitialized }
+                            IconButton(
+                                    enabled = enabled,
+                                    onClick = {
+                                        val sendIntent = Intent(Intent.ACTION_SEND)
+                                        sendIntent.putExtra(
+                                                Intent.EXTRA_TEXT,
+                                                if (viewModel.user.value?.fullname != null)
+                                                    "${viewModel.user.value!!.fullname} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
+                                                else
+                                                    "${viewModel.user.value!!.alias} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
+                                        )
+                                        sendIntent.setType("text/plain")
+                                        val shareIntent = Intent.createChooser(sendIntent, null)
+                                        context.startActivity(shareIntent)
+                                    }) {
+                                Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
+                            }
+                        }
+                )
+            }
     ) {
         LaunchedEffect(key1 = Unit) {
             if (!viewModel.user.isInitialized) {
@@ -98,82 +100,43 @@ fun UserScreen(
         viewModel.user.observeAsState().value?.let { usr ->
             var pagesMap = remember {
                 var map = mapOf<UserScreenPages, @Composable () -> Unit>(
-                    UserScreenPages.Profile to {
-                        val user by viewModel.user.observeAsState()
-                        if (user != null) {
+                        UserScreenPages.Profile to {
+                            val user by viewModel.user.observeAsState()
+                            if (user != null) {
 
-                            val note by viewModel.note.observeAsState()
-                            val hubs by viewModel.subscribedHubs.observeAsState()
-                            val whoIs by viewModel.whoIs.observeAsState()
+                                val note by viewModel.note.observeAsState()
+                                val hubs by viewModel.subscribedHubs.observeAsState()
+                                val whoIs by viewModel.whoIs.observeAsState()
 
-                            if (hubs != null)
-                                UserProfile(
-                                    user!!,
-                                    isAppUser,
-                                    onLogout,
-                                    onHubClicked,
-                                    onCompanyClick,
-                                    viewModel,
-                                )
-                            else
-                                LaunchedEffect(key1 = Unit, block = {
-                                    viewModel.loadNote()
-                                    viewModel.loadSubscribedHubs()
-                                    viewModel.loadWhoIs()
-                                })
-                        }
-                    })
+                                if (hubs != null)
+                                    UserProfile(
+                                            user!!,
+                                            isAppUser,
+                                            onLogout,
+                                            onHubClicked,
+                                            onCompanyClick,
+                                            viewModel,
+                                    )
+                                else
+                                    LaunchedEffect(key1 = Unit, block = {
+                                        viewModel.loadNote()
+                                        viewModel.loadSubscribedHubs()
+                                        viewModel.loadWhoIs()
+                                    })
+                            }
+                        })
                 if (usr.articlesCount > 0 || initialPage == UserScreenPages.Articles) {
                     map += UserScreenPages.Articles to {
-                        val articles by viewModel.articles.observeAsState()
+                        LaunchedEffect(key1 = Unit, block = {
+                            viewModel.articlesModel.loadFirstPage()
+                        })
 
-                        if (articles != null) {
-                            PagedHabrSnippetsColumn(
-                                data = articles!!,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf(
-                                                "user" to viewModel.user.value!!.alias,
-                                                "page" to it.toString()
-                                            )
-                                        )?.let {
-                                            viewModel.articles.postValue(
-                                                articles!! + it
-                                            )
-                                        }
-                                    }
-                                }
-                            ) {
-                                ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClicked(it.id) },
-                                    onCommentsClick = { onCommentsClicked(it.id) },
-                                    onAuthorClick = { onUserClicked(it.author!!.alias) }
-                                )
-                            }
-                        } else {
-                            if (!viewModel.articles.isInitialized) {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.align(
-                                            Alignment.Center
-                                        )
-                                    )
-                                }
-                            }
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.articles.postValue(
-                                        ArticlesListController.getArticlesSnippets(
-                                            "articles",
-                                            mapOf("user" to viewModel.user.value!!.alias)
-                                        )
-                                    )
-                                }
-                            })
-                        }
+                        ArticlesListPage(
+                                listModel = viewModel.articlesModel,
+                                onArticleSnippetClick = onArticleClicked,
+                                onArticleAuthorClick = onUserClicked,
+                                onArticleCommentsClick = onCommentsClicked
+                        )
                     }
                 }
                 if (usr.commentsCount > 0 || initialPage == UserScreenPages.Comments) {
@@ -181,46 +144,46 @@ fun UserScreen(
                         val userComments by viewModel.comments.observeAsState()
                         if (userComments != null) {
                             PagedHabrSnippetsColumn(
-                                data = userComments!!,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        CommentsListController.getCommentsSnippets(
-                                            "users/${alias}/comments",
-                                            mapOf("page" to it.toString())
-                                        )?.let {
-                                            viewModel.comments.postValue(
-                                                userComments!! + it
-                                            )
+                                    data = userComments!!,
+                                    onNextPageLoad = {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
+                                            CommentsListController.getCommentsSnippets(
+                                                    "users/${alias}/comments",
+                                                    mapOf("page" to it.toString())
+                                            )?.let {
+                                                viewModel.comments.postValue(
+                                                        userComments!! + it
+                                                )
+                                            }
                                         }
                                     }
-                                }
                             ) {
                                 CommentCard(
-                                    comment = it,
-                                    onCommentClick = {
-                                        onCommentClicked(
-                                            it.parentPost.id,
-                                            it.id
-                                        )
-                                    },
-                                    onAuthorClick = { onUserClicked(it.author.alias) },
-                                    onParentPostClick = { onArticleClicked(it.parentPost.id) }
+                                        comment = it,
+                                        onCommentClick = {
+                                            onCommentClicked(
+                                                    it.parentPost.id,
+                                                    it.id
+                                            )
+                                        },
+                                        onAuthorClick = { onUserClicked(it.author.alias) },
+                                        onParentPostClick = { onArticleClicked(it.parentPost.id) }
                                 )
                             }
                         } else {
                             if (!viewModel.comments.isInitialized) {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.align(
-                                            Alignment.Center
-                                        )
+                                            modifier = Modifier.align(
+                                                    Alignment.Center
+                                            )
                                     )
                                 }
                             }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     viewModel.comments.postValue(
-                                        CommentsListController.getCommentsSnippets("users/${alias}/comments")
+                                            CommentsListController.getCommentsSnippets("users/${alias}/comments")
                                     )
                                 }
                             })
@@ -233,49 +196,49 @@ fun UserScreen(
 
                         if (bookmarks != null) {
                             PagedHabrSnippetsColumn(
-                                data = bookmarks!!,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        ArticlesListController.getArticlesSnippets(
-                                            path = "articles",
-                                            args = mapOf(
-                                                "user" to alias,
-                                                "user_bookmarks" to "true",
-                                                "page" to it.toString()
-                                            )
-                                        )?.let {
-                                            viewModel.bookmarks.postValue(bookmarks!! + it)
+                                    data = bookmarks!!,
+                                    onNextPageLoad = {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
+                                            ArticlesListController.getArticlesSnippets(
+                                                    path = "articles",
+                                                    args = mapOf(
+                                                            "user" to alias,
+                                                            "user_bookmarks" to "true",
+                                                            "page" to it.toString()
+                                                    )
+                                            )?.let {
+                                                viewModel.bookmarks.postValue(bookmarks!! + it)
+                                            }
                                         }
                                     }
-                                }
                             ) {
                                 ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClicked(it.id) },
-                                    onCommentsClick = { onCommentsClicked(it.id) },
-                                    onAuthorClick = {
-                                        onUserClicked(it.author!!.alias)
-                                    }
+                                        article = it,
+                                        onClick = { onArticleClicked(it.id) },
+                                        onCommentsClick = { onCommentsClicked(it.id) },
+                                        onAuthorClick = {
+                                            onUserClicked(it.author!!.alias)
+                                        }
                                 )
                             }
                         } else {
                             if (!viewModel.bookmarks.isInitialized) {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.align(
-                                            Alignment.Center
-                                        )
+                                            modifier = Modifier.align(
+                                                    Alignment.Center
+                                            )
                                     )
                                 }
                             }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     ArticlesListController.getArticlesSnippets(
-                                        path = "articles",
-                                        args = mapOf(
-                                            "user" to alias,
-                                            "user_bookmarks" to "true"
-                                        )
+                                            path = "articles",
+                                            args = mapOf(
+                                                    "user" to alias,
+                                                    "user_bookmarks" to "true"
+                                            )
                                     )?.let {
                                         viewModel.bookmarks.postValue(it)
                                     }
@@ -289,20 +252,20 @@ fun UserScreen(
                         val followers by viewModel.followers.observeAsState()
                         if (followers != null) {
                             PagedHabrSnippetsColumn(
-                                data = followers!!,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        UsersListController.get(
-                                            "users/${alias}/followers",
-                                            mapOf("page" to it.toString())
-                                        )?.let {
-                                            viewModel.followers.postValue(
-                                                followers!! + it
-                                            )
-                                        }
+                                    data = followers!!,
+                                    onNextPageLoad = {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
+                                            UsersListController.get(
+                                                    "users/${alias}/followers",
+                                                    mapOf("page" to it.toString())
+                                            )?.let {
+                                                viewModel.followers.postValue(
+                                                        followers!! + it
+                                                )
+                                            }
 
+                                        }
                                     }
-                                }
                             ) {
                                 UserCard(user = it, onClick = { onUserClicked(it.alias) })
                             }
@@ -310,16 +273,16 @@ fun UserScreen(
                             if (!viewModel.followers.isInitialized) {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.align(
-                                            Alignment.Center
-                                        )
+                                            modifier = Modifier.align(
+                                                    Alignment.Center
+                                            )
                                     )
                                 }
                             }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     viewModel.followers.postValue(
-                                        UsersListController.get("users/${alias}/followers")
+                                            UsersListController.get("users/${alias}/followers")
                                     )
                                 }
                             })
@@ -332,19 +295,19 @@ fun UserScreen(
 
                         if (follows != null) {
                             PagedHabrSnippetsColumn(
-                                data = follows!!,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        UsersListController.get(
-                                            "users/${alias}/followed",
-                                            mapOf("page" to it.toString())
-                                        )?.let {
-                                            viewModel.follow.postValue(
-                                                follows!! + it
-                                            )
+                                    data = follows!!,
+                                    onNextPageLoad = {
+                                        commonCoroutineScope.launch(Dispatchers.IO) {
+                                            UsersListController.get(
+                                                    "users/${alias}/followed",
+                                                    mapOf("page" to it.toString())
+                                            )?.let {
+                                                viewModel.follow.postValue(
+                                                        follows!! + it
+                                                )
+                                            }
                                         }
                                     }
-                                }
                             ) {
                                 UserCard(user = it, onClick = { onUserClicked(it.alias) })
                             }
@@ -352,16 +315,16 @@ fun UserScreen(
                             if (!viewModel.follow.isInitialized) {
                                 Box(modifier = Modifier.fillMaxSize()) {
                                     CircularProgressIndicator(
-                                        modifier = Modifier.align(
-                                            Alignment.Center
-                                        )
+                                            modifier = Modifier.align(
+                                                    Alignment.Center
+                                            )
                                     )
                                 }
                             }
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     viewModel.follow.postValue(
-                                        UsersListController.get("users/${alias}/followed")
+                                            UsersListController.get("users/${alias}/followed")
                                     )
                                 }
                             })
@@ -373,31 +336,35 @@ fun UserScreen(
             }
             val tabs = remember {
                 pagesMap.keys.map {
-                    when(it){
+                    when (it) {
                         UserScreenPages.Profile -> "Профиль"
                         UserScreenPages.Articles -> "Публикации${
                             if (viewModel.user.value!!.articlesCount > 0) " " + formatLongNumbers(
-                                viewModel.user.value!!.articlesCount
+                                    viewModel.user.value!!.articlesCount
                             ) else ""
                         }"
+
                         UserScreenPages.Comments -> "Комментарии${
                             if (viewModel.user.value!!.commentsCount > 0) " " + formatLongNumbers(
-                                viewModel.user.value!!.commentsCount
+                                    viewModel.user.value!!.commentsCount
                             ) else ""
                         }"
+
                         UserScreenPages.Bookmarks -> "Закладки${
                             if (viewModel.user.value!!.favoritesCount > 0) " " + formatLongNumbers(
-                                viewModel.user.value!!.favoritesCount
+                                    viewModel.user.value!!.favoritesCount
                             ) else ""
                         }"
+
                         UserScreenPages.Followers -> "Подписчики${
                             if (viewModel.user.value!!.followersCount > 0) " " + formatLongNumbers(
-                                viewModel.user.value!!.followersCount
+                                    viewModel.user.value!!.followersCount
                             ) else ""
                         }"
+
                         UserScreenPages.Follows -> "Подписки${
                             if (viewModel.user.value!!.followsCount > 0) " " + formatLongNumbers(
-                                viewModel.user.value!!.followsCount
+                                    viewModel.user.value!!.followsCount
                             ) else ""
                         }"
                     }
@@ -412,16 +379,16 @@ fun UserScreen(
                     HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
                 }
                 HorizontalPager(
-                    state = pagerState,
-                    pageCount = pagesMap.size
+                        state = pagerState,
+                        pageCount = pagesMap.size
                 ) { pageIndex ->
                     pagesMap.values.elementAt(pageIndex).invoke()
                 }
             }
         } ?: Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(it)
+                modifier = Modifier
+                        .fillMaxSize()
+                        .padding(it)
         ) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }

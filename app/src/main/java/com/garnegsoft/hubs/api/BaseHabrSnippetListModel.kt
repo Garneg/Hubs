@@ -12,10 +12,10 @@ import kotlinx.coroutines.launch
 
 
 abstract class AbstractHabrSnippetListModel<T>(
-    override val path: String,
-    override val baseArgs: Map<String, String>,
-    initialFilter: Map<String, String> = mapOf(),
-    open val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
+        override val path: String,
+        override val baseArgs: Map<String, String>,
+        initialFilter: Map<String, String> = emptyMap(),
+        open val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
 ) : HabrSnippetListModel<T> where T : HabrSnippet {
 
     private var filterMap: Map<String, String> = initialFilter

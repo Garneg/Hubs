@@ -5,7 +5,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.HabrList
+import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.comment.CommentsListModel
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
@@ -15,9 +17,20 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class UserScreenViewModel : ViewModel() {
+class UserScreenViewModel(val userAlias: String) : ViewModel() {
     val user = MutableLiveData<User>()
-    val articles = MutableLiveData<HabrList<ArticleSnippet>>()
+
+    val articlesModel = ArticlesListModel(
+            path = "articles",
+            coroutineScope = viewModelScope,
+            "user" to userAlias
+    )
+
+    val commentsModel = CommentsListModel(
+            path = "",
+            coroutineScope = viewModelScope,
+
+    )
     val comments = MutableLiveData<HabrList<CommentSnippet>>()
     val bookmarks = MutableLiveData<HabrList<ArticleSnippet>>()
     val followers = MutableLiveData<HabrList<UserSnippet>>()
@@ -51,7 +64,7 @@ class UserScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             if (subscribedHubsPage == 1) {
                 HubsListController.get(
-                    "users/${user.value?.alias}/subscriptions/hubs"
+                        "users/${user.value?.alias}/subscriptions/hubs"
                 )?.let {
                     _subscribedHubs.postValue(it)
                     subscribedHubsPage++
@@ -59,8 +72,8 @@ class UserScreenViewModel : ViewModel() {
             } else {
                 if (subscribedHubs.isInitialized && moreHubsAvailable)
                     HubsListController.get(
-                        "users/${user.value?.alias}/subscriptions/hubs",
-                        mapOf("page" to subscribedHubsPage.toString())
+                            "users/${user.value?.alias}/subscriptions/hubs",
+                            mapOf("page" to subscribedHubsPage.toString())
                     )?.let {
                         _subscribedHubs.postValue(subscribedHubs.value!! + it)
                         subscribedHubsPage++

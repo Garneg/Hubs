@@ -563,7 +563,7 @@ fun ArticleScreen(
                                     it1(
                                         SpanStyle(
                                             color = MaterialTheme.colors.onSurface,
-                                            fontSize = MaterialTheme.typography.body1.fontSize
+                                            fontSize = fontSize?.sp ?:MaterialTheme.typography.body1.fontSize
                                         ),
                                         elementsSettings
                                     )

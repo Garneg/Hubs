@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -55,26 +56,26 @@ val HEADER_FONT_WEIGHT = FontWeight.W700
 val LINE_HEIGHT_FACTOR = 1.5F
 
 fun parseElement(
-    html: String,
-    spanStyle: SpanStyle
+        html: String,
+        spanStyle: SpanStyle
 ): Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?> =
-    parseElement(Jsoup.parse(html), spanStyle)
+        parseElement(Jsoup.parse(html), spanStyle)
 
 @Stable
 @Composable
 fun RenderHtml(
-    html: String,
-    spanStyle: SpanStyle =
-        SpanStyle(
-            color = MaterialTheme.colors.onSurface,
-            fontSize = MaterialTheme.typography.body1.fontSize
-        ),
-    elementSettings: ElementSettings
+        html: String,
+        spanStyle: SpanStyle =
+                SpanStyle(
+                        color = MaterialTheme.colors.onSurface,
+                        fontSize = MaterialTheme.typography.body1.fontSize
+                ),
+        elementSettings: ElementSettings
 ) {
     val result = remember {
         parseElement(
-            html = html,
-            spanStyle = spanStyle
+                html = html,
+                spanStyle = spanStyle
         )
     }
     Column {
@@ -88,9 +89,9 @@ fun RenderHtml(
  * WARNING! Specify fontSize with **spanStyle** or you will get exception
  */
 fun parseElement(
-    element: Element,
-    spanStyle: SpanStyle,
-    onViewImageRequest: ((imageUrl: String) -> Unit)? = null,
+        element: Element,
+        spanStyle: SpanStyle,
+        onViewImageRequest: ((imageUrl: String) -> Unit)? = null,
 ): Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?> {
     var isBlock = element.isHabrBlock()
     var resultAnnotatedString: AnnotatedString = buildAnnotatedString { }
@@ -99,13 +100,14 @@ fun parseElement(
     // Applying Inline elements style
     when (element.tagName()) {
         "del" -> ChildrenSpanStyle = ChildrenSpanStyle.copy(
-            textDecoration = TextDecoration.combine(
-                listOf(
-                    ChildrenSpanStyle.textDecoration ?: TextDecoration.None,
-                    TextDecoration.LineThrough
+                textDecoration = TextDecoration.combine(
+                        listOf(
+                                ChildrenSpanStyle.textDecoration ?: TextDecoration.None,
+                                TextDecoration.LineThrough
+                        )
                 )
-            )
         )
+
         "b" -> ChildrenSpanStyle = ChildrenSpanStyle.copy(fontWeight = STRONG_FONT_WEIGHT)
         "strong" -> ChildrenSpanStyle = ChildrenSpanStyle.copy(fontWeight = STRONG_FONT_WEIGHT)
         "i" -> ChildrenSpanStyle = ChildrenSpanStyle.copy(fontStyle = FontStyle.Italic)
@@ -115,48 +117,54 @@ fun parseElement(
                 ChildrenSpanStyle = ChildrenSpanStyle.copy(background = Color(101, 238, 255, 76))
             }
         }
+
         "code" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontFamily = FontFamily.Monospace,
-                background = Color(138, 156, 165, 20)
+                    fontFamily = FontFamily.Monospace,
+                    background = Color(138, 156, 165, 20)
             )
         }
+
         "u" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                textDecoration = TextDecoration.combine(
-                    listOf(
-                        ChildrenSpanStyle.textDecoration ?: TextDecoration.None,
-                        TextDecoration.Underline
+                    textDecoration = TextDecoration.combine(
+                            listOf(
+                                    ChildrenSpanStyle.textDecoration ?: TextDecoration.None,
+                                    TextDecoration.Underline
+                            )
                     )
-                )
             )
         }
+
         "s" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                textDecoration = TextDecoration.combine(
-                    listOf(
-                        ChildrenSpanStyle.textDecoration ?: TextDecoration.None,
-                        TextDecoration.LineThrough
+                    textDecoration = TextDecoration.combine(
+                            listOf(
+                                    ChildrenSpanStyle.textDecoration ?: TextDecoration.None,
+                                    TextDecoration.LineThrough
+                            )
                     )
-                )
             )
         }
+
         "sup" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                baselineShift = BaselineShift.Superscript,
-                fontSize = (ChildrenSpanStyle.fontSize.value - 4).coerceAtLeast(1f).sp
+                    baselineShift = BaselineShift.Superscript,
+                    fontSize = (ChildrenSpanStyle.fontSize.value - 4).coerceAtLeast(1f).sp
             )
         }
+
         "sub" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                baselineShift = BaselineShift.Subscript,
-                fontSize = (ChildrenSpanStyle.fontSize.value - 4).coerceAtLeast(1f).sp
+                    baselineShift = BaselineShift.Subscript,
+                    fontSize = (ChildrenSpanStyle.fontSize.value - 4).coerceAtLeast(1f).sp
             )
         }
 
         "br" -> {
             return buildAnnotatedString { append("\n") } to null
         }
+
         "a" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(color = Color(88, 132, 185, 255))
             if (element.hasClass("user_link")) {
@@ -165,50 +173,58 @@ fun parseElement(
                 }
             }
         }
+
         "h1" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontSize = (ChildrenSpanStyle.fontSize.value + 4f).sp,
-                fontWeight = HEADER_FONT_WEIGHT
+                    fontSize = (ChildrenSpanStyle.fontSize.value + 4f).sp,
+                    fontWeight = HEADER_FONT_WEIGHT
             )
         }
+
         "h2" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontSize = (ChildrenSpanStyle.fontSize.value + 3f).sp,
-                fontWeight = HEADER_FONT_WEIGHT
+                    fontSize = (ChildrenSpanStyle.fontSize.value + 3f).sp,
+                    fontWeight = HEADER_FONT_WEIGHT
             )
         }
+
         "h3" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontSize = (ChildrenSpanStyle.fontSize.value + 2f).sp,
-                fontWeight = HEADER_FONT_WEIGHT
+                    fontSize = (ChildrenSpanStyle.fontSize.value + 2f).sp,
+                    fontWeight = HEADER_FONT_WEIGHT
             )
         }
+
         "h4" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontSize = (ChildrenSpanStyle.fontSize.value + 2f).sp,
-                fontWeight = HEADER_FONT_WEIGHT
+                    fontSize = (ChildrenSpanStyle.fontSize.value + 2f).sp,
+                    fontWeight = HEADER_FONT_WEIGHT
             )
         }
+
         "h5" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontSize = (ChildrenSpanStyle.fontSize.value + 1f).sp,
-                fontWeight = HEADER_FONT_WEIGHT
+                    fontSize = (ChildrenSpanStyle.fontSize.value + 1f).sp,
+                    fontWeight = HEADER_FONT_WEIGHT
             )
         }
+
         "h6" -> {
             ChildrenSpanStyle = ChildrenSpanStyle.copy(
-                fontWeight = HEADER_FONT_WEIGHT
+                    fontWeight = HEADER_FONT_WEIGHT
             )
         }
+
         "figcaption" -> {
             ChildrenSpanStyle =
-                ChildrenSpanStyle.copy(
-                    color = Color.Gray,
-                    // TODO: Fix unspecified span style's fontSize that leads to NaN and exception
-                    fontSize = (ChildrenSpanStyle.fontSize.value - 4).sp
-                )
+                    ChildrenSpanStyle.copy(
+                            color = Color.Gray,
+                            // TODO: Fix unspecified span style's fontSize that leads to NaN and exception
+                            fontSize = (ChildrenSpanStyle.fontSize.value - 4).sp
+                    )
 
         }
+
         "img" -> {
             if (element.attr("inline") == "true") {
                 resultAnnotatedString = buildAnnotatedString {
@@ -216,12 +232,13 @@ fun parseElement(
                 }
             }
         }
+
         "summary" -> return buildAnnotatedString { } to null
     }
 
     // Child elements parsing and styling
     var childrenElementsResult: ArrayList<Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?>> =
-        ArrayList()
+            ArrayList()
     element.children().forEach {
         childrenElementsResult.add(parseElement(it, ChildrenSpanStyle, onViewImageRequest))
     }
@@ -238,19 +255,19 @@ fun parseElement(
         if (thisNode is TextNode) {
             if (!thisNode.isBlank)
                 currentText +=
-                    buildAnnotatedString {
-                        withStyle(ChildrenSpanStyle) {
-                            append(
-                                if (thisNode.previousSibling() == null ||
-                                    thisNode.previousSibling() is Element &&
-                                    (thisNode.previousSibling() as Element)?.tagName() == "br"
+                        buildAnnotatedString {
+                            withStyle(ChildrenSpanStyle) {
+                                append(
+                                        if (thisNode.previousSibling() == null ||
+                                                thisNode.previousSibling() is Element &&
+                                                (thisNode.previousSibling() as Element)?.tagName() == "br"
+                                        )
+                                            thisNode.text().trimStart()
+                                        else
+                                            thisNode.text()
                                 )
-                                    thisNode.text().trimStart()
-                                else
-                                    thisNode.text()
-                            )
+                            }
                         }
-                    }
         }
         if (thisNode is Element) {
 
@@ -260,35 +277,35 @@ fun parseElement(
 
             if (childrenElementsResult[childElementsIndex].second != null) {
                 if (currentText.isNotEmpty() && thisNode.previousElementSibling() != null
-                    && thisNode.previousElementSibling()!!.tagName() != "pre"
+                        && thisNode.previousElementSibling()!!.tagName() != "pre"
                 ) {
                     var thisElementCurrentText = currentText
                     childrenComposables.add { localSpanStyle, settings ->
                         //Text(text = thisElementCurrentText)
                         var context = LocalContext.current
                         ClickableText(
-                            text = thisElementCurrentText,
-                            style = LocalTextStyle.current.copy(
-                                lineHeight = localSpanStyle.fontSize.times(
-                                    LINE_HEIGHT_FACTOR
+                                text = thisElementCurrentText,
+                                style = LocalTextStyle.current.copy(
+                                        lineHeight = localSpanStyle.fontSize.times(
+                                                LINE_HEIGHT_FACTOR
+                                        ),
+                                        color = localSpanStyle.color
                                 ),
-                                color = localSpanStyle.color
-                            ),
-                            onClick = {
-                                thisElementCurrentText.getStringAnnotations(it, it)
-                                    .find { it.tag == "url" }
-                                    ?.let {
-                                        if (it.item.startsWith("http")) {
-                                            Log.e(
-                                                "URL Clicked",
-                                                it.item
-                                            )
-                                            var intent =
-                                                Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                                            context.startActivity(intent)
-                                        }
-                                    }
-                            }
+                                onClick = {
+                                    thisElementCurrentText.getStringAnnotations(it, it)
+                                            .find { it.tag == "url" }
+                                            ?.let {
+                                                if (it.item.startsWith("http")) {
+                                                    Log.e(
+                                                            "URL Clicked",
+                                                            it.item
+                                                    )
+                                                    var intent =
+                                                            Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
+                                                    context.startActivity(intent)
+                                                }
+                                            }
+                                }
                         )
                     }
                 }
@@ -319,26 +336,28 @@ fun parseElement(
         childrenComposables.add { localSpanStyle, settings ->
             //Text(text = currentText)
             val context = LocalContext.current
-            ClickableText(
-                text = currentText,
-                style = LocalTextStyle.current.copy(
+            val style = TextStyle(
+                    fontSize = localSpanStyle.fontSize,
                     lineHeight = localSpanStyle.fontSize.times(
-                        LINE_HEIGHT_FACTOR
+                            LINE_HEIGHT_FACTOR
                     ),
                     color = localSpanStyle.color
-                ),
-                onClick = {
-                    currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
-                        if (it.item.startsWith("http")) {
-                            Log.e(
-                                "URL Clicked",
-                                it.item
-                            )
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                            context.startActivity(intent)
+            )
+            ClickableText(
+                    text = currentText,
+                    style = style,
+                    onClick = {
+                        currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
+                            if (it.item.startsWith("http")) {
+                                Log.e(
+                                        "URL Clicked",
+                                        it.item
+                                )
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
+                                context.startActivity(intent)
+                            }
                         }
                     }
-                }
             )
         }
 
@@ -349,21 +368,25 @@ fun parseElement(
                 childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
+
         "h3" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 6.dp)) {
                 childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
+
         "h4" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 4.dp)) {
                 childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
+
         "h5" -> { localSpanStyle, settings ->
             Column(Modifier.padding(top = 4.dp, bottom = 3.dp)) {
                 childrenComposables.forEach { it(localSpanStyle, settings) }
             }
         }
+
         "p" -> if (element.html().isNotEmpty()) { localSpanStyle, settings ->
             Column(Modifier.padding(bottom = 16.dp)) {
                 childrenComposables.forEach {
@@ -372,48 +395,51 @@ fun parseElement(
             }
         }
         else null
+
         "a" -> if (element.hasClass("anchor"))
             { localSpanStyle, settings -> } else null
+
         "figcaption" -> if (element.text().isNotEmpty())
             { localSpanStyle, settings ->
                 val context = LocalContext.current
                 ClickableText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 14.dp),
-                    text = currentText,
-                    style = LocalTextStyle.current.copy(
-                        lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
-                        textAlign = TextAlign.Center
-                    ),
-                    onClick = {
-                        currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
-                            if (it.item.startsWith("http")) {
-                                Log.e(
-                                    "URL Clicked",
-                                    it.item
-                                )
-                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                                context.startActivity(intent)
+                        modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 14.dp),
+                        text = currentText,
+                        style = LocalTextStyle.current.copy(
+                                lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
+                                textAlign = TextAlign.Center
+                        ),
+                        onClick = {
+                            currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
+                                if (it.item.startsWith("http")) {
+                                    Log.e(
+                                            "URL Clicked",
+                                            it.item
+                                    )
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
+                                    context.startActivity(intent)
+                                }
                             }
-                        }
-                    })
+                        })
 //                Column(Modifier.padding(bottom = 12.dp)) {
 //                    childrenComposables.forEach { it(localSpanStyle) }
 //                }
             }
         else null
+
         "img" -> if (element.hasClass("formula")) {
             { localSpanStyle, settings ->
                 Box(
-                    modifier = Modifier
-                        .height(50.dp)
-                        .fillMaxWidth()
+                        modifier = Modifier
+                                .height(50.dp)
+                                .fillMaxWidth()
                 ) {
                     AsyncSvgImage(
-                        modifier = Modifier.align(Alignment.Center),
-                        data = element.attr("src"),
-                        contentScale = ContentScale.Inside
+                            modifier = Modifier.align(Alignment.Center),
+                            data = element.attr("src"),
+                            contentScale = ContentScale.Inside
                     )
                 }
 
@@ -429,34 +455,34 @@ fun parseElement(
                 }
                 var isLoaded by rememberSaveable { mutableStateOf(false) }
                 var aspectRatio by rememberSaveable {
-                    mutableStateOf(16f/9f)
+                    mutableStateOf(16f / 9f)
                 }
                 AsyncGifImage(
-                    model = sourceUrl,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .clickable(enabled = onViewImageRequest != null) {
-                            onViewImageRequest?.invoke(sourceUrl)
-                        }
-                        .background(
-                            if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
-                                0.75f
-                            ) else Color.Transparent
-                        )
-                        .aspectRatio(aspectRatio),
-                    contentScale = ContentScale.FillWidth,
-                    onState = {
-                        if (!isLoaded && it is AsyncImagePainter.State.Success){
-                            isLoaded = true
-                            it.painter.intrinsicSize.let {
-                                Log.e("painter_bounds", it.toString())
-                                aspectRatio = it.width / it.height
-                            }
+                        model = sourceUrl,
+                        modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable(enabled = onViewImageRequest != null) {
+                                    onViewImageRequest?.invoke(sourceUrl)
+                                }
+                                .background(
+                                        if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
+                                                0.75f
+                                        ) else Color.Transparent
+                                )
+                                .aspectRatio(aspectRatio),
+                        contentScale = ContentScale.FillWidth,
+                        onState = {
+                            if (!isLoaded && it is AsyncImagePainter.State.Success) {
+                                isLoaded = true
+                                it.painter.intrinsicSize.let {
+                                    Log.e("painter_bounds", it.toString())
+                                    aspectRatio = it.width / it.height
+                                }
 
+                            }
                         }
-                    }
                 )
             }
         }
@@ -465,20 +491,20 @@ fun parseElement(
             { localSpanStyle, settings ->
 
                 AndroidView(modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp)),
-                    factory = {
-                        WebView(it).apply {
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .padding(vertical = 4.dp)
+                        .clip(RoundedCornerShape(4.dp)),
+                        factory = {
+                            WebView(it).apply {
 
-                            this.settings.javaScriptEnabled = true
-                            this.settings.databaseEnabled = true
-                            isFocusable = true
-                            isLongClickable = true
-                            loadUrl(element.attr("data-src"))
-                        }
-                    })
+                                this.settings.javaScriptEnabled = true
+                                this.settings.databaseEnabled = true
+                                isFocusable = true
+                                isLongClickable = true
+                                loadUrl(element.attr("data-src"))
+                            }
+                        })
             }
         else
             { localSpanStyle, settings ->
@@ -491,16 +517,16 @@ fun parseElement(
             }
 
         "code" -> if (element.parent() != null && element.parent()!!
-                .tagName() == "pre"
+                        .tagName() == "pre"
         ) { localSpanStyle, settings ->
             Box(Modifier.padding(bottom = 4.dp)) {
                 Code(
-                    code = element.text(),
-                    language = LanguagesMap.getOrElse(
-                        element.attr("class"),
-                        { element.attr("class") }),
-                    spanStyle = localSpanStyle,
-                    elementSettings = settings
+                        code = element.text(),
+                        language = LanguagesMap.getOrElse(
+                                element.attr("class"),
+                                { element.attr("class") }),
+                        spanStyle = localSpanStyle,
+                        elementSettings = settings
                 )
             }
             resultAnnotatedString = buildAnnotatedString { }
@@ -512,70 +538,70 @@ fun parseElement(
             if (element.parent() != null && element.parent()!!.tagName() == "li")
                 { localSpanStyle, settings ->
                     TextList(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        items = childrenComposables,
-                        spanStyle = localSpanStyle,
-                        ordered = false,
-                        nested = true,
-                        elementSettings = settings
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            items = childrenComposables,
+                            spanStyle = localSpanStyle,
+                            ordered = false,
+                            nested = true,
+                            elementSettings = settings
                     )
                 }
             else
                 { localSpanStyle, settings ->
                     TextList(
-                        modifier = Modifier.padding(bottom = 8.dp),
-                        items = childrenComposables,
-                        spanStyle = localSpanStyle,
-                        ordered = false,
-                        elementSettings = settings
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            items = childrenComposables,
+                            spanStyle = localSpanStyle,
+                            ordered = false,
+                            elementSettings = settings
                     )
                 }
 
         "ol" -> if (element.hasAttr("start"))
             { localSpanStyle, settings ->
                 TextList(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    items = childrenComposables,
-                    spanStyle = localSpanStyle,
-                    ordered = true,
-                    startNumber = element.attr("start").toIntOrNull() ?: 1,
-                    elementSettings = settings
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        items = childrenComposables,
+                        spanStyle = localSpanStyle,
+                        ordered = true,
+                        startNumber = element.attr("start").toIntOrNull() ?: 1,
+                        elementSettings = settings
                 )
             }
         else
             { localSpanStyle, settings ->
                 TextList(
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    items = childrenComposables,
-                    spanStyle = localSpanStyle,
-                    ordered = true,
-                    elementSettings = settings
+                        modifier = Modifier.padding(bottom = 8.dp),
+                        items = childrenComposables,
+                        spanStyle = localSpanStyle,
+                        ordered = true,
+                        elementSettings = settings
                 )
             }
 
         "blockquote" -> { localSpanStyle, settings ->
             val quoteWidth = with(LocalDensity.current) { 4.dp.toPx() }
             Surface(
-                color = Color.Transparent,
-                modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth()
+                    color = Color.Transparent,
+                    modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
             ) {
                 val blockQuoteColor =
-                    if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
-                        0.75f
-                    )
-                Column(modifier = Modifier
-                    .drawWithContent {
-                        drawContent()
-                        drawRoundRect(
-                            color = blockQuoteColor,
-                            size = Size(quoteWidth, size.height),
-                            cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
+                        if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
+                                0.75f
                         )
+                Column(modifier = Modifier
+                        .drawWithContent {
+                            drawContent()
+                            drawRoundRect(
+                                    color = blockQuoteColor,
+                                    size = Size(quoteWidth, size.height),
+                                    cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
+                            )
 
-                    }
-                    .padding(start = 12.dp)) {
+                        }
+                        .padding(start = 12.dp)) {
                     childrenComposables.forEach { it(localSpanStyle.copy(fontStyle = FontStyle.Italic), settings) }
                 }
             }
@@ -584,8 +610,8 @@ fun parseElement(
 
         "hr" -> { localSpanStyle, settings ->
             Divider(
-                thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                    thickness = 1.dp,
+                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
             )
 
         }
@@ -594,55 +620,55 @@ fun parseElement(
             var spoilerCaption = element.getElementsByTag("summary").first()?.text() ?: "Спойлер"
             var showDetails by rememberSaveable { mutableStateOf(false) }
             Surface(
-                color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x803C3C3C),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp))
+                    color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x803C3C3C),
+                    modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 4.dp)
+                            .clip(RoundedCornerShape(4.dp))
             ) {
                 Column(
-                    modifier = Modifier
-                        .animateContentSize()
+                        modifier = Modifier
+                                .animateContentSize()
 
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showDetails = !showDetails }
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable { showDetails = !showDetails }
+                                    .padding(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            tint = Color(0xFF5587A3),
-                            modifier = Modifier
-                                .size(18.dp)
-                                .rotate(
-                                    if (!showDetails) {
-                                        -90f
-                                    } else {
-                                        0f
-                                    }
-                                ),
-                            imageVector = Icons.Outlined.ArrowDropDown, contentDescription = ""
+                                tint = Color(0xFF5587A3),
+                                modifier = Modifier
+                                        .size(18.dp)
+                                        .rotate(
+                                                if (!showDetails) {
+                                                    -90f
+                                                } else {
+                                                    0f
+                                                }
+                                        ),
+                                imageVector = Icons.Outlined.ArrowDropDown, contentDescription = ""
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         DisableSelection {
                             Text(
-                                text = spoilerCaption,
-                                color = Color(0xFF5587A3),
-                                fontSize = localSpanStyle.fontSize
+                                    text = spoilerCaption,
+                                    color = Color(0xFF5587A3),
+                                    fontSize = localSpanStyle.fontSize
                             )
                         }
                     }
                     if (showDetails) {
                         Divider()
                         Column(
-                            modifier = Modifier.padding(
-                                start = 12.dp,
-                                end = 12.dp,
-                                bottom = 8.dp,
-                                top = 8.dp
-                            )
+                                modifier = Modifier.padding(
+                                        start = 12.dp,
+                                        end = 12.dp,
+                                        bottom = 8.dp,
+                                        top = 8.dp
+                                )
                         ) {
                             childrenComposables.forEach { it(localSpanStyle, settings) }
                         }
@@ -654,32 +680,32 @@ fun parseElement(
 
         "table" -> { localSpanStyle, settings ->
             val backgroundColor =
-                if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background
+                    if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background
             val textColor = MaterialTheme.colors.onBackground
             val fontSize =
-                LocalDensity.current.fontScale * MaterialTheme.typography.body1.fontSize.value
+                    LocalDensity.current.fontScale * MaterialTheme.typography.body1.fontSize.value
             AndroidView(modifier = Modifier
 //                    .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clip(RoundedCornerShape(0.dp)),
-                factory = {
-                    WebView(it).apply {
-                        this.setBackgroundColor(backgroundColor.toArgb())
-                        this.isScrollContainer = false
-                        isFocusable = true
-                        isLongClickable = true
-                        isVerticalScrollBarEnabled = false
-                        val bodyElement = Element("body")
-                            .attr(
-                                "style",
-                                "color: rgb(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f}); " +
+                    .padding(vertical = 8.dp)
+                    .clip(RoundedCornerShape(0.dp)),
+                    factory = {
+                        WebView(it).apply {
+                            this.setBackgroundColor(backgroundColor.toArgb())
+                            this.isScrollContainer = false
+                            isFocusable = true
+                            isLongClickable = true
+                            isVerticalScrollBarEnabled = false
+                            val bodyElement = Element("body")
+                                    .attr(
+                                            "style",
+                                            "color: rgb(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f}); " +
 //                                            "background-color: rgb(${backgroundColor.red * 255f}, ${backgroundColor.green * 255f}, ${backgroundColor.blue * 255f}); " +
-                                        "font-size: ${fontSize}px;" +
-                                        "margin: 0px;"
-                            )
-                            .appendChild(
-                                Element("style").appendText(
-                                    """
+                                                    "font-size: ${fontSize}px;" +
+                                                    "margin: 0px;"
+                                    )
+                                    .appendChild(
+                                            Element("style").appendText(
+                                                    """
                                         td { 
                                             padding: 10px;
                                             border: 1px solid rgba(${textColor.red * 255f}, ${textColor.green * 255f}, ${textColor.blue * 255f}, 0.5);
@@ -692,13 +718,13 @@ fun parseElement(
                                             width: auto;
                                         }
                                     """.trimIndent()
-                                )
-                            )
-                            .appendChild(element)
+                                            )
+                                    )
+                                    .appendChild(element)
 
-                        loadData(bodyElement.outerHtml(), "text/html; charset=utf-8", "utf-8")
-                    }
-                })
+                            loadData(bodyElement.outerHtml(), "text/html; charset=utf-8", "utf-8")
+                        }
+                    })
 
         }
 
@@ -717,77 +743,77 @@ fun parseElement(
 
 
 val LanguagesMap = mapOf(
-    "" to "Язык неизвестен",
-    "plaintext" to "Текст",
+        "" to "Язык неизвестен",
+        "plaintext" to "Текст",
 
-    "1c" to "1C",
+        "1c" to "1C",
 
-    "assembly" to "Assembly",
+        "assembly" to "Assembly",
 
-    "bash" to "BASH",
+        "bash" to "BASH",
 
-    "css" to "CSS",
-    "cmake" to "CMake",
-    "cpp" to "C++",
-    "cs" to "C#",
+        "css" to "CSS",
+        "cmake" to "CMake",
+        "cpp" to "C++",
+        "cs" to "C#",
 
-    "dart" to "Dart",
-    "delphi" to "Delphi",
-    "diff" to "Diff",
-    "django" to "Django",
+        "dart" to "Dart",
+        "delphi" to "Delphi",
+        "diff" to "Diff",
+        "django" to "Django",
 
-    "elixir" to "Elixir",
-    "erlang" to "Erlang",
+        "elixir" to "Elixir",
+        "erlang" to "Erlang",
 
-    "fs" to "F#",
+        "fs" to "F#",
 
-    "go" to "Go",
+        "go" to "Go",
 
-    "html" to "HTML",
+        "html" to "HTML",
 
-    "java" to "Java",
-    "javascript" to "JavaScript",
-    "json" to "JSON",
-    "julia" to "Julia",
+        "java" to "Java",
+        "javascript" to "JavaScript",
+        "json" to "JSON",
+        "julia" to "Julia",
 
-    "kotlin" to "Kotlin",
+        "kotlin" to "Kotlin",
 
-    "lisp" to "Lisp",
-    "lua" to "Lua",
+        "lisp" to "Lisp",
+        "lua" to "Lua",
 
-    "markdown" to "Markdown",
-    "matlab" to "Matlab",
+        "markdown" to "Markdown",
+        "matlab" to "Matlab",
 
-    "nginx" to "NGINX",
+        "nginx" to "NGINX",
 
-    "objectivec" to "Objective C",
+        "objectivec" to "Objective C",
 
-    "perl" to "Perl",
-    "pgsql" to "pgSQL",
-    "php" to "PHP",
-    "powershell" to "PowerShell",
-    "python" to "Python",
+        "perl" to "Perl",
+        "pgsql" to "pgSQL",
+        "php" to "PHP",
+        "powershell" to "PowerShell",
+        "python" to "Python",
 
-    "r" to "R",
-    "ruby" to "Ruby",
-    "rust" to "Rust",
+        "r" to "R",
+        "ruby" to "Ruby",
+        "rust" to "Rust",
 
-    "swift" to "Swift",
-    "sql" to "SQL",
-    "scala" to "Scala",
-    "smalltalk" to "Smalltalk",
+        "swift" to "Swift",
+        "sql" to "SQL",
+        "scala" to "Scala",
+        "smalltalk" to "Smalltalk",
 
-    "typescript" to "TypeScript",
+        "typescript" to "TypeScript",
 
-    "vala" to "Vala",
-    "vbscript" to "Vbscript",
-    "vhdl" to "VHDL",
+        "vala" to "Vala",
+        "vbscript" to "Vbscript",
+        "vhdl" to "VHDL",
 
-    "xml" to "XML",
+        "xml" to "XML",
 
-    "yaml" to "YAML",
+        "yaml" to "YAML",
 
-    "zig" to "Zig"
+        "zig" to "Zig"
 
 )
 
@@ -795,10 +821,10 @@ val LanguagesMap = mapOf(
 // may be redundant
 fun Element.isHabrBlock(): Boolean {
     val blocks = arrayListOf(
-        "h1", "h2", "h3", "h4", "h5", "h6",
-        "p", "div", "img", "table", "iframe",
-        "li", "ul", "ol", "figcaption", "blockquote",
-        "hr"
+            "h1", "h2", "h3", "h4", "h5", "h6",
+            "p", "div", "img", "table", "iframe",
+            "li", "ul", "ol", "figcaption", "blockquote",
+            "hr"
     )
 
     blocks.forEach {
@@ -809,13 +835,13 @@ fun Element.isHabrBlock(): Boolean {
 
 @Composable
 fun TextList(
-    modifier: Modifier = Modifier,
-    items: List<@Composable (SpanStyle, ElementSettings) -> Unit>,
-    spanStyle: SpanStyle,
-    elementSettings: ElementSettings,
-    ordered: Boolean,
-    nested: Boolean = false,
-    startNumber: Int = 1
+        modifier: Modifier = Modifier,
+        items: List<@Composable (SpanStyle, ElementSettings) -> Unit>,
+        spanStyle: SpanStyle,
+        elementSettings: ElementSettings,
+        ordered: Boolean,
+        nested: Boolean = false,
+        startNumber: Int = 1
 ) {
     var itemNumber = startNumber
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -844,26 +870,26 @@ const val CODE_ALPHA_VALUE = 0.035f
 
 @Composable
 fun Code(
-    code: String,
-    language: String,
-    spanStyle: SpanStyle,
-    elementSettings: ElementSettings,
-    modifier: Modifier = Modifier
+        code: String,
+        language: String,
+        spanStyle: SpanStyle,
+        elementSettings: ElementSettings,
+        modifier: Modifier = Modifier
 ) {
     Column(
-        modifier
-            .clip(RoundedCornerShape(4.dp))
+            modifier
+                    .clip(RoundedCornerShape(4.dp))
     ) {
         Surface(
-            color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
-            modifier = Modifier.fillMaxWidth()
+                color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
+                modifier = Modifier.fillMaxWidth()
         ) {
             DisableSelection {
                 Row(modifier = Modifier.padding(8.dp)) {
                     Text(
-                        text = buildAnnotatedString { withStyle(spanStyle) { append(language) } },
-                        fontWeight = FontWeight.W600,
-                        fontFamily = FontFamily.SansSerif
+                            text = buildAnnotatedString { withStyle(spanStyle) { append(language) } },
+                            fontWeight = FontWeight.W600,
+                            fontFamily = FontFamily.SansSerif
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                 }
@@ -872,12 +898,12 @@ fun Code(
 
         }
         Surface(
-            color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
-            modifier = Modifier.fillMaxWidth()
+                color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
+                modifier = Modifier.fillMaxWidth()
         ) {
             Row() {
                 Surface(
-                    color = MaterialTheme.colors.onBackground.copy(0f),
+                        color = MaterialTheme.colors.onBackground.copy(0f),
                 ) {
                     Column(Modifier.padding(8.dp)) {
                         var linesIndicator = String()
@@ -888,24 +914,24 @@ fun Code(
 
                         DisableSelection {
                             Text(
-                                text = buildAnnotatedString { withStyle(spanStyle.copy(color = MaterialTheme.colors.onBackground.copy(0.5f))) { append(linesIndicator) } },
-                                color = MaterialTheme.colors.onBackground.copy(0.5f),
-                                fontFamily = FontFamily.Monospace,
-                                textAlign = TextAlign.End
+                                    text = buildAnnotatedString { withStyle(spanStyle.copy(color = MaterialTheme.colors.onBackground.copy(0.5f))) { append(linesIndicator) } },
+                                    color = MaterialTheme.colors.onBackground.copy(0.5f),
+                                    fontFamily = FontFamily.Monospace,
+                                    textAlign = TextAlign.End
                             )
                         }
                     }
                 }
                 Row(
-                    modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .fillMaxWidth()
-                        .padding(8.dp)
+                        modifier = Modifier
+                                .horizontalScroll(rememberScrollState())
+                                .fillMaxWidth()
+                                .padding(8.dp)
                 ) {
                     Text(
-                        text = buildAnnotatedString { withStyle(spanStyle) { append(code) } },
+                            text = buildAnnotatedString { withStyle(spanStyle) { append(code) } },
 
-                        fontFamily = FontFamily.Monospace,
+                            fontFamily = FontFamily.Monospace,
                     )
                 }
             }
