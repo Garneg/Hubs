@@ -68,404 +68,410 @@ val Context.settingsDataStore by preferencesDataStore(HubsDataStore.Settings.Dat
 val Context.lastReadDataStore by preferencesDataStore(HubsDataStore.LastRead.DataStoreName)
 
 fun <T> Context.lastReadDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
-    return lastReadDataStore.data.map { it[key] }
+	return lastReadDataStore.data.map { it[key] }
 }
 
 fun <T> Context.settingsDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
-    return settingsDataStore.data.map { it[key] }
+	return settingsDataStore.data.map { it[key] }
 }
+
 fun <T> Context.settingsDataStoreFlowWithDefault(key: Preferences.Key<T>, defaultValue: T): Flow<T> {
-    return settingsDataStore.data.map { it[key] ?: defaultValue }
+	return settingsDataStore.data.map { it[key] ?: defaultValue }
 }
 
 fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
-    return authDataStore.data.map { it[key] }
+	return authDataStore.data.map { it[key] }
 }
 
 
-
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
-
-        CookieManager.getInstance().removeAllCookies(null)
-        val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
-        val isAuthorizedFlow =
-            authDataStore.data.map { it[HubsDataStore.Auth.Keys.Authorized] ?: false }
-        lifecycle.coroutineScope.launch {
-            cookiesFlow
-                .collect {
-                    cookies = it
-                }
-        }
-        var theme: HubsDataStore.Settings.Keys.ThemeMode? = null
-
-        runBlocking {
-            authorized = isAuthorizedFlow.first()
-            val themeInt = settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).first() ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal
-            theme = HubsDataStore.Settings.Keys.ThemeMode.values()[themeInt]
-        }
-
-        val authActivityLauncher =
-            registerForActivityResult(AuthActivityResultContract()) { result ->
-                CookieManager.getInstance().removeAllCookies(null)
-                lifecycle.coroutineScope.launch {
-                    result?.let {
-                        authDataStore.edit {
-                            it[HubsDataStore.Auth.Keys.Cookies] = result
-                            it[HubsDataStore.Auth.Keys.Authorized] = true
-                            authorized = true
-                            //cookies = result
-                        }
-                    }
-                }
-            }
-
-
-        intent.dataString?.let { Log.e("intentData", it) }
-        HabrApi.initialize(this)
-
-
-        setContent {
-            val themeMode by settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).collectAsState(initial = HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal)
-
-            val theme by remember(themeMode) { mutableStateOf(
-                themeMode?.let {
-                    HubsDataStore.Settings.Keys.ThemeMode.values()[it]
-                } ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined
-
-            ) }
-
-            var userInfo: Me? by remember { mutableStateOf(null) }
-            val userInfoUpdateBlock = remember {
-                {
-                    userInfo = MeController.getMe()
-                    Log.e("userInfoUpdateBlock", userInfo.toString())
-                }
-            }
-            LaunchedEffect(
-                key1 = isAuthorizedFlow.collectAsState(initial = false).value,
-                block = {
-                    launch(Dispatchers.IO, block = { userInfoUpdateBlock() })
-                })
-
-            HubsTheme(
-                darkTheme = when(theme){
-                    HubsDataStore.Settings.Keys.ThemeMode.Undetermined -> isSystemInDarkTheme()
-                    HubsDataStore.Settings.Keys.ThemeMode.SystemDefined -> isSystemInDarkTheme()
-                    HubsDataStore.Settings.Keys.ThemeMode.Dark -> true
-                    else -> false
-                }
-            ) {
-                val navController = rememberNavController()
-
-                NavHost(
-                    modifier = Modifier
-                        .statusBarsPadding()
-                        .navigationBarsPadding(),
-                    navController = navController,
-                    startDestination = "articles",
-                    builder = {
-
-                        composable("articles") {
-
-                            ArticlesScreen(
-                                viewModelStoreOwner = it,
-                                onSearchClicked = { navController.navigate("search") },
-                                onArticleClicked = {
-                                    if (!navController.currentBackStackEntry!!.destination.route!!.contains(
-                                            "article/"
-                                        )
-                                    )
-                                        navController.navigate("article/$it")
-                                },
-                                onCommentsClicked = {
-                                    navController.navigate("comments/$it")
-                                },
-                                onUserClicked = {
-                                    navController.navigate("user/$it")
-                                },
-                                onCompanyClicked = {
-                                    navController.navigate("company/$it")
-                                },
-                                onHubClicked = {
-                                    navController.navigate("hub/$it")
-                                },
-                                menu = {
-                                    val authorizedMenu by isAuthorizedFlow.collectAsState(
-                                        initial = false
-                                    )
-                                    if (authorizedMenu && userInfo != null) {
-                                        AuthorizedMenu(
-                                            userAlias = userInfo!!.alias,
-                                            avatarUrl = userInfo!!.avatarUrl,
-                                            onProfileClick = { navController.navigate("user/${userInfo!!.alias}") },
-                                            onArticlesClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Articles}") },
-                                            onCommentsClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Comments}") },
-                                            onBookmarksClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}") },
-                                            onSavedArticlesClick = { navController.navigate("savedArticles")},
-                                            onSettingsClick = { navController.navigate("settings") },
-                                            onAboutClick = { navController.navigate("about") }
-                                        )
-                                    } else {
-                                        UnauthorizedMenu(
-                                            onLoginClick = {
-                                                authActivityLauncher.launch(Unit)
-                                                lifecycle.coroutineScope.launch(Dispatchers.IO) { userInfoUpdateBlock() }
-                                            },
-                                            onSavedArticlesClick = { navController.navigate("savedArticles")},
-                                            onSettingsClick = { navController.navigate("settings") },
-                                            onAboutClick = { navController.navigate("about") }
-                                        )
-                                    }
-                                }
-                            )
-                        }
-
-                        composable(
-                            route = "article/{id}?offline={offline}",
-                            deepLinks = ArticleNavDeepLinks
-                        ) {
-                            val id = it.arguments?.getString("id")?.toIntOrNull()
-                            val offline = it.arguments?.getString("offline")?.toBooleanStrict()
-
-                            val clearLastArticle = remember {
-                                {
-                                    lifecycle.coroutineScope.launch(Dispatchers.IO) {
-                                        lastReadDataStore.edit {
-                                            it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
-                                            it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] =
-                                                0
-                                        }
-                                    }
-                                }
-                            }
-
-                            BackHandler(enabled = true) {
-                                clearLastArticle()
-                                if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
-                                    this@MainActivity.finish()
-                                }
-                                else {
-                                    navController.popBackStack()
-                                }
-                            }
-
-                            ArticleScreen(
-                                articleId = id!!,
-                                isOffline = offline ?: false,
-                                onBackButtonClicked = {
-                                    clearLastArticle()
-                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
-                                        this@MainActivity.finish()
-                                    }
-                                    else {
-                                        navController.popBackStack()
-                                    }
-                                },
-                                onCommentsClicked = {
-                                    clearLastArticle()
-                                    navController.navigate("comments/${id}")
-                                },
-                                onAuthorClicked = {
-                                    clearLastArticle()
-                                    navController.navigate("user/${it}")
-                                },
-                                onHubClicked = {
-                                    clearLastArticle()
-                                    navController.navigate("hub/$it")
-                                },
-                                onCompanyClick = {
-                                    clearLastArticle()
-                                    navController.navigate("company/$it")
-                                },
-                                onViewImageRequest = {
-                                    navController.navigate(route = "imageViewer?imageUrl=$it")
-                                },
-                                onArticleClick = {
-                                    navController.navigate("article/$it")
-                                },
-                                viewModelStoreOwner = it
-                            )
-
-                        }
-
-                        composable(route = "search") {
-                            SearchScreen(
-                                viewModelStoreOwner = it,
-                                onArticleClicked = { navController.navigate("article/$it") },
-                                onUserClicked = { navController.navigate("user/$it") },
-                                onHubClicked = { navController.navigate("hub/$it") },
-                                onCompanyClicked = { navController.navigate("company/$it") },
-                                onCommentsClicked = { navController.navigate("comments/$it") },
-                                onBackClicked = { navController.navigateUp() }
-                            )
-                        }
-
-                        composable(route = "settings") {
-                            SettingsScreen(
-                                onBack = {
-                                    navController.popBackStack()
-                                },
-                                onArticleScreenSettings = {
-                                    navController.navigate("article_settings")
-                                }
-                            )
-                        }
-
-                        composable(route = "article_settings") {
-                            ArticleScreenSettingsScreen(
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-
-                        composable(
-                            route = "comments/{postId}?commentId={commentId}",
-                            deepLinks = CommentsScreenNavDeepLinks
-                        ) {
-                            val postId = it.arguments!!.getString("postId")!!
-                            val commentId = it.arguments?.getString("commentId")
-                            CommentsScreen(
-                                viewModelStoreOwner = it,
-                                parentPostId = postId.toInt(),
-                                commentId = commentId?.toInt(),
-                                onBackClicked = {
-                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
-                                        this@MainActivity.finish()
-                                    }
-                                    else {
-                                        navController.popBackStack()
-                                    }
-                                                },
-                                onArticleClicked = { navController.navigate("article/$postId") },
-                                onUserClicked = { navController.navigate("user/$it") }
-                            )
-
-                        }
-
-                        composable(
-                            "user/{alias}?page={page}",
-                            deepLinks = UserScreenNavDeepLinks
-                        ) {
-                            navController.popBackStack("", false)
-                            val page =
-                                it.arguments?.getString("page")?.let { UserScreenPages.valueOf(it) }
-                                    ?: UserScreenPages.Profile
-
-                            val alias = it.arguments!!.getString("alias")!!
-
-                            val logoutCoroutineScope = rememberCoroutineScope()
-                            UserScreen(
-                                isAppUser = alias == userInfo?.alias,
-                                initialPage = page,
-                                alias = alias,
-                                onBack = {
-                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
-                                        this@MainActivity.finish()
-                                    }
-                                    else {
-                                        navController.popBackStack()
-                                    }
-                                         },
-                                onArticleClicked = { navController.navigate("article/$it") },
-                                onUserClicked = { navController.navigate("user/$it") },
-                                onCommentsClicked = { navController.navigate("comments/$it") },
-                                onCommentClicked = { postId, commentId ->
-                                    navController.navigate(
-                                        "comments/$postId?commentId=$commentId"
-                                    )
-                                },
-                                onCompanyClick = { navController.navigate("company/$it")},
-                                viewModelStoreOwner = it,
-                                onLogout = {
-                                    logoutCoroutineScope.launch {
-                                        authDataStore.edit {
-                                            it[HubsDataStore.Auth.Keys.Authorized] = false
-                                            it[HubsDataStore.Auth.Keys.Cookies] = ""
-                                        }
-                                        //cookies = ""
-                                        authorized = false
-                                        navController.popBackStack(
-                                            "articles",
-                                            inclusive = false
-                                        )
-                                    }
-                                },
-                                onHubClicked = {
-                                    navController.navigate("hub/$it")
-                                }
-                            )
-
-
-                        }
-
-                        composable(
-                            "hub/{alias}",
-                            deepLinks = HubScreenNavDeepLinks
-                        ) {
-                            val alias = it.arguments?.getString("alias")
-                            HubScreen(alias = alias!!, viewModelStoreOwner = it,
-                                onBackClick = {
-                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
-                                        this@MainActivity.finish()
-                                    }
-                                    else {
-                                        navController.popBackStack()
-                                    }
-                                              },
-                                onArticleClick = { navController.navigate("article/$it") },
-                                onCompanyClick = { navController.navigate("company/$it") },
-                                onUserClick = { navController.navigate("user/$it") },
-                                onCommentsClick = { navController.navigate("comments/$it") }
-                            )
-                        }
-                        composable(
-                            "company/{alias}",
-                            deepLinks = CompanyScreenNavDeepLinks,
-                        ) {
-                            val alias = it.arguments?.getString("alias")!!
-                            CompanyScreen(
-                                viewModelStoreOwner = it,
-                                alias = alias,
-                                onBack = {
-                                    if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null){
-                                        this@MainActivity.finish()
-                                    }
-                                    else {
-                                        navController.popBackStack()
-                                    }
-                                         },
-                                onArticleClick = { navController.navigate("article/$it") },
-                                onCommentsClick = { navController.navigate("comments/$it") },
-                                onUserClick = { navController.navigate("user/$it") }
-                            )
-                        }
-
-                        composable("about") {
-                            AboutScreen {
-                                navController.popBackStack()
-                            }
-                        }
-
-                        composable("savedArticles"){
-                            OfflineArticlesScreen(
-                                onBack = { navController.popBackStack() },
-                                onArticleClick = { navController.navigate("article/$it?offline=true")}
-                            )
-                        }
-
-                        composable("imageViewer?imageUrl={imageUrl}"){
-                            val url = it.arguments?.getString("imageUrl")
-                            ImageViewScreen(model = url!!, onBack = { navController.popBackStack() })
-                        }
-                    })
-
-            }
-        }
-
-        Log.e("ExternalLink", intent.data.toString())
-
-    }
-
+	override fun onCreate(savedInstanceState: Bundle?) {
+		super.onCreate(savedInstanceState)
+		WindowCompat.setDecorFitsSystemWindows(window, false)
+		
+		CookieManager.getInstance().removeAllCookies(null)
+		val cookiesFlow = authDataStore.data.map { it.get(HubsDataStore.Auth.Keys.Cookies) ?: "" }
+		val isAuthorizedFlow =
+			 authDataStore.data.map { it[HubsDataStore.Auth.Keys.Authorized] ?: false }
+		lifecycle.coroutineScope.launch {
+			cookiesFlow
+				 .collect {
+					 cookies = it
+				 }
+		}
+		var theme: HubsDataStore.Settings.Keys.ThemeMode? = null
+		
+		runBlocking {
+			authorized = isAuthorizedFlow.first()
+			val themeInt = settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).first()
+				 ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal
+			theme = HubsDataStore.Settings.Keys.ThemeMode.values()[themeInt]
+		}
+		
+		val authActivityLauncher =
+			 registerForActivityResult(AuthActivityResultContract()) { result ->
+				 CookieManager.getInstance().removeAllCookies(null)
+				 lifecycle.coroutineScope.launch {
+					 result?.let {
+						 authDataStore.edit {
+							 it[HubsDataStore.Auth.Keys.Cookies] = result
+							 it[HubsDataStore.Auth.Keys.Authorized] = true
+							 authorized = true
+							 //cookies = result
+						 }
+					 }
+				 }
+			 }
+		
+		
+		intent.dataString?.let { Log.e("intentData", it) }
+		HabrApi.initialize(this)
+		
+		
+		setContent {
+			val themeMode by settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).collectAsState(initial = HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal)
+			
+			val theme by remember(themeMode) {
+				mutableStateOf(
+					 themeMode?.let {
+						 HubsDataStore.Settings.Keys.ThemeMode.values()[it]
+					 } ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined
+				
+				)
+			}
+			
+			var userInfo: Me? by remember { mutableStateOf(null) }
+			val userInfoUpdateBlock = remember {
+				{
+					userInfo = MeController.getMe()
+					Log.e("userInfoUpdateBlock", userInfo.toString())
+				}
+			}
+			LaunchedEffect(
+				 key1 = isAuthorizedFlow.collectAsState(initial = false).value,
+				 block = {
+					 launch(Dispatchers.IO, block = { userInfoUpdateBlock() })
+				 })
+			
+			HubsTheme(
+				 darkTheme = when (theme) {
+					 HubsDataStore.Settings.Keys.ThemeMode.Undetermined -> isSystemInDarkTheme()
+					 HubsDataStore.Settings.Keys.ThemeMode.SystemDefined -> isSystemInDarkTheme()
+					 HubsDataStore.Settings.Keys.ThemeMode.Dark -> true
+					 else -> false
+				 }
+			) {
+				val navController = rememberNavController()
+				
+				NavHost(
+					 modifier = Modifier
+						  .statusBarsPadding()
+						  .navigationBarsPadding(),
+					 navController = navController,
+					 startDestination = "articles",
+					 builder = {
+						 
+						 composable("articles") {
+							 
+							 ArticlesScreen(
+								  viewModelStoreOwner = it,
+								  onSearchClicked = { navController.navigate("search") },
+								  onArticleClicked = {
+									  if (!navController.currentBackStackEntry!!.destination.route!!.contains(
+												 "article/"
+											)
+									  )
+										  navController.navigate("article/$it")
+								  },
+								  onCommentsClicked = {
+									  navController.navigate("comments/$it")
+								  },
+								  onUserClicked = {
+									  navController.navigate("user/$it")
+								  },
+								  onCompanyClicked = {
+									  navController.navigate("company/$it")
+								  },
+								  onHubClicked = {
+									  navController.navigate("hub/$it")
+								  },
+								  menu = {
+									  val authorizedMenu by isAuthorizedFlow.collectAsState(
+											initial = false
+									  )
+									  if (authorizedMenu && userInfo != null) {
+										  AuthorizedMenu(
+												userAlias = userInfo!!.alias,
+												avatarUrl = userInfo!!.avatarUrl,
+												onProfileClick = { navController.navigate("user/${userInfo!!.alias}") },
+												onArticlesClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Articles}") },
+												onCommentsClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Comments}") },
+												onBookmarksClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}") },
+												onSavedArticlesClick = { navController.navigate("savedArticles") },
+												onSettingsClick = { navController.navigate("settings") },
+												onAboutClick = { navController.navigate("about") }
+										  )
+									  } else {
+										  UnauthorizedMenu(
+												onLoginClick = {
+													authActivityLauncher.launch(Unit)
+													lifecycle.coroutineScope.launch(Dispatchers.IO) { userInfoUpdateBlock() }
+												},
+												onSavedArticlesClick = { navController.navigate("savedArticles") },
+												onSettingsClick = { navController.navigate("settings") },
+												onAboutClick = { navController.navigate("about") }
+										  )
+									  }
+								  }
+							 )
+						 }
+						 
+						 composable(
+							  route = "article/{id}?offline={offline}",
+							  deepLinks = ArticleNavDeepLinks
+						 ) {
+							 val id = it.arguments?.getString("id")?.toIntOrNull()
+							 val offline = it.arguments?.getString("offline")?.toBooleanStrict()
+							 
+							 val clearLastArticle = remember {
+								 {
+									 lifecycle.coroutineScope.launch(Dispatchers.IO) {
+										 lastReadDataStore.edit {
+											 it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
+											 it[HubsDataStore.LastRead.Keys.LastArticleReadPosition] =
+												  0
+										 }
+									 }
+								 }
+							 }
+							 
+							 BackHandler(enabled = true) {
+								 clearLastArticle()
+								 if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+									 this@MainActivity.finish()
+								 } else {
+									 navController.popBackStack()
+								 }
+							 }
+							 
+							 ArticleScreen(
+								  articleId = id!!,
+								  isOffline = offline ?: false,
+								  onBackButtonClicked = {
+									  clearLastArticle()
+									  if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+										  this@MainActivity.finish()
+									  } else {
+										  navController.popBackStack()
+									  }
+								  },
+								  onCommentsClicked = {
+									  clearLastArticle()
+									  navController.navigate("comments/${id}")
+								  },
+								  onAuthorClicked = {
+									  clearLastArticle()
+									  navController.navigate("user/${it}")
+								  },
+								  onHubClicked = {
+									  clearLastArticle()
+									  navController.navigate("hub/$it")
+								  },
+								  onCompanyClick = {
+									  clearLastArticle()
+									  navController.navigate("company/$it")
+								  },
+								  onViewImageRequest = {
+									  navController.navigate(route = "imageViewer?imageUrl=$it")
+								  },
+								  onArticleClick = {
+									  navController.navigate("article/$it")
+								  },
+								  viewModelStoreOwner = it
+							 )
+							 
+						 }
+						 
+						 composable(route = "search") {
+							 SearchScreen(
+								  viewModelStoreOwner = it,
+								  onArticleClicked = { navController.navigate("article/$it") },
+								  onUserClicked = { navController.navigate("user/$it") },
+								  onHubClicked = { navController.navigate("hub/$it") },
+								  onCompanyClicked = { navController.navigate("company/$it") },
+								  onCommentsClicked = { navController.navigate("comments/$it") },
+								  onBackClicked = { navController.navigateUp() }
+							 )
+						 }
+						 
+						 composable(route = "settings") {
+							 SettingsScreen(
+								  onBack = {
+									  navController.popBackStack()
+								  },
+								  onArticleScreenSettings = {
+									  navController.navigate("article_settings")
+								  }
+							 )
+						 }
+						 
+						 composable(route = "article_settings") {
+							 ArticleScreenSettingsScreen(
+								  onBack = { navController.popBackStack() }
+							 )
+						 }
+						 
+						 composable(
+							  route = "comments/{postId}?commentId={commentId}",
+							  deepLinks = CommentsScreenNavDeepLinks
+						 ) {
+							 val postId = it.arguments!!.getString("postId")!!
+							 val commentId = it.arguments?.getString("commentId")
+							 CommentsScreen(
+								  viewModelStoreOwner = it,
+								  parentPostId = postId.toInt(),
+								  commentId = commentId?.toInt(),
+								  onBackClicked = {
+									  if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+										  this@MainActivity.finish()
+									  } else {
+										  navController.popBackStack()
+									  }
+								  },
+								  onArticleClicked = { navController.navigate("article/$postId") },
+								  onUserClicked = { navController.navigate("user/$it") }
+							 )
+							 
+						 }
+						 
+						 composable(
+							  "user/{alias}?page={page}",
+							  deepLinks = UserScreenNavDeepLinks
+						 ) {
+							 navController.popBackStack("", false)
+							 val page = it.arguments?.getString("page")?.let { UserScreenPages.valueOf(it) }
+								  ?: UserScreenPages.Profile
+							 val deepLinkPage = it.arguments?.getString("deepLinkPage")?.let {
+								 when (it) {
+									 "posts" -> UserScreenPages.Articles
+									 "comments" -> UserScreenPages.Comments
+									 "bookmarks" -> UserScreenPages.Bookmarks
+									 
+									 else -> null
+								 }
+							 }
+							 
+							 
+							 val alias = it.arguments!!.getString("alias")!!
+							 
+							 val logoutCoroutineScope = rememberCoroutineScope()
+							 UserScreen(
+								  isAppUser = alias == userInfo?.alias,
+								  initialPage = deepLinkPage ?: page,
+								  alias = alias,
+								  onBack = {
+									  if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+										  this@MainActivity.finish()
+									  } else {
+										  navController.popBackStack()
+									  }
+								  },
+								  onArticleClicked = { navController.navigate("article/$it") },
+								  onUserClicked = { navController.navigate("user/$it") },
+								  onCommentsClicked = { navController.navigate("comments/$it") },
+								  onCommentClicked = { postId, commentId ->
+									  navController.navigate(
+											"comments/$postId?commentId=$commentId"
+									  )
+								  },
+								  onCompanyClick = { navController.navigate("company/$it") },
+								  viewModelStoreOwner = it,
+								  onLogout = {
+									  logoutCoroutineScope.launch {
+										  authDataStore.edit {
+											  it[HubsDataStore.Auth.Keys.Authorized] = false
+											  it[HubsDataStore.Auth.Keys.Cookies] = ""
+										  }
+										  //cookies = ""
+										  authorized = false
+										  navController.popBackStack(
+												"articles",
+												inclusive = false
+										  )
+									  }
+								  },
+								  onHubClicked = {
+									  navController.navigate("hub/$it")
+								  }
+							 )
+							 
+							 
+						 }
+						 
+						 composable(
+							  "hub/{alias}",
+							  deepLinks = HubScreenNavDeepLinks
+						 ) {
+							 val alias = it.arguments?.getString("alias")
+							 HubScreen(alias = alias!!, viewModelStoreOwner = it,
+								  onBackClick = {
+									  if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+										  this@MainActivity.finish()
+									  } else {
+										  navController.popBackStack()
+									  }
+								  },
+								  onArticleClick = { navController.navigate("article/$it") },
+								  onCompanyClick = { navController.navigate("company/$it") },
+								  onUserClick = { navController.navigate("user/$it") },
+								  onCommentsClick = { navController.navigate("comments/$it") }
+							 )
+						 }
+						 composable(
+							  "company/{alias}",
+							  deepLinks = CompanyScreenNavDeepLinks,
+						 ) {
+							 val alias = it.arguments?.getString("alias")!!
+							 CompanyScreen(
+								  viewModelStoreOwner = it,
+								  alias = alias,
+								  onBack = {
+									  if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+										  this@MainActivity.finish()
+									  } else {
+										  navController.popBackStack()
+									  }
+								  },
+								  onArticleClick = { navController.navigate("article/$it") },
+								  onCommentsClick = { navController.navigate("comments/$it") },
+								  onUserClick = { navController.navigate("user/$it") }
+							 )
+						 }
+						 
+						 composable("about") {
+							 AboutScreen {
+								 navController.popBackStack()
+							 }
+						 }
+						 
+						 composable("savedArticles") {
+							 OfflineArticlesScreen(
+								  onBack = { navController.popBackStack() },
+								  onArticleClick = { navController.navigate("article/$it?offline=true") }
+							 )
+						 }
+						 
+						 composable("imageViewer?imageUrl={imageUrl}") {
+							 val url = it.arguments?.getString("imageUrl")
+							 ImageViewScreen(model = url!!, onBack = { navController.popBackStack() })
+						 }
+					 })
+				
+			}
+		}
+		
+		Log.e("ExternalLink", intent.data.toString())
+		
+	}
+	
 }

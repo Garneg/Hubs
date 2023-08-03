@@ -9,6 +9,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_RESPONSE
 import org.jsoup.Jsoup
 import java.io.IOException
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 
@@ -125,7 +126,6 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         return if (!isConnectionOn()) {
             throw NoConnectivityException()
-
         } else if (!isInternetAvailable()) {
             throw NoInternetException()
         } else {
@@ -136,21 +136,12 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
     private fun isConnectionOn(): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
-            val network = connectivityManager.activeNetwork
-            val connection = connectivityManager.getNetworkCapabilities(network)
-            return connection != null && (
-                    connection.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
-                            connection.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
-        } else {
-            val activeNetwork = connectivityManager.activeNetworkInfo
-            if (activeNetwork != null) {
-                return (activeNetwork.type == ConnectivityManager.TYPE_WIFI ||
-                        activeNetwork.type == ConnectivityManager.TYPE_MOBILE)
-            }
-            return false
-        }
+    
+        val network = connectivityManager.activeNetwork
+        val connection = connectivityManager.getNetworkCapabilities(network)
+        return connection != null && (
+                connection.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                        connection.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
     }
 
     private fun isInternetAvailable(): Boolean {
@@ -164,7 +155,8 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
 
             true
         } catch (e: IOException) {
-            false
+            val address = InetAddress.getByName("yandex.ru")
+            !address.equals("")
         }
 
     }

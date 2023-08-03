@@ -9,7 +9,7 @@ class ArticlesListModel(
         override val coroutineScope: CoroutineScope,
         vararg baseArgs: Pair<String, String>,
         initialFilter: Map<String, String> = emptyMap(),
-) : AbstractHabrSnippetListModel<ArticleSnippet>(
+) : AbstractSnippetListModel<ArticleSnippet>(
         path = path,
         baseArgs = baseArgs.toMap(),
         coroutineScope = coroutineScope,

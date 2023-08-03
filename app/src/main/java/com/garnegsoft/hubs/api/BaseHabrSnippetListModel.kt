@@ -1,17 +1,15 @@
 package com.garnegsoft.hubs.api.article
 
-import ArticlesListController
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.lifecycle.*
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HabrSnippet
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-abstract class AbstractHabrSnippetListModel<T>(
+abstract class AbstractSnippetListModel<T>(
         override val path: String,
         override val baseArgs: Map<String, String>,
         initialFilter: Map<String, String> = emptyMap(),
@@ -72,13 +70,13 @@ abstract class AbstractHabrSnippetListModel<T>(
                             doRetry = false
                             _lastLoadedPage.postValue(pageNumber)
                         }
-                    }
+                    } ?: delay(500)
                 }
             }
 
         }
     }
-
+    
     override fun loadFirstPage() {
         coroutineScope.launch(Dispatchers.IO) {
             _data.postValue(_load())

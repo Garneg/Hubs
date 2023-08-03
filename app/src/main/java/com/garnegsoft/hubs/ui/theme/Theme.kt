@@ -52,7 +52,6 @@ private val LightColorPalette = lightColors(
     */
 )
 
-// TODO add support for dark theme
 @Composable
 fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()

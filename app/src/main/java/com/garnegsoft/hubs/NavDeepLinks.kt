@@ -14,8 +14,9 @@ import me.saket.telephoto.zoomable.rememberZoomableState
 val UserScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/users/{alias}"),
     NavDeepLink("https://habr.com/{lang}/users/{alias}/"),
-    NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}"),
-    NavDeepLink("https://habr.com/{lang}/users/{alias}/{page}/"),
+    NavDeepLink("https://habr.com/{lang}/users/{alias}/{deepLinkPage}"),
+    NavDeepLink("https://habr.com/{lang}/users/{alias}/{deepLinkPage}/"),
+    NavDeepLink("https://habr.com/{lang}/users/{alias}/{deepLinkPage}/{subPage}"),
     NavDeepLink("https://habr.com/users/{alias}"),
     NavDeepLink("https://habr.com/users/{alias}/"),
 )
@@ -39,8 +40,8 @@ val CommentsScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/articles/{postId}/comments/#comment_{commentId}/"),
     NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/comments/#comment_{commentId}"),
     NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/comments/#comment_{commentId}/"),
-//    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/#comment_{commentId}"),
-//    NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/#comment_{commentId}/"),
+//        NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/#comment_{commentId}"),
+//        NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/#comment_{commentId}/"),
     NavDeepLink("https://habr.com/{lang}/companies/{company}/articles/{postId}/comments/"),
     NavDeepLink("https://habr.com/p/{postId}/comments/#comment_{commentId}"),
     NavDeepLink("https://habr.com/p/{postId}/comments/#comment_{commentId}/")
@@ -69,7 +70,6 @@ val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/amp/publications/{id}/"),
     NavDeepLink("https://habr.com/{lang}/specials/{id}"),
     NavDeepLink("https://habr.com/{lang}/specials/{id}/"),
-
     )
 
 

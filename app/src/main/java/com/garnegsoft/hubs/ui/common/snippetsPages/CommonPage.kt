@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.snippetsPages
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,19 +17,21 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.HabrSnippet
-import com.garnegsoft.hubs.api.article.AbstractHabrSnippetListModel
-import com.garnegsoft.hubs.api.article.ArticlesListModel
+import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
+import com.garnegsoft.hubs.ui.common.BaseFilterDialog
+import com.garnegsoft.hubs.ui.common.LazyHabrSnippetsColumn
+import com.garnegsoft.hubs.ui.common.RefreshableContainer
 
 @Composable
 fun <T : HabrSnippet> CommonPage(
-    listModel: AbstractHabrSnippetListModel<T>,
+    listModel: AbstractSnippetListModel<T>,
     lazyListState: LazyListState = rememberLazyListState(),
     filter: (@Composable () -> Unit)? = null,
+    doInitialLoading: Boolean = true,
     snippetCard: @Composable (T) -> Unit,
 ) {
 
@@ -42,6 +44,12 @@ fun <T : HabrSnippet> CommonPage(
         if (doScrollToTop)
             lazyListState.scrollToItem(0)
         doScrollToTop = false
+    })
+    
+    LaunchedEffect(key1 = Unit, block = {
+        if (doInitialLoading && !listModel.data.isInitialized){
+            listModel.loadFirstPage()
+        }
     })
 
     val doCollapse = remember {
@@ -64,6 +72,7 @@ fun <T : HabrSnippet> CommonPage(
                 refreshing = refreshing
             ) {
                 LazyHabrSnippetsColumn(
+                    modifier = Modifier.fillMaxSize(),
                     lazyListState = lazyListState,
                     data = data!!,
                     onScrollEnd = listModel::loadNextPage,
@@ -99,9 +108,9 @@ fun DefaultFilter(
 ) {
     Box(
         modifier = modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colors.surface)
-                .clickable(onClick = onClick),
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.surface)
+            .clickable(onClick = onClick),
     ) {
         Text(
             modifier = Modifier.padding(12.dp),

@@ -37,6 +37,7 @@ import com.garnegsoft.hubs.authDataStoreFlow
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
+import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import kotlinx.coroutines.*
 
 
@@ -473,41 +474,12 @@ fun ArticlesScreen(
                 if (isAuthorized) map =
                     mapOf<String, @Composable () -> Unit>(
                         "Моя лента" to {
-                            val refreshing by viewModel.myFeedArticlesModel.isRefreshing.observeAsState(initial = false)
-                            val articles by viewModel.myFeedArticlesModel.data.observeAsState()
-                            var doScrollToTop by rememberSaveable() { mutableStateOf(false)}
-                            LaunchedEffect(key1 = articles?.list?.first(), block = {
-                                if (doScrollToTop)
-                                    myFeedLazyListState.scrollToItem(0)
-                                doScrollToTop = false
-                            })
-
-                            if (articles != null) {
-//                                RefreshableContainer(onRefresh = {
-//                                    doScrollToTop = true
-//                                    viewModel.myFeedArticlesModel.refresh()
-//                                                                 }, refreshing = refreshing) {
-                                    LazyHabrSnippetsColumn(
-                                        lazyListState = myFeedLazyListState,
-                                        data = articles!!,
-                                        onScrollEnd = viewModel.myFeedArticlesModel::loadNextPage
-                                    ) {
-                                        ArticleCard(
-                                            article = it,
-                                            onClick = { onArticleClicked(it.id) },
-                                            onAuthorClick = { onUserClicked(it.author!!.alias) },
-                                            onCommentsClick = { onCommentsClicked(it.id) },
-                                        )
-                                    }
-
-                            } else {
-                                Box(modifier = Modifier.fillMaxSize()) {
-                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                                }
-                                LaunchedEffect(key1 = Unit, block = {
-                                    viewModel.myFeedArticlesModel.loadFirstPage()
-                                })
-                            }
+                            ArticlesListPage(
+                                listModel = viewModel.myFeedArticlesModel,
+                                onArticleSnippetClick = onArticleClicked,
+                                onArticleAuthorClick = onUserClicked,
+                                onArticleCommentsClick = onCommentsClicked
+                            )
                         }) + map
                 map
             }
