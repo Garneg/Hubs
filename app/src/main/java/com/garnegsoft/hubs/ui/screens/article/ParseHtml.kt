@@ -57,9 +57,10 @@ val LINE_HEIGHT_FACTOR = 1.5F
 
 fun parseElement(
         html: String,
-        spanStyle: SpanStyle
+        spanStyle: SpanStyle,
+        onViewImageRequest: ((imageUrl: String) -> Unit)? = null
 ): Pair<AnnotatedString?, (@Composable (SpanStyle, ElementSettings) -> Unit)?> =
-        parseElement(Jsoup.parse(html), spanStyle)
+        parseElement(Jsoup.parse(html), spanStyle, onViewImageRequest)
 
 @Stable
 @Composable

@@ -95,14 +95,7 @@ fun ArticleContent(
 		val state = rememberLazyListState()
 		val updatedPolls by viewModel.updatedPolls.observeAsState()
 		
-		LaunchedEffect(key1 = fontSize, block = {
-			if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
-				val element =
-					 Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!.child(0)
-						  ?: Element("")
-				viewModel.parsedArticleContent.postValue(parseChildElements(element, spanStyle, onViewImageRequest).second)
-			}
-		})
+		
 		LazyColumn(
 			 modifier = Modifier
               .fillMaxSize()

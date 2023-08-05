@@ -34,6 +34,7 @@ import com.garnegsoft.hubs.api.company.list.CompaniesListController
 import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.authDataStoreFlow
+import com.garnegsoft.hubs.authDataStoreFlowWithDefault
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.lastReadDataStoreFlow
 import com.garnegsoft.hubs.ui.common.*
@@ -55,8 +56,8 @@ fun ArticlesScreen(
 ) {
     val context = LocalContext.current
     var isAuthorized by rememberSaveable() { mutableStateOf(false) }
-    val authorizedState by context.authDataStoreFlow(HubsDataStore.Auth.Keys.Authorized)
-        .collectAsState(initial = false)
+    val authorizedState by context.authDataStoreFlowWithDefault(HubsDataStore.Auth.Keys.Authorized, false)
+        .collectAsState(initial = null)
     LaunchedEffect(key1 = authorizedState, block = {
         isAuthorized = authorizedState == true
     })
@@ -100,7 +101,7 @@ fun ArticlesScreen(
             showSnackBar = false
         }
     })
-
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -133,6 +134,7 @@ fun ArticlesScreen(
             }
         }
     ) {
+        if (authorizedState != null)
         Column(
             Modifier.padding(it)
         ) {

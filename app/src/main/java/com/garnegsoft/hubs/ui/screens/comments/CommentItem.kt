@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -95,7 +96,10 @@ fun CommentItem(
                         fontWeight = FontWeight.W500
                     )
                     Text(
-                        text = Jsoup.parse(it.message).text(),
+                        text = Jsoup.parse(it.message).child(0).child(1).child(0).children().firstOrNull {
+                            Log.e("current tag", it.tagName())
+                            it.tagName() != "blockquote"
+                        }?.text() ?: "",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )

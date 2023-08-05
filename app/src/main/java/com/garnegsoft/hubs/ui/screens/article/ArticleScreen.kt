@@ -76,8 +76,8 @@ fun ArticleScreen(
     isOffline: Boolean = false
 ) {
     val context = LocalContext.current
-    val fontSize by context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreen.FontSize).collectAsState(
-        initial = MaterialTheme.typography.body1.fontSize.value
+    val fontSize by context.settingsDataStoreFlowWithDefault(HubsDataStore.Settings.Keys.ArticleScreen.FontSize, MaterialTheme.typography.body1.fontSize.value).collectAsState(
+        initial = null
     )
     val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
     val article by viewModel.article.observeAsState()
@@ -622,12 +622,45 @@ fun ArticleScreen(
             }
         } else {
             article?.let { article ->
+                
+                val lineHeightFactor by context.settingsDataStoreFlowWithDefault(HubsDataStore.Settings.Keys.ArticleScreen.LineHeightFactor, 1.5f).collectAsState(
+                    initial = null
+                )
+                val color = MaterialTheme.colors.onSurface
+                val spanStyle = remember(fontSize, color) {
+                    SpanStyle(
+                        color = color,
+                        fontSize = fontSize?.sp ?: 16.sp
+                    )
+                }
+                val elementsSettings = remember {
+                    ElementSettings(
+                        fontSize = fontSize?.sp ?: 16.sp,
+                        lineHeight = 16.sp,
+                        fitScreenWidth = false
+                    )
+                }
+                var nodeParsed by rememberSaveable {
+                    mutableStateOf(false)
+                }
                 LaunchedEffect(key1 = Unit, block = {
                     context.lastReadDataStore.edit {
                         it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
                     }
+                    if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
+                        val element =
+                            Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!.child(0)
+                                ?: Element("")
+                        
+                        viewModel.parsedArticleContent.postValue(parseChildElements(element, spanStyle, onViewImageRequest).second)
+                        nodeParsed = true
+                    }
+                })
+                LaunchedEffect(key1 = fontSize, block = {
+                
                 })
                 Box(modifier = Modifier.padding(it)) {
+                    if (nodeParsed && fontSize != null)
                     ArticleContent(
                         article = article,
                         onAuthorClicked = { onAuthorClicked(article.author!!.alias) },

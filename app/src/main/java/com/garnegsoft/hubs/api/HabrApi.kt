@@ -31,7 +31,6 @@ class HabrApi {
                     it.proceed(req)
                 })
                 .addInterceptor(NoConnectionInterceptor(context))
-
                 .build()
 
         }
@@ -136,14 +135,13 @@ class NoConnectionInterceptor(private val context: Context) : Interceptor {
     private fun isConnectionOn(): Boolean {
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    
         val network = connectivityManager.activeNetwork
         val connection = connectivityManager.getNetworkCapabilities(network)
         return connection != null && (
                 connection.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
                         connection.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR))
     }
-
+    
     private fun isInternetAvailable(): Boolean {
         return try {
             val timeoutMs = 1500

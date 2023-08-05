@@ -57,7 +57,6 @@ fun UserScreen(
 ) {
 	val viewModel = viewModel<UserScreenViewModel> { UserScreenViewModel(alias) }
 	
-	val commonCoroutineScope = rememberCoroutineScope()
 	Scaffold(
 		topBar = {
 			TopAppBar(

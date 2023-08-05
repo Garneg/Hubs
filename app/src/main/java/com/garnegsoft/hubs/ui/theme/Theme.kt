@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,13 +63,15 @@ fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
         systemUiController.setSystemBarsColor(LightColorPalette.primary)
         LightColorPalette
     }
-
-    MaterialTheme(
-        colors = colors,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
-    )
+    
+    Box(modifier = Modifier.background(colors.background)) {
+        MaterialTheme(
+            colors = colors,
+            typography = Typography,
+            shapes = Shapes,
+            content = content
+        )
+    }
 }
 
 val m3LightColorScheme = lightColorScheme(

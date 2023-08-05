@@ -94,6 +94,7 @@ fun CompanyCard(
                 tint = placeholderColor(company.alias)
             )
         }
+        
         Spacer(modifier = Modifier.width(style.innerPadding))
         Column(
             modifier = Modifier.weight(1f),

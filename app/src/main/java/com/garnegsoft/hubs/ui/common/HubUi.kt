@@ -9,14 +9,18 @@ import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -66,15 +70,22 @@ fun HubCard(
                     .background(Color.White)
             )
             Spacer(modifier = Modifier.width(style.innerPadding))
+            val onBackgroundColor = MaterialTheme.colors.onBackground
             Column(
                 modifier = Modifier.weight(1f),
             ) {
                 Text(
                     text =
-                    if (hub.isProfiled)
-                        hub.title + "*"
-                    else
-                        hub.title,
+                    remember { buildAnnotatedString {
+                        append(hub.title)
+                        if (hub.isProfiled) {
+                            withStyle(
+                                SpanStyle(color = onBackgroundColor.copy(0.5f))
+                            ) {
+                                append("\u00A0*")
+                            }
+                        }
+                    }},
                     style = style.titleTextStyle,
                     modifier = Modifier.wrapContentHeight(
                         Alignment.Top

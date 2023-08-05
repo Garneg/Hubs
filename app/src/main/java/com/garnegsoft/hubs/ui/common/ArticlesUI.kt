@@ -276,7 +276,7 @@ fun ArticleCard(
                     contentDescription = "",
                     tint = postComplexityColor
                 )
-                Spacer(modifier = Modifier.width(2.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = when (article.complexity) {
                         PostComplexity.Low -> "Простой"
@@ -298,7 +298,7 @@ fun ArticleCard(
                 contentDescription = "",
                 tint = style.statisticsColor
             )
-            Spacer(modifier = Modifier.width(2.dp))
+            Spacer(modifier = Modifier.width(4.dp))
             Text(
                 text = "${article.readingTime} мин",
                 color = style.statisticsColor,
@@ -398,7 +398,7 @@ fun ArticleCard(
                     tint = style.statisticsColor
                 )
 
-                Spacer(modifier = Modifier.padding(2.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 if (article.statistics.score > 0) {
                     Text(
                         text = '+' + article.statistics.score.toString(),
@@ -435,7 +435,7 @@ fun ArticleCard(
                     modifier = Modifier.size(18.dp),
                     tint = style.statisticsColor
                 )
-                Spacer(modifier = Modifier.padding(2.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = formatLongNumbers(article.statistics.readingCount),
                     style = style.statisticsTextStyle
@@ -516,7 +516,7 @@ fun ArticleCard(
                     modifier = Modifier.size(18.dp),
                     tint = style.statisticsColor
                 )
-                Spacer(modifier = Modifier.padding(2.dp))
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = addedToBookmarksCount.toString(),
                     style = style.statisticsTextStyle
@@ -572,7 +572,7 @@ fun ArticleCard(
                             modifier = Modifier.size(18.dp),
                             tint = style.statisticsColor
                         )
-                        Spacer(modifier = Modifier.padding(2.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Text(
                             text = formatLongNumbers(article.statistics.commentsCount),
                             style = style.statisticsTextStyle,
