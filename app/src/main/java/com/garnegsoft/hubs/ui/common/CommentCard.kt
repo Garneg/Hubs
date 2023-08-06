@@ -4,8 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -159,26 +162,50 @@ fun CommentCard(
                 ), elementsSettings)
             Spacer(modifier = Modifier.height(style.padding.calculateBottomPadding()))
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    modifier = Modifier.size(18.dp),
-                    painter = painterResource(id = R.drawable.rating),
-                    contentDescription = ""
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                comment.score.let {
-                    Text(
-                        text = if (it > 0) {
-                            "+"
-                        } else {
-                            ""
-                        } + it,
-                        color = when {
-                            it > 0 -> RatingPositive
-                            it < 0 -> RatingNegative
-                            else -> style.textColor
-                        }
-
+                Row(
+                    modifier = Modifier.padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        modifier = Modifier.size(18.dp),
+                        painter = painterResource(id = R.drawable.rating),
+                        contentDescription = ""
                     )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    comment.score.let {
+                        Text(
+                            text = if (it > 0) {
+                                "+"
+                            } else {
+                                ""
+                            } + it,
+                            color = when {
+                                it > 0 -> RatingPositive
+                                it < 0 -> RatingNegative
+                                else -> style.textColor
+                            }
+        
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.weight(1f))
+                TextButton(
+                    onClick = { onCommentClick() },
+                    elevation = null,
+                    shape = CircleShape,
+                    //colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.Bottom
+                    ) {
+                        Text(text = "Посмотреть")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            modifier = Modifier.size(18.dp),
+                            imageVector = Icons.Default.ArrowForward, contentDescription = null
+                        )
+                    }
                 }
             }
 

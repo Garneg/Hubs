@@ -31,7 +31,7 @@ val Typography = Typography(
     button = TextStyle(
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
-        letterSpacing = 0.5.sp
+        letterSpacing = 0.sp
     ),
 /* Other default text styles to override
 button = TextStyle(

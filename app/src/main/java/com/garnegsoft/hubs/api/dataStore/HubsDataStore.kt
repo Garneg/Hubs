@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.api
+package com.garnegsoft.hubs.api.dataStore
 
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.floatPreferencesKey

@@ -34,13 +34,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.EditorVersion
-import com.garnegsoft.hubs.api.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.utils.placeholderColor
-import com.garnegsoft.hubs.settingsDataStoreFlowWithDefault
-import com.garnegsoft.hubs.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip

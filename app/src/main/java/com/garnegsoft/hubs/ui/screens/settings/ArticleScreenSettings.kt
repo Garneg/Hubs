@@ -26,11 +26,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColor
 import com.garnegsoft.hubs.settingsDataStore
-import com.garnegsoft.hubs.settingsDataStoreFlowWithDefault
-import com.garnegsoft.hubs.settingsDataStoreFlow
+import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
+import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import kotlinx.coroutines.Dispatchers
