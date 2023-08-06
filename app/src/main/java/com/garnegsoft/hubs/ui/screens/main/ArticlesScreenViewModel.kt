@@ -106,8 +106,6 @@ class ArticlesScreenViewModel : ViewModel() {
         }
     }
 
-    val isLoadingArticles = MutableLiveData<Boolean>(false)
-
     var newsFilter = MutableLiveData<NewsFilterState>(
         NewsFilterState(
             showLast = true,
@@ -115,9 +113,8 @@ class ArticlesScreenViewModel : ViewModel() {
             period = FilterPeriod.Day
         )
     )
-    val isLoadingNews = MutableLiveData(false)
-
-    fun changeNewsFilterAndLoadNews(newFilter: NewsFilterState) {
+    
+    fun changeNewsFilter(newFilter: NewsFilterState) {
         if (newsFilter.value?.hasChanged(newFilter) == true) {
             newsFilter.postValue(newFilter)
             viewModelScope.launch(Dispatchers.IO) {
@@ -135,7 +132,6 @@ class ArticlesScreenViewModel : ViewModel() {
                         }
                     } else {
                         mapOf(
-                            "sort" to "date",
                             "period" to when (newFilter.period) {
                                 FilterPeriod.Day -> "daily"
                                 FilterPeriod.Week -> "weekly"
@@ -144,50 +140,10 @@ class ArticlesScreenViewModel : ViewModel() {
                                 FilterPeriod.AllTime -> "alltime"
                             },
                         )
-                    } + mapOf("news" to "true")
-                ArticlesListController.getArticlesSnippets(
-                    path = "articles",
-                    args = argsMap
-                )?.let {
-                    news.postValue(it)
-                }
-
-            }
-        }
-    }
-
-    fun loadNews(page: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val filter = newsFilter.value!!
-            val argsMap: Map<String, String> =
-                if (filter.showLast) {
-                    if (filter.minRating == -1) {
-                        mapOf(
-                            "sort" to "rating",
-                        )
-                    } else {
-                        mapOf(
-                            "sort" to "rating",
-                            "score" to filter.minRating.toString()
-                        )
                     }
-                } else {
-                    mapOf(
-                        "sort" to "date",
-                        "period" to when (filter.period) {
-                            FilterPeriod.Day -> "daily"
-                            FilterPeriod.Week -> "weekly"
-                            FilterPeriod.Month -> "monthly"
-                            FilterPeriod.Year -> "yearly"
-                            FilterPeriod.AllTime -> "alltime"
-                        },
-                    )
-                }
+                
+                newsListModel.editFilter(argsMap)
 
-            ArticlesListController.getArticlesSnippets(
-                path = "articles", args = argsMap
-            )?.let {
-                news.postValue(it)
             }
         }
     }

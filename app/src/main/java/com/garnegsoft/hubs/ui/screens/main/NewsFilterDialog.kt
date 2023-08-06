@@ -19,7 +19,7 @@ import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 
 @Composable
-fun NewFilterDialog(
+fun NewsFilterDialog(
     defaultValues: NewsFilterState,
     onDismiss: () -> Unit,
     onDone: (NewsFilterState) -> Unit

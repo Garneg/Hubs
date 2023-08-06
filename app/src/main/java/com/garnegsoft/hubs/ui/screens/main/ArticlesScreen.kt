@@ -207,95 +207,36 @@ fun ArticlesScreen(
 							)
 						},
 						"Новости" to {
-							val newsList by viewModel.news.observeAsState()
-							val pageNumber = rememberSaveable { mutableStateOf(1) }
-							val updateFeedCoroutineScope = rememberCoroutineScope()
-							var isRefreshing by rememberSaveable { mutableStateOf(false) }
-							val swipestate = rememberPullRefreshState(
-								refreshing = isRefreshing,
-								refreshThreshold = 50.dp,
-								onRefresh = {
-									updateFeedCoroutineScope.launch(Dispatchers.IO) {
-										isRefreshing = true
-										pageNumber.value = 1
-										var newArticlesList =
-											ArticlesListController.getArticlesSnippets(
-												"articles",
-												mapOf("sort" to "rating", "news" to "true")
-											)
-										if (newArticlesList != null) {
-											viewModel.news.postValue(newArticlesList)
-										}
-										//delay(400)
-										//newsLazyListState.scrollToItem(0)
-										isRefreshing = false
-										
-									}
-								})
 							
-							
-							Box(
-								modifier = Modifier.pullRefresh(
-									state = swipestate
+							var showFilter by rememberSaveable { mutableStateOf(false) }
+							val filter by viewModel.newsFilter.observeAsState(
+								NewsFilterState(
+									true,
+									period = FilterPeriod.Day
 								)
-							) {
-								if (newsList != null) {
-									PagedHabrSnippetsColumn(
-										data = newsList!!,
-										page = pageNumber,
-										lazyListState = newsLazyListState,
-										onNextPageLoad = {
-											updateFeedCoroutineScope.launch(Dispatchers.IO) {
-												
-												ArticlesListController
-													.getArticlesSnippets(
-														"articles",
-														mapOf(
-															"sort" to "rating",
-															"news" to "true",
-															"page" to it.toString()
-														)
-													)?.let {
-														viewModel.news.postValue(newsList!! + it)
-													}
-												
-											}
-											
-										}
-									) {
-										ArticleCard(
-											article = it,
-											onClick = { onArticleClicked(it.id) },
-											onCommentsClick = { onCommentsClicked(it.id) },
-											onAuthorClick = { onUserClicked(it.author!!.alias) }
-										)
+							)
+							if (showFilter) {
+								NewsFilterDialog(
+									defaultValues = filter,
+									onDismiss = { showFilter = false },
+									onDone = {
+										viewModel.changeNewsFilter(it)
+										showFilter = false
 									}
-									PullRefreshIndicator(
-										modifier = Modifier.align(Alignment.TopCenter),
-										contentColor = MaterialTheme.colors.primary,
-										refreshing = isRefreshing, state = swipestate
-									)
-								} else {
-									Box(modifier = Modifier.fillMaxSize()) {
-										CircularProgressIndicator(
-											modifier = Modifier.align(
-												Alignment.Center
-											)
-										)
-									}
-									LaunchedEffect(key1 = Unit) {
-										launch(Dispatchers.IO) {
-											ArticlesListController.getArticlesSnippets(
-												"articles",
-												mapOf("news" to "true", "sort" to "rating")
-											)?.let {
-												viewModel.news.postValue(it)
-											}
-										}
-									}
-								}
+								)
 							}
 							
+							ArticlesListPage(
+								listModel = viewModel.newsListModel,
+								onArticleSnippetClick = onArticleClicked,
+								onArticleAuthorClick = onUserClicked,
+								onArticleCommentsClick = onCommentsClicked,
+								filterIndicator = {
+									FilterElement(title = "фильтр") {
+										showFilter = true
+									}
+								}
+							)
 						},
 						"Хабы" to {
 							val hubs by viewModel.hubs.observeAsState()

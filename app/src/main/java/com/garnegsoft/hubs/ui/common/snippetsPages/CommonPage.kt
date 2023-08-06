@@ -34,15 +34,21 @@ fun <T : HabrSnippet> CommonPage(
     doInitialLoading: Boolean = true,
     snippetCard: @Composable (T) -> Unit,
 ) {
-
     val refreshing by listModel.isRefreshing.observeAsState(initial = false)
 
     val data by listModel.data.observeAsState()
     var doScrollToTop by rememberSaveable() { mutableStateOf(false) }
+    var lastFirstItemArticleId by rememberSaveable {
+        mutableStateOf(0)
+    }
 
     LaunchedEffect(key1 = data?.list?.firstOrNull(), block = {
-        if (doScrollToTop)
+        if (doScrollToTop || lastFirstItemArticleId != data?.list?.firstOrNull()?.id) {
             lazyListState.scrollToItem(0)
+            data?.list?.firstOrNull()?.id?.let {
+                lastFirstItemArticleId = it
+            }
+        }
         doScrollToTop = false
     })
     
@@ -100,42 +106,3 @@ fun <T : HabrSnippet> CommonPage(
     }
 }
 
-@Composable
-fun DefaultFilter(
-    title: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.surface)
-            .clickable(onClick = onClick),
-    ) {
-        Text(
-            modifier = Modifier.padding(12.dp),
-            text = title,
-            style = MaterialTheme.typography.body2,
-            fontWeight = FontWeight.W500,
-            color = MaterialTheme.colors.onSurface
-        )
-        Divider(Modifier.align(Alignment.BottomCenter))
-    }
-}
-
-@Composable
-fun <T : Filter> CommonFilter(
-    defaultValue: T,
-    onDone: (T) -> Unit,
-    filterDialogContent: @Composable (defaultValue: T, ) -> Unit
-) {
-    BaseFilterDialog(onDismiss = { /*TODO*/ }, onDone = {  }) {
-        filterDialogContent
-    }
-}
-
-interface Filter {
-    fun getTitle(): String
-
-    fun getArgs(): Map<String, String>
-}
