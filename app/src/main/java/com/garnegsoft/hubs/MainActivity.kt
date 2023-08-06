@@ -116,7 +116,6 @@ class MainActivity : ComponentActivity() {
 		intent.dataString?.let { Log.e("intentData", it) }
 		HabrApi.initialize(this)
 		
-		
 		setContent {
 			val themeMode by settingsDataStoreFlowWithDefault(
 				HubsDataStore.Settings.Keys.Theme,

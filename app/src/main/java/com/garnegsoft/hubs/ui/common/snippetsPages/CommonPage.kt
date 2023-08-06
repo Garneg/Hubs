@@ -52,7 +52,7 @@ fun <T : HabrSnippet> CommonPage(
         }
     })
 
-    val doCollapse = remember {
+    val isPullingInProgress = remember {
         mutableStateOf(true)
     }
 
@@ -61,10 +61,10 @@ fun <T : HabrSnippet> CommonPage(
     if (data != null && data!!.list.isNotEmpty()) {
         CollapsingContent(
             collapsingContent = { filter?.invoke() },
-            doCollapse = doCollapse.value
+            doCollapse = !isPullingInProgress.value
         ) {
             RefreshableContainer(
-                isPullingInProgress = doCollapse,
+                isPullingInProgress = isPullingInProgress,
                 onRefresh = {
                     doScrollToTop = true
                     listModel.refresh()

@@ -20,19 +20,29 @@ class ArticlesScreenViewModel : ViewModel() {
         coroutineScope = viewModelScope,
         "custom" to "true"
     )
-
-    var articles = MutableLiveData<HabrList<ArticleSnippet>?>()
-    var articlesPageNumber = MutableLiveData<Int>(1)
+    
+    val articlesListModel = ArticlesListModel(
+        path = "articles",
+        coroutineScope = viewModelScope,
+        initialFilter = mapOf("sort" to "rating")
+    )
+    
     var articlesFilter = MutableLiveData<ArticlesFilterState>(
         ArticlesFilterState(
             showLast = true,
             complexity = PostComplexity.None
         )
     )
+    
+    val newsListModel = ArticlesListModel(
+        path = "articles",
+        coroutineScope = viewModelScope,
+        initialFilter = mapOf("sort" to "rating"),
+        baseArgs = arrayOf("news" to "true")
+    )
 
     fun updateArticlesFilter(newFilter: ArticlesFilterState) {
         if (articlesFilter.value?.hasChanged(newFilter) == true) {
-            articles.postValue(null)
             articlesFilter.postValue(newFilter)
             viewModelScope.launch(Dispatchers.IO) {
                 var argsMap: Map<String, String> =
@@ -59,7 +69,7 @@ class ArticlesScreenViewModel : ViewModel() {
                             },
                         )
                     }
-
+                
                 if (newFilter.complexity != PostComplexity.None) {
                     argsMap += mapOf(
                         "complexity" to when (newFilter.complexity) {
@@ -70,9 +80,7 @@ class ArticlesScreenViewModel : ViewModel() {
                         }
                     )
                 }
-                ArticlesListController.getArticlesSnippets("articles", argsMap)?.let {
-                    articles.postValue(it)
-                }
+                articlesListModel.editFilter(argsMap)
 
             }
 
@@ -80,64 +88,6 @@ class ArticlesScreenViewModel : ViewModel() {
     }
 
     val isLoadingArticles = MutableLiveData<Boolean>(false)
-
-    fun loadArticles(page: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            isLoadingArticles.postValue(true)
-            val filter = articlesFilter.value ?: ArticlesFilterState(
-                showLast = true,
-                complexity = PostComplexity.None
-            )
-            var argsMap: Map<String, String> =
-                if (filter.showLast) {
-                    if (filter.minRating == -1) {
-                        mapOf(
-                            "sort" to "rating",
-                        )
-                    } else {
-                        mapOf(
-                            "sort" to "rating",
-                            "score" to filter.minRating.toString()
-                        )
-                    }
-                } else {
-                    mapOf(
-                        "sort" to "date",
-                        "period" to when (filter.period) {
-                            FilterPeriod.Day -> "daily"
-                            FilterPeriod.Week -> "weekly"
-                            FilterPeriod.Month -> "monthly"
-                            FilterPeriod.Year -> "yearly"
-                            FilterPeriod.AllTime -> "alltime"
-                        },
-                    )
-                }
-
-            if (filter.complexity != PostComplexity.None) {
-                argsMap += mapOf(
-                    "complexity" to when (filter.complexity) {
-                        PostComplexity.Low -> "easy"
-                        PostComplexity.Medium -> "medium"
-                        PostComplexity.High -> "hard"
-                        else -> throw IllegalArgumentException("mapping of this complexity is not supported")
-                    }
-                )
-            }
-            argsMap += mapOf("page" to page.toString())
-            ArticlesListController.getArticlesSnippets("articles", argsMap)?.let {
-                if (page > 1) {
-                    articles.value?.let { firstArticles ->
-                        articles.postValue(firstArticles + it)
-                    }
-                } else {
-                    articles.postValue(it)
-                }
-            }
-            isLoadingArticles.postValue(false)
-
-
-        }
-    }
 
     var newsFilter = MutableLiveData<NewsFilterState>(
         NewsFilterState(

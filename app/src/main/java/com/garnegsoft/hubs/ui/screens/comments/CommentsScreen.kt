@@ -120,19 +120,21 @@ fun CommentsScreen(
     var doScrollToComment by rememberSaveable {
         mutableStateOf(true)
     }
-    LaunchedEffect(key1 = commentsData, block = {
+    val itemsCountIndicator by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount > 2 }}
+    LaunchedEffect(key1 = commentsData, key2 = itemsCountIndicator, block = {
         commentId?.let { commId ->
-            if (viewModel.commentsData.isInitialized && doScrollToComment) {
+            if (viewModel.commentsData.isInitialized && lazyListState.layoutInfo.totalItemsCount > 2 && doScrollToComment) {
                 commentsData?.comments?.indexOf(commentsData.comments.find { it.id == commId })
                     ?.let {
                         if (it > -1)
                             if (showArticleSnippet)
-                                lazyListState.animateScrollToItem(it + 1)
+                                lazyListState.scrollToItem(it + 1)
                             else
-                                lazyListState.animateScrollToItem(it)
-
+                                lazyListState.scrollToItem(it)
+    
+                        doScrollToComment = false
+                        
                     }
-                doScrollToComment = false
             }
         }
     })
