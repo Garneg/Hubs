@@ -7,15 +7,18 @@ import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.company.CompaniesListModel
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
+import com.garnegsoft.hubs.api.hub.HubsListModel
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.api.user.UsersListModel
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ArticlesScreenViewModel : ViewModel() {
 
-    val myFeedArticlesModel = ArticlesListModel(
+    val myFeedArticlesListModel = ArticlesListModel(
         path = "articles",
         coroutineScope = viewModelScope,
         "custom" to "true"
@@ -39,6 +42,22 @@ class ArticlesScreenViewModel : ViewModel() {
         coroutineScope = viewModelScope,
         initialFilter = mapOf("sort" to "rating"),
         baseArgs = arrayOf("news" to "true")
+    )
+    
+    val hubsListModel = HubsListModel(
+        path = "hubs",
+        coroutineScope = viewModelScope,
+    )
+    
+    val authorsListModel = UsersListModel(
+        path = "users",
+        coroutineScope = viewModelScope
+    )
+    
+    val companiesListModel = CompaniesListModel(
+        path = "companies",
+        coroutineScope = viewModelScope,
+        initialFilter = mapOf("order" to "rating")
     )
 
     fun updateArticlesFilter(newFilter: ArticlesFilterState) {

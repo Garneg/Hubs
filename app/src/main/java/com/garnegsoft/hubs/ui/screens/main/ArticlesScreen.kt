@@ -21,13 +21,11 @@ import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
@@ -412,7 +410,7 @@ fun ArticlesScreen(
 						mapOf<String, @Composable () -> Unit>(
 							"Моя лента" to {
 								ArticlesListPage(
-									listModel = viewModel.myFeedArticlesModel,
+									listModel = viewModel.myFeedArticlesListModel,
 									onArticleSnippetClick = onArticleClicked,
 									onArticleAuthorClick = onUserClicked,
 									onArticleCommentsClick = onCommentsClicked
