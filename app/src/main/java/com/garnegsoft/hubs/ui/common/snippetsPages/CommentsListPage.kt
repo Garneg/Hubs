@@ -20,7 +20,7 @@ fun CommentsListPage(
 	CommonPage(
 		listModel = listModel,
 		lazyListState = lazyListState,
-		filter = filterIndicator,
+		collapsingBar = filterIndicator,
 		doInitialLoading = doInitialLoading
 	) {
 		CommentCard(

@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.api.company
 
+import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
@@ -10,7 +11,7 @@ class CompaniesListModel(
 	override val path: String,
 	override val coroutineScope: CoroutineScope,
 	vararg baseArgs: Pair<String, String>,
-	initialFilter: Map<String, String> = emptyMap()
+	initialFilter: Filter? = null,
 ) : AbstractSnippetListModel<CompanySnippet>(
 	path = path,
 	coroutineScope = coroutineScope,

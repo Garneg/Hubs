@@ -128,9 +128,9 @@ fun HubScreen(
             val articles = viewModel.articles.observeAsState().value
             val authors = viewModel.authors.observeAsState().value
             val companies = viewModel.companies.observeAsState().value
-            val pagerState = rememberPagerState()
+            val pagerState = rememberPagerState { 4 }
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
-            HorizontalPager(state = pagerState, pageCount = 4) {
+            HorizontalPager(state = pagerState) {
                 when (it) {
                     0 -> {
                         if (viewModel.hub.observeAsState().value != null) {

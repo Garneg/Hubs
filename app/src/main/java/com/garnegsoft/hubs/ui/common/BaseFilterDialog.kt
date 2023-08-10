@@ -10,7 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.garnegsoft.hubs.ui.screens.main.Spacer
+
 
 @Composable
 fun BaseFilterDialog(
@@ -36,11 +36,11 @@ fun BaseFilterDialog(
                     color = MaterialTheme.colors.onSurface,
                     style = MaterialTheme.typography.subtitle1
                 )
-                Spacer(dp = 12.dp)
+                Spacer(modifier = Modifier.height(12.dp))
                 Box(modifier = Modifier.weight(1f)) {
                     content()
                 }
-                Spacer(dp = 12.dp)
+                Spacer(modifier = Modifier.height(12.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End

@@ -34,12 +34,33 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.*
 import android.webkit.CookieManager
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInExpo
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseInOutBack
+import androidx.compose.animation.core.EaseInSine
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.EaseOutCubic
+import androidx.compose.animation.core.EaseOutExpo
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.IntOffset
 import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -162,7 +183,11 @@ class MainActivity : ComponentActivity() {
 						startDestination = "articles",
 						builder = {
 							
-							composable("articles") {
+							composable(
+								"articles",
+								exitTransition = { ExitTransition.None },
+								popEnterTransition = { EnterTransition.None }
+							) {
 								
 								ArticlesScreen(
 									viewModelStoreOwner = it,
@@ -219,7 +244,20 @@ class MainActivity : ComponentActivity() {
 							
 							composable(
 								route = "article/{id}?offline={offline}",
-								deepLinks = ArticleNavDeepLinks
+								deepLinks = ArticleNavDeepLinks,
+								enterTransition = {
+									scaleIn(tween(200, easing = EaseOut), 0.9f) + fadeIn(tween(270, easing = EaseOut))
+								},
+								exitTransition = {
+									ExitTransition.None
+								},
+								popExitTransition = {
+									scaleOut(tween(200, easing = EaseOut), 0.9f) + fadeOut(tween(200, easing = EaseOut), )
+									
+								},
+								popEnterTransition = {
+									EnterTransition.None
+								}
 							) {
 								val id = it.arguments?.getString("id")?.toIntOrNull()
 								val offline = it.arguments?.getString("offline")?.toBooleanStrict()

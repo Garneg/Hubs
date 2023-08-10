@@ -43,7 +43,7 @@ fun CompanyProfile(
     company: Company
 ) {
     val context = LocalContext.current
-    val viewModel = viewModel<CompanyScreenViewModel>()
+    val viewModel = viewModel { CompanyScreenViewModel(company.alias) }
     Column(
         modifier = Modifier
             .fillMaxSize()

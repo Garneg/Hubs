@@ -14,15 +14,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.garnegsoft.hubs.api.Filter
+import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import java.lang.StringBuilder
 
 @Composable
 fun NewsFilterDialog(
-    defaultValues: NewsFilterState,
+    defaultValues: NewsFilter,
     onDismiss: () -> Unit,
-    onDone: (NewsFilterState) -> Unit
+    onDone: (NewsFilter) -> Unit
 ) {
     var showLast by rememberSaveable {
         mutableStateOf(defaultValues.showLast)
@@ -33,10 +36,10 @@ fun NewsFilterDialog(
     var period by rememberSaveable {
         mutableStateOf(defaultValues.period)
     }
-
+    
     BaseFilterDialog(onDismiss = onDismiss, onDone = {
         onDone(
-            NewsFilterState(
+            NewsFilter(
                 showLast,
                 minRating,
                 period,
@@ -143,8 +146,55 @@ fun NewsFilterDialog(
     }
 }
 
-data class NewsFilterState(
+data class NewsFilter(
     val showLast: Boolean,
     val minRating: Int = -1,
     val period: FilterPeriod,
-)
+) : Filter {
+    override fun toArgsMap(): Map<String, String> {
+        val argsMap: Map<String, String> =
+            if (showLast) {
+                if (minRating == -1) {
+                    mapOf(
+                        "sort" to "rating",
+                    )
+                } else {
+                    mapOf(
+                        "sort" to "rating",
+                        "score" to minRating.toString()
+                    )
+                }
+            } else {
+                mapOf(
+                    "period" to when (period) {
+                        FilterPeriod.Day -> "daily"
+                        FilterPeriod.Week -> "weekly"
+                        FilterPeriod.Month -> "monthly"
+                        FilterPeriod.Year -> "yearly"
+                        FilterPeriod.AllTime -> "alltime"
+                        else -> ""
+                    },
+                )
+            }
+        return argsMap
+    }
+    
+    override fun getTitle(): String {
+        if (showLast){
+            if (minRating == -1)
+                return "Все подряд"
+            else
+                return "Новые с рейтингом ≥$minRating"
+        } else {
+            return "Лучшие за " +
+            when (period) {
+                FilterPeriod.Day -> "сутки"
+                FilterPeriod.Week -> "неделю"
+                FilterPeriod.Month -> "месяц"
+                FilterPeriod.Year -> "год"
+                FilterPeriod.AllTime -> "все время"
+            }
+        }
+    }
+    
+}

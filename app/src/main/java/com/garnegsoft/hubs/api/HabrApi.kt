@@ -3,6 +3,8 @@ package com.garnegsoft.hubs.api
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.cookies
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -49,7 +51,6 @@ class HabrApi {
                 .build()
             try {
                 return HttpClient.newCall(request).execute()
-
             } catch (ex: Exception) {
                 return null
             }

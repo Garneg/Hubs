@@ -30,18 +30,10 @@ import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.PagedHabrSnippetsColumn
 import com.garnegsoft.hubs.ui.common.UserCard
+import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-
-class CompanyScreenViewModel : ViewModel() {
-    var companyProfile = MutableLiveData<Company>()
-    var companyWhoIs = MutableLiveData<Company.WhoIs>()
-    var blogArticles = MutableLiveData<HabrList<ArticleSnippet>>()
-    var blogNews = MutableLiveData<HabrList<ArticleSnippet>>()
-    var followers = MutableLiveData<HabrList<UserSnippet>>()
-    var employees = MutableLiveData<HabrList<UserSnippet>>()
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -53,7 +45,7 @@ fun CompanyScreen(
     onCommentsClick: (postId: Int) -> Unit,
     onBack: () -> Unit
 ) {
-    val viewModel = viewModel<CompanyScreenViewModel>(viewModelStoreOwner)
+    val viewModel = viewModel(viewModelStoreOwner) { CompanyScreenViewModel(alias) }
     val companyProfile by viewModel.companyProfile.observeAsState()
     val whoIs by viewModel.companyWhoIs.observeAsState()
     val articles by viewModel.blogArticles.observeAsState()
@@ -103,7 +95,7 @@ fun CompanyScreen(
         })
         companyProfile?.let { companyProfile ->
             Column(modifier = Modifier.padding(it)) {
-                val pagerState = rememberPagerState()
+                
 
                 val tabs = remember() {
                     var map: Map<String, @Composable () -> Unit> = mapOf(
@@ -124,6 +116,16 @@ fun CompanyScreen(
                     if (companyProfile.statistics.articlesCount > 0) {
                         map += "Блог ${formatLongNumbers(companyProfile.statistics.articlesCount)}" to {
                             if (articles != null) {
+                                
+                                ArticlesListPageWithFilter(
+                                    listModel = viewModel.blogArticlesListModel,
+                                    onArticleSnippetClick = onArticleClick,
+                                    onArticleAuthorClick = onUserClick,
+                                    onArticleCommentsClick = onCommentsClick
+                                ) { defaultValues, onDismiss, onDone ->
+                                
+                                }
+                                
                                 PagedHabrSnippetsColumn(
                                     data = articles!!,
                                     onNextPageLoad = {
@@ -278,10 +280,13 @@ fun CompanyScreen(
                     }
                     map
                 }
+                val pagerState = rememberPagerState {
+                    tabs.size
+                }
                 HabrScrollableTabRow(
                     pagerState = pagerState,
                     tabs = remember { tabs.keys.toList() })
-                HorizontalPager(state = pagerState, pageCount = tabs.size) {
+                HorizontalPager(state = pagerState) {
                     tabs.values.elementAt(it).invoke()
                 }
             }

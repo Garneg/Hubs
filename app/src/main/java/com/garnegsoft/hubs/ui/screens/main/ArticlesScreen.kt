@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.ui.screens.main
 
 
 import ArticleController
-import ArticlesListController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -10,9 +9,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,6 +22,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
@@ -36,6 +33,7 @@ import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import kotlinx.coroutines.*
 
 
@@ -149,92 +147,29 @@ fun ArticlesScreen(
 				val pages = remember(key1 = isAuthorized) {
 					var map = mapOf<String, @Composable () -> Unit>(
 						"Статьи" to {
-							
-							val updateFeedCoroutineScope = rememberCoroutineScope()
-							
-							val filter by viewModel.articlesFilter.observeAsState()
-							val filterTitle = remember(filter) {
-								filter?.let {
-									var result = ""
-									if (it.showLast) {
-										if (it.minRating == -1) {
-											result = "Все подряд"
-										} else {
-											result = "Новые с рейтингом ≥${it.minRating}"
-										}
-									} else {
-										result += "Лучшие за "
-										when (it.period) {
-											FilterPeriod.Day -> result += "сутки"
-											FilterPeriod.Week -> result += "неделю"
-											FilterPeriod.Month -> result += "месяц"
-											FilterPeriod.Year -> result += "год"
-											FilterPeriod.AllTime -> result += "все время"
-											
-										}
-									}
-									when (it.complexity) {
-										PostComplexity.High -> result += ", сложные"
-										PostComplexity.Medium -> result += ", средние"
-										PostComplexity.Low -> result += ", простые"
-										
-										else -> {}
-									}
-									result
-								} ?: ""
-							}
-							
-							var showFilterDialog by remember { mutableStateOf(false) }
-							if (showFilterDialog && filter != null) {
-								ArticlesFilterDialog(
-									defaultValues = filter!!,
-									onDismiss = { showFilterDialog = false },
-									onDone = {
-										viewModel.updateArticlesFilter(it)
-									})
-							}
-							
-							ArticlesListPage(
+							ArticlesListPageWithFilter(
 								listModel = viewModel.articlesListModel,
+								lazyListState = articlesLazyListState,
 								onArticleSnippetClick = onArticleClicked,
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
-								filterIndicator = {
-									FilterElement(title = filterTitle) {
-										showFilterDialog = true
-									}
+								filterDialog = { defVals, onDissmis, onDone ->
+									ArticlesFilterDialog(defVals, onDissmis, onDone)
 								}
 							)
 						},
 						"Новости" to {
-							
-							var showFilter by rememberSaveable { mutableStateOf(false) }
-							val filter by viewModel.newsFilter.observeAsState(
-								NewsFilterState(
-									true,
-									period = FilterPeriod.Day
-								)
-							)
-							if (showFilter) {
-								NewsFilterDialog(
-									defaultValues = filter,
-									onDismiss = { showFilter = false },
-									onDone = {
-										viewModel.changeNewsFilter(it)
-										showFilter = false
-									}
-								)
-							}
-							
-							ArticlesListPage(
+							ArticlesListPageWithFilter(
 								listModel = viewModel.newsListModel,
 								onArticleSnippetClick = onArticleClicked,
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
-								filterIndicator = {
-									FilterElement(title = "фильтр") {
-										showFilter = true
-									}
+								filterDialog = { defVals, onDismiss, onDone ->
+									NewsFilterDialog(
+										defaultValues = defVals,
+										onDismiss = onDismiss,
+										onDone = onDone
+									)
 								}
 							)
 						},
@@ -352,6 +287,7 @@ fun ArticlesScreen(
 							"Моя лента" to {
 								ArticlesListPage(
 									listModel = viewModel.myFeedArticlesListModel,
+									lazyListState = myFeedLazyListState,
 									onArticleSnippetClick = onArticleClicked,
 									onArticleAuthorClick = onUserClicked,
 									onArticleCommentsClick = onCommentsClicked
@@ -359,7 +295,7 @@ fun ArticlesScreen(
 							}) + map
 					map
 				}
-				val pagerState = rememberPagerState()
+				val pagerState = rememberPagerState { pages.size }
 				
 				HabrScrollableTabRow(
 					pagerState = pagerState,
@@ -376,7 +312,6 @@ fun ArticlesScreen(
 					})
 				HorizontalPager(
 					state = pagerState,
-					pageCount = pages.size,
 				) {
 					pages.values.elementAt(it)()
 					

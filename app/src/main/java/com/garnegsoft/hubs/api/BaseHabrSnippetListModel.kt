@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.api.article
 
 import androidx.lifecycle.*
+import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HabrSnippet
 import kotlinx.coroutines.CoroutineScope
@@ -9,23 +10,29 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
-abstract class AbstractSnippetListModel<T>(
+abstract class AbstractSnippetListModel<S>(
         override val path: String,
         override val baseArgs: Map<String, String>,
-        initialFilter: Map<String, String> = emptyMap(),
+        initialFilter: Filter? = null,
         open val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-) : HabrSnippetListModel<T> where T : HabrSnippet {
+) : HabrSnippetListModel<S> where S : HabrSnippet {
 
-    private var filterMap: Map<String, String> = initialFilter
+    private var _filter: MutableLiveData<Filter?> = MutableLiveData(initialFilter)
+    val filter: LiveData<Filter?> get() = _filter
 
-    fun editFilter(newFilter: Map<String, String>) {
-        filterMap = newFilter
-        _data.postValue(_load())
+    fun editFilter(newFilter: Filter) {
+        if (filter.value != newFilter) {
+            _filter.value = newFilter
+            coroutineScope.launch(Dispatchers.IO) {
+                _data.postValue(_load())
+                
+            }
+        }
     }
 
-    private val _data = MutableLiveData<HabrList<T>?>()
+    private val _data = MutableLiveData<HabrList<S>?>()
 
-    override val data: LiveData<HabrList<T>?>
+    override val data: LiveData<HabrList<S>?>
         get() = _data
 
     private val _isLoading = MutableLiveData(false)
@@ -34,6 +41,9 @@ abstract class AbstractSnippetListModel<T>(
 
     private val _isRefreshing = MutableLiveData(false)
     override val isRefreshing: LiveData<Boolean> get() = _isRefreshing
+    
+    private val _isLoadingNextPage = MutableLiveData(false)
+    val isLoadingNextPage: LiveData<Boolean> get() = _isLoadingNextPage
 
     private val _lastLoadedPage = MutableLiveData<Int>()
     override val lastLoadedPage: LiveData<Int>
@@ -41,9 +51,9 @@ abstract class AbstractSnippetListModel<T>(
 
     private var pageNumber = 1
 
-    private fun _load(additionalArgs: Map<String, String> = mapOf()): HabrList<T>? {
+    private fun _load(additionalArgs: Map<String, String> = mapOf()): HabrList<S>? {
         _isLoading.postValue(true)
-        val result = load(filterMap + baseArgs + additionalArgs)
+        val result = load((filter.value?.toArgsMap() ?: emptyMap()) + baseArgs + additionalArgs)
         _isLoading.postValue(false)
         return result
     }
@@ -61,6 +71,7 @@ abstract class AbstractSnippetListModel<T>(
     override fun loadNextPage() {
         coroutineScope.launch(Dispatchers.IO) {
             if (_data.value!!.pagesCount > pageNumber) {
+                _isLoadingNextPage.postValue(true)
                 pageNumber++
                 var doRetry = true
                 while (doRetry) {
@@ -72,8 +83,8 @@ abstract class AbstractSnippetListModel<T>(
                         }
                     } ?: delay(500)
                 }
+                _isLoadingNextPage.postValue(false)
             }
-
         }
     }
     

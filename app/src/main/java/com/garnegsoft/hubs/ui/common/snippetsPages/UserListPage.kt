@@ -17,7 +17,7 @@ fun UsersListPage(
 	CommonPage(
 		listModel = listModel,
 		lazyListState = lazyListState,
-		filter = filter
+		collapsingBar = filter
 	) {
 		UserCard(
 			user = it,

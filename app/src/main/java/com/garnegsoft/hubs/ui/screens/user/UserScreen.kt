@@ -211,15 +211,14 @@ fun UserScreen(
 			}
 			val pagerState = rememberPagerState(initialPage = remember {
 				pagesMap.keys.indexOf(initialPage)
-			})
+			}) { pagesMap.size }
 			
 			Column(modifier = Modifier.padding(it)) {
 				if (pagesMap.size > 1) {
 					HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
 				}
 				HorizontalPager(
-					state = pagerState,
-					pageCount = pagesMap.size
+					state = pagerState
 				) { pageIndex ->
 					pagesMap.values.elementAt(pageIndex).invoke()
 				}

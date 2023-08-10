@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.main
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.ArticlesListModel
@@ -17,159 +18,44 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class ArticlesScreenViewModel : ViewModel() {
-
-    val myFeedArticlesListModel = ArticlesListModel(
-        path = "articles",
-        coroutineScope = viewModelScope,
-        "custom" to "true"
-    )
-    
-    val articlesListModel = ArticlesListModel(
-        path = "articles",
-        coroutineScope = viewModelScope,
-        initialFilter = mapOf("sort" to "rating")
-    )
-    
-    var articlesFilter = MutableLiveData<ArticlesFilterState>(
-        ArticlesFilterState(
-            showLast = true,
-            complexity = PostComplexity.None
-        )
-    )
-    
-    val newsListModel = ArticlesListModel(
-        path = "articles",
-        coroutineScope = viewModelScope,
-        initialFilter = mapOf("sort" to "rating"),
-        baseArgs = arrayOf("news" to "true")
-    )
-    
-    val hubsListModel = HubsListModel(
-        path = "hubs",
-        coroutineScope = viewModelScope,
-    )
-    
-    val authorsListModel = UsersListModel(
-        path = "users",
-        coroutineScope = viewModelScope
-    )
-    
-    val companiesListModel = CompaniesListModel(
-        path = "companies",
-        coroutineScope = viewModelScope,
-        initialFilter = mapOf("order" to "rating")
-    )
-
-    fun updateArticlesFilter(newFilter: ArticlesFilterState) {
-        if (articlesFilter.value?.hasChanged(newFilter) == true) {
-            articlesFilter.postValue(newFilter)
-            viewModelScope.launch(Dispatchers.IO) {
-                var argsMap: Map<String, String> =
-                    if (newFilter.showLast) {
-                        if (newFilter.minRating == -1) {
-                            mapOf(
-                                "sort" to "rating",
-                            )
-                        } else {
-                            mapOf(
-                                "sort" to "rating",
-                                "score" to newFilter.minRating.toString()
-                            )
-                        }
-                    } else {
-                        mapOf(
-                            "sort" to "date",
-                            "period" to when (newFilter.period) {
-                                FilterPeriod.Day -> "daily"
-                                FilterPeriod.Week -> "weekly"
-                                FilterPeriod.Month -> "monthly"
-                                FilterPeriod.Year -> "yearly"
-                                FilterPeriod.AllTime -> "alltime"
-                            },
-                        )
-                    }
-                
-                if (newFilter.complexity != PostComplexity.None) {
-                    argsMap += mapOf(
-                        "complexity" to when (newFilter.complexity) {
-                            PostComplexity.Low -> "easy"
-                            PostComplexity.Medium -> "medium"
-                            PostComplexity.High -> "hard"
-                            else -> throw IllegalArgumentException("mapping of this complexity is not supported")
-                        }
-                    )
-                }
-                articlesListModel.editFilter(argsMap)
-
-            }
-
-        }
-    }
-
-    var newsFilter = MutableLiveData<NewsFilterState>(
-        NewsFilterState(
-            showLast = true,
-            minRating = -1,
-            period = FilterPeriod.Day
-        )
-    )
-    
-    fun changeNewsFilter(newFilter: NewsFilterState) {
-        if (newsFilter.value?.hasChanged(newFilter) == true) {
-            newsFilter.postValue(newFilter)
-            viewModelScope.launch(Dispatchers.IO) {
-                val argsMap: Map<String, String> =
-                    if (newFilter.showLast) {
-                        if (newFilter.minRating == -1) {
-                            mapOf(
-                                "sort" to "rating",
-                            )
-                        } else {
-                            mapOf(
-                                "sort" to "rating",
-                                "score" to newFilter.minRating.toString()
-                            )
-                        }
-                    } else {
-                        mapOf(
-                            "period" to when (newFilter.period) {
-                                FilterPeriod.Day -> "daily"
-                                FilterPeriod.Week -> "weekly"
-                                FilterPeriod.Month -> "monthly"
-                                FilterPeriod.Year -> "yearly"
-                                FilterPeriod.AllTime -> "alltime"
-                            },
-                        )
-                    }
-                
-                newsListModel.editFilter(argsMap)
-
-            }
-        }
-    }
-
-    fun ArticlesFilterState.hasChanged(newFilter: ArticlesFilterState): Boolean {
-        if (showLast != newFilter.showLast)
-            return true
-        if (complexity != newFilter.complexity)
-            return true
-        if (showLast) {
-            return minRating != newFilter.minRating
-        } else
-            return period != newFilter.period
-    }
-
-    fun NewsFilterState.hasChanged(newFilter: NewsFilterState): Boolean {
-        if (showLast != newFilter.showLast)
-            return true
-        if (showLast) {
-            return minRating != newFilter.minRating
-        } else
-            return period != newFilter.period
-    }
-
-    var news = MutableLiveData<HabrList<ArticleSnippet>>()
-    var hubs = MutableLiveData<HabrList<HubSnippet>>()
-    var authors = MutableLiveData<HabrList<UserSnippet>>()
-    var companies = MutableLiveData<HabrList<CompanySnippet>>()
+	
+	val myFeedArticlesListModel = ArticlesListModel(
+		path = "articles",
+		coroutineScope = viewModelScope,
+		"custom" to "true"
+	)
+	
+	val articlesListModel = ArticlesListModel(
+		path = "articles",
+		coroutineScope = viewModelScope,
+		initialFilter = ArticlesFilterState(showLast = true, complexity = PostComplexity.None)
+	)
+	
+	val newsListModel = ArticlesListModel(
+		path = "articles",
+		coroutineScope = viewModelScope,
+		initialFilter = NewsFilter(showLast = true, period = FilterPeriod.Day),
+		baseArgs = arrayOf("news" to "true")
+	)
+	
+	val hubsListModel = HubsListModel(
+		path = "hubs",
+		coroutineScope = viewModelScope,
+	)
+	
+	
+	val authorsListModel = UsersListModel(
+		path = "users",
+		coroutineScope = viewModelScope
+	)
+	
+	val companiesListModel = CompaniesListModel(
+		path = "companies",
+		coroutineScope = viewModelScope,
+		//initialFilter = mapOf("order" to "rating")
+	)
+	
+	var hubs = MutableLiveData<HabrList<HubSnippet>>()
+	var authors = MutableLiveData<HabrList<UserSnippet>>()
+	var companies = MutableLiveData<HabrList<CompanySnippet>>()
 }

@@ -46,7 +46,7 @@ val CommentsScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/p/{postId}/comments/#comment_{commentId}"),
     NavDeepLink("https://habr.com/p/{postId}/comments/#comment_{commentId}/")
 )
-
+//https://habr.com/ru/news/753128/comments/#comment_25835578
 val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/p/{id}"),
     NavDeepLink("https://habr.com/p/{id}/"),
@@ -60,7 +60,7 @@ val ArticleNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/news/t/{id}/"),
     NavDeepLink("https://habr.com/{lang}/news/{id}"),
     NavDeepLink("https://habr.com/{lang}/news/{id}/"),
-    NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}"),
+    //NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}"),
     NavDeepLink("https://habr.com/{lang}/{companies}/{company}/{type}/{id}/"),
     NavDeepLink("https://habr.com/{lang}/article/{id}"),
     NavDeepLink("https://habr.com/{lang}/article/{id}/"),
