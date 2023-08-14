@@ -12,12 +12,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.garnegsoft.hubs.api.CollapsingContent
+import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrSnippet
 import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
+import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.LazyHabrSnippetsColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
+import kotlinx.coroutines.launch
 
 @Composable
 fun <T : HabrSnippet> CommonPage(
@@ -25,6 +28,7 @@ fun <T : HabrSnippet> CommonPage(
 	lazyListState: LazyListState = rememberLazyListState(),
 	collapsingBar: (@Composable () -> Unit)? = null,
 	doInitialLoading: Boolean = true,
+	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	snippetCard: @Composable (T) -> Unit,
 ) {
 	val refreshing by listModel.isRefreshing.observeAsState(initial = false)
@@ -58,9 +62,12 @@ fun <T : HabrSnippet> CommonPage(
 	val lastLoadedPageNumber by listModel.lastLoadedPage.observeAsState(1)
 	val isLoading by listModel.isLoading.observeAsState(false)
 	val isLoadingNextPage by listModel.isLoadingNextPage.observeAsState(false)
+
+	
 	CollapsingContent(
 		collapsingContent = { collapsingBar?.invoke() },
-		doCollapse = !isPullingInProgress.value
+		doCollapse = !isPullingInProgress.value,
+		state = collapsingContentState
 	) {
 		if (data != null && data!!.list.isNotEmpty() && (!isLoading || refreshing || isLoadingNextPage)) {
 			
@@ -106,9 +113,16 @@ fun <T : HabrSnippet> CommonPage(
 fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	listModel: AbstractSnippetListModel<T>,
 	lazyListState: LazyListState = rememberLazyListState(),
+	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	filter: (@Composable (onClick: () -> Unit) -> Unit) = { onClick ->
 		listModel.filter.observeAsState().value?.let {
-			FilterElement(title = it.getTitle(), onClick = onClick)
+			val corscop = rememberCoroutineScope()
+			FilterElement(title = it.getTitle(), onClick = {
+				corscop.launch {
+					collapsingContentState.show()
+				}
+				onClick()
+			})
 		}
 	},
 	doInitialLoading: Boolean = true,
@@ -141,7 +155,8 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 			}
 		},
 		doInitialLoading = doInitialLoading,
-		snippetCard = snippetCard
+		snippetCard = snippetCard,
+		collapsingContentState = collapsingContentState
 	)
 }
 

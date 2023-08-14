@@ -4,12 +4,16 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.rememberCoroutineScope
+import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.FilterElement
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -41,9 +45,16 @@ fun ArticlesListPage(
 fun <F : Filter> ArticlesListPageWithFilter(
 	listModel: ArticlesListModel,
 	lazyListState: LazyListState = rememberLazyListState(),
+	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	filter: (@Composable (onClick: () -> Unit) -> Unit) = { onClick ->
 		listModel.filter.observeAsState().value?.let {
-			FilterElement(title = it.getTitle(), onClick = onClick)
+			val corscop = rememberCoroutineScope()
+			FilterElement(title = it.getTitle(), onClick = {
+				corscop.launch {
+					collapsingContentState.show()
+				}
+				onClick()
+			})
 		}
 	},
 	onArticleSnippetClick: (articleId: Int) -> Unit,
@@ -56,7 +67,8 @@ fun <F : Filter> ArticlesListPageWithFilter(
 		listModel = listModel, filterDialog = filterDialog,
 		filter = filter,
 		doInitialLoading = doInitialLoading,
-		lazyListState = lazyListState
+		lazyListState = lazyListState,
+		collapsingContentState = collapsingContentState
 	) {
 		ArticleCard(
 			article = it,

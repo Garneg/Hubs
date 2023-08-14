@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.api
 
 import android.util.Log
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -34,7 +35,36 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 
+class CollapsingContentState {
+    
+    val offset = mutableFloatStateOf(0f)
+    
+    val contentHeight = mutableFloatStateOf(0f)
+    
+    suspend fun hide() {
+        animateOffsetTo(contentHeight.floatValue)
+    }
+    
+    private suspend fun animateOffsetTo(targetValue: Float) {
+        animate(
+            initialValue = offset.floatValue,
+            targetValue = targetValue,
+        ) { currentValue, velocity ->
+            offset.floatValue = currentValue
+        }
+    }
+    
+    suspend fun show() {
+        animateOffsetTo(0f)
+    }
+}
 
+@Composable
+fun rememberCollapsingContentState(): CollapsingContentState {
+    return remember {
+        CollapsingContentState()
+    }
+}
 
 /**
  * Collapsing content, that hides when user scrolls down and shows if user scrolls up.
@@ -46,8 +76,10 @@ import kotlin.math.roundToInt
 fun CollapsingContent(
     collapsingContent: @Composable () -> Unit,
     doCollapse: Boolean = true,
+    state: CollapsingContentState = rememberCollapsingContentState(),
     content: @Composable () -> Unit
 ) {
+    
     var collapsingContentHeightDp by rememberSaveable { mutableStateOf(0f) }
     val density = LocalDensity.current
     val collapsingContentHeightPx = rememberSaveable(collapsingContentHeightDp) {
@@ -61,16 +93,17 @@ fun CollapsingContent(
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             if (doCollapse) {
-                if (available.y > 0 && collapsingContentOffsetPx > 0f) {
-                    collapsingContentOffsetPx -= available.y
-                    collapsingContentOffsetPx =
-                        collapsingContentOffsetPx.coerceIn(0f, collapsingContentHeightPx)
+                if (available.y > 0 && state.offset.floatValue > 0f) {
+    
+                    state.offset.floatValue -= available.y
+                    state.offset.floatValue =
+                        state.offset.floatValue.coerceIn(0f, state.contentHeight.floatValue)
                     return available
                 }
-                if (available.y < 0 && collapsingContentOffsetPx < collapsingContentHeightPx) {
-                    collapsingContentOffsetPx -= available.y
-                    collapsingContentOffsetPx =
-                        collapsingContentOffsetPx.coerceIn(0f, collapsingContentHeightPx)
+                if (available.y < 0 && state.offset.floatValue < state.contentHeight.floatValue) {
+                    state.offset.floatValue -= available.y
+                    state.offset.floatValue =
+                        state.offset.floatValue.coerceIn(0f, state.contentHeight.floatValue)
                     return available
                 }
             }
@@ -83,16 +116,18 @@ fun CollapsingContent(
     Box(
         modifier = Modifier.nestedScroll(nestedScrollConnection)
     ) {
-        Box(Modifier.padding(top = collapsingContentHeightDp.dp - Dp(collapsingContentOffsetPx / density.density))) {
+        Box(Modifier
+            .padding(top = Dp(state.contentHeight.floatValue / density.density) - Dp(state.offset.floatValue / density.density))) {
             content()
         }
         Box(
             modifier = Modifier
                 .clip(RectangleShape)
                 .offset {
-                    IntOffset(0, -collapsingContentOffsetPx.roundToInt())
+                    IntOffset(0, -state.offset.floatValue.roundToInt())
                 }
                 .onGloballyPositioned {
+                    state.contentHeight.floatValue = it.size.height.toFloat()
                     collapsingContentHeightDp = it.size.height.toFloat() / density.density
                 }
 
