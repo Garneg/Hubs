@@ -16,7 +16,8 @@ class CompanyScreenViewModel(alias: String) : ViewModel() {
 	val blogArticlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("company" to alias)
+		baseArgs = arrayOf("company" to alias),
+		initialFilter = CompanyBlogArticlesFilter(true)
 	)
 	
 	var blogArticles = MutableLiveData<HabrList<ArticleSnippet>>()

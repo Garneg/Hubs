@@ -44,33 +44,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.rememberCoroutineScope
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
+import com.garnegsoft.hubs.ui.screens.search.ArticlesSearchFilter
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
-class HubScreenViewModel : ViewModel() {
-    var articles = MutableLiveData<HabrList<ArticleSnippet>>()
-    var hub = MutableLiveData<Hub>()
-    var authors = MutableLiveData<HabrList<UserSnippet>>()
-    var companies = MutableLiveData<HabrList<CompanySnippet>>()
-
-    fun loadArticles(alias: String, page: Int, vararg additionalArgs: Pair<String, String>){
-        viewModelScope.launch(Dispatchers.IO) {
-            ArticlesListController.getArticlesSnippets(
-                "articles",
-                mapOf("hub" to alias, "page" to page.toString()) + additionalArgs.toMap()
-            )?.let {
-                if (articles.value != null && page > 1){
-                    articles.postValue(articles.value!! + it)
-                }
-                else{
-                    articles.postValue(it)
-                }
-            }
-        }
-    }
-}
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -84,7 +63,7 @@ fun HubScreen(
     onCommentsClick: (postId: Int) -> Unit,
     onBackClick: () -> Unit
 ) {
-    var viewModel = viewModel<HubScreenViewModel>(viewModelStoreOwner)
+    var viewModel = viewModel(viewModelStoreOwner) { HubScreenViewModel(alias) }
     val commonCoroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
@@ -99,7 +78,7 @@ fun HubScreen(
                 actions = {
                     val context = LocalContext.current
                     IconButton(
-                        enabled = viewModel.hub.isInitialized,
+                        enabled = true,
                         onClick = {
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
@@ -125,7 +104,6 @@ fun HubScreen(
                 )
             }
 
-            val articles = viewModel.articles.observeAsState().value
             val authors = viewModel.authors.observeAsState().value
             val companies = viewModel.companies.observeAsState().value
             val pagerState = rememberPagerState { 4 }
@@ -148,24 +126,13 @@ fun HubScreen(
                     }
                     // articles
                     1 -> {
-                        if (articles != null) {
-                            PagedHabrSnippetsColumn(
-                                data = articles,
-                                onNextPageLoad = {
-                                    viewModel.loadArticles(alias, it, "sort" to "all")
-                                }
-                            ) {
-                                ArticleCard(
-                                    article = it,
-                                    onClick = { onArticleClick(it.id) },
-                                    onAuthorClick = { it.author?.let { it1 -> onUserClick(it1.alias) } },
-                                    onCommentsClick = { onCommentsClick(it.id) }
-                                )
-                            }
-                        } else {
-                            LaunchedEffect(key1 = Unit, block = {
-                                viewModel.loadArticles(alias, 1, "sort" to "all")
-                            })
+                        ArticlesListPageWithFilter(
+                            listModel = viewModel.articlesListModel,
+                            onArticleSnippetClick = onArticleClick,
+                            onArticleAuthorClick = onUserClick,
+                            onArticleCommentsClick = onCommentsClick
+                        ) { defaultValues, onDismiss, onDone ->
+                            HubArticlesFilter(defaultValues, onDismiss, onDone)
                         }
                     }
                     // authors

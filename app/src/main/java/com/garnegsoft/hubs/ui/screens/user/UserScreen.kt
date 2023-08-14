@@ -110,7 +110,6 @@ fun UserScreen(
 							
 							if (hubs != null)
 								UserProfile(
-									user!!,
 									isAppUser,
 									onLogout,
 									onHubClicked,

@@ -21,6 +21,24 @@ import kotlinx.coroutines.launch
 class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	val user = MutableLiveData<User>()
 	
+	val isRefreshingUser = MutableLiveData(false)
+	
+	fun refreshUser(){
+		isRefreshingUser.postValue(true)
+		viewModelScope.launch(Dispatchers.IO) {
+			loadUser()
+			loadNote()
+			loadWhoIs()
+			isRefreshingUser.postValue(false)
+		}
+	}
+	
+	private fun loadUser() {
+		UserController.get(userAlias)?.let {
+			user.postValue(it)
+		}
+	}
+	
 	val articlesModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
@@ -111,9 +129,7 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	
 	fun loadUserProfile() {
 		viewModelScope.launch(Dispatchers.IO) {
-			UserController.get(userAlias)?.let {
-				user.postValue(it)
-			}
+			loadUser()
 		}
 	}
 	

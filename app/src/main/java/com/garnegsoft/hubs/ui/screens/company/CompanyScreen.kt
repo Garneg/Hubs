@@ -123,7 +123,11 @@ fun CompanyScreen(
                                     onArticleAuthorClick = onUserClick,
                                     onArticleCommentsClick = onCommentsClick
                                 ) { defaultValues, onDismiss, onDone ->
-                                
+                                    CompanyBlogArticlesFilter(
+                                        defaultValues = defaultValues,
+                                        onDismiss = onDismiss,
+                                        onDone = onDone
+                                    )
                                 }
                                 
                                 PagedHabrSnippetsColumn(

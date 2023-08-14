@@ -21,7 +21,7 @@ abstract class AbstractSnippetListModel<S>(
     val filter: LiveData<Filter?> get() = _filter
 
     fun editFilter(newFilter: Filter) {
-        if (filter.value != newFilter) {
+        if (filter.value?.equals(newFilter) == false) {
             _filter.value = newFilter
             coroutineScope.launch(Dispatchers.IO) {
                 _data.postValue(_load())

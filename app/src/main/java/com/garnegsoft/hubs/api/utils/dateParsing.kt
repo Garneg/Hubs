@@ -1,5 +1,8 @@
 package com.garnegsoft.hubs.api.utils
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,12 +30,13 @@ private val MONTH_MAP = mapOf(
     12 to "дек",
 )
 
+
 fun formatTime(time: String): String {
     var result = String()
 
     val localedTime = defaultInputFormatter.parse(time.split('+')[0].replace('T', ' '))!!
-    localedTime.time = localedTime.time + TimeZone.getDefault().rawOffset
-
+    localedTime.time = localedTime.time + TimeZone.getDefault().rawOffset + TimeZone.getDefault().dstSavings
+    
     var todayCallendar = Calendar.getInstance()
     var publishCalendar = Calendar.getInstance()
     publishCalendar.time = localedTime
