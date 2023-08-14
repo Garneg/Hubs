@@ -246,6 +246,7 @@ class MainActivity : ComponentActivity() {
 								route = "article/{id}?offline={offline}",
 								deepLinks = ArticleNavDeepLinks,
 								enterTransition = {
+									
 									scaleIn(tween(200, easing = EaseOut), 0.9f) + fadeIn(tween(270, easing = EaseOut))
 								},
 								exitTransition = {
