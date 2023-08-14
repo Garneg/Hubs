@@ -3,11 +3,9 @@ package com.garnegsoft.hubs.ui.screens.company
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.Company
-import com.garnegsoft.hubs.api.user.list.UserSnippet
+import com.garnegsoft.hubs.api.user.UsersListModel
 
 class CompanyScreenViewModel(alias: String) : ViewModel() {
 	var companyProfile = MutableLiveData<Company>()
@@ -20,8 +18,18 @@ class CompanyScreenViewModel(alias: String) : ViewModel() {
 		initialFilter = CompanyBlogArticlesFilter(true)
 	)
 	
-	var blogArticles = MutableLiveData<HabrList<ArticleSnippet>>()
-	var blogNews = MutableLiveData<HabrList<ArticleSnippet>>()
-	var followers = MutableLiveData<HabrList<UserSnippet>>()
-	var employees = MutableLiveData<HabrList<UserSnippet>>()
+	val blogNewsListModel = ArticlesListModel(
+		path = "articles",
+		coroutineScope = viewModelScope,
+		baseArgs = arrayOf("companyNews" to alias)
+	)
+	val followersListModel = UsersListModel(
+		path = "companies/$alias/fans/all",
+		coroutineScope = viewModelScope
+	)
+	
+	var employeesListModel = UsersListModel(
+		path = "companies/$alias/workers/all",
+		coroutineScope = viewModelScope
+	)
 }

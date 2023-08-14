@@ -58,12 +58,12 @@ fun <T : HabrSnippet> CommonPage(
 	val lastLoadedPageNumber by listModel.lastLoadedPage.observeAsState(1)
 	val isLoading by listModel.isLoading.observeAsState(false)
 	val isLoadingNextPage by listModel.isLoadingNextPage.observeAsState(false)
-	
-	if (data != null && data!!.list.isNotEmpty() && (!isLoading || refreshing || isLoadingNextPage)) {
-		CollapsingContent(
-			collapsingContent = { collapsingBar?.invoke() },
-			doCollapse = !isPullingInProgress.value
-		) {
+	CollapsingContent(
+		collapsingContent = { collapsingBar?.invoke() },
+		doCollapse = !isPullingInProgress.value
+	) {
+		if (data != null && data!!.list.isNotEmpty() && (!isLoading || refreshing || isLoadingNextPage)) {
+			
 			RefreshableContainer(
 				isPullingInProgress = isPullingInProgress,
 				onRefresh = {
@@ -90,14 +90,15 @@ fun <T : HabrSnippet> CommonPage(
 						}
 					} else null
 				)
+				
 			}
+		} else if (isLoading) {
+			Box(modifier = Modifier.fillMaxSize()) {
+				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+			}
+		} else {
+			Box(modifier = Modifier.fillMaxSize())
 		}
-	} else if (isLoading) {
-		Box(modifier = Modifier.fillMaxSize()) {
-			CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-		}
-	} else {
-		Box(modifier = Modifier.fillMaxSize())
 	}
 }
 

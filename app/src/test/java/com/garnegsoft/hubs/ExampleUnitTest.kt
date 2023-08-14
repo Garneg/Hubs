@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs
 
-import com.garnegsoft.hubs.ui.screens.main.FilterPeriod
+import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.ui.screens.main.NewsFilter
 import org.junit.Test
 
@@ -41,6 +41,24 @@ class ExampleUnitTest {
         )
         assertEquals(filter1, filter2)
         assertNotEquals(filter2, filter3)
+    }
+    
+    @Test
+    fun test_newAvatarPlaceholderUrl(){
+        val alias = "A"
+        val totalNumberOfPlaceholders = 200
+        
+        var result = alias.toCharArray().map { it.code }
+            .reduce { acc, i ->
+                acc + i
+            } % totalNumberOfPlaceholders
+        result++
+            
+        val resultString = result.toString().padStart(3, '0')
+        val endString = "https://assets.habr.com/habr-web/img/avatars/${resultString}.png"
+        
+        assertEquals("https://assets.habr.com/habr-web/img/avatars/076.png", endString)
+        
     }
 
 
