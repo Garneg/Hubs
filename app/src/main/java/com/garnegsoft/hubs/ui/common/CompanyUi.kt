@@ -57,7 +57,6 @@ fun CompanyCard(
 ) {
     Row(
         modifier = Modifier
-            .height(IntrinsicSize.Max)
             .clip(style.shape)
             .background(style.backgroundColor)
             .clickable { onClick() }
@@ -98,7 +97,6 @@ fun CompanyCard(
         Spacer(modifier = Modifier.width(style.innerPadding))
         Column(
             modifier = Modifier.weight(1f),
-
             ) {
             Text(text = company.title, style = style.titleTextStyle)
             if (style.showDescription)
@@ -111,7 +109,7 @@ fun CompanyCard(
                     )
                 }
         }
-        Box(modifier = Modifier.fillMaxHeight().padding(start = 4.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.padding(start = 4.dp), contentAlignment = Alignment.Center) {
             indicator()
         }
     }

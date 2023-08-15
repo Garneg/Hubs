@@ -34,6 +34,9 @@ import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
+import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.HubsListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 import kotlinx.coroutines.*
 
 
@@ -174,112 +177,13 @@ fun ArticlesScreen(
 							)
 						},
 						"Хабы" to {
-							val hubs by viewModel.hubs.observeAsState()
-							if (hubs != null) {
-								PagedHabrSnippetsColumn(
-									lazyListState = hubsLazyListState,
-									data = hubs!!,
-									onNextPageLoad = {
-										commonCoroutineScope.launch(Dispatchers.IO) {
-											HubsListController.get(
-												"hubs",
-												mapOf("page" to it.toString())
-											)?.let {
-												viewModel.hubs.postValue(
-													hubs!! + it
-												)
-											}
-										}
-									}
-								) {
-									HubCard(
-										hub = it,
-										onClick = { onHubClicked(it.alias) }
-									)
-								}
-							} else {
-								Box(modifier = Modifier.fillMaxSize()) {
-									CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-								}
-								LaunchedEffect(key1 = Unit) {
-									launch(Dispatchers.IO) {
-										viewModel.hubs.postValue(HubsListController.get("hubs"))
-									}
-								}
-							}
+							HubsListPage(listModel = viewModel.hubsListModel, onHubClick = onHubClicked)
 						},
 						"Авторы" to {
-							val authors by viewModel.authors.observeAsState()
-							if (authors != null) {
-								PagedHabrSnippetsColumn(
-									lazyListState = authorsLazyListState,
-									data = authors!!,
-									onNextPageLoad = {
-										commonCoroutineScope.launch(Dispatchers.IO) {
-											UsersListController.get(
-												"users",
-												mapOf("page" to it.toString())
-											)?.let {
-												viewModel.authors.postValue(
-													authors!! + it
-												)
-											}
-										}
-									}
-								) {
-									UserCard(user = it, onClick = { onUserClicked(it.alias) })
-								}
-							} else {
-								Box(modifier = Modifier.fillMaxSize()) {
-									CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-									
-								}
-								LaunchedEffect(key1 = Unit, block = {
-									launch(Dispatchers.IO) {
-										viewModel.authors.postValue(UsersListController.get("users"))
-									}
-								})
-								
-							}
+							UsersListPage(listModel = viewModel.authorsListModel, onUserClick = onUserClicked)
 						},
 						"Компании" to {
-							val companies by viewModel.companies.observeAsState()
-							if (companies != null) {
-								PagedHabrSnippetsColumn(
-									lazyListState = companiesLazyListState,
-									data = companies!!,
-									onNextPageLoad = {
-										commonCoroutineScope.launch(Dispatchers.IO) {
-											CompaniesListController.get(
-												"companies",
-												mapOf("order" to "rating", "page" to it.toString())
-											)?.let {
-												viewModel.companies.postValue(
-													companies!! + it
-												)
-											}
-										}
-									}
-								) {
-									CompanyCard(
-										company = it,
-										onClick = { onCompanyClicked(it.alias) })
-								}
-							} else {
-								Box(modifier = Modifier.fillMaxSize()) {
-									CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-								}
-								LaunchedEffect(key1 = Unit, block = {
-									launch(Dispatchers.IO) {
-										viewModel.companies.postValue(
-											CompaniesListController.get(
-												"companies",
-												args = mapOf("order" to "rating")
-											)
-										)
-									}
-								})
-							}
+							CompaniesListPage(listModel = viewModel.companiesListModel, onCompanyClick = onCompanyClicked)
 						}
 					)
 					if (isAuthorized) map =

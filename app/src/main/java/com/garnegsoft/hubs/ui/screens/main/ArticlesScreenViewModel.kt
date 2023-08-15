@@ -52,10 +52,7 @@ class ArticlesScreenViewModel : ViewModel() {
 	val companiesListModel = CompaniesListModel(
 		path = "companies",
 		coroutineScope = viewModelScope,
-		//initialFilter = mapOf("order" to "rating")
+		"order" to "rating"
 	)
 	
-	var hubs = MutableLiveData<HabrList<HubSnippet>>()
-	var authors = MutableLiveData<HabrList<UserSnippet>>()
-	var companies = MutableLiveData<HabrList<CompanySnippet>>()
 }

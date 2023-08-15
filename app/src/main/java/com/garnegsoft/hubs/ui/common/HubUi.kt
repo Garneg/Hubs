@@ -52,7 +52,7 @@ fun HubCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Max)
+            //.height(IntrinsicSize.Max)
             .clip(style.shape)
             .background(style.backgroundColor)
             .clickable(onClick = onClick)
