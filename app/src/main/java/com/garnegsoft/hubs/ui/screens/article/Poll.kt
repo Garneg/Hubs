@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.article
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -36,127 +37,127 @@ fun Poll(
 	val mostVotedVariantId = rememberSaveable {
 		poll.variants.sortedByDescending { it.percent }.first().id
 	}
-	HubsTheme {
-		Column(
-			verticalArrangement = Arrangement.spacedBy(16.dp)
-		) {
-			Text(
-				text = poll.title,
-				fontWeight = FontWeight.W600,
-				fontSize = 20.sp,
-				color = MaterialTheme.colors.onBackground
-			)
-			// FIXME: This is a stub. Habr do not accept answering variants for some reason
-			if (true) {
+	
+	Column(
+		verticalArrangement = Arrangement.spacedBy(16.dp),
+		modifier = Modifier.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.onBackground)
+	) {
+		Text(
+			text = poll.title,
+			fontWeight = FontWeight.W600,
+			fontSize = 20.sp,
+			color = MaterialTheme.colors.onBackground
+		)
+		// FIXME: This is a stub. Habr do not accept answering variants for some reason
+		if (true) {
+			poll.variants.forEach {
+				PollItem(data = it, isMostVoted = it.id == mostVotedVariantId)
+			}
+		} else {
+			if (poll.answersType == Article.Poll.PollType.Radio) {
 				poll.variants.forEach {
-					PollItem(data = it, isMostVoted = it.id == mostVotedVariantId)
+					val interactionSource = remember { MutableInteractionSource() }
+					var selected by remember { mutableStateOf(false) }
+					
+					Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.clickable(
+								indication = null,
+								interactionSource = interactionSource
+							) {
+								if (!selected) {
+									selectedVariants.clear()
+									selectedVariants.add(it.id)
+									selected = true
+								}
+							}
+					) {
+						
+						LaunchedEffect(key1 = selectedVariants.getOrNull(0), block = {
+							if (selectedVariants.getOrNull(0) != it.id)
+								selected = false
+						})
+						RadioButton(
+							selected = selected, onClick = {
+								if (!selected) {
+									selectedVariants.clear()
+									selectedVariants.add(it.id)
+									selected = true
+								}
+								
+							},
+							interactionSource = interactionSource
+						)
+						Text(modifier = Modifier.padding(top = 12.dp), text = it.text)
+					}
 				}
 			} else {
-				if (poll.answersType == Article.Poll.PollType.Radio) {
-					poll.variants.forEach {
-						val interactionSource = remember { MutableInteractionSource() }
-						var selected by remember { mutableStateOf(false) }
-						
-						Row(
-							modifier = Modifier
-								.fillMaxWidth()
-								.clickable(
-									indication = null,
-									interactionSource = interactionSource
-								) {
-									if (!selected) {
-										selectedVariants.clear()
-										selectedVariants.add(it.id)
-										selected = true
-									}
-								}
-						) {
-							
-							LaunchedEffect(key1 = selectedVariants.getOrNull(0), block = {
-								if (selectedVariants.getOrNull(0) != it.id)
-									selected = false
-							})
-							RadioButton(
-								selected = selected, onClick = {
-									if (!selected) {
-										selectedVariants.clear()
-										selectedVariants.add(it.id)
-										selected = true
-									}
-									
-								},
+				poll.variants.forEach {
+					var selected by remember { mutableStateOf(false) }
+					val interactionSource = remember { MutableInteractionSource() }
+					Row(
+						modifier = Modifier
+							.fillMaxWidth()
+							.clickable(
+								indication = null,
 								interactionSource = interactionSource
-							)
-							Text(modifier = Modifier.padding(top = 12.dp), text = it.text)
-						}
-					}
-				} else {
-					poll.variants.forEach {
-						var selected by remember { mutableStateOf(false) }
-						val interactionSource = remember { MutableInteractionSource() }
-						Row(
-							modifier = Modifier
-								.fillMaxWidth()
-								.clickable(
-									indication = null,
-									interactionSource = interactionSource
-								) {
-									val checked = !selected
-									if (!checked) {
-										selectedVariants.remove(it.id)
-									} else {
-										selectedVariants.add(it.id)
-									}
-									selected = checked
-								},
-							
 							) {
-							Checkbox(
-								checked = selected,
-								onCheckedChange = { checked ->
-									if (!checked) {
-										selectedVariants.remove(it.id)
-									} else {
-										selectedVariants.add(it.id)
-									}
-									selected = checked
-									
-								},
-								interactionSource = interactionSource
-							)
-							Text(modifier = Modifier.padding(top = 12.dp), text = it.text)
-							
-						}
+								val checked = !selected
+								if (!checked) {
+									selectedVariants.remove(it.id)
+								} else {
+									selectedVariants.add(it.id)
+								}
+								selected = checked
+							},
 						
+						) {
+						Checkbox(
+							checked = selected,
+							onCheckedChange = { checked ->
+								if (!checked) {
+									selectedVariants.remove(it.id)
+								} else {
+									selectedVariants.add(it.id)
+								}
+								selected = checked
+								
+							},
+							interactionSource = interactionSource
+						)
+						Text(modifier = Modifier.padding(top = 12.dp), text = it.text)
 						
 					}
-				}
-				FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-					Button(
-						elevation = null,
-						shape = RoundedCornerShape(8.dp),
-						enabled = selectedVariants.size > 0,
-						contentPadding = PaddingValues(12.dp),
-						onClick = {
-							onVote(selectedVariants)
-						}
-					) {
-						Text(text = "Голосовать", style = MaterialTheme.typography.body2)
-					}
-					OutlinedButton(
-						contentPadding = PaddingValues(12.dp),
-						onClick = onPass
-					) {
-						Text(text = "Воздержаться", style = MaterialTheme.typography.body2)
-					}
+					
+					
 				}
 			}
-			Text(
-				text = "Проголосовали: ${poll.votesCount}. Воздержались ${poll.passCount}",
-				color = MaterialTheme.colors.onBackground.copy(0.5f)
-			)
-			
+			FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+				Button(
+					elevation = null,
+					shape = RoundedCornerShape(8.dp),
+					enabled = selectedVariants.size > 0,
+					contentPadding = PaddingValues(12.dp),
+					onClick = {
+						onVote(selectedVariants)
+					}
+				) {
+					Text(text = "Голосовать", style = MaterialTheme.typography.body2)
+				}
+				OutlinedButton(
+					contentPadding = PaddingValues(12.dp),
+					onClick = onPass
+				) {
+					Text(text = "Воздержаться", style = MaterialTheme.typography.body2)
+				}
+			}
 		}
+		Text(
+			text = "Проголосовали: ${poll.votesCount}. Воздержались ${poll.passCount}",
+			color = MaterialTheme.colors.onBackground.copy(0.5f)
+		)
+		
 	}
 }
 

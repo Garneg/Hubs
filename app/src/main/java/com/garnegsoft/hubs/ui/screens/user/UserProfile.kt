@@ -299,6 +299,17 @@ internal fun UserProfile(
                                 ),
                                 verticalArrangement = Arrangement.spacedBy(20.dp)
                             ) {
+                                whoIs?.badges?.let {
+                                    TitledColumn(title = "Значки") {
+                                        FlowRow(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            it.forEach { Badge(title = it.title)}
+                                        }
+                                    }
+                                }
+                                
                                 whoIs?.aboutHtml?.let {
                                     if (it.isNotBlank()) {
                                         TitledColumn(title = "О Себе") {

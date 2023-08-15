@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -13,19 +14,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-val badgeColor = Color(0xFF3D96EE)
 
 @Composable
 fun Badge(title: String) {
+    val badgeColor = MaterialTheme.colors.secondaryVariant
     Box(modifier = Modifier
-        .clip(CircleShape)
+        .clip(MaterialTheme.shapes.small)
         .border(
             1.dp,
             badgeColor,
-            shape = CircleShape
+            shape = MaterialTheme.shapes.small
         )
-        .background(Color.White)
-        .padding(horizontal = 12.dp, vertical = 8.dp)){
+        .padding(horizontal = 8.dp, vertical = 6.dp)){
         Text(color = badgeColor, text = title)
     }
 }

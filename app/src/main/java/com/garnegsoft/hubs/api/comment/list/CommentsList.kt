@@ -174,8 +174,8 @@ class CommentsListController {
                             CommentSnippet(
                                 id = it.id.toInt(),
                                 parentPost = CommentSnippet.ParentPost(
-                                    id = it.post!!.id,
-                                    title = it.post!!.title
+                                    id = it.publication!!.id.toInt(),
+                                    title = it.publication!!.title
                                 ),
                                 text = it.message,
                                 timePublished = it.timePublished,
@@ -300,15 +300,15 @@ class CommentsListController {
             //ral timeEditAllowedTill: Any? = null,
             var children: ArrayList<String>,
             //val vote: Vote? = null,
-            var post: Post? = null,
+            var publication: Post? = null,
             var isPinned: Boolean
         ) {
             @Serializable
             data class Post(
-                var id: Int,
+                var id: String,
+                var publicationType: String,
                 var title: String,
-                var commentsCount: Int,
-                var postType: String,
+                var isCorporative: Boolean
             )
 
             @Serializable

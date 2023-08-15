@@ -107,7 +107,6 @@ fun CompanyScreen(
 								onArticleSnippetClick = onArticleClick,
 								onArticleAuthorClick = onUserClick,
 								onArticleCommentsClick = onCommentsClick,
-								doInitialLoading = false
 							) { defaultValues, onDismiss, onDone ->
 								CompanyBlogArticlesFilter(
 									defaultValues = defaultValues,
