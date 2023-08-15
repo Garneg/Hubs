@@ -203,7 +203,7 @@ fun ArticleContent(
 				}
 			}
 			
-			if (article.author != null) {
+			if (article.author != null && article.postType != PostType.Megaproject) {
 				item {
 					Row(
 						modifier = Modifier

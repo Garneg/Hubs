@@ -46,7 +46,7 @@ class ArticleController {
             return raw?.let {
                 com.garnegsoft.hubs.api.article.Article(
                     id = it.id.toInt(),
-                    title = it.titleHtml,
+                    title = Jsoup.parse(it.titleHtml).text(),
                     timePublished = it.timePublished,
                     author = if (it.author != null) {
                         com.garnegsoft.hubs.api.article.Article.Author(

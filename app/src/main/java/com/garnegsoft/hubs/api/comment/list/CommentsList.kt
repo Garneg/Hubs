@@ -175,7 +175,7 @@ class CommentsListController {
                                 id = it.id.toInt(),
                                 parentPost = CommentSnippet.ParentPost(
                                     id = it.publication!!.id.toInt(),
-                                    title = it.publication!!.title
+                                    title = Jsoup.parse(it.publication!!.title).text()
                                 ),
                                 text = it.message,
                                 timePublished = it.timePublished,
