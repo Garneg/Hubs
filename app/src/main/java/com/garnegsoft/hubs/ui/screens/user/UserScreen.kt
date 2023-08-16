@@ -24,6 +24,7 @@ import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 import kotlinx.coroutines.Dispatchers
@@ -126,12 +127,18 @@ fun UserScreen(
 					})
 				if (usr.articlesCount > 0 || initialPage == UserScreenPages.Articles) {
 					map += UserScreenPages.Articles to {
-						ArticlesListPage(
+						ArticlesListPageWithFilter(
 							listModel = viewModel.articlesModel,
 							onArticleSnippetClick = onArticleClicked,
 							onArticleAuthorClick = onUserClicked,
 							onArticleCommentsClick = onCommentsClicked
-						)
+						) { defaultValues, onDismiss, onDone ->
+							UserArticlesFilter(
+								defaultValues = defaultValues,
+								onDismiss = onDismiss,
+								onDone = onDone
+							)
+						}
 					}
 				}
 				if (usr.commentsCount > 0 || initialPage == UserScreenPages.Comments) {

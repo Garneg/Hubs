@@ -8,6 +8,7 @@ import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.comment.ArticleComments
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.formatTime
+import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -32,8 +33,12 @@ class CommentsListController {
                 commentsList.comments.values.forEach {
                     it.apply {
                         timePublished = formatTime(timePublished)
-                        author?.avatarUrl?.let {
-                            author?.avatarUrl = "https:" + author?.avatarUrl
+                        author?.let {
+                            if (it.avatarUrl == null) {
+                                it.avatarUrl = placeholderAvatarUrl(it.alias!!)
+                            } else {
+                                it.avatarUrl = "https:" + author?.avatarUrl
+                            }
                         }
                     }
                 }

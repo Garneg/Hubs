@@ -1,29 +1,20 @@
 package com.garnegsoft.hubs.ui.common
 
 import ArticleController
-import android.os.Build
-import android.text.TextUtils.SimpleStringSplitter
-import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -31,26 +22,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
 import coil.compose.AsyncImage
-import coil.compose.AsyncImagePainter
-import coil.compose.rememberAsyncImagePainter
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.disk.DiskCache
-import coil.imageLoader
-import coil.memory.MemoryCache
-import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.size.Size
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -210,13 +190,13 @@ fun ArticleCard(
                                     .clip(style.innerElementsShape)
                                     .background(Color.White)
                                     .border(
-                                        BorderStroke(2.dp, placeholderColor(article.author.alias)),
+                                        BorderStroke(2.dp, placeholderColorLegacy(article.author.alias)),
                                         shape = style.innerElementsShape
                                     )
                                     .padding(2.dp),
                                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                 contentDescription = "",
-                                tint = placeholderColor(article.author.alias)
+                                tint = placeholderColorLegacy(article.author.alias)
                             )
                         } else {
                             AsyncImage(

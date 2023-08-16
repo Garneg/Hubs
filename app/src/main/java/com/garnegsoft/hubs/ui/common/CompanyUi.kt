@@ -26,8 +26,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
-import com.garnegsoft.hubs.api.utils.placeholderColor
-import com.garnegsoft.hubs.ui.screens.company.CompanyProfile
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 
 
 @Composable
@@ -83,14 +82,14 @@ fun CompanyCard(
                     .size(style.avatarSize)
                     .border(
                         width = 2.5.dp,
-                        color = placeholderColor(company.alias),
+                        color = placeholderColorLegacy(company.alias),
                         shape = style.avatarShape
                     )
                     .background(Color.White, shape = style.avatarShape)
                     .padding(3.dp),
                 painter = painterResource(id = R.drawable.company_avatar_placeholder),
                 contentDescription = "",
-                tint = placeholderColor(company.alias)
+                tint = placeholderColorLegacy(company.alias)
             )
         }
         

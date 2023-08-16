@@ -44,10 +44,9 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -442,7 +441,7 @@ fun ArticleScreen(
                                             .size(34.dp)
                                             .border(
                                                 width = 2.dp,
-                                                color = placeholderColor(article.authorName),
+                                                color = placeholderColorLegacy(article.authorName),
                                                 shape = RoundedCornerShape(8.dp)
                                             )
                                             .background(
@@ -452,7 +451,7 @@ fun ArticleScreen(
                                             .padding(2.dp),
                                         painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                         contentDescription = "",
-                                        tint = placeholderColor(article.authorName)
+                                        tint = placeholderColorLegacy(article.authorName)
                                     )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(

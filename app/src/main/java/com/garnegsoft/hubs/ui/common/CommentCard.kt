@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -122,14 +122,14 @@ fun CommentCard(
                                     .size(style.avatarSize)
                                     .border(
                                         width = 2.dp,
-                                        color = placeholderColor(comment.author.alias),
+                                        color = placeholderColorLegacy(comment.author.alias),
                                         shape = style.avatarShape
                                     )
                                     .background(Color.White, shape = style.avatarShape)
                                     .padding(2.dp),
                                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                 contentDescription = "",
-                                tint = placeholderColor(comment.author.alias)
+                                tint = placeholderColorLegacy(comment.author.alias)
                             )
                         }
                         Spacer(modifier = Modifier.width(4.dp))

@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import android.content.Intent
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -19,10 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,8 +30,7 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
-import com.garnegsoft.hubs.api.utils.placeholderColor
-import com.garnegsoft.hubs.ui.screens.article.parseElement
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.delay
@@ -130,13 +125,13 @@ fun CommentItem(
                         .clip(shape = RoundedCornerShape(10.dp))
                         .background(Color.White)
                         .border(
-                            BorderStroke(2.dp, color = placeholderColor(comment.author.alias)),
+                            BorderStroke(2.dp, color = placeholderColorLegacy(comment.author.alias)),
                             shape = RoundedCornerShape(10.dp)
                         )
                         .padding(2.dp),
                     painter = painterResource(id = R.drawable.user_avatar_placeholder),
                     contentDescription = "",
-                    tint = placeholderColor(comment.author.alias)
+                    tint = placeholderColorLegacy(comment.author.alias)
                 )
             } else {
                 AsyncImage(

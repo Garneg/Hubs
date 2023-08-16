@@ -12,20 +12,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 
@@ -58,14 +53,14 @@ fun OfflineArticleCard(
                             .size(style.authorAvatarSize)
                             .border(
                                 width = 2.dp,
-                                color = placeholderColor(it),
+                                color = placeholderColorLegacy(it),
                                 shape = style.innerElementsShape
                             )
                             .background(Color.White, shape = style.innerElementsShape)
                             .padding(2.dp),
                         painter = painterResource(id = R.drawable.user_avatar_placeholder),
                         contentDescription = "",
-                        tint = placeholderColor(it)
+                        tint = placeholderColorLegacy(it)
                     )
                 }
                 Spacer(modifier = Modifier.width(4.dp))

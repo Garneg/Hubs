@@ -4,6 +4,7 @@ import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.utils.formatBirthdate
 import com.garnegsoft.hubs.api.utils.formatTime
+import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import okhttp3.ResponseBody
@@ -27,9 +28,12 @@ class UserController {
                     customJson.decodeFromJsonElement(customJson.parseToJsonElement(it.string()))
 
                 result?.let {
-                    if (it.avatarUrl != null)
+                    if (it.avatarUrl != null) {
                         it.avatarUrl = "https:" + it.avatarUrl!!.replace("habrastorage", "hsto")
-
+                    }
+                    else {
+                        it.avatarUrl = placeholderAvatarUrl(it.alias)
+                    }
                     it.registerDateTime = formatTime(it.registerDateTime).split(' ')
                         .run { "${this[0]} ${this[1]} ${this[2]}" }
 

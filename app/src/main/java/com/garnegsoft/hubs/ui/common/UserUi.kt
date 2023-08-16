@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.common
 
-import android.content.res.Resources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -26,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.user.list.UserSnippet
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.R
 
 
@@ -82,11 +81,11 @@ fun UserCard(
                 modifier = Modifier
                     .size(style.avatarSize)
                     .background(Color.White, shape = style.avatarShape)
-                    .border(2.3.dp, color = placeholderColor(user.alias), shape = style.avatarShape)
+                    .border(2.3.dp, color = placeholderColorLegacy(user.alias), shape = style.avatarShape)
                     .padding(3.dp),
                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                 contentDescription = "",
-                tint = placeholderColor(user.alias)
+                tint = placeholderColorLegacy(user.alias)
             )
 
         }

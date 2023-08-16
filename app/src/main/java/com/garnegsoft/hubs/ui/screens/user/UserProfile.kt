@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.user.UserController
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
@@ -92,14 +92,14 @@ internal fun UserProfile(
                                         .background(Color.White, shape = RoundedCornerShape(12.dp))
                                         .border(
                                             width = 4.dp,
-                                            color = placeholderColor(user.alias),
+                                            color = placeholderColorLegacy(user.alias),
                                             shape = RoundedCornerShape(12.dp)
                                         )
                                         .align(Alignment.Center)
                                         .padding(5.dp),
                                     painter = painterResource(id = R.drawable.user_avatar_placeholder),
                                     contentDescription = "",
-                                    tint = placeholderColor(user.alias)
+                                    tint = placeholderColorLegacy(user.alias)
                                 )
                             }
                         }

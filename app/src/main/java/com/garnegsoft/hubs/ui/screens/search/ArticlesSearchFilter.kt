@@ -11,6 +11,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
+import com.garnegsoft.hubs.ui.common.TitledColumn
 
 class ArticlesSearchFilter(
 	val order: SearchFilterOrder,
@@ -58,20 +59,23 @@ fun ArticlesSearchFilter(
 		onDismiss = onDismiss,
 		onDone = { onDone(ArticlesSearchFilter(order, defaultValues.query)) }) {
 		Column {
-			HubsFilterChip(
-				selected = order == ArticlesSearchFilter.SearchFilterOrder.Relevance,
-				onClick = { order = ArticlesSearchFilter.SearchFilterOrder.Relevance }) {
-				Text(text = "По релевантности")
-			}
-			HubsFilterChip(
-				selected = order == ArticlesSearchFilter.SearchFilterOrder.Date,
-				onClick = { order = ArticlesSearchFilter.SearchFilterOrder.Date }) {
-				Text(text = "По времени")
-			}
-			HubsFilterChip(
-				selected = order == ArticlesSearchFilter.SearchFilterOrder.Rating,
-				onClick = { order = ArticlesSearchFilter.SearchFilterOrder.Rating }) {
-				Text(text = "По рейтингу")
+			TitledColumn(title = "Сортировать") {
+				
+				HubsFilterChip(
+					selected = order == ArticlesSearchFilter.SearchFilterOrder.Relevance,
+					onClick = { order = ArticlesSearchFilter.SearchFilterOrder.Relevance }) {
+					Text(text = "По релевантности")
+				}
+				HubsFilterChip(
+					selected = order == ArticlesSearchFilter.SearchFilterOrder.Date,
+					onClick = { order = ArticlesSearchFilter.SearchFilterOrder.Date }) {
+					Text(text = "По времени")
+				}
+				HubsFilterChip(
+					selected = order == ArticlesSearchFilter.SearchFilterOrder.Rating,
+					onClick = { order = ArticlesSearchFilter.SearchFilterOrder.Rating }) {
+					Text(text = "По рейтингу")
+				}
 			}
 		}
 	}

@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -34,7 +33,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import kotlinx.coroutines.delay
 
 @Composable
@@ -66,7 +65,7 @@ fun AuthorizedMenu(
 					.size(32.dp)
 					.clip(RoundedCornerShape(8.dp))
 					.border(
-						width = 2.dp, color = placeholderColor(userAlias),
+						width = 2.dp, color = placeholderColorLegacy(userAlias),
 						shape = RoundedCornerShape(8.dp)
 					)
 					.padding(1.dp)
@@ -74,7 +73,7 @@ fun AuthorizedMenu(
 					.padding(1.5.dp),
 				painter = painterResource(id = R.drawable.user_avatar_placeholder),
 				contentDescription = "",
-				tint = placeholderColor(userAlias)
+				tint = placeholderColorLegacy(userAlias)
 			)
 		}
 		
@@ -148,7 +147,7 @@ fun AuthorizedMenu(
 									modifier = Modifier
 										.size(32.dp)
 										.border(
-											width = 2.dp, color = placeholderColor(userAlias),
+											width = 2.dp, color = placeholderColorLegacy(userAlias),
 											shape = RoundedCornerShape(8.dp)
 										)
 										.background(
@@ -158,7 +157,7 @@ fun AuthorizedMenu(
 										.padding(2.5.dp),
 									painter = painterResource(id = R.drawable.user_avatar_placeholder),
 									contentDescription = "",
-									tint = placeholderColor(userAlias)
+									tint = placeholderColorLegacy(userAlias)
 								)
 							}
 						}, onClick = onProfileClick)

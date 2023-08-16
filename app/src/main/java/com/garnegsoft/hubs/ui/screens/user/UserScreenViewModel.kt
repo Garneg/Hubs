@@ -42,7 +42,9 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	val articlesModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		"user" to userAlias
+		baseArgs = arrayOf("user" to userAlias),
+		initialFilter = UserArticlesFilter(false),
+		
 	)
 	
 	val commentsModel = CommentsListModel(

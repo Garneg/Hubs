@@ -29,7 +29,7 @@ class AuthActivity : AppCompatActivity() {
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
 
-            webViewClient = AuthWebViewClient() {
+            webViewClient = AuthWebViewClient {
                 this@AuthActivity.setResult(Activity.RESULT_OK, Intent().apply
                 {
                     putExtra(
@@ -53,7 +53,7 @@ class AuthActivity : AppCompatActivity() {
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             url?.let {
-                if (it.contains("/all/"))
+                if (it.contains("/articles/"))
                     onLogin()
             }
                 super.onPageStarted(view, url, favicon)

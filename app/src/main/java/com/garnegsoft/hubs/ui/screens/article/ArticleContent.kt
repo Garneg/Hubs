@@ -1,9 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import ArticleController
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -40,18 +38,14 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.company.Company
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
-import com.garnegsoft.hubs.api.utils.placeholderColor
-import com.garnegsoft.hubs.ui.common.HubsFilterChip
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
 import org.jsoup.nodes.*
-import org.jsoup.select.Elements
 import kotlin.math.roundToInt
 
 
@@ -226,7 +220,7 @@ fun ArticleContent(
 									.size(34.dp)
 									.border(
 										width = 2.dp,
-										color = placeholderColor(article.author.alias),
+										color = placeholderColorLegacy(article.author.alias),
 										shape = RoundedCornerShape(8.dp)
 									)
 									.background(
@@ -236,7 +230,7 @@ fun ArticleContent(
 									.padding(2.dp),
 								painter = painterResource(id = R.drawable.user_avatar_placeholder),
 								contentDescription = "",
-								tint = placeholderColor(article.author.alias)
+								tint = placeholderColorLegacy(article.author.alias)
 							)
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(

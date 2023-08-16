@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -27,15 +26,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.utils.placeholderColor
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.settingsDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlow
-import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 
 
@@ -227,7 +223,7 @@ fun ArticleScreenSettingsScreen(
                         .size(34.dp)
                         .border(
                             width = 2.dp,
-                            color = placeholderColor("Boomburum"),
+                            color = placeholderColorLegacy("Boomburum"),
                             shape = RoundedCornerShape(8.dp)
                         )
                         .background(
@@ -237,7 +233,7 @@ fun ArticleScreenSettingsScreen(
                         .padding(2.dp),
                     painter = painterResource(id = R.drawable.user_avatar_placeholder),
                     contentDescription = "",
-                    tint = placeholderColor("Boomburum")
+                    tint = placeholderColorLegacy("Boomburum")
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(

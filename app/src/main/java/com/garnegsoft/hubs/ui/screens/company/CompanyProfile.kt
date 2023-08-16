@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.DefaultAlpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -28,13 +27,11 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.Company
 import com.garnegsoft.hubs.api.company.CompanyController
-import com.garnegsoft.hubs.api.utils.placeholderColor
-import com.garnegsoft.hubs.ui.common.AsyncSvgImage
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
-import com.garnegsoft.hubs.ui.screens.user.HubChip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -115,14 +112,14 @@ fun CompanyProfile(
                                 )
                                 .border(
                                     width = 4.dp,
-                                    color = placeholderColor(company.alias),
+                                    color = placeholderColorLegacy(company.alias),
                                     shape = RoundedCornerShape(12.dp)
                                 )
                                 .align(Alignment.Center)
                                 .padding(5.dp),
                             painter = painterResource(id = R.drawable.company_avatar_placeholder),
                             contentDescription = "",
-                            tint = placeholderColor(company.alias)
+                            tint = placeholderColorLegacy(company.alias)
                         )
                     }
                 }

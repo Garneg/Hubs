@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.api.user.list
 
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HabrApi
+import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -29,6 +30,9 @@ class UsersListController {
                 authorsList.authorRefs.entries.forEach {
                     it.value.avatarUrl =
                         it.value.avatarUrl?.replace("//habrastorage", "https://hsto")
+                    if (it.value.avatarUrl == null){
+                        it.value.avatarUrl = placeholderAvatarUrl(it.value.alias)
+                    }
                 }
             }
             return authorsList

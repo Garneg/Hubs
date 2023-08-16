@@ -4,6 +4,7 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.HubsList
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
+import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.encodeToString
@@ -215,9 +216,15 @@ class ArticleController {
             if (response?.body != null && response.code == 200) {
                 article = HabrDataParser.parseJson<Article>(response.body!!.string())
                 article!!.timePublished = formatTime(article.timePublished)
-                article.author?.avatarUrl?.let {
-                    article.author!!.avatarUrl = "https:" + article.author!!.avatarUrl
+                article.author?.let {
+                    if (it.avatarUrl == null) {
+                        it.avatarUrl = placeholderAvatarUrl(it.alias)
+                    }
+                    else {
+                        it.avatarUrl = "https:" + it.avatarUrl
+                    }
                 }
+                
             }
 
             return article
