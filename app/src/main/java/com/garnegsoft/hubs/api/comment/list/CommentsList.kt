@@ -35,7 +35,10 @@ class CommentsListController {
                         timePublished = formatTime(timePublished)
                         author?.let {
                             if (it.avatarUrl == null) {
-                                it.avatarUrl = placeholderAvatarUrl(it.alias!!)
+                                it.alias?.let {
+                                    author!!.avatarUrl = placeholderAvatarUrl(it)
+                                    
+                                }
                             } else {
                                 it.avatarUrl = "https:" + author?.avatarUrl
                             }

@@ -7,9 +7,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
-import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.FilterElement
@@ -51,7 +49,7 @@ fun <F : Filter> ArticlesListPageWithFilter(
 			val corscop = rememberCoroutineScope()
 			FilterElement(title = it.getTitle(), onClick = {
 				corscop.launch {
-					collapsingContentState.show()
+					collapsingContentState.animateShow()
 				}
 				onClick()
 			})

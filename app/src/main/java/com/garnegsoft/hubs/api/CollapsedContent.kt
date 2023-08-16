@@ -27,7 +27,7 @@ class CollapsingContentState {
     
     val contentHeight = mutableFloatStateOf(0f)
     
-    suspend fun hide() {
+    suspend fun animateHide() {
         animateOffsetTo(contentHeight.floatValue)
     }
     
@@ -41,9 +41,19 @@ class CollapsingContentState {
         }
     }
     
-    suspend fun show() {
+    suspend fun animateShow() {
         animateOffsetTo(0f)
     }
+    
+    fun show(){
+        offset.floatValue = 0f
+    }
+    
+    fun hide() {
+        offset.floatValue = contentHeight.floatValue
+        
+    }
+    
 }
 
 @Composable

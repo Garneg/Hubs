@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.api.me
 
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
+import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 
 
@@ -14,9 +15,9 @@ class MeController {
             response.body?.string()?.let {
                 if (it == "null") return null
                 val me = HabrDataParser.parseJson<Me>(it)
-                me.avatarUrl?.let {
-                    me.avatarUrl = it.replace("//habrastorage", "https://hsto")
-                }
+                me.avatarUrl = me.avatarUrl?.let {
+                    it.replace("//habrastorage", "https://hsto")
+                } ?: placeholderAvatarUrl(me.alias)
                 return me
             }
             return null

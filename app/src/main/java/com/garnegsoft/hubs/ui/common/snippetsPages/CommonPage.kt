@@ -119,7 +119,7 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 			val corscop = rememberCoroutineScope()
 			FilterElement(title = it.getTitle(), onClick = {
 				corscop.launch {
-					collapsingContentState.show()
+					collapsingContentState.animateShow()
 				}
 				onClick()
 			})

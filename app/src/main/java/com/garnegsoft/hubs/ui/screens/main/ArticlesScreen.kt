@@ -10,7 +10,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.*
@@ -22,14 +21,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.PostComplexity
-import com.garnegsoft.hubs.api.company.list.CompaniesListController
 import com.garnegsoft.hubs.api.dataStore.authDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.dataStore.lastReadDataStoreFlow
-import com.garnegsoft.hubs.api.hub.list.HubsListController
-import com.garnegsoft.hubs.api.user.list.UsersListController
+import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
@@ -141,8 +136,13 @@ fun ArticlesScreen(
 			) {
 				val commonCoroutineScope = rememberCoroutineScope()
 				val myFeedLazyListState = rememberLazyListState()
+				
 				val articlesLazyListState = rememberLazyListState()
+				val articlesListFilterContentState = rememberCollapsingContentState()
+				
 				val newsLazyListState = rememberLazyListState()
+				val newsListFilterContentState = rememberCollapsingContentState()
+				
 				val hubsLazyListState = rememberLazyListState()
 				val authorsLazyListState = rememberLazyListState()
 				val companiesLazyListState = rememberLazyListState()
@@ -153,6 +153,7 @@ fun ArticlesScreen(
 							ArticlesListPageWithFilter(
 								listModel = viewModel.articlesListModel,
 								lazyListState = articlesLazyListState,
+								collapsingContentState = articlesListFilterContentState,
 								onArticleSnippetClick = onArticleClicked,
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
@@ -164,6 +165,8 @@ fun ArticlesScreen(
 						"Новости" to {
 							ArticlesListPageWithFilter(
 								listModel = viewModel.newsListModel,
+								lazyListState = newsLazyListState,
+								collapsingContentState = newsListFilterContentState,
 								onArticleSnippetClick = onArticleClicked,
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
@@ -177,13 +180,24 @@ fun ArticlesScreen(
 							)
 						},
 						"Хабы" to {
-							HubsListPage(listModel = viewModel.hubsListModel, onHubClick = onHubClicked)
+							HubsListPage(
+								listModel = viewModel.hubsListModel,
+								lazyListState = hubsLazyListState,
+								onHubClick = onHubClicked
+							)
 						},
 						"Авторы" to {
-							UsersListPage(listModel = viewModel.authorsListModel, onUserClick = onUserClicked)
+							UsersListPage(
+								listModel = viewModel.authorsListModel,
+								lazyListState = authorsLazyListState,
+								onUserClick = onUserClicked
+							)
 						},
 						"Компании" to {
-							CompaniesListPage(listModel = viewModel.companiesListModel, onCompanyClick = onCompanyClicked)
+							CompaniesListPage(
+								listModel = viewModel.companiesListModel,
+								lazyListState = companiesLazyListState,
+								onCompanyClick = onCompanyClicked)
 						}
 					)
 					if (isAuthorized) map =
@@ -207,8 +221,14 @@ fun ArticlesScreen(
 					onCurrentPositionTabClick = { index, title ->
 						when (title) {
 							"Моя лента" -> ScrollUpMethods.scrollLazyList(myFeedLazyListState)
-							"Статьи" -> ScrollUpMethods.scrollLazyList(articlesLazyListState)
-							"Новости" -> ScrollUpMethods.scrollLazyList(newsLazyListState)
+							"Статьи" -> {
+								articlesListFilterContentState.show()
+								ScrollUpMethods.scrollLazyList(articlesLazyListState)
+							}
+							"Новости" -> {
+								newsListFilterContentState.show()
+								ScrollUpMethods.scrollLazyList(newsLazyListState)
+							}
 							"Хабы" -> ScrollUpMethods.scrollLazyList(hubsLazyListState)
 							"Авторы" -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
 							"Компании" -> ScrollUpMethods.scrollLazyList(companiesLazyListState)

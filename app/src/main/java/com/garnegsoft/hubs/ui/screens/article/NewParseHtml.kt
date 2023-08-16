@@ -258,7 +258,7 @@ fun parseChildElements(
             ClickableText(
                 text = currentText,
                 style = LocalTextStyle.current.copy(
-                    lineHeight = LocalTextStyle.current.fontSize.times(
+                    lineHeight = localSpanStyle.fontSize.times(
                         LINE_HEIGHT_FACTOR
                     )
                 ),
