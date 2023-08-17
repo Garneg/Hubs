@@ -54,7 +54,6 @@ fun CompanyScreen(
 				},
 				actions = {
 					IconButton(
-						enabled = viewModel.companyProfile.isInitialized,
 						onClick = {
 							val intent = Intent(Intent.ACTION_SEND)
 							intent.putExtra(
@@ -82,9 +81,7 @@ fun CompanyScreen(
 		})
 		companyProfile?.let { companyProfile ->
 			Column(modifier = Modifier.padding(it)) {
-				
-				
-				val tabs = remember() {
+				val tabs = remember {
 					var map: Map<String, @Composable () -> Unit> = mapOf(
 						"Профиль" to {
 							if (whoIs != null) {

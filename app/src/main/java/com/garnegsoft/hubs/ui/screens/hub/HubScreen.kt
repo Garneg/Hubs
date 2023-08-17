@@ -45,6 +45,8 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.rememberCoroutineScope
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
+import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 import com.garnegsoft.hubs.ui.screens.search.ArticlesSearchFilter
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -63,8 +65,8 @@ fun HubScreen(
     onCommentsClick: (postId: Int) -> Unit,
     onBackClick: () -> Unit
 ) {
-    var viewModel = viewModel(viewModelStoreOwner) { HubScreenViewModel(alias) }
-    val commonCoroutineScope = rememberCoroutineScope()
+    val viewModel = viewModel(viewModelStoreOwner) { HubScreenViewModel(alias) }
+    
     Scaffold(
         topBar = {
             TopAppBar(
@@ -78,7 +80,6 @@ fun HubScreen(
                 actions = {
                     val context = LocalContext.current
                     IconButton(
-                        enabled = true,
                         onClick = {
                         val sendIntent = Intent(Intent.ACTION_SEND)
                         sendIntent.putExtra(
@@ -99,14 +100,13 @@ fun HubScreen(
                 listOf(
                     "Профиль",
                     "Статьи",
+                    "Новости",
                     "Авторы",
                     "Компании"
                 )
             }
-
-            val authors = viewModel.authors.observeAsState().value
-            val companies = viewModel.companies.observeAsState().value
-            val pagerState = rememberPagerState { 4 }
+            
+            val pagerState = rememberPagerState { 5 }
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
             HorizontalPager(state = pagerState) {
                 when (it) {
@@ -137,79 +137,32 @@ fun HubScreen(
                     }
                     // authors
                     2 -> {
-                        if (authors != null){
-                            PagedHabrSnippetsColumn(
-                                data = authors,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        viewModel.authors.postValue(
-                                            authors + UsersListController.get("hubs/$alias/authors", mapOf("page" to it.toString()))!!
-                                        )
-                                    }
-                                }
-                            ) {
-                                UserCard(
-                                    user = it,
-                                    onClick = {onUserClick(it.alias)},
-                                    indicator = {
-                                        it.investment?.let {
-                                            Text(
-                                                text = if (it < 1000f) it.toString() else formatLongNumbers(it.roundToInt()),
-                                                color = RatingPositive
-                                            )
-                                        }
-                                    }
-                                )
-                            }
-                        }
-                        else{
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.authors.postValue(
-                                        UsersListController.get("hubs/$alias/authors")
-                                    )
-                                }
-                            })
+                        ArticlesListPageWithFilter(
+                            listModel = viewModel.newsListModel,
+                            onArticleSnippetClick = onArticleClick,
+                            onArticleAuthorClick = onUserClick,
+                            onArticleCommentsClick = onCommentsClick
+                        ) { defaultValues, onDismiss, onDone ->
+                            HubsNewsFilterDialog(
+                                defaultValues = defaultValues,
+                                onDismiss = onDismiss,
+                                onDone = onDone
+                            )
                         }
                     }
-                    // companies
+                    
                     3 -> {
-                        if (companies != null){
-                            PagedHabrSnippetsColumn(
-                                data = companies,
-                                onNextPageLoad = {
-                                    commonCoroutineScope.launch(Dispatchers.IO) {
-                                        viewModel.companies.postValue(
-                                            companies + CompaniesListController.get("hubs/$alias/companies", mapOf("page" to it.toString()))!!
-                                        )
-                                    }
-                                }
-                            ) {
-
-                                CompanyCard(
-                                    company = it,
-                                    onClick = { onCompanyClick(it.alias)},
-                                    indicator = {
-                                        it.statistics.investment?.let {
-                                            Text(
-                                                text = if (it < 1000f) it.toString() else formatLongNumbers(it.roundToInt()),
-                                                color = RatingPositive
-                                            )
-                                        }
-
-                                    }
-                                )
-                            }
-                        }
-                        else{
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.companies.postValue(
-                                        CompaniesListController.get("hubs/$alias/companies")
-                                    )
-                                }
-                            })
-                        }
+                        UsersListPage(
+                            listModel = viewModel.authorsListModel,
+                            onUserClick = onUserClick
+                        )
+                    }
+                    // companies
+                    4 -> {
+                        CompaniesListPage(
+                            listModel = viewModel.companiesListModel,
+                            onCompanyClick = onCompanyClick
+                        )
                     }
                 }
             }
