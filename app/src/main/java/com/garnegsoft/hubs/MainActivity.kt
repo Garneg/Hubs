@@ -45,6 +45,8 @@ import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.EaseOutCubic
 import androidx.compose.animation.core.EaseOutExpo
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -56,11 +58,16 @@ import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -247,7 +254,7 @@ class MainActivity : ComponentActivity() {
 								deepLinks = ArticleNavDeepLinks,
 								enterTransition = {
 									
-									scaleIn(tween(200, easing = EaseOut), 0.9f) + fadeIn(tween(270, easing = EaseOut))
+									scaleIn(tween(200, easing = EaseOut), 0.9f) + fadeIn(tween(200, easing = EaseIn))
 								},
 								exitTransition = {
 									ExitTransition.None
@@ -260,6 +267,7 @@ class MainActivity : ComponentActivity() {
 									EnterTransition.None
 								}
 							) {
+								
 								val id = it.arguments?.getString("id")?.toIntOrNull()
 								val offline = it.arguments?.getString("offline")?.toBooleanStrict()
 								
@@ -284,41 +292,43 @@ class MainActivity : ComponentActivity() {
 									}
 								}
 								
-								ArticleScreen(
-									articleId = id!!,
-									isOffline = offline ?: false,
-									onBackButtonClicked = {
-										clearLastArticle()
-										if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
-											this@MainActivity.finish()
-										} else {
-											navController.popBackStack()
-										}
-									},
-									onCommentsClicked = {
-										clearLastArticle()
-										navController.navigate("comments/${id}")
-									},
-									onAuthorClicked = {
-										clearLastArticle()
-										navController.navigate("user/${it}")
-									},
-									onHubClicked = {
-										clearLastArticle()
-										navController.navigate("hub/$it")
-									},
-									onCompanyClick = {
-										clearLastArticle()
-										navController.navigate("company/$it")
-									},
-									onViewImageRequest = {
-										navController.navigate(route = "imageViewer?imageUrl=$it")
-									},
-									onArticleClick = {
-										navController.navigate("article/$it")
-									},
-									viewModelStoreOwner = it
-								)
+								
+									ArticleScreen(
+										articleId = id!!,
+										isOffline = offline ?: false,
+										onBackButtonClicked = {
+											clearLastArticle()
+											if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+												this@MainActivity.finish()
+											} else {
+												navController.popBackStack()
+											}
+										},
+										onCommentsClicked = {
+											clearLastArticle()
+											navController.navigate("comments/${id}")
+										},
+										onAuthorClicked = {
+											clearLastArticle()
+											navController.navigate("user/${it}")
+										},
+										onHubClicked = {
+											clearLastArticle()
+											navController.navigate("hub/$it")
+										},
+										onCompanyClick = {
+											clearLastArticle()
+											navController.navigate("company/$it")
+										},
+										onViewImageRequest = {
+											navController.navigate(route = "imageViewer?imageUrl=$it")
+										},
+										onArticleClick = {
+											navController.navigate("article/$it")
+										},
+										viewModelStoreOwner = it
+									)
+								
 								
 							}
 							

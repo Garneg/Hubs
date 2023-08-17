@@ -70,10 +70,8 @@ fun UserScreen(
 				},
 				actions = {
 					val context = LocalContext.current
-					val enabled =
-						remember(viewModel.user.isInitialized) { viewModel.user.isInitialized }
+					
 					IconButton(
-						enabled = enabled,
 						onClick = {
 							val sendIntent = Intent(Intent.ACTION_SEND)
 							sendIntent.putExtra(
