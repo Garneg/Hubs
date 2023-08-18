@@ -121,8 +121,6 @@ class MainActivity : ComponentActivity() {
 			authStatus = isAuthorizedFlow.firstOrNull()
 			authorized = isAuthorizedFlow.firstOrNull() ?: false
 			cookies = cookiesFlow.firstOrNull() ?: ""
-//			val themeInt = settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme).first()
-//				?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal
 		}
 		
 		val authActivityLauncher =

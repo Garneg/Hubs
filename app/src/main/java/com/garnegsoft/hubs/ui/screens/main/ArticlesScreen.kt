@@ -134,8 +134,9 @@ fun ArticlesScreen(
 			Column(
 				Modifier.padding(it)
 			) {
-				val commonCoroutineScope = rememberCoroutineScope()
+				
 				val myFeedLazyListState = rememberLazyListState()
+				val myFeedFilterContentState = rememberCollapsingContentState()
 				
 				val articlesLazyListState = rememberLazyListState()
 				val articlesListFilterContentState = rememberCollapsingContentState()
@@ -203,13 +204,20 @@ fun ArticlesScreen(
 					if (isAuthorized) map =
 						mapOf<String, @Composable () -> Unit>(
 							"Моя лента" to {
-								ArticlesListPage(
+								ArticlesListPageWithFilter(
 									listModel = viewModel.myFeedArticlesListModel,
+									collapsingContentState = myFeedFilterContentState,
 									lazyListState = myFeedLazyListState,
 									onArticleSnippetClick = onArticleClicked,
 									onArticleAuthorClick = onUserClicked,
 									onArticleCommentsClick = onCommentsClicked
-								)
+								) { defaultValues, onDismiss, onDone ->
+									MyFeedFilter(
+										defaultValues = defaultValues,
+										onDismiss = onDismiss,
+										onDone = onDone
+									)
+								}
 							}) + map
 					map
 				}
@@ -220,7 +228,10 @@ fun ArticlesScreen(
 					tabs = pages.keys.toList(),
 					onCurrentPositionTabClick = { index, title ->
 						when (title) {
-							"Моя лента" -> ScrollUpMethods.scrollLazyList(myFeedLazyListState)
+							"Моя лента" -> {
+								myFeedFilterContentState.show()
+								ScrollUpMethods.scrollLazyList(myFeedLazyListState)
+							}
 							"Статьи" -> {
 								articlesListFilterContentState.show()
 								ScrollUpMethods.scrollLazyList(articlesLazyListState)

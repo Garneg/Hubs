@@ -22,7 +22,8 @@ class ArticlesScreenViewModel : ViewModel() {
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		"custom" to "true"
+		baseArgs = arrayOf("custom" to "true"),
+		initialFilter = MyFeedFilter(showNews = false)
 	)
 	
 	val articlesListModel = ArticlesListModel(

@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.user
 
 
-import ArticlesListController
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -11,6 +10,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material.Text
+import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
@@ -19,16 +20,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.comment.list.CommentsListController
-import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 
 enum class UserScreenPages {
@@ -56,7 +53,7 @@ fun UserScreen(
 	onLogout: (() -> Unit)? = null,
 	viewModelStoreOwner: ViewModelStoreOwner,
 ) {
-	val viewModel = viewModel<UserScreenViewModel> { UserScreenViewModel(alias) }
+	val viewModel = viewModel { UserScreenViewModel(alias) }
 	
 	Scaffold(
 		topBar = {
