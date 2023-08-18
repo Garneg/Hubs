@@ -2,91 +2,65 @@ package com.garnegsoft.hubs
 
 
 import android.content.Context
-import android.content.res.Configuration
-import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.*
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.HabrApi
-import com.garnegsoft.hubs.api.NoConnectionInterceptor
-import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
-import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
-import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
-import com.garnegsoft.hubs.ui.screens.hub.HubScreen
-import com.garnegsoft.hubs.ui.screens.main.ArticlesScreen
-import com.garnegsoft.hubs.ui.screens.search.SearchScreen
-import com.garnegsoft.hubs.ui.screens.user.UserScreen
-import com.garnegsoft.hubs.ui.theme.HubsTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import okhttp3.*
-import android.webkit.CookieManager
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInExpo
-import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseInOutBack
-import androidx.compose.animation.core.EaseInSine
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.EaseOutBack
-import androidx.compose.animation.core.EaseOutCubic
-import androidx.compose.animation.core.EaseOutExpo
-import androidx.compose.animation.core.animate
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.animation.shrinkOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOut
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.navigation.Navigator
-import androidx.navigation.navOptions
-import androidx.room.Database
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.me.Me
 import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.ImageViewScreen
-import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
+import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
+import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
+import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
+import com.garnegsoft.hubs.ui.screens.hub.HubScreen
+import com.garnegsoft.hubs.ui.screens.main.ArticlesScreen
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
+import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
+import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
+import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
-import okhttp3.internal.filterList
-import java.net.URLEncoder
+import com.garnegsoft.hubs.ui.theme.HubsTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 // TODO: shouldn't be singleton
@@ -96,8 +70,6 @@ var authorized: Boolean = false
 val Context.authDataStore by preferencesDataStore(HubsDataStore.Auth.DataStoreName)
 val Context.settingsDataStore by preferencesDataStore(HubsDataStore.Settings.DataStoreName)
 val Context.lastReadDataStore by preferencesDataStore(HubsDataStore.LastRead.DataStoreName)
-
-
 
 
 class MainActivity : ComponentActivity() {
@@ -111,10 +83,9 @@ class MainActivity : ComponentActivity() {
 		val isAuthorizedFlow =
 			authDataStore.data.map { it[HubsDataStore.Auth.Keys.Authorized] ?: false }
 		lifecycle.coroutineScope.launch {
-			cookiesFlow
-				.collect {
-					cookies = it
-				}
+			cookiesFlow.collect {
+				cookies = it
+			}
 		}
 		
 		runBlocking {
@@ -129,7 +100,8 @@ class MainActivity : ComponentActivity() {
 				lifecycle.coroutineScope.launch {
 					result?.let { res ->
 						authDataStore.edit {
-							it[HubsDataStore.Auth.Keys.Cookies] = res.split("; ").find { it.startsWith("connect_sid") }!! + "; hl=ru; fl=ru"
+							it[HubsDataStore.Auth.Keys.Cookies] = res.split("; ")
+								.find { it.startsWith("connect_sid") }!! + "; hl=ru; fl=ru"
 							it[HubsDataStore.Auth.Keys.Authorized] = true
 							authorized = true
 							//cookies = result
@@ -198,11 +170,7 @@ class MainActivity : ComponentActivity() {
 									viewModelStoreOwner = it,
 									onSearchClicked = { navController.navigate("search") },
 									onArticleClicked = {
-										if (!navController.currentBackStackEntry!!.destination.route!!.contains(
-												"article/"
-											)
-										)
-											navController.navigate("article/$it")
+										navController.navigate("article/$it")
 									},
 									onCommentsClicked = {
 										navController.navigate("comments/$it")
@@ -251,14 +219,23 @@ class MainActivity : ComponentActivity() {
 								route = "article/{id}?offline={offline}",
 								deepLinks = ArticleNavDeepLinks,
 								enterTransition = {
-									
-									scaleIn(tween(200, easing = EaseOut), 0.9f) + fadeIn(tween(200, easing = EaseIn))
+									scaleIn(
+										tween(200, easing = EaseOut),
+										0.9f
+									) + fadeIn(
+										tween(durationMillis = 200, easing = EaseIn)
+									)
 								},
 								exitTransition = {
 									ExitTransition.None
 								},
 								popExitTransition = {
-									scaleOut(tween(200, easing = EaseOut), 0.9f) + fadeOut(tween(200, easing = EaseOut), )
+									scaleOut(
+										tween(200, easing = EaseOut),
+										0.9f
+									) + fadeOut(
+										tween(200, easing = EaseOut)
+									)
 									
 								},
 								popEnterTransition = {
@@ -291,41 +268,41 @@ class MainActivity : ComponentActivity() {
 								}
 								
 								
-									ArticleScreen(
-										articleId = id!!,
-										isOffline = offline ?: false,
-										onBackButtonClicked = {
-											clearLastArticle()
-											if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
-												this@MainActivity.finish()
-											} else {
-												navController.popBackStack()
-											}
-										},
-										onCommentsClicked = {
-											clearLastArticle()
-											navController.navigate("comments/${id}")
-										},
-										onAuthorClicked = {
-											clearLastArticle()
-											navController.navigate("user/${it}")
-										},
-										onHubClicked = {
-											clearLastArticle()
-											navController.navigate("hub/$it")
-										},
-										onCompanyClick = {
-											clearLastArticle()
-											navController.navigate("company/$it")
-										},
-										onViewImageRequest = {
-											navController.navigate(route = "imageViewer?imageUrl=$it")
-										},
-										onArticleClick = {
-											navController.navigate("article/$it")
-										},
-										viewModelStoreOwner = it
-									)
+								ArticleScreen(
+									articleId = id!!,
+									isOffline = offline ?: false,
+									onBackButtonClicked = {
+										clearLastArticle()
+										if (this@MainActivity.intent.data != null && navController.previousBackStackEntry == null) {
+											this@MainActivity.finish()
+										} else {
+											navController.popBackStack()
+										}
+									},
+									onCommentsClicked = {
+										clearLastArticle()
+										navController.navigate("comments/${id}")
+									},
+									onAuthorClicked = {
+										clearLastArticle()
+										navController.navigate("user/${it}")
+									},
+									onHubClicked = {
+										clearLastArticle()
+										navController.navigate("hub/$it")
+									},
+									onCompanyClick = {
+										clearLastArticle()
+										navController.navigate("company/$it")
+									},
+									onViewImageRequest = {
+										navController.navigate(route = "imageViewer?imageUrl=$it")
+									},
+									onArticleClick = {
+										navController.navigate("article/$it")
+									},
+									viewModelStoreOwner = it
+								)
 								
 								
 							}

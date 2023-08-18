@@ -145,6 +145,7 @@ fun ArticleCard(
     Column(
         modifier = Modifier
             .clip(style.cardShape)
+            
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = ripple, onClick = onClick
