@@ -162,7 +162,7 @@ fun CompanyScreen(
 					tabs = remember { tabs.keys.toList() }){ index, title ->  
 					when {
 						title.startsWith("Профиль") -> { ScrollUpMethods.scrollNormalList(profilePageScrollState)}
-						title.startsWith("Статьи") -> { ScrollUpMethods.scrollLazyList(articlesLazyListState) }
+						title.startsWith("Блог") -> { ScrollUpMethods.scrollLazyList(articlesLazyListState) }
 						title.startsWith("Новости") -> { ScrollUpMethods.scrollLazyList(newsLazyListState) }
 						title.startsWith("Подписчики") -> { ScrollUpMethods.scrollLazyList(followersLazyListState) }
 						title.startsWith("Сотрудники") -> { ScrollUpMethods.scrollLazyList(employeesLazyListState) }
