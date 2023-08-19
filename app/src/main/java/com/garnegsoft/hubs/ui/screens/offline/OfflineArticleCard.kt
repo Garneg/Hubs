@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
+import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
@@ -65,6 +66,8 @@ fun OfflineArticleCard(
                 }
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(text = it, style = style.authorTextStyle)
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = formatTime(article.timePublished), style = style.publishedTimeTextStyle)
             }
             Spacer(modifier = Modifier.height(8.dp))
         }

@@ -1,12 +1,11 @@
 import com.garnegsoft.hubs.api.*
-import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.HubsList
+import com.garnegsoft.hubs.api.article.offline.OfflineArticle
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -27,6 +26,70 @@ class ArticleController {
         ): com.garnegsoft.hubs.api.article.Article? {
             return get(path = "articles/$id", args = args)
         }
+        
+        fun getOfflineArticle(
+            id: Int,
+            args: Map<String, String>? = null
+        ): OfflineArticle? {
+            val article = getArticle("articles/$id", args)
+            
+            return article?.let {
+                OfflineArticle(
+                    articleId = it.id.toInt(),
+                    authorName = it.author?.alias,
+                    authorAvatarUrl = if (article.author?.avatarUrl == null) {
+                        placeholderAvatarUrl(article.author!!.alias)
+                    }
+                    else {
+                        "https:" + article.author!!.avatarUrl
+                    },
+                    timePublished = it.timePublished,
+                    title = Jsoup.parse(it.titleHtml).text(),
+                    contentHtml = it.textHtml,
+                    hubs = HubsList(it.hubs.map { it.title }),
+                    readingTime = it.readingTime,
+                    isTranslation = it.postLabels?.find { it.type == "translation" } != null
+                )
+            }
+        
+        }
+        
+        fun getOfflineArticleSnippet(
+            id: Int,
+            args: Map<String, String>? = null
+        ): OfflineArticleSnippet? {
+            val article = getArticle("articles/$id", args)
+    
+            return article?.let {
+                OfflineArticleSnippet(
+                    articleId = it.id.toInt(),
+                    authorName = it.author?.alias,
+                    authorAvatarUrl = if (article.author?.avatarUrl == null) {
+                        placeholderAvatarUrl(article.author!!.alias)
+                    }
+                    else {
+                        "https:" + article.author!!.avatarUrl
+                    },
+                    timePublished = it.timePublished,
+                    title = Jsoup.parse(it.titleHtml).text(),
+                    hubs = HubsList(it.hubs.map { it.title }),
+                    readingTime = it.readingTime,
+                    isTranslation = it.postLabels?.find { it.type == "translation" } != null,
+                    thumbnailUrl = if (
+                        it.leadData.imageUrl == null &&
+                        it.leadData.textHtml.contains("<img")
+                    ) {
+                        Jsoup.parse(it.leadData.textHtml)
+                            .getElementsByTag("img")[0]?.attr("src")
+                    } else if (it.leadData.imageUrl == null && it.leadData.image?.url != null) {
+                        it.leadData.image?.url
+                    } else {
+                        it.leadData.imageUrl
+                    },
+                    textSnippet = it.leadData.textHtml
+                )
+            }
+        }
 
         /**
          * Get snippet of article. Snippets are objects that used to be in lists
@@ -45,6 +108,7 @@ class ArticleController {
             val raw = this.getArticle(path, args)
 
             return raw?.let {
+                val it = articleFormat(it)
                 com.garnegsoft.hubs.api.article.Article(
                     id = it.id.toInt(),
                     title = Jsoup.parse(it.titleHtml).text(),
@@ -63,7 +127,7 @@ class ArticleController {
                     format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
                         commentsCount = it.statistics.commentsCount,
-                        favoritesCount = it.statistics.favoritesCount,
+                        bookmarksCount = it.statistics.favoritesCount,
                         readingCount = it.statistics.readingCount,
                         score = it.statistics.score,
                         votesCountMinus = it.statistics.votesCountMinus,
@@ -140,45 +204,44 @@ class ArticleController {
         ): ArticleSnippet? {
             val raw = this.getArticle(path, args)
             return raw?.let {
+                val formatted = articleFormat(it)
                 ArticleSnippet(
-                    id = it.id.toInt(),
-                    timePublished = it.timePublished,
-                    isCorporative = it.isCorporative,
-                    title = Jsoup.parse(it.titleHtml).text(),
-                    editorVersion = EditorVersion.fromString(it.editorVersion),
-                    type = PostType.fromString(it.postType),
+                    id = formatted.id.toInt(),
+                    timePublished = formatted.timePublished,
+                    isCorporative = formatted.isCorporative,
+                    title = Jsoup.parse(formatted.titleHtml).text(),
+                    editorVersion = EditorVersion.fromString(formatted.editorVersion),
+                    type = PostType.fromString(formatted.postType),
                     labels = null,
-                    author = if (it.author != null) {
+                    author = formatted.author?.let {
                         com.garnegsoft.hubs.api.article.Article.Author(
-                            alias = it.author!!.alias,
-                            fullname = it.author!!.fullname,
-                            avatarUrl = it.author!!.avatarUrl,
+                            alias = formatted.author!!.alias,
+                            fullname = formatted.author!!.fullname,
+                            avatarUrl = formatted.author!!.avatarUrl,
                         )
-                    } else {
-                        null
                     },
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
-                        commentsCount = it.statistics.commentsCount,
-                        favoritesCount = it.statistics.favoritesCount,
-                        readingCount = it.statistics.readingCount,
-                        score = it.statistics.score,
-                        votesCountMinus = it.statistics.votesCountMinus,
-                        votesCountPlus = it.statistics.votesCountPlus
+                        commentsCount = formatted.statistics.commentsCount,
+                        bookmarksCount = formatted.statistics.favoritesCount,
+                        readingCount = formatted.statistics.readingCount,
+                        score = formatted.statistics.score,
+                        votesCountMinus = formatted.statistics.votesCountMinus,
+                        votesCountPlus = formatted.statistics.votesCountPlus
                     ),
                     imageUrl = if (
-                        it.leadData.imageUrl == null &&
-                        it.leadData.textHtml.contains("<img")
+                        formatted.leadData.imageUrl == null &&
+                        formatted.leadData.textHtml.contains("<img")
                     ) {
-                        Jsoup.parse(it.leadData.textHtml)
+                        Jsoup.parse(formatted.leadData.textHtml)
                             .getElementsByTag("img")[0]?.attr("src")
-                    } else if (it.leadData.imageUrl == null && it.leadData.image?.url != null) {
-                        it.leadData.image?.url
+                    } else if (formatted.leadData.imageUrl == null && formatted.leadData.image?.url != null) {
+                        formatted.leadData.image?.url
                     } else {
-                        it.leadData.imageUrl
+                        formatted.leadData.imageUrl
                     },
-                    format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
-                    textSnippet = it.leadData.textHtml,
-                    hubs = it.hubs.map {
+                    format = formatted.format?.let { ArticleFormat.fromString(formatted.format!!) },
+                    textSnippet = formatted.leadData.textHtml,
+                    hubs = formatted.hubs.map {
                         com.garnegsoft.hubs.api.article.Article.Hub(
                             alias = it.alias,
                             title = it.title,
@@ -192,9 +255,9 @@ class ArticleController {
                         )
 
                     },
-                    complexity = PostComplexity.fromString(it.complexity),
-                    readingTime = it.readingTime,
-                    relatedData = it.relatedData?.let {
+                    complexity = PostComplexity.fromString(formatted.complexity),
+                    readingTime = formatted.readingTime,
+                    relatedData = formatted.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
                             bookmarked = it.bookmarked,
@@ -202,7 +265,7 @@ class ArticleController {
                             canVotePlus = it.canVotePlus
                         )
                     },
-                    isTranslation = it.postLabels?.find { it.type == "translation" } != null,
+                    isTranslation = formatted.postLabels?.find { it.type == "translation" } != null,
                 )
 
             }
@@ -215,19 +278,23 @@ class ArticleController {
 
             if (response?.body != null && response.code == 200) {
                 article = HabrDataParser.parseJson<Article>(response.body!!.string())
-                article!!.timePublished = formatTime(article.timePublished)
-                article.author?.let {
-                    if (it.avatarUrl == null) {
-                        it.avatarUrl = placeholderAvatarUrl(it.alias)
-                    }
-                    else {
-                        it.avatarUrl = "https:" + it.avatarUrl
-                    }
-                }
-                
             }
 
             return article
+        }
+        
+        private fun articleFormat(article: Article): Article {
+            return article.copy(
+                timePublished = formatTime(article.timePublished),
+                author = article.author?.copy(
+                    avatarUrl =  if (article.author?.avatarUrl == null) {
+                        placeholderAvatarUrl(article.author!!.alias)
+                    }
+                    else {
+                        "https:" + article.author!!.avatarUrl
+                    }
+                )
+            )
         }
 
         fun addToBookmarks(id: Int): Boolean {

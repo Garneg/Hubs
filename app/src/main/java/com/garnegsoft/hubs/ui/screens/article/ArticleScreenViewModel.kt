@@ -19,6 +19,7 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.HubsList
 import com.garnegsoft.hubs.api.article.offline.OfflineArticle
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
+import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -59,39 +60,7 @@ class ArticleScreenViewModel : ViewModel() {
 
     fun saveArticle(id: Int, context: Context){
         viewModelScope.launch(Dispatchers.IO){
-            val dao = context.offlineArticlesDatabase.articlesDao()
-            ArticleController.getSnippet(id)?.let {
-                dao.insertSnippet(
-                    OfflineArticleSnippet(
-                        articleId = it.id,
-                        authorName = it.author?.alias,
-                        authorAvatarUrl = it.author?.avatarUrl,
-                        timePublished = "",
-                        title = it.title,
-                        readingTime = it.readingTime,
-                        isTranslation = it.isTranslation,
-                        textSnippet = it.textSnippet,
-                        hubs = HubsList(it.hubs?.map { if (it.isProfiled) it.title + "*" else it.title } ?: emptyList()),
-                        thumbnailUrl = it.imageUrl
-                    )
-                )
-            }
-
-            ArticleController.get(id)?.let {
-                dao.insert(
-                    OfflineArticle(
-                        articleId = it.id,
-                        authorName = it.author?.alias,
-                        authorAvatarUrl = it.author?.avatarUrl,
-                        timePublished = "",
-                        title = it.title,
-                        readingTime = it.readingTime,
-                        isTranslation = it.translationData.isTranslation,
-                        hubs = HubsList(it.hubs.map { if (it.isProfiled) it.title + "*" else it.title }),
-                        contentHtml = it.contentHtml
-                    )
-                )
-            }
+            OfflineArticlesController.downloadArticle(id, context)
             withContext(Dispatchers.Main){
                 Toast.makeText(context, "Статья скачана!", Toast.LENGTH_SHORT).show()
             }
@@ -101,9 +70,7 @@ class ArticleScreenViewModel : ViewModel() {
 
     fun deleteSavedArticle(id: Int, context: Context){
         viewModelScope.launch(Dispatchers.IO) {
-            val dao = context.offlineArticlesDatabase.articlesDao()
-            dao.delete(id)
-            dao.deleteSnippet(id)
+            OfflineArticlesController.deleteArticle(id, context)
             withContext(Dispatchers.Main) {
                 Toast.makeText(context, "Статья удалена!", Toast.LENGTH_SHORT).show()
             }

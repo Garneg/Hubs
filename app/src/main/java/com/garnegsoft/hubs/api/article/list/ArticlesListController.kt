@@ -1,13 +1,10 @@
 import android.util.Log
-import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
-import okhttp3.Response
 import org.jsoup.Jsoup
 
 
@@ -142,7 +139,7 @@ class ArticlesListController {
 									score = it.statistics.score,
 									readingCount = it.statistics.readingCount,
 									commentsCount = it.statistics.commentsCount,
-									favoritesCount = it.statistics.favoritesCount,
+									bookmarksCount = it.statistics.favoritesCount,
 									votesCountMinus = it.statistics.votesCountMinus,
 									votesCountPlus = it.statistics.votesCountPlus
 								),

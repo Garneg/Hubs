@@ -19,7 +19,9 @@ import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -41,3 +43,5 @@ sealed interface ScrollUpMethods {
         }
     }
 }
+
+

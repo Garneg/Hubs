@@ -47,6 +47,7 @@ import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
+import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import com.garnegsoft.hubs.ui.theme.RatingNegative
@@ -276,8 +277,8 @@ fun ArticleScreen(
                     var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
                         mutableStateOf(article.relatedData?.bookmarked ?: false)
                     }
-                    var addedToBookmarksCount by rememberSaveable(article.statistics.favoritesCount) {
-                        mutableStateOf(article.statistics.favoritesCount)
+                    var addedToBookmarksCount by rememberSaveable(article.statistics.bookmarksCount) {
+                        mutableStateOf(article.statistics.bookmarksCount)
                     }
                     val favoriteCoroutineScope = rememberCoroutineScope()
 
@@ -303,7 +304,7 @@ fun ArticleScreen(
                                                 addedToBookmarksCount =
                                                     addedToBookmarksCount.coerceAtLeast(0)
                                             }
-
+                    
                                         } else {
                                             addedToBookmarks = true
                                             addedToBookmarksCount++
@@ -396,9 +397,9 @@ fun ArticleScreen(
                                     override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
                                         if (abs(initialVelocity) <= 1f)
                                             return initialVelocity
-
+                
                                         val performedInitialVelocity = initialVelocity * 1.2f
-
+                
                                         var velocityLeft = performedInitialVelocity
                                         var lastValue = 0f
                                         AnimationState(
@@ -409,14 +410,14 @@ fun ArticleScreen(
                                             val consumed = scrollBy(delta)
                                             lastValue = value
                                             velocityLeft = velocity
-
+                    
                                             if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
-
+                    
                                         }
                                         return velocityLeft
-
+                
                                     }
-
+            
                                 }
                             )
                             .padding(bottom = 12.dp)
@@ -459,6 +460,9 @@ fun ArticleScreen(
                                     fontSize = 14.sp,
                                     color = MaterialTheme.colors.onBackground
                                 )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(text = formatTime(article.timePublished), color = Color.Gray,
+                                    fontSize = 12.sp, fontWeight = FontWeight.W400)
                             }
                         }
                         Spacer(modifier = Modifier.size(8.dp))
@@ -699,7 +703,7 @@ fun ScrollBar(
         .fillMaxHeight()
         .width(6.dp)
         .drawBehind {
-
+        
             var scrollbarheight = size.height / scrollState.maxValue * size.height
             var place = size.height - scrollbarheight
             var offsetheight =
@@ -711,7 +715,7 @@ fun ScrollBar(
                 cornerRadius = CornerRadius(40.dp.toPx(), 40.dp.toPx()),
                 alpha = alpha
             )
-
+        
         })
 
 }

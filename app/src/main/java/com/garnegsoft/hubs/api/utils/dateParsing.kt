@@ -32,8 +32,11 @@ private val MONTH_MAP = mapOf(
 
 
 fun formatTime(time: String): String {
+    if (time.isBlank()){
+        return ""
+    }
     var result = String()
-
+    
     val localedTime = defaultInputFormatter.parse(time.split('+')[0].replace('T', ' '))!!
     localedTime.time = localedTime.time + TimeZone.getDefault().rawOffset + TimeZone.getDefault().dstSavings
     

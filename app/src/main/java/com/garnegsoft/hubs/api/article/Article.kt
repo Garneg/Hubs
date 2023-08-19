@@ -1,12 +1,9 @@
 package com.garnegsoft.hubs.api.article
 
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.text.SpanStyle
 import com.garnegsoft.hubs.api.ArticleFormat
 import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 
 
 /**
@@ -77,7 +74,7 @@ class Article(
 
     data class Statistics(
         val commentsCount: Int,
-        val favoritesCount: Int,
+        val bookmarksCount: Int,
         val readingCount: Int,
         val score: Int,
         val votesCountPlus: Int,
