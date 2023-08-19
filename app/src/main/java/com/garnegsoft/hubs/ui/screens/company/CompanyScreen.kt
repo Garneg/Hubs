@@ -3,6 +3,8 @@ package com.garnegsoft.hubs.ui.screens.company
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
@@ -19,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
+import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
@@ -79,13 +82,20 @@ fun CompanyScreen(
 				}
 			}
 		})
+		
+		val profilePageScrollState = rememberScrollState()
+		val articlesLazyListState = rememberLazyListState()
+		val newsLazyListState = rememberLazyListState()
+		val followersLazyListState = rememberLazyListState()
+		val employeesLazyListState = rememberLazyListState()
+		
 		companyProfile?.let { companyProfile ->
 			Column(modifier = Modifier.padding(it)) {
 				val tabs = remember {
 					var map: Map<String, @Composable () -> Unit> = mapOf(
 						"Профиль" to {
 							if (whoIs != null) {
-								CompanyProfile(company = companyProfile)
+								CompanyProfile(company = companyProfile, scrollState = profilePageScrollState)
 							} else {
 								LaunchedEffect(key1 = Unit, block = {
 									launch(Dispatchers.IO) {
@@ -101,6 +111,7 @@ fun CompanyScreen(
 						map += "Блог ${formatLongNumbers(companyProfile.statistics.articlesCount)}" to {
 							ArticlesListPageWithFilter(
 								listModel = viewModel.blogArticlesListModel,
+								lazyListState = articlesLazyListState,
 								onArticleSnippetClick = onArticleClick,
 								onArticleAuthorClick = onUserClick,
 								onArticleCommentsClick = onCommentsClick,
@@ -117,6 +128,7 @@ fun CompanyScreen(
 						map += "Новости ${formatLongNumbers(companyProfile.statistics.newsCount)}" to {
 							ArticlesListPage(
 								listModel = viewModel.blogNewsListModel,
+								lazyListState = newsLazyListState,
 								onArticleSnippetClick = onArticleClick,
 								onArticleAuthorClick = onUserClick,
 								onArticleCommentsClick = onCommentsClick
@@ -125,13 +137,19 @@ fun CompanyScreen(
 					}
 					if (companyProfile.statistics.subscribersCount > 0) {
 						map += "Подписчики ${formatLongNumbers(companyProfile.statistics.subscribersCount)}" to {
-							UsersListPage(listModel = viewModel.followersListModel, onUserClick = onUserClick)
+							UsersListPage(
+								listModel = viewModel.followersListModel, 
+								lazyListState = followersLazyListState,
+								onUserClick = onUserClick)
 							
 						}
 					}
 					if (companyProfile.statistics.employeesCount > 0) {
 						map += "Сотрудники ${formatLongNumbers(companyProfile.statistics.employeesCount)}" to {
-							UsersListPage(listModel = viewModel.employeesListModel, onUserClick = onUserClick)
+							UsersListPage(
+								listModel = viewModel.employeesListModel, 
+								lazyListState = employeesLazyListState,
+								onUserClick = onUserClick)
 						}
 					}
 					map
@@ -141,7 +159,15 @@ fun CompanyScreen(
 				}
 				HabrScrollableTabRow(
 					pagerState = pagerState,
-					tabs = remember { tabs.keys.toList() })
+					tabs = remember { tabs.keys.toList() }){ index, title ->  
+					when {
+						title.startsWith("Профиль") -> { ScrollUpMethods.scrollNormalList(profilePageScrollState)}
+						title.startsWith("Статьи") -> { ScrollUpMethods.scrollLazyList(articlesLazyListState) }
+						title.startsWith("Новости") -> { ScrollUpMethods.scrollLazyList(newsLazyListState) }
+						title.startsWith("Подписчики") -> { ScrollUpMethods.scrollLazyList(followersLazyListState) }
+						title.startsWith("Сотрудники") -> { ScrollUpMethods.scrollLazyList(employeesLazyListState) }
+					}
+				}
 				HorizontalPager(state = pagerState) {
 					tabs.values.elementAt(it).invoke()
 				}

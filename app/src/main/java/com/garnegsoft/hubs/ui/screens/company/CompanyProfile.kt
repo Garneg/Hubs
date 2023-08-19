@@ -37,16 +37,15 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CompanyProfile(
-    company: Company
+    company: Company,
+    scrollState: ScrollState
 ) {
     val context = LocalContext.current
     val viewModel = viewModel { CompanyScreenViewModel(company.alias) }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(
-                rememberScrollState()
-            )
+            .verticalScroll(scrollState)
     ) {
         Column(
             modifier = Modifier.padding(8.dp),
