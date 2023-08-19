@@ -44,6 +44,7 @@ internal fun UserProfile(
     onUserLogout: (() -> Unit)? = null,
     onHubClick: (alias: String) -> Unit,
     onWorkPlaceClick: (alias: String) -> Unit,
+    scrollState: ScrollState,
     viewModel: UserScreenViewModel
 ) {
     val userState by viewModel.user.observeAsState()
@@ -53,9 +54,7 @@ internal fun UserProfile(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(
-                        rememberScrollState()
-                    )
+                    .verticalScroll(scrollState)
             ) {
                 Column(
                     modifier = Modifier.padding(8.dp),

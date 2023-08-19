@@ -4,6 +4,7 @@ package com.garnegsoft.hubs.ui.screens.user
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
@@ -20,11 +21,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.garnegsoft.hubs.api.comment.list.CommentSnippet
+import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.CommonPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 
 
@@ -93,6 +97,22 @@ fun UserScreen(
 				viewModel.loadUserProfile()
 			}
 		}
+		
+		val profilePageScrollState = rememberScrollState()
+		
+		val articlesLazyListState = rememberLazyListState()
+		val articlesFilterContentState = rememberCollapsingContentState()
+		
+		val commentsLazyListState = rememberLazyListState()
+		
+		val bookmarksLazyListState = rememberLazyListState()
+		val bookmarksFilterContentState = rememberCollapsingContentState()
+		
+		val followersLazyListState = rememberLazyListState()
+		
+		val subscriptionsLazyListState = rememberLazyListState()
+		
+		
 		viewModel.user.observeAsState().value?.let { usr ->
 			var pagesMap = remember {
 				var map = mapOf<UserScreenPages, @Composable () -> Unit>(
@@ -110,6 +130,7 @@ fun UserScreen(
 									onLogout,
 									onHubClicked,
 									onCompanyClick,
+									profilePageScrollState,
 									viewModel,
 								)
 							else
@@ -124,6 +145,8 @@ fun UserScreen(
 					map += UserScreenPages.Articles to {
 						ArticlesListPageWithFilter(
 							listModel = viewModel.articlesModel,
+							lazyListState = articlesLazyListState,
+							collapsingContentState = articlesFilterContentState,
 							onArticleSnippetClick = onArticleClicked,
 							onArticleAuthorClick = onUserClicked,
 							onArticleCommentsClick = onCommentsClicked
@@ -140,34 +163,79 @@ fun UserScreen(
 					map += UserScreenPages.Comments to {
 						CommentsListPage(
 							listModel = viewModel.commentsModel,
+							lazyListState = commentsLazyListState,
 							onArticleClick = onArticleClicked,
 							onCommentClick = onCommentClicked,
 							onUserClick = onUserClicked
 						)
 					}
 				}
-				if (usr.favoritesCount > 0 || initialPage == UserScreenPages.Bookmarks) {
+				if (usr.bookmarksCount > 0 || initialPage == UserScreenPages.Bookmarks) {
 					map += UserScreenPages.Bookmarks to {
-						ArticlesListPage(
-							listModel = viewModel.bookmarksModel,
-							onArticleSnippetClick = onArticleClicked,
-							onArticleAuthorClick = onUserClicked,
-							onArticleCommentsClick = onCommentsClicked
-						)
+						val bookmarksFilter by viewModel.bookmarksFilter.observeAsState(initial = null)
+						bookmarksFilter?.let {
+							if (it.bookmarks != UserBookmarksFilter.Bookmarks.Comments) {
+								ArticlesListPageWithFilter(
+									listModel = viewModel.bookmarksModel,
+									lazyListState = bookmarksLazyListState,
+									collapsingContentState = bookmarksFilterContentState,
+									onArticleSnippetClick = onArticleClicked,
+									onArticleAuthorClick = onUserClicked,
+									onArticleCommentsClick = onCommentsClicked
+								) { defaultValues, onDismiss, onDone ->
+									UserBookmarksFilter(
+										defaultValues = defaultValues,
+										onDismiss = onDismiss,
+										onDone = {
+											viewModel.bookmarksFilter.value = it
+											if (it.bookmarks != UserBookmarksFilter.Bookmarks.Comments)
+												onDone(it)
+										}
+									)
+								}
+							}
+							else {
+								CommonPageWithFilter<CommentSnippet, UserBookmarksFilter>(
+									listModel = viewModel.commentsBookmarksModel,
+									filterDialog = { defaultValues, onDismiss, onDone ->
+										UserBookmarksFilter(
+											defaultValues = defaultValues,
+											onDismiss = onDismiss,
+											onDone = {
+												viewModel.bookmarksFilter.value = it
+												onDone(it)
+											}
+										)
+									}
+								) {
+									CommentCard(
+										comment = it,
+										onCommentClick = { onCommentClicked(it.parentPost.id, it.id) },
+										onAuthorClick = { onUserClicked(it.author.alias) },
+										onParentPostClick = { onArticleClicked(it.parentPost.id) })
+								}
+							}
+						}
+						
+						Unit
+						
+						
 					}
 				}
 				if (usr.followersCount > 0 || initialPage == UserScreenPages.Followers) {
 					map += UserScreenPages.Followers to {
 						UsersListPage(
 							listModel = viewModel.followersModel,
+							lazyListState = followersLazyListState,
 							onUserClick = onUserClicked
 						)
 					}
 				}
-				if (usr.followsCount > 0 || initialPage == UserScreenPages.Follows) {
+				if (usr.subscriptionsCount > 0 || initialPage == UserScreenPages.Follows) {
 					map += UserScreenPages.Follows to {
 						UsersListPage(
-							listModel = viewModel.followsModel,
+							listModel = viewModel.subscriptionsModel,
+							lazyListState = subscriptionsLazyListState,
 							onUserClick = onUserClicked
 						)
 					}
@@ -191,8 +259,8 @@ fun UserScreen(
 						}"
 						
 						UserScreenPages.Bookmarks -> "Закладки${
-							if (viewModel.user.value!!.favoritesCount > 0) " " + formatLongNumbers(
-								viewModel.user.value!!.favoritesCount
+							if (viewModel.user.value!!.bookmarksCount > 0) " " + formatLongNumbers(
+								viewModel.user.value!!.bookmarksCount
 							) else ""
 						}"
 						
@@ -203,8 +271,8 @@ fun UserScreen(
 						}"
 						
 						UserScreenPages.Follows -> "Подписки${
-							if (viewModel.user.value!!.followsCount > 0) " " + formatLongNumbers(
-								viewModel.user.value!!.followsCount
+							if (viewModel.user.value!!.subscriptionsCount > 0) " " + formatLongNumbers(
+								viewModel.user.value!!.subscriptionsCount
 							) else ""
 						}"
 					}
@@ -216,7 +284,23 @@ fun UserScreen(
 			
 			Column(modifier = Modifier.padding(it)) {
 				if (pagesMap.size > 1) {
-					HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
+					HabrScrollableTabRow(pagerState = pagerState, tabs = tabs) { index, title ->
+						when {
+							title.startsWith("Профиль") -> { ScrollUpMethods.scrollNormalList(profilePageScrollState) }
+							title.startsWith("Публикации") -> {
+								articlesFilterContentState.show()
+								ScrollUpMethods.scrollLazyList(articlesLazyListState)
+							}
+							title.startsWith("Комментарии") -> { ScrollUpMethods.scrollLazyList(commentsLazyListState) }
+							title.startsWith("Закладки") -> {
+								bookmarksFilterContentState.show()
+								ScrollUpMethods.scrollLazyList(bookmarksLazyListState)
+							}
+							title.startsWith("Подписчики") -> { ScrollUpMethods.scrollLazyList(followersLazyListState) }
+							title.startsWith("Подписки") -> { ScrollUpMethods.scrollLazyList(subscriptionsLazyListState) }
+							
+						}
+					}
 				}
 				HorizontalPager(
 					state = pagerState

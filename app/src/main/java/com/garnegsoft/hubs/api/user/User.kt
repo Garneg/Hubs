@@ -1,32 +1,28 @@
 package com.garnegsoft.hubs.api.user
 
-import androidx.compose.runtime.Immutable
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
-
 
 class User(
-    val alias: String,
-    val fullname: String?,
-    val avatarUrl: String?,
-    val speciality: String?,
-    val rating: Float,
-    val ratingPosition: Int?,
-    val score: Int,
-    val articlesCount: Int,
-    val commentsCount: Int,
-    val favoritesCount: Int,
-    val followersCount: Int,
-    val followsCount: Int,
-    val isReadonly: Boolean,
-    val registrationDate: String,
-    val lastActivityDate: String?,
-    val birthday: String?,
-    val canBeInvited: Boolean,
-    val location: String?,
-    val workPlaces: List<WorkPlace>,
-
-    val relatedData: RelatedData?
+	val alias: String,
+	val fullname: String?,
+	val avatarUrl: String?,
+	val speciality: String?,
+	val rating: Float,
+	val ratingPosition: Int?,
+	val score: Int,
+	val articlesCount: Int,
+	val commentsCount: Int,
+	val bookmarksCount: Int,
+	val followersCount: Int,
+	val subscriptionsCount: Int,
+	val isReadonly: Boolean,
+	val registrationDate: String,
+	val lastActivityDate: String?,
+	val birthday: String?,
+	val canBeInvited: Boolean,
+	val location: String?,
+	val workPlaces: List<WorkPlace>,
+	
+	val relatedData: RelatedData?
 ){
 
     class WhoIs(

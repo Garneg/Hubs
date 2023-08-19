@@ -7,7 +7,6 @@ import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
-import okhttp3.ResponseBody
 import org.jsoup.Jsoup
 
 class UserController {
@@ -101,7 +100,7 @@ class UserController {
                     ratingPosition = it.ratingPos,
                     score = it.scoreStats.score,
                     followersCount = it.followStats.followersCount,
-                    followsCount = it.followStats.followCount,
+                    subscriptionsCount = it.followStats.followCount,
                     isReadonly = it.isReadonly,
                     registrationDate = it.registerDateTime,
                     lastActivityDate = it.lastActivityDateTime,
@@ -123,7 +122,7 @@ class UserController {
                     },
                     articlesCount = it.counterStats.postCount,
                     commentsCount = it.counterStats.commentCount,
-                    favoritesCount = it.counterStats.favoriteCount,
+                    bookmarksCount = it.counterStats.favoriteCount,
                     workPlaces = it.workplace.map { User.WorkPlace(it.title, it.alias) },
                     relatedData = it.relatedData?.let{ User.RelatedData(it.isSubscribed)}
                 )

@@ -46,6 +46,7 @@ import com.garnegsoft.hubs.api.company.list.CompaniesListController
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
+import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
@@ -87,16 +88,17 @@ fun SearchScreen(
 			var showClearAllButton by rememberSaveable { mutableStateOf(false) }
 			val focusRequester by remember { mutableStateOf(FocusRequester()) }
 			val keyboardController = LocalSoftwareKeyboardController.current
-			val coroutineScope = rememberCoroutineScope()
-			
-			var pageNumber by rememberSaveable { mutableStateOf(1) }
 			
 			var currentQuery by rememberSaveable {
 				mutableStateOf(searchTextValue)
 			}
 			
 			val articlesLazyListState = rememberLazyListState()
+			val articlesFilterContentState = rememberCollapsingContentState()
 			
+			val hubsLazyListState = rememberLazyListState()
+			val companiesLazyListState = rememberLazyListState()
+			val usersLazyListState = rememberLazyListState()
 			
 			var doRequestFocus by rememberSaveable {
 				mutableStateOf(true)
@@ -151,15 +153,13 @@ fun SearchScreen(
 						} else {
 							currentQuery = searchTextValue
 							
-								
-								viewModel.articlesListModel.editFilter(
-									ArticlesSearchFilter(
-										order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
-										query = currentQuery
-									)
-								)
-								
 							
+							viewModel.articlesListModel.editFilter(
+								ArticlesSearchFilter(
+									order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
+									query = currentQuery
+								)
+							)
 							showPages = true
 						}
 					},
@@ -182,20 +182,36 @@ fun SearchScreen(
 			}
 			var pagerState = rememberPagerState { 4 }
 			if (showPages) {
-				var tabs = listOf(
-					"Публикации",
-					"Хабы",
-					"Компании",
-					"Пользователи"
-				)
+				val tabs = remember {
+					listOf(
+						"Публикации",
+						"Хабы",
+						"Компании",
+						"Пользователи"
+					)
+				}
 				
-				HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
+				HabrScrollableTabRow(pagerState = pagerState, tabs = tabs
+				){ index, title ->
+					when {
+						title.startsWith("Публикации") -> {
+							articlesFilterContentState.show()
+							ScrollUpMethods.scrollLazyList(articlesLazyListState)
+						}
+						title.startsWith("Хабы") -> { ScrollUpMethods.scrollLazyList(hubsLazyListState) }
+						title.startsWith("Компании") -> { ScrollUpMethods.scrollLazyList(companiesLazyListState) }
+						title.startsWith("Пользователи") -> { ScrollUpMethods.scrollLazyList(usersLazyListState) }
+
+					}
+				}
 				HorizontalPager(state = pagerState) {
 					when (it) {
 						0 -> {
 							
 							ArticlesListPageWithFilter(
 								listModel = viewModel.articlesListModel,
+								lazyListState = articlesLazyListState,
+								collapsingContentState = articlesFilterContentState,
 								onArticleSnippetClick = onArticleClicked,
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
@@ -213,12 +229,11 @@ fun SearchScreen(
 						1 -> {
 							val hubs by viewModel.hubs.observeAsState()
 							if (hubs != null) {
+								
 								PagedHabrSnippetsColumn(
 									modifier = Modifier.fillMaxHeight(),
 									data = hubs!!,
-									contentPadding = PaddingValues(8.dp),
-									verticalArrangement = Arrangement.spacedBy(8.dp),
-									lazyListState = rememberLazyListState(),
+									lazyListState = hubsLazyListState,
 									onNextPageLoad = { viewModel.loadHubs(currentQuery, it) }
 								) {
 									HubCard(hub = it, onClick = { onHubClicked(it.alias) })
@@ -236,8 +251,7 @@ fun SearchScreen(
 								PagedHabrSnippetsColumn(
 									modifier = Modifier.fillMaxHeight(),
 									data = companies!!,
-									contentPadding = PaddingValues(8.dp),
-									verticalArrangement = Arrangement.spacedBy(8.dp),
+									lazyListState = companiesLazyListState,
 									onNextPageLoad = {
 										viewModel.loadCompanies(currentQuery, it)
 									}
@@ -255,14 +269,11 @@ fun SearchScreen(
 						
 						3 -> {
 							val users by viewModel.users.observeAsState()
-							val usersLazyListState = rememberLazyListState()
 							
 							if (users != null) {
 								PagedHabrSnippetsColumn(
 									lazyListState = usersLazyListState,
 									data = users!!,
-									contentPadding = PaddingValues(8.dp),
-									verticalArrangement = Arrangement.spacedBy(8.dp),
 									onNextPageLoad = {
 										viewModel.loadUsers(currentQuery, it)
 									}

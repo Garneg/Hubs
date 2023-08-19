@@ -178,23 +178,25 @@ class CommentsListController {
             raw?.let {
                 raw.threads.forEach {
                     raw.comments[it]?.let {
-                        commentsList.add(
-                            CommentSnippet(
-                                id = it.id.toInt(),
-                                parentPost = CommentSnippet.ParentPost(
-                                    id = it.publication!!.id.toInt(),
-                                    title = Jsoup.parse(it.publication!!.title).text()
-                                ),
-                                text = it.message,
-                                timePublished = it.timePublished,
-                                score = it.score ?: 0,
-                                author = Article.Author(
-                                    alias = it.author!!.alias!!,
-                                    fullname = it.author!!.fullname,
-                                    avatarUrl = it.author!!.avatarUrl,
+                        if (it.post != null || it.publication != null) {
+                            commentsList.add(
+                                CommentSnippet(
+                                    id = it.id.toInt(),
+                                    parentPost = CommentSnippet.ParentPost(
+                                        id = it.publication?.id?.toInt() ?: it.post!!.id,
+                                        title = Jsoup.parse(it.publication!!.title).text()
+                                    ),
+                                    text = it.message,
+                                    timePublished = it.timePublished,
+                                    score = it.score ?: 0,
+                                    author = Article.Author(
+                                        alias = it.author!!.alias!!,
+                                        fullname = it.author!!.fullname,
+                                        avatarUrl = it.author!!.avatarUrl,
+                                    )
                                 )
                             )
-                        )
+                        }
                     }
                 }
 
@@ -309,8 +311,16 @@ class CommentsListController {
             var children: ArrayList<String>,
             //val vote: Vote? = null,
             var publication: Post? = null,
+            var post: LegacyPost? = null,
             var isPinned: Boolean
         ) {
+            
+            @Serializable
+            data class LegacyPost(
+                var id: Int,
+                var title: String
+            )
+            
             @Serializable
             data class Post(
                 var id: String,

@@ -31,9 +31,9 @@ class ArticlesSearchFilter(
 	
 	override fun getTitle(): String {
 		return when (order) {
-			SearchFilterOrder.Relevance -> "по релевантности"
-			SearchFilterOrder.Date -> "по времени"
-			SearchFilterOrder.Rating -> "по рейтингу"
+			SearchFilterOrder.Relevance -> "По релевантности"
+			SearchFilterOrder.Date -> "По времени"
+			SearchFilterOrder.Rating -> "По рейтингу"
 		}
 	}
 	

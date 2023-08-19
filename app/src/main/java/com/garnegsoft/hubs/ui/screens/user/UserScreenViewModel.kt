@@ -6,19 +6,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.CommentsListModel
-import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.User
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.user.UsersListModel
-import com.garnegsoft.hubs.api.user.list.UserSnippet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class UserScreenViewModel(val userAlias: String) : ViewModel() {
+	
 	val user = MutableLiveData<User>()
 	
 	val isRefreshingUser = MutableLiveData(false)
@@ -53,19 +51,26 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 		
 		)
 	
+	val bookmarksFilter = MutableLiveData(UserBookmarksFilter(UserBookmarksFilter.Bookmarks.Articles))
 	val bookmarksModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		"user" to userAlias,
-		"user_bookmarks" to "true"
+		baseArgs = arrayOf("user" to userAlias),
+		initialFilter = bookmarksFilter.value
 	)
+	val commentsBookmarksModel = CommentsListModel(
+		path = "users/$userAlias/bookmarks/comments",
+		coroutineScope = viewModelScope,
+		initialFilter = UserBookmarksFilter(UserBookmarksFilter.Bookmarks.Comments)
+	)
+	
 	
 	val followersModel = UsersListModel(
 		path = "users/${userAlias}/followers",
 		coroutineScope = viewModelScope
 	)
 	
-	val followsModel = UsersListModel(
+	val subscriptionsModel = UsersListModel(
 		path = "users/$userAlias/followed",
 		coroutineScope = viewModelScope
 	)
