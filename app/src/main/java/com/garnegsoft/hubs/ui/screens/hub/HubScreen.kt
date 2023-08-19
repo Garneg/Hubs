@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -42,6 +43,7 @@ import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.rememberCoroutineScope
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
@@ -105,14 +107,30 @@ fun HubScreen(
                     "Компании"
                 )
             }
+            val profilePageScrollState = rememberScrollState()
+            val articlesLazyListState = rememberLazyListState()
+            val newsLazyListState = rememberLazyListState()
+            val authorsLazyListState = rememberLazyListState()
+            val companiesLazyListState = rememberLazyListState()
             
             val pagerState = rememberPagerState { 5 }
-            HabrScrollableTabRow(pagerState = pagerState, tabs = tabs)
+            HabrScrollableTabRow(pagerState = pagerState, tabs = tabs) { index, title ->
+                when(index) {
+                    0 -> ScrollUpMethods.scrollNormalList(profilePageScrollState)
+                    1 -> ScrollUpMethods.scrollLazyList(articlesLazyListState)
+                    2 -> ScrollUpMethods.scrollLazyList(newsLazyListState)
+                    3 -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
+                    4 -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
+                }
+            }
             HorizontalPager(state = pagerState) {
                 when (it) {
                     0 -> {
                         if (viewModel.hub.observeAsState().value != null) {
-                            HubProfile(hub = viewModel.hub.observeAsState().value!!)
+                            HubProfile(
+                                hub = viewModel.hub.observeAsState().value!!,
+                                scrollState = profilePageScrollState
+                            )
                         } else {
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
@@ -128,6 +146,7 @@ fun HubScreen(
                     1 -> {
                         ArticlesListPageWithFilter(
                             listModel = viewModel.articlesListModel,
+                            lazyListState = articlesLazyListState,
                             onArticleSnippetClick = onArticleClick,
                             onArticleAuthorClick = onUserClick,
                             onArticleCommentsClick = onCommentsClick
@@ -135,10 +154,11 @@ fun HubScreen(
                             HubArticlesFilter(defaultValues, onDismiss, onDone)
                         }
                     }
-                    // authors
+                    // news
                     2 -> {
                         ArticlesListPageWithFilter(
                             listModel = viewModel.newsListModel,
+                            lazyListState = newsLazyListState,
                             onArticleSnippetClick = onArticleClick,
                             onArticleAuthorClick = onUserClick,
                             onArticleCommentsClick = onCommentsClick
@@ -150,10 +170,11 @@ fun HubScreen(
                             )
                         }
                     }
-                    
+                    // authors
                     3 -> {
                         UsersListPage(
                             listModel = viewModel.authorsListModel,
+                            lazyListState = authorsLazyListState,
                             onUserClick = onUserClick
                         )
                     }
@@ -161,6 +182,7 @@ fun HubScreen(
                     4 -> {
                         CompaniesListPage(
                             listModel = viewModel.companiesListModel,
+                            lazyListState = companiesLazyListState,
                             onCompanyClick = onCompanyClick
                         )
                     }

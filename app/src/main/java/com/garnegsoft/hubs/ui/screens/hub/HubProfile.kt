@@ -1,10 +1,13 @@
 package com.garnegsoft.hubs.ui.screens.hub
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -38,10 +41,14 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun HubProfile(hub: Hub) {
+fun HubProfile(
+	hub: Hub,
+	scrollState: ScrollState
+) {
 	Column(
 		modifier = Modifier
 			.fillMaxSize()
+			.verticalScroll(scrollState)
 			.padding(8.dp),
 		verticalArrangement = Arrangement.spacedBy(8.dp)
 	) {

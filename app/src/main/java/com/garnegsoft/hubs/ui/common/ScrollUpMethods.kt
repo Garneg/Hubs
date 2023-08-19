@@ -39,7 +39,7 @@ sealed interface ScrollUpMethods {
         }
 
         suspend fun scrollNormalList(scrollState: ScrollState) {
-            scrollState.scrollTo(0)
+            scrollState.animateScrollTo(0)
         }
     }
 }
