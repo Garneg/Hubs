@@ -33,6 +33,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDao
@@ -455,7 +456,7 @@ fun ArticleCard(
 								addedToBookmarksCount--
 								addedToBookmarksCount =
 									addedToBookmarksCount.coerceAtLeast(0)
-								if (!ArticleController.removeFromBookmarks(article.id)) {
+								if (!ArticleController.removeFromBookmarks(article.id, article.type == PostType.News)) {
 									addedToBookmarks = true
 									addedToBookmarksCount++
 									addedToBookmarksCount =
@@ -465,7 +466,7 @@ fun ArticleCard(
 							} else {
 								addedToBookmarks = true
 								addedToBookmarksCount++
-								if (!ArticleController.addToBookmarks(article.id)) {
+								if (!ArticleController.addToBookmarks(article.id, article.type == PostType.News)) {
 									addedToBookmarks = false
 									addedToBookmarksCount--
 									addedToBookmarksCount =

@@ -21,11 +21,10 @@ data class UserBookmarksFilter(
 	}
 	
 	override fun getTitle(): String {
-		return when(bookmarks) {
+		return when (bookmarks) {
 			Bookmarks.Articles -> "Статьи"
 			Bookmarks.News -> "Новости"
 			Bookmarks.Comments -> "Комментарии"
-			
 		}
 	}
 	
@@ -48,9 +47,11 @@ fun UserBookmarksFilter(
 		)
 	}
 	
-	BaseFilterDialog(onDismiss = onDismiss, onDone = {
-		onDone(UserBookmarksFilter(bookmarksType))
-	}
+	BaseFilterDialog(
+		onDismiss = onDismiss,
+		onDone = {
+			onDone(UserBookmarksFilter(bookmarksType))
+		}
 	) {
 		TitledColumn(title = "Тип закладок") {
 			HubsFilterChip(

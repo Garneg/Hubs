@@ -44,6 +44,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
@@ -253,7 +254,7 @@ fun ArticleScreen(
 											addedToBookmarksCount--
 											addedToBookmarksCount =
 												addedToBookmarksCount.coerceAtLeast(0)
-											if (!ArticleController.removeFromBookmarks(article.id)) {
+											if (!ArticleController.removeFromBookmarks(article.id, article.postType == PostType.News)) {
 												addedToBookmarks = true
 												addedToBookmarksCount++
 												addedToBookmarksCount =
@@ -263,7 +264,7 @@ fun ArticleScreen(
 										} else {
 											addedToBookmarks = true
 											addedToBookmarksCount++
-											if (!ArticleController.addToBookmarks(article.id)) {
+											if (!ArticleController.addToBookmarks(article.id, article.postType == PostType.News)) {
 												addedToBookmarks = false
 												addedToBookmarksCount--
 												addedToBookmarksCount =

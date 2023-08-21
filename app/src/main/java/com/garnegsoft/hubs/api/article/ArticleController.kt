@@ -296,16 +296,21 @@ class ArticleController {
                 )
             )
         }
-
-        fun addToBookmarks(id: Int): Boolean {
-            val response = HabrApi.post("articles/$id/bookmarks")
+        
+        
+        
+        fun addToBookmarks(id: Int, isNews: Boolean): Boolean {
+            val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
+            val response = HabrApi.post(path)
             if (response.code != 200)
                 return false
             return true
         }
 
-        fun removeFromBookmarks(id: Int): Boolean {
-            val response = HabrApi.delete("articles/$id/bookmarks")
+        fun removeFromBookmarks(id: Int, isNews: Boolean): Boolean {
+            val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
+            
+            val response = HabrApi.delete(path)
             if (response.code != 200)
                 return false
             return true
