@@ -46,10 +46,9 @@ fun CommentItem(
     onAuthorClick: () -> Unit,
     onShare: () -> Unit,
     onReplyClick: () -> Unit,
-    onParentCommentSnippetClick: () -> Unit,
+    onParentCommentSnippetClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-
     val onSurfaceColor = MaterialTheme.colors.onSurface
     val commentFlagColor = remember {
         when {
@@ -74,7 +73,10 @@ fun CommentItem(
                     .fillMaxWidth()
                     .height(IntrinsicSize.Max)
                     .clip(RoundedCornerShape(2.dp))
-                    .clickable(onClick = onParentCommentSnippetClick)
+                    .clickable(
+                        onClick = { onParentCommentSnippetClick?.invoke() },
+                        enabled = onParentCommentSnippetClick != null
+                    )
             ) {
                 Spacer(
                     modifier = Modifier
@@ -125,7 +127,10 @@ fun CommentItem(
                         .clip(shape = RoundedCornerShape(10.dp))
                         .background(Color.White)
                         .border(
-                            BorderStroke(2.dp, color = placeholderColorLegacy(comment.author.alias)),
+                            BorderStroke(
+                                2.dp,
+                                color = placeholderColorLegacy(comment.author.alias)
+                            ),
                             shape = RoundedCornerShape(10.dp)
                         )
                         .padding(2.dp),

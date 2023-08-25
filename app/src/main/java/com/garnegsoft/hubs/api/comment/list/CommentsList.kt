@@ -1,24 +1,22 @@
 package com.garnegsoft.hubs.api.comment.list
 
-import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.comment.ArticleComments
+import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Comment
+import com.garnegsoft.hubs.api.comment.CommentPlaceholder
+import com.garnegsoft.hubs.api.comment.ShortenCommentsCollection
+import com.garnegsoft.hubs.api.comment.ViewThreadLabel
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
-import okhttp3.MediaType
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttp
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import okio.Okio
 import org.jsoup.Jsoup
 
 
@@ -59,11 +57,11 @@ class CommentsListController {
             return null
         }
 
-        fun getComments(articleId: Int): ArticleComments? {
+        fun getComments(articleId: Int): CommentsCollection? {
             return getComments("articles/$articleId/comments")
         }
 
-        fun getComments(path: String, args: Map<String, String>? = null): ArticleComments? {
+        fun getComments(path: String, args: Map<String, String>? = null): CommentsCollection? {
             var serializedData = get(path, args)
 
             var commentsList = ArrayList<Comment>()
@@ -101,23 +99,82 @@ class CommentsListController {
                         }
                     }
                 }
+                
+                
 
-                return ArticleComments(
+                return CommentsCollection(
                     newList,
-                    ArticleComments.CommentAccess(
+                    CommentsCollection.CommentAccess(
                         canComment = serializedData?.commentAccess?.isCanComment ?: false,
                         cantCommentReason = serializedData?.commentAccess?.cantCommentReason
                     )
                 )
             }
 
-            return ArticleComments(
+            return CommentsCollection(
                 commentsList,
-                ArticleComments.CommentAccess(
+                CommentsCollection.CommentAccess(
                     canComment = serializedData?.commentAccess?.isCanComment ?: false,
                     cantCommentReason = serializedData?.commentAccess?.cantCommentReason
                 )
             )
+        }
+        
+        fun getCuttedComments(articleId: Int, maxNumberPerThread: Int): ShortenCommentsCollection? {
+            val comments = getComments(articleId)
+            return comments?.let {
+                val newComments = arrayListOf<CommentPlaceholder>()
+                var doConcat = false
+                var currentThreadId = 0
+                var commentsSkipped = 0
+                var concattedNumber = 0
+                it.comments.forEach {
+                    if (it.level == 0){
+                        if (currentThreadId != 0 && commentsSkipped > 0){
+                            newComments.add(ViewThreadLabel(currentThreadId, commentsSkipped))
+                        }
+                        doConcat = true
+                        concattedNumber = 0
+                        commentsSkipped = 0
+                        currentThreadId = it.id
+                    }
+                    if (concattedNumber == maxNumberPerThread) {
+                        doConcat = false
+                    }
+                    if (doConcat) {
+                        newComments.add(it)
+                        concattedNumber++
+                    } else {
+                        commentsSkipped++
+                    }
+                }
+                if (currentThreadId != 0 && commentsSkipped > 0){
+                    newComments.add(ViewThreadLabel(currentThreadId, commentsSkipped))
+                }
+                
+                ShortenCommentsCollection(newComments, it.commentAccess)
+            }
+        }
+        
+        fun getThread(articleId: Int, threadId: Int): CommentsCollection? {
+            val comments = getComments(articleId)
+            
+            return comments?.let {
+                val newComments = arrayListOf<Comment>()
+                var doConcatinating = false
+                it.comments.forEach {
+                    if (it.level == 0) {
+                        if (it.id == threadId){
+                            doConcatinating = true
+                        }
+                        else {
+                            doConcatinating = false
+                        }
+                    }
+                    if (doConcatinating) newComments.add(it)
+                }
+                CommentsCollection(newComments, it.commentAccess)
+            }
         }
 
         private fun parseComment(comment: CommentsList.Comment, inModeration: Boolean): Comment {
@@ -245,10 +302,10 @@ class CommentsListController {
             articleId: Int,
             text: String,
             parentCommentId: Int? = null
-        ): ArticleComments.CommentAccess? {
+        ): CommentsCollection.CommentAccess? {
             val response = _sendComment(articleId, text, parentCommentId)
             return response?.let {
-                ArticleComments.CommentAccess(
+                CommentsCollection.CommentAccess(
                     response.commentAccess.isCanComment,
                     response.commentAccess.cantCommentReason,
                 )

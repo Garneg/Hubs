@@ -17,9 +17,9 @@ class Comment (
     val isUserAuthor: Boolean,
     val edited: Boolean,
     val inModeration: Boolean
-)
+) : CommentPlaceholder
 
-class ArticleComments(
+class CommentsCollection(
     val comments: ArrayList<Comment>,
     val commentAccess: CommentAccess
 ) {
@@ -27,4 +27,19 @@ class ArticleComments(
         val canComment: Boolean,
         val cantCommentReason: String?
     )
+}
+
+class ShortenCommentsCollection(
+    val items: List<CommentPlaceholder>,
+    val commentAccess: CommentsCollection.CommentAccess
+)
+
+data class ViewThreadLabel(
+    val threadId: Int,
+    val hiddenCommentsCount: Int,
+    
+) : CommentPlaceholder
+
+interface CommentPlaceholder {
+
 }
