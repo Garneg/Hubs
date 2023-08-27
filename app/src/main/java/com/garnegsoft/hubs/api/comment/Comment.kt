@@ -29,9 +29,20 @@ class CommentsCollection(
     )
 }
 
-class ShortenCommentsCollection(
-    val items: List<CommentPlaceholder>,
+class Threads(
+    val threads: List<ThreadSnippet>,
     val commentAccess: CommentsCollection.CommentAccess
+)
+
+class Thread(
+    val root: Comment,
+    val children: List<Comment>
+)
+
+data class ThreadSnippet(
+    val root: Comment,
+    val threadChildrenCommentsCount: Int,
+    val threadNewChildrenCommentsCount: Int,
 )
 
 data class ViewThreadLabel(

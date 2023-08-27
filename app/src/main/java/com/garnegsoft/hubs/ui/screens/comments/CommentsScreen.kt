@@ -2,22 +2,18 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
-import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
-import androidx.compose.material.icons.outlined.Close
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -25,16 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,12 +36,8 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.comment.CommentsCollection
-import com.garnegsoft.hubs.api.comment.Comment
-import com.garnegsoft.hubs.api.comment.ShortenCommentsCollection
-import com.garnegsoft.hubs.api.comment.ViewThreadLabel
+import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
@@ -57,14 +45,12 @@ import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
-import kotlin.math.roundToInt
 
-const val answersCount = 2
+const val answersCount = 1
 
 class CommentsScreenViewModel : ViewModel() {
 	var parentPostSnippet = MutableLiveData<ArticleSnippet>()
-	var commentsData = MutableLiveData<ShortenCommentsCollection?>()
+	var commentsData = MutableLiveData<Threads?>()
 	
 	fun comment(text: String, postId: Int, parentCommentId: Int? = null) {
 		viewModelScope.launch(Dispatchers.IO) {
@@ -74,10 +60,10 @@ class CommentsScreenViewModel : ViewModel() {
 				parentCommentId = parentCommentId
 			)
 			
-			CommentsListController.getCuttedComments(postId, answersCount)?.let {
+			CommentsListController.getThreads(postId)?.let {
 				commentsData.postValue(newAccess?.let { it1 ->
-					ShortenCommentsCollection(
-						it.items,
+					Threads(
+						it.threads,
 						it1
 					)
 				}
@@ -96,6 +82,7 @@ fun CommentsScreen(
 	showArticleSnippet: Boolean = true,
 	onBackClicked: () -> Unit,
 	onArticleClicked: () -> Unit,
+	onThreadClick: (threadId: Int) -> Unit,
 	onUserClicked: (alias: String) -> Unit,
 	onImageClick: (imageUrl: String) -> Unit
 ) {
@@ -122,9 +109,8 @@ fun CommentsScreen(
 			launch(Dispatchers.IO) {
 				viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
 				viewModel.commentsData.postValue(
-					CommentsListController.getCuttedComments(
+					CommentsListController.getThreads(
 						parentPostId,
-						3
 					)
 				)
 			}
@@ -202,85 +188,81 @@ fun CommentsScreen(
 									addToBookmarksButtonEnabled = articleSnippet.relatedData != null
 								),
 								onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-								onCommentsClick = {}
+								onCommentsClick = {  }
 							)
 						}
 					}
 					
 					if (commentsData != null) {
 						itemsIndexed(
-							items = commentsData.items,
-							key = { index, it -> index }
+							items = commentsData.threads,
+							key = { index, it -> it.root.id }
 						) { index, it ->
-							val comment = it
 							val context = LocalContext.current
-							if (comment is Comment) {
-								CommentItem(
-									modifier = Modifier
-										.padding(
-											start = 20.dp.times(comment.level.coerceAtMost(5))
-										),
-									comment = comment,
-									onAuthorClick = {
-										onUserClicked(comment.author.alias)
-									},
-									highlight = comment.id == commentId,
-									showReplyButton = viewModel.commentsData.value?.commentAccess?.canComment
-										?: false,
-									onShare = {
-										val intent = Intent(Intent.ACTION_SEND)
-										intent.putExtra(
-											Intent.EXTRA_TEXT,
-											"https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
-										)
-										intent.setType("text/plain")
-										context.startActivity(Intent.createChooser(intent, null))
-									},
-									onReplyClick = {
-										commentTextFieldFocusRequester.requestFocus()
-										parentCommentId = comment.id
-									}
-								) {
-									Column {
-										comment.let {
-											SelectionContainer {
-												((parseElement(
-													it.message, SpanStyle(
-														fontSize = 16.sp,
-														color = MaterialTheme.colors.onSurface
-													),
-													onViewImageRequest = onImageClick
-												).second)?.let { it1 ->
-													it1(
-														SpanStyle(
+								
+								Column(horizontalAlignment = Alignment.End) {
+									
+									CommentItem(
+										comment = it.root,
+										onAuthorClick = {
+											onUserClicked(it.root.author.alias)
+										},
+										highlight = it.root.id == commentId,
+										showReplyButton = false,
+										onShare = {
+											val intent = Intent(Intent.ACTION_SEND)
+											intent.putExtra(
+												Intent.EXTRA_TEXT,
+												"https://habr.com/p/${parentPostId}/comments/#comment_${it.root.id}"
+											)
+											intent.setType("text/plain")
+											context.startActivity(
+												Intent.createChooser(
+													intent,
+													null
+												)
+											)
+										},
+										onReplyClick = { }
+									) {
+										Column {
+											it.root.let {
+												SelectionContainer {
+													((parseElement(
+														it.message, SpanStyle(
 															fontSize = 16.sp,
 															color = MaterialTheme.colors.onSurface
 														),
-														elementsSettings
-													)
-												})
+														onViewImageRequest = onImageClick
+													).second)?.let { it1 ->
+														it1(
+															SpanStyle(
+																fontSize = 16.sp,
+																color = MaterialTheme.colors.onSurface
+															),
+															elementsSettings
+														)
+													})
+												}
 											}
 										}
-										
+									}
+									if (it.threadChildrenCommentsCount > 0) {
+										Spacer(modifier = Modifier.height(2.dp))
+										OutlinedButton(
+											onClick = { onThreadClick(it.root.id) },
+											shape = RoundedCornerShape(26.dp),
+											contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
+										) {
+											Text(text = "Ответы (${it.threadChildrenCommentsCount})")
+											Spacer(modifier = Modifier.width(4.dp))
+											Icon(
+												modifier = Modifier.size(18.dp),
+												imageVector = Icons.Default.ArrowForward, contentDescription = null)
+										}
 									}
 								}
-							}
-							if (comment is ViewThreadLabel) {
-								OutlinedButton(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(start = 20.dp * 2),
-									onClick = { /*TODO*/ },
-									shape = RoundedCornerShape(26.dp),
-									contentPadding = PaddingValues(12.dp)
-								) {
-									Text("Остальные ответы (${comment.hiddenCommentsCount})")
-									Spacer(modifier = Modifier.width(4.dp))
-									Icon(
-										modifier = Modifier.size(18.dp),
-										imageVector = Icons.Default.ArrowForward, contentDescription = null)
-								}
-							}
+							
 							
 						}
 					} else {
@@ -296,144 +278,18 @@ fun CommentsScreen(
 				}
 				
 				if (commentsData?.commentAccess?.canComment == true) {
-					Column(modifier = Modifier) {
-						AnimatedVisibility(
-							visible = parentCommentId > 0,
-							enter = expandVertically(expandFrom = Alignment.Bottom),
-							exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
-						
-						) {
-							Column() {
-								val comment =
-									viewModel.commentsData.value?.items?.find { it is Comment && it.id == parentCommentId } as Comment
-								Divider()
-								val coroutineScope = rememberCoroutineScope()
-								Row(modifier = Modifier
-									.clickable {
-										val index =
-											viewModel.commentsData.value?.items?.indexOf(
-												comment
-											)
-												?: 0
-										coroutineScope.launch {
-											lazyListState.animateScrollToItem(
-												index + 1
-											)
-										}
-									}
-									.background(MaterialTheme.colors.surface)
-									.padding(4.dp)
-									.padding(start = 4.dp)
-									.height(IntrinsicSize.Min),
-									verticalAlignment = Alignment.CenterVertically
-								) {
-									
-									Spacer(
-										modifier = Modifier
-											.width(4.dp)
-											.fillMaxHeight()
-											.clip(CircleShape)
-											.background(MaterialTheme.colors.secondary)
-									)
-									Spacer(modifier = Modifier.width(8.dp))
-									Column(modifier = Modifier.weight(1f)) {
-										Text(
-											text = comment?.author?.alias ?: "",
-											fontWeight = FontWeight.W500,
-											color = MaterialTheme.colors.primary.copy(0.9f)
-										)
-										val text = comment?.message ?: ""
-										Text(
-											maxLines = 1,
-											text = Jsoup.parse(text).text(),
-											overflow = TextOverflow.Ellipsis,
-											style = MaterialTheme.typography.body2,
-											color = MaterialTheme.colors.onSurface.copy(0.6f)
-										)
-										
-									}
-									Spacer(modifier = Modifier.width(4.dp))
-									IconButton(onClick = { parentCommentId = 0 }) {
-										Icon(
-											imageVector = Icons.Outlined.Close,
-											contentDescription = "",
-											tint = MaterialTheme.colors.secondary
-										)
-										
-									}
-								}
-							}
-						}
-						Divider()
-						Row(
-							verticalAlignment = Alignment.Bottom, modifier = Modifier
-								.fillMaxWidth()
-								.background(MaterialTheme.colors.surface)
-								.padding(4.dp)
-						) {
-							var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }
-							Box(
-								modifier = Modifier
-									.weight(1f)
-									.padding(horizontal = 8.dp)
-							) {
-								BasicTextField(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(vertical = 12.dp)
-										.heightIn(max = 140.dp)
-										.focusRequester(commentTextFieldFocusRequester),
-									value = commentTextFieldValue,
-									onValueChange = {
-										commentTextFieldValue = it
-										
-									},
-									cursorBrush = SolidColor(MaterialTheme.colors.secondary),
-									textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface)
-								)
-								if (commentTextFieldValue.text.isEmpty()) {
-									Row(modifier = Modifier.align(Alignment.CenterStart)) {
-										Text(
-											text = "Комментарий",
-											color = MaterialTheme.colors.onSurface.copy(0.4f)
-										)
-										Spacer(modifier = Modifier.width(4.dp))
-										Icon(
-											tint = MaterialTheme.colors.onSurface.copy(0.4f),
-											painter = painterResource(id = R.drawable.markdown),
-											contentDescription = ""
-										)
-									}
-									
-								}
-							}
-							
-							IconButton(
-								enabled = commentTextFieldValue.text.isNotBlank(),
-								onClick = {
-									viewModel.comment(
-										text = commentTextFieldValue.text,
-										postId = parentPostId,
-										parentCommentId = if (parentCommentId > 0) parentCommentId else null
-									)
-									commentTextFieldValue = TextFieldValue()
-									parentCommentId = 0
-									commentTextFieldFocusRequester.freeFocus()
-								}
-							) {
-								val iconTint by animateColorAsState(
-									targetValue = if (commentTextFieldValue.text.isNotBlank()) MaterialTheme.colors.secondary else MaterialTheme.colors.onSurface.copy(
-										0.4f
-									)
-								)
-								Icon(
-									tint = iconTint,
-									painter = painterResource(id = R.drawable.send),
-									contentDescription = "send comment"
-								)
-							}
-						}
-					}
+					
+					Divider()
+					EnterCommentTextField(
+						focusRequester = commentTextFieldFocusRequester,
+						onSend = {
+							viewModel.comment(
+								text = it,
+								postId = parentPostId,
+								parentCommentId = null
+							)
+							commentTextFieldFocusRequester.freeFocus()
+						})
 				}
 				
 			}

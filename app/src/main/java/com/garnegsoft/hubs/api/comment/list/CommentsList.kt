@@ -6,9 +6,8 @@ import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Comment
-import com.garnegsoft.hubs.api.comment.CommentPlaceholder
-import com.garnegsoft.hubs.api.comment.ShortenCommentsCollection
-import com.garnegsoft.hubs.api.comment.ViewThreadLabel
+import com.garnegsoft.hubs.api.comment.ThreadSnippet
+import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
@@ -120,39 +119,49 @@ class CommentsListController {
             )
         }
         
-        fun getCuttedComments(articleId: Int, maxNumberPerThread: Int): ShortenCommentsCollection? {
+        fun getThreads(articleId: Int): Threads? {
             val comments = getComments(articleId)
             return comments?.let {
-                val newComments = arrayListOf<CommentPlaceholder>()
-                var doConcat = false
-                var currentThreadId = 0
-                var commentsSkipped = 0
-                var concattedNumber = 0
+                val threads = arrayListOf<ThreadSnippet>()
+                var currentRootComment: Comment? = null
+                var threadCommentsCount = 0
+                var newCommentsCount = 0
                 it.comments.forEach {
                     if (it.level == 0){
-                        if (currentThreadId != 0 && commentsSkipped > 0){
-                            newComments.add(ViewThreadLabel(currentThreadId, commentsSkipped))
+                        
+                        currentRootComment?.let {
+                            threads.add(
+                                ThreadSnippet(
+                                    root = it,
+                                    threadChildrenCommentsCount = threadCommentsCount,
+                                    threadNewChildrenCommentsCount = newCommentsCount
+                                    )
+                            )
                         }
-                        doConcat = true
-                        concattedNumber = 0
-                        commentsSkipped = 0
-                        currentThreadId = it.id
-                    }
-                    if (concattedNumber == maxNumberPerThread) {
-                        doConcat = false
-                    }
-                    if (doConcat) {
-                        newComments.add(it)
-                        concattedNumber++
+                        
+                        threadCommentsCount = 0
+                        currentRootComment = it
+                        newCommentsCount = 0
                     } else {
-                        commentsSkipped++
+                        threadCommentsCount++
+                        if (it.isNew)
+                            newCommentsCount++
+                        
                     }
+                    
+                    
                 }
-                if (currentThreadId != 0 && commentsSkipped > 0){
-                    newComments.add(ViewThreadLabel(currentThreadId, commentsSkipped))
+                currentRootComment?.let {
+                    threads.add(
+                        ThreadSnippet(
+                            root = it,
+                            threadChildrenCommentsCount = threadCommentsCount,
+                            threadNewChildrenCommentsCount = newCommentsCount
+                        )
+                    )
                 }
                 
-                ShortenCommentsCollection(newComments, it.commentAccess)
+                Threads(threads, it.commentAccess)
             }
         }
         

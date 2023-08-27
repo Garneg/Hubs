@@ -44,6 +44,7 @@ import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
+import com.garnegsoft.hubs.ui.screens.comments.CommentsThreadScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
 import com.garnegsoft.hubs.ui.screens.hub.HubScreen
 import com.garnegsoft.hubs.ui.screens.main.ArticlesScreen
@@ -355,16 +356,30 @@ class MainActivity : ComponentActivity() {
 									},
 									onArticleClicked = { navController.navigate("article/$postId") },
 									onUserClicked = { navController.navigate("user/$it") },
-									onImageClick = { navController.navigate(route = "imageViewer?imageUrl=$it") }
+									onImageClick = { navController.navigate(route = "imageViewer?imageUrl=$it") },
+									onThreadClick = { navController.navigate("thread/$postId/$it")}
 								)
 								
+							}
+							
+							composable("thread/{articleId}/{threadId}") {
+								val articleId = it.arguments!!.getString("articleId")?.toInt()
+								val threadId = it.arguments!!.getString("threadId")?.toInt()
+								
+								CommentsThreadScreen(
+									articleId = articleId!!,
+									threadId = threadId!!,
+									onAuthor = { navController.navigate("user/$it") },
+									onImageClick = { navController.navigate("image/$it") },
+									onBack = { navController.popBackStack() }
+								)
 							}
 							
 							composable(
 								"user/{alias}?page={page}",
 								deepLinks = UserScreenNavDeepLinks
 							) {
-								navController.popBackStack("", false)
+								
 								val page =
 									it.arguments?.getString("page")
 										?.let { UserScreenPages.valueOf(it) }
