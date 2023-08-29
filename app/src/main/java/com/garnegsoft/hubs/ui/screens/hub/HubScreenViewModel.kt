@@ -11,13 +11,29 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.CompaniesListModel
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.hub.Hub
+import com.garnegsoft.hubs.api.hub.HubController
 import com.garnegsoft.hubs.api.hub.HubsListModel
 import com.garnegsoft.hubs.api.user.UsersListModel
 import com.garnegsoft.hubs.api.user.list.UserSnippet
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class HubScreenViewModel(alias: String) : ViewModel() {
+class HubScreenViewModel(val alias: String) : ViewModel() {
 	
 	var hub = MutableLiveData<Hub>()
+	
+	val isRefreshing = MutableLiveData(false)
+	
+	fun refresh() {
+		isRefreshing.value = true
+		viewModelScope.launch(Dispatchers.IO) {
+			HubController.get(alias)?.let {
+				hub.postValue(it)
+			}
+			
+			isRefreshing.postValue(false)
+		}
+	}
 	
 	val articlesListModel = ArticlesListModel(
 		path = "articles",

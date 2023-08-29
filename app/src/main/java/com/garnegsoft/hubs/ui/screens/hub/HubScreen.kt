@@ -67,7 +67,7 @@ fun HubScreen(
     onCommentsClick: (postId: Int) -> Unit,
     onBackClick: () -> Unit
 ) {
-    val viewModel = viewModel(viewModelStoreOwner) { HubScreenViewModel(alias) }
+    val viewModel = viewModel() { HubScreenViewModel(alias) }
     
     Scaffold(
         topBar = {
@@ -135,7 +135,7 @@ fun HubScreen(
                             LaunchedEffect(key1 = Unit, block = {
                                 launch(Dispatchers.IO) {
                                     viewModel.hub.postValue(
-                                        HubController.get("hubs/${alias}/profile")
+                                        HubController.get(alias = alias)
                                     )
                                 }
                             })

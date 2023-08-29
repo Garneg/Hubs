@@ -5,11 +5,28 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.company.Company
+import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.user.UsersListModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class CompanyScreenViewModel(alias: String) : ViewModel() {
+class CompanyScreenViewModel(val alias: String) : ViewModel() {
 	var companyProfile = MutableLiveData<Company>()
 	var companyWhoIs = MutableLiveData<Company.WhoIs>()
+	
+	val isRefreshing = MutableLiveData(false)
+	fun refreshCompany() {
+		isRefreshing.value = true
+		viewModelScope.launch(Dispatchers.IO) {
+			companyProfile.postValue(
+				CompanyController.get(alias)
+			)
+			companyWhoIs.postValue(
+				CompanyController.getWhoIs(alias)
+			)
+			isRefreshing.postValue(false)
+		}
+	}
 	
 	val blogArticlesListModel = ArticlesListModel(
 		path = "articles",

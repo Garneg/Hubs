@@ -25,6 +25,10 @@ class HubController {
 
             return profile
         }
+        
+        fun get(alias: String): Hub? {
+            return get(path = "hubs/$alias/profile")
+        }
 
         fun get(path: String, args: Map<String, String>? = null): Hub? {
             var raw = getProfile(path, args)
