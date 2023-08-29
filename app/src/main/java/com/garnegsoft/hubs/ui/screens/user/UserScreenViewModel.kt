@@ -27,6 +27,8 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 			loadUser()
 			loadNote()
 			loadWhoIs()
+			subscribedHubsPage = 1
+			loadSubscribedHubs()
 			isRefreshingUser.postValue(false)
 		}
 	}
