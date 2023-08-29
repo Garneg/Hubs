@@ -17,7 +17,7 @@ object HubsDataStore {
              * - 3 - defined by system
              */
             val Theme = intPreferencesKey("theme_mode")
-            enum class ThemeMode {
+            enum class ThemeModes {
                 Undetermined,
                 Light,
                 Dark,
@@ -28,6 +28,13 @@ object HubsDataStore {
                 val LineHeightFactor = floatPreferencesKey("line_height_factor")
                 val TextWrapMode = intPreferencesKey("article_text_wrap")
                 val Indent = intPreferencesKey("article_indent")
+            }
+            object Comments {
+                val CommentsDisplayMode = intPreferencesKey("comment_display_mode")
+                enum class CommentsDisplayModes {
+                    Default,
+                    Threads,
+                }
             }
 
 

@@ -2,18 +2,23 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,20 +42,26 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.comment.Comment
+import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import org.jsoup.Jsoup
 
 const val answersCount = 1
 
 class CommentsScreenViewModel : ViewModel() {
 	var parentPostSnippet = MutableLiveData<ArticleSnippet>()
-	var commentsData = MutableLiveData<Threads?>()
+	var threadsData = MutableLiveData<Threads?>()
+	val commentsData = MutableLiveData<CommentsCollection>()
 	
 	fun comment(text: String, postId: Int, parentCommentId: Int? = null) {
 		viewModelScope.launch(Dispatchers.IO) {
@@ -61,7 +72,7 @@ class CommentsScreenViewModel : ViewModel() {
 			)
 			
 			CommentsListController.getThreads(postId)?.let {
-				commentsData.postValue(newAccess?.let { it1 ->
+				threadsData.postValue(newAccess?.let { it1 ->
 					Threads(
 						it.threads,
 						it1
@@ -88,11 +99,17 @@ fun CommentsScreen(
 ) {
 	var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 	
-	val commentsData = viewModel.commentsData.observeAsState().value
+	val threadsData = viewModel.threadsData.observeAsState().value
+	val commentsData by viewModel.commentsData.observeAsState()
 	val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
 	
 	val lazyListState = rememberLazyListState()
-
+	
+	val context = LocalContext.current
+	
+	val commentsDisplayMode by context.settingsDataStoreFlowWithDefault(HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode, HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal).collectAsState(
+		initial = null
+	)
 //	var commentsById = remember(commentsData?.items) {
 //
 //		val map = hashMapOf<Int, Comment>()
@@ -103,23 +120,28 @@ fun CommentsScreen(
 //		}
 //		map
 //	}
-	
-	LaunchedEffect(key1 = Unit) {
-		if (!viewModel.commentsData.isInitialized) {
-			launch(Dispatchers.IO) {
-				viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
-				viewModel.commentsData.postValue(
-					CommentsListController.getThreads(
-						parentPostId,
-					)
-				)
+	commentsDisplayMode?.let {
+		val mode = HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.values()[it]
+		LaunchedEffect(key1 = Unit) {
+			if (!viewModel.threadsData.isInitialized) {
+				launch(Dispatchers.IO) {
+					viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
+					if (mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default){
+						viewModel.commentsData.postValue(
+							CommentsListController.getComments(parentPostId)
+						)
+					} else {
+						viewModel.threadsData.postValue(
+							CommentsListController.getThreads(parentPostId)
+						)
+					}
+				}
 			}
 		}
-	}
-	var doScrollToComment by rememberSaveable {
-		mutableStateOf(true)
-	}
-	val itemsCountIndicator by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount > 2 } }
+		var doScrollToComment by rememberSaveable {
+			mutableStateOf(true)
+		}
+		val itemsCountIndicator by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount > 2 } }
 //	LaunchedEffect(key1 = commentsData, key2 = itemsCountIndicator, block = {
 //		commentId?.let { commId ->
 //			if (viewModel.commentsData.isInitialized && lazyListState.layoutInfo.totalItemsCount > 2 && doScrollToComment) {
@@ -137,68 +159,68 @@ fun CommentsScreen(
 //			}
 //		}
 //	})
-	
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				elevation = 0.dp,
-				title = { Text("Комментарии") },
-				navigationIcon = {
-					IconButton(onClick = onBackClicked) {
-						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
-					}
-				}
-			)
-		}
-	) {
-		var parentCommentId by rememberSaveable {
-			mutableStateOf(0)
-		}
-		val showArticleHeader by remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }
-		val commentTextFieldFocusRequester = remember { FocusRequester() }
-		val randomCoroutineScope = rememberCoroutineScope()
-		var articleHeaderOffset by remember { mutableStateOf(0f) }
-		val elementsSettings = remember {
-			ElementSettings(
-				fontSize = 16.sp,
-				lineHeight = 16.sp,
-				fitScreenWidth = false
-			)
-		}
-		Box {
-			Column(
-				modifier = Modifier
-					.padding(it)
-					.imePadding()
-			) {
-				LazyColumn(
-					state = lazyListState,
-					modifier = Modifier.weight(1f),
-					contentPadding = PaddingValues(8.dp),
-					verticalArrangement = Arrangement.spacedBy(8.dp)
-				) {
-					if (articleSnippet != null) {
-						item {
-							ArticleCard(
-								article = articleSnippet,
-								onClick = onArticleClicked,
-								style = defaultArticleCardStyle().copy(
-									showImage = false,
-									showTextSnippet = false,
-									addToBookmarksButtonEnabled = articleSnippet.relatedData != null
-								),
-								onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-								onCommentsClick = {  }
-							)
+		
+		Scaffold(
+			topBar = {
+				TopAppBar(
+					elevation = 0.dp,
+					title = { Text("Комментарии") },
+					navigationIcon = {
+						IconButton(onClick = onBackClicked) {
+							Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
 						}
 					}
-					
-					if (commentsData != null) {
-						itemsIndexed(
-							items = commentsData.threads,
-							key = { index, it -> it.root.id }
-						) { index, it ->
-							val context = LocalContext.current
+				)
+			}
+		) {
+			var parentComment: Comment? by remember {
+				mutableStateOf(null)
+			}
+			val showArticleHeader by remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }
+			val commentTextFieldFocusRequester = remember { FocusRequester() }
+			val randomCoroutineScope = rememberCoroutineScope()
+			var articleHeaderOffset by remember { mutableStateOf(0f) }
+			val elementsSettings = remember {
+				ElementSettings(
+					fontSize = 16.sp,
+					lineHeight = 16.sp,
+					fitScreenWidth = false
+				)
+			}
+			Box {
+				Column(
+					modifier = Modifier
+						.padding(it)
+						.imePadding()
+				) {
+					LazyColumn(
+						state = lazyListState,
+						modifier = Modifier.weight(1f),
+						contentPadding = PaddingValues(8.dp),
+						verticalArrangement = Arrangement.spacedBy(8.dp)
+					) {
+						if (articleSnippet != null) {
+							item {
+								ArticleCard(
+									article = articleSnippet,
+									onClick = onArticleClicked,
+									style = defaultArticleCardStyle().copy(
+										showImage = false,
+										showTextSnippet = false,
+										addToBookmarksButtonEnabled = articleSnippet.relatedData != null
+									),
+									onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+									onCommentsClick = { }
+								)
+							}
+						}
+						
+						if (threadsData != null) {
+							itemsIndexed(
+								items = threadsData.threads,
+								key = { index, it -> it.root.id }
+							) { index, it ->
+								val context = LocalContext.current
 								
 								Column(horizontalAlignment = Alignment.End) {
 									
@@ -252,107 +274,231 @@ fun CommentsScreen(
 										OutlinedButton(
 											onClick = { onThreadClick(it.root.id) },
 											shape = RoundedCornerShape(26.dp),
-											contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
+											contentPadding = PaddingValues(
+												vertical = 12.dp,
+												horizontal = 16.dp
+											)
 										) {
 											Text(text = "Ответы (${it.threadChildrenCommentsCount})")
 											Spacer(modifier = Modifier.width(4.dp))
 											Icon(
 												modifier = Modifier.size(18.dp),
-												imageVector = Icons.Default.ArrowForward, contentDescription = null)
+												imageVector = Icons.Default.ArrowForward,
+												contentDescription = null
+											)
 										}
 									}
 								}
-							
-							
-						}
-					} else {
-						item {
-							Box(
-								modifier = Modifier.fillMaxSize(),
-								contentAlignment = Alignment.Center
-							) {
-								CircularProgressIndicator()
+								
+								
+							}
+						} else if (commentsData != null) {
+							itemsIndexed(
+								items = commentsData!!.comments,
+								key = { index, it -> it.id }
+							) { index, it ->
+								
+								Column(horizontalAlignment = Alignment.End) {
+									
+									CommentItem(
+										modifier = Modifier
+											.padding(start = 20.dp * it.level.coerceAtMost(5)),
+										comment = it,
+										onAuthorClick = { onUserClicked(it.author.alias) },
+										parentComment = commentsData!!.comments.firstOrNull { com -> com.id == it.parentCommentId },
+										highlight = it.id == commentId,
+										showReplyButton = commentsData!!.commentAccess.canComment,
+										onShare = {
+											val intent = Intent(Intent.ACTION_SEND)
+											intent.putExtra(
+												Intent.EXTRA_TEXT,
+												"https://habr.com/p/${parentPostId}/comments/#comment_${it.id}"
+											)
+											intent.setType("text/plain")
+											context.startActivity(
+												Intent.createChooser(
+													intent,
+													null
+												)
+											)
+										},
+										onReplyClick = {
+											parentComment = it
+										}
+									) {
+										Column {
+											it.let {
+												SelectionContainer {
+													((parseElement(
+														it.message, SpanStyle(
+															fontSize = 16.sp,
+															color = MaterialTheme.colors.onSurface
+														),
+														onViewImageRequest = onImageClick
+													).second)?.let { it1 ->
+														it1(
+															SpanStyle(
+																fontSize = 16.sp,
+																color = MaterialTheme.colors.onSurface
+															),
+															elementsSettings
+														)
+													})
+												}
+											}
+										}
+									}
+								}
+								
+								
+							}
+						} else {
+							item {
+								Box(
+									modifier = Modifier.fillMaxSize(),
+									contentAlignment = Alignment.Center
+								) {
+									CircularProgressIndicator()
+								}
 							}
 						}
 					}
-				}
-				
-				if (commentsData?.commentAccess?.canComment == true) {
 					
-					Divider()
-					EnterCommentTextField(
-						focusRequester = commentTextFieldFocusRequester,
-						onSend = {
-							viewModel.comment(
-								text = it,
-								postId = parentPostId,
-								parentCommentId = null
-							)
-							commentTextFieldFocusRequester.freeFocus()
-						})
-				}
-				
-			}
-			if (showArticleHeader) {
-				articleSnippet?.let {
-					Box {
-						Row(
-							modifier = Modifier
-								.clickable {
-									randomCoroutineScope.launch {
-										lazyListState.animateScrollToItem(0)
+					if (threadsData?.commentAccess?.canComment == true) {
+						AnimatedVisibility(
+							visible = if (parentComment != null) true else false,
+							enter = expandVertically(expandFrom = Alignment.Bottom),
+							exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
+						) {
+							val comment = parentComment
+							Column {
+								Divider()
+								val coroutineScope = rememberCoroutineScope()
+								Row(modifier = Modifier
+									.clickable {
+										val index =
+											commentsData?.comments?.indexOf(parentComment) ?: 0
+										coroutineScope.launch {
+											lazyListState.animateScrollToItem(index)
+										}
+									}
+									.background(MaterialTheme.colors.surface)
+									.padding(4.dp)
+									.padding(start = 4.dp)
+									.height(IntrinsicSize.Min),
+									verticalAlignment = Alignment.CenterVertically
+								) {
+									
+									Spacer(
+										modifier = Modifier
+											.width(4.dp)
+											.fillMaxHeight()
+											.clip(CircleShape)
+											.background(MaterialTheme.colors.secondary)
+									)
+									Spacer(modifier = Modifier.width(8.dp))
+									Column(modifier = Modifier.weight(1f)) {
+										Text(
+											text = comment?.author?.alias ?: "",
+											fontWeight = FontWeight.W500,
+											color = MaterialTheme.colors.primary.copy(0.9f)
+										)
+										val text = comment?.message ?: ""
+										Text(
+											maxLines = 1,
+											text = Jsoup.parse(text).text(),
+											overflow = TextOverflow.Ellipsis,
+											style = MaterialTheme.typography.body2,
+											color = MaterialTheme.colors.onSurface.copy(0.6f)
+										)
+										
+									}
+									Spacer(modifier = Modifier.width(4.dp))
+									IconButton(onClick = { parentComment = null }) {
+										Icon(
+											imageVector = Icons.Outlined.Close,
+											contentDescription = "",
+											tint = MaterialTheme.colors.secondary
+										)
+										
 									}
 								}
-								.onGloballyPositioned {
-									articleHeaderOffset = it.boundsInRoot().height
-								}
-								.background(MaterialTheme.colors.surface)
-								.fillMaxWidth()
-//                    .height(50.dp)
-								.height(IntrinsicSize.Min)
-								.padding(8.dp),
-							verticalAlignment = Alignment.CenterVertically
-						) {
-							it.imageUrl?.let {
-								AsyncImage(
-									modifier = Modifier
-										.fillMaxHeight()
-										.aspectRatio(1f)
-										.clip(RoundedCornerShape(4.dp)),
-									model = articleSnippet?.imageUrl, contentDescription = null,
-									contentScale = ContentScale.Crop
-								)
-								Spacer(modifier = Modifier.width(8.dp))
 							}
-							
-							Column(
-							
+						}
+						Divider()
+						EnterCommentTextField(
+							focusRequester = commentTextFieldFocusRequester,
+							onSend = {
+								viewModel.comment(
+									text = it,
+									postId = parentPostId,
+									parentCommentId = parentComment?.id
+								)
+								commentTextFieldFocusRequester.freeFocus()
+							})
+					}
+					
+				}
+				if (showArticleHeader) {
+					articleSnippet?.let {
+						Box {
+							Row(
+								modifier = Modifier
+									.clickable {
+										randomCoroutineScope.launch {
+											lazyListState.animateScrollToItem(0)
+										}
+									}
+									.onGloballyPositioned {
+										articleHeaderOffset = it.boundsInRoot().height
+									}
+									.background(MaterialTheme.colors.surface)
+									.fillMaxWidth()
+//                    .height(50.dp)
+									.height(IntrinsicSize.Min)
+									.padding(8.dp),
+								verticalAlignment = Alignment.CenterVertically
 							) {
-								it.author?.run {
+								it.imageUrl?.let {
+									AsyncImage(
+										modifier = Modifier
+											.fillMaxHeight()
+											.aspectRatio(1f)
+											.clip(RoundedCornerShape(4.dp)),
+										model = articleSnippet?.imageUrl, contentDescription = null,
+										contentScale = ContentScale.Crop
+									)
+									Spacer(modifier = Modifier.width(8.dp))
+								}
+								
+								Column(
+								
+								) {
+									it.author?.run {
+										Text(
+											text = alias,
+											style = MaterialTheme.typography.body2,
+											fontWeight = FontWeight.W500,
+											maxLines = 1,
+											overflow = TextOverflow.Ellipsis
+										)
+									}
+									
 									Text(
-										text = alias,
+										text = articleSnippet?.title!!,
 										style = MaterialTheme.typography.body2,
-										fontWeight = FontWeight.W500,
 										maxLines = 1,
 										overflow = TextOverflow.Ellipsis
 									)
 								}
-								
-								Text(
-									text = articleSnippet?.title!!,
-									style = MaterialTheme.typography.body2,
-									maxLines = 1,
-									overflow = TextOverflow.Ellipsis
-								)
 							}
+							Divider(modifier = Modifier.align(Alignment.BottomCenter))
 						}
-						Divider(modifier = Modifier.align(Alignment.BottomCenter))
 					}
 				}
 			}
 		}
 	}
-	
 }
 
 

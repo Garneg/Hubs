@@ -23,10 +23,7 @@ fun <T> Context.settingsDataStoreFlowWithDefault(
 	return settingsDataStore.data.map { it[key] ?: defaultValue }
 }
 
-fun <T> Context.authDataStoreFlow(key: Preferences.Key<T>): Flow<T?> {
-	return authDataStore.data.map { it[key] }
-}
-
 fun <T> Context.authDataStoreFlowWithDefault(key: Preferences.Key<T>, defaultValue: T): Flow<T> {
 	return authDataStore.data.map { it[key] ?: defaultValue }
 }
+

@@ -118,14 +118,14 @@ class MainActivity : ComponentActivity() {
 		setContent {
 			val themeMode by settingsDataStoreFlowWithDefault(
 				HubsDataStore.Settings.Keys.Theme,
-				HubsDataStore.Settings.Keys.ThemeMode.Undetermined.ordinal
+				HubsDataStore.Settings.Keys.ThemeModes.Undetermined.ordinal
 			).collectAsState(initial = null)
 			
 			val theme by remember(themeMode) {
 				mutableStateOf(
 					themeMode?.let {
-						HubsDataStore.Settings.Keys.ThemeMode.values()[it]
-					} ?: HubsDataStore.Settings.Keys.ThemeMode.Undetermined
+						HubsDataStore.Settings.Keys.ThemeModes.values()[it]
+					} ?: HubsDataStore.Settings.Keys.ThemeModes.Undetermined
 				
 				)
 			}
@@ -145,9 +145,9 @@ class MainActivity : ComponentActivity() {
 			if (themeMode != null && authStatus != null) {
 				HubsTheme(
 					darkTheme = when (theme) {
-						HubsDataStore.Settings.Keys.ThemeMode.Undetermined -> isSystemInDarkTheme()
-						HubsDataStore.Settings.Keys.ThemeMode.SystemDefined -> isSystemInDarkTheme()
-						HubsDataStore.Settings.Keys.ThemeMode.Dark -> true
+						HubsDataStore.Settings.Keys.ThemeModes.Undetermined -> isSystemInDarkTheme()
+						HubsDataStore.Settings.Keys.ThemeModes.SystemDefined -> isSystemInDarkTheme()
+						HubsDataStore.Settings.Keys.ThemeModes.Dark -> true
 						else -> false
 					}
 				) {
