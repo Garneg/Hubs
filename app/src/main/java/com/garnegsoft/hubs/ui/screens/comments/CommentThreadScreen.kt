@@ -110,8 +110,10 @@ fun CommentsThreadScreen(
 	
 	LaunchedEffect(key1 = Unit, block = {
 		launch(Dispatchers.IO) {
-			CommentsListController.getThread(articleId, threadId)?.let {
-				viewModel.comments.postValue(it)
+			if (!viewModel.comments.isInitialized) {
+				CommentsListController.getThread(articleId, threadId)?.let {
+					viewModel.comments.postValue(it)
+				}
 			}
 		}
 	})

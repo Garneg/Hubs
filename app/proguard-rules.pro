@@ -27,7 +27,6 @@
    static <1>$Companion Companion;
 }
 
--dontobfuscate
 
 # Keep `serializer()` on companion objects (both default and named) of serializable classes.
 -if @kotlinx.serialization.Serializable class ** {
