@@ -67,7 +67,7 @@ import org.jsoup.Jsoup
 class CommentThreadScreenViewModel : ViewModel() {
 	val comments = MutableLiveData<CommentsCollection>()
 	
-	fun comment(text: String, postId: Int, parentCommentId: Int? = null) {
+	fun comment(text: String, postId: Int, threadId: Int, parentCommentId: Int? = null) {
 		viewModelScope.launch(Dispatchers.IO) {
 			val newAccess = CommentsListController.sendComment(
 				articleId = postId,
@@ -75,7 +75,7 @@ class CommentThreadScreenViewModel : ViewModel() {
 				parentCommentId = parentCommentId
 			)
 			
-			CommentsListController.getThread(postId, answersCount)?.let {
+			CommentsListController.getThread(postId, threadId)?.let {
 				comments.postValue(newAccess?.let { it1 ->
 					CommentsCollection(
 						it.comments,
@@ -271,6 +271,7 @@ fun CommentsThreadScreen(
 						viewModel.comment(
 							text = it,
 							postId = articleId,
+							threadId = threadId,
 							parentCommentId = parentComment?.id ?: threadId
 						)
 						parentComment = null

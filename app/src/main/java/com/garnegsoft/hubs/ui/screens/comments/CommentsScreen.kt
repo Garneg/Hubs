@@ -56,7 +56,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
-const val answersCount = 1
 
 class CommentsScreenViewModel : ViewModel() {
 	var parentPostSnippet = MutableLiveData<ArticleSnippet>()
@@ -107,33 +106,35 @@ fun CommentsScreen(
 	
 	val context = LocalContext.current
 	
-	val commentsDisplayMode by context.settingsDataStoreFlowWithDefault(HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode, HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal).collectAsState(
+	val commentsDisplayMode by context.settingsDataStoreFlowWithDefault(
+		HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode,
+		HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal
+	).collectAsState(
 		initial = null
 	)
-//	var commentsById = remember(commentsData?.items) {
-//
-//		val map = hashMapOf<Int, Comment>()
-//		if (commentsData?.comments != null) {
-//			commentsData?.comments?.forEach {
-//				map.put(it.id, it)
-//			}
-//		}
-//		map
-//	}
+	
 	commentsDisplayMode?.let {
 		val mode = HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.values()[it]
 		LaunchedEffect(key1 = Unit) {
-			if (!viewModel.threadsData.isInitialized) {
+			if (
+				(mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Threads &&
+					!viewModel.threadsData.isInitialized)
+				||
+				(mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default
+					&&
+					!viewModel.commentsData.isInitialized)
+			) {
 				launch(Dispatchers.IO) {
 					viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
-					if (mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default){
-						viewModel.commentsData.postValue(
-							CommentsListController.getComments(parentPostId)
-						)
+					if (mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default) {
+						CommentsListController.getComments(parentPostId)?.let {
+							viewModel.commentsData.postValue(it)
+						}
 					} else {
-						viewModel.threadsData.postValue(
-							CommentsListController.getThreads(parentPostId)
-						)
+						CommentsListController.getThreads(parentPostId)?.let {
+							viewModel.threadsData.postValue(it)
+						}
+						
 					}
 				}
 			}
