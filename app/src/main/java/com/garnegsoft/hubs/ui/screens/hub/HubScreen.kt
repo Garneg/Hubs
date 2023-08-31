@@ -50,6 +50,7 @@ import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 import com.garnegsoft.hubs.ui.screens.search.ArticlesSearchFilter
+import com.garnegsoft.hubs.ui.theme.HubInvestmentIndicatorColor
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -175,7 +176,14 @@ fun HubScreen(
                         UsersListPage(
                             listModel = viewModel.authorsListModel,
                             lazyListState = authorsLazyListState,
-                            onUserClick = onUserClick
+                            onUserClick = onUserClick,
+                            cardIndicator = {
+                                Text(
+                                    text = it.investment.toString(),
+                                    fontWeight = FontWeight.W400,
+                                    color = HubInvestmentIndicatorColor
+                                )
+                            }
                         )
                     }
                     // companies
@@ -183,7 +191,14 @@ fun HubScreen(
                         CompaniesListPage(
                             listModel = viewModel.companiesListModel,
                             lazyListState = companiesLazyListState,
-                            onCompanyClick = onCompanyClick
+                            onCompanyClick = onCompanyClick,
+                            cardIndicator = {
+                                Text(
+                                    it.statistics.investment.toString(),
+                                    fontWeight = FontWeight.W400,
+                                    color = HubInvestmentIndicatorColor
+                                )
+                            }
                         )
                     }
                 }

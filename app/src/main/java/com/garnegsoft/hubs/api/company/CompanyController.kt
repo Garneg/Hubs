@@ -203,11 +203,10 @@ class CompanyController {
 
         @Serializable
         data class Badge(
-            val id: String,
             val title: String,
             val description: String,
-            val url: String? = null,
-            val isRemovable: Boolean
+//            val url: String? = null,
+//            val isRemovable: Boolean
         )
 
         @Serializable

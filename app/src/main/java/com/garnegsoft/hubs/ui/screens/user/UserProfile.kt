@@ -32,6 +32,7 @@ import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
+import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -187,7 +188,7 @@ internal fun UserProfile(
                                     text = user.rating.toString(),
                                     fontSize = 24.sp,
                                     fontWeight = FontWeight.W600,
-                                    color = Color.Magenta
+                                    color = DefaultRatingIndicatorColor
                                 )
                                 Text(
                                     text = "Рейтинг",

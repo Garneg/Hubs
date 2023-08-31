@@ -7,6 +7,9 @@ val Purple500 = Color(0xFF6200EE)
 val Purple700 = Color(0xFF3700B3)
 val Teal200 = Color(0xFF03DAC5)
 
+val DefaultRatingIndicatorColor = Color(0xFFE719A9)
+val HubInvestmentIndicatorColor = Color(0xFF4CBE51)
+
 
 val SecondaryColor = Color(0xFF_52_64_74)
 val PrimaryColor = Color(0xFF_30_3B_44)

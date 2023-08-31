@@ -190,14 +190,13 @@ class UserController {
         var contacts: List<Contact>,
         var invitedBy: InvitedBy? = null
     )
-
-
+    
     @Serializable
     data class Badget(
         var title: String,
         var description: String,
-        var url: String? = null,
-        var isRemovable: Boolean
+//        var url: String? = null,
+//        var isRemovable: Boolean
     )
 
     @Serializable

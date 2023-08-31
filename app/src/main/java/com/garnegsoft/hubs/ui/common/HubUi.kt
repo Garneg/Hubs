@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
 
 @Composable
@@ -45,7 +46,7 @@ fun HubCard(
         Text(
             text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
             fontWeight = FontWeight.W400,
-            color = Color(0xFFF555D7)
+            color = DefaultRatingIndicatorColor
         )
     }
 ) {

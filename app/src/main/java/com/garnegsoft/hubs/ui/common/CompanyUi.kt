@@ -27,6 +27,7 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
 
 @Composable
@@ -49,7 +50,7 @@ fun CompanyCard(
         Text(
             company.statistics.rating.toString(),
             fontWeight = FontWeight.W400,
-            color = Color(0xFFF555D7)
+            color = DefaultRatingIndicatorColor
         )
     },
     onClick: () -> Unit

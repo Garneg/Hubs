@@ -37,6 +37,7 @@ import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
@@ -122,7 +123,7 @@ fun HubProfile(
 							text = hub.statistics.rating.toString(),
 							fontSize = 24.sp,
 							fontWeight = FontWeight.W600,
-							color = Color.Magenta
+							color = DefaultRatingIndicatorColor
 						)
 						Text(
 							text = "Рейтинг",
