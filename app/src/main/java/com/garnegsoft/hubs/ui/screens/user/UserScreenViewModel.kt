@@ -21,7 +21,7 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	
 	val isRefreshingUser = MutableLiveData(false)
 	
-	fun refreshUser(){
+	fun refreshUser() {
 		isRefreshingUser.postValue(true)
 		viewModelScope.launch(Dispatchers.IO) {
 			loadUser()
@@ -45,7 +45,7 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 		baseArgs = arrayOf("user" to userAlias),
 		initialFilter = UserArticlesFilter(false),
 		
-	)
+		)
 	
 	val commentsModel = CommentsListModel(
 		path = "users/$userAlias/comments",
@@ -53,7 +53,8 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 		
 		)
 	
-	val bookmarksFilter = MutableLiveData(UserBookmarksFilter(UserBookmarksFilter.Bookmarks.Articles))
+	val bookmarksFilter =
+		MutableLiveData(UserBookmarksFilter(UserBookmarksFilter.Bookmarks.Articles))
 	val bookmarksModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
@@ -128,10 +129,8 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	
 	fun loadWhoIs() {
 		viewModelScope.launch(Dispatchers.IO) {
-			if (user.value?.relatedData != null) {
-				UserController.whoIs(userAlias)?.let {
-					_whoIs.postValue(it)
-				}
+			UserController.whoIs(userAlias)?.let {
+				_whoIs.postValue(it)
 			}
 		}
 	}
