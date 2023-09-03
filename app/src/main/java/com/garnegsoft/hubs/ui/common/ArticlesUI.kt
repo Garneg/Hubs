@@ -153,14 +153,11 @@ fun ArticleCard(
 	style: ArticleCardStyle = defaultArticleCardStyle().copy(addToBookmarksButtonEnabled = article.relatedData != null)
 ) {
 	
-	val ripple = rememberRipple(color = style.rippleColor)
 	Column(
 		modifier = Modifier
 			.clip(style.cardShape)
-			
 			.clickable(
-				interactionSource = remember { MutableInteractionSource() },
-				indication = ripple, onClick = onClick
+				onClick = onClick
 			)
 			.background(style.backgroundColor)
 	) {
@@ -191,8 +188,6 @@ fun ArticleCard(
 						modifier = Modifier
 							.clip(style.innerElementsShape)
 							.clickable(
-								interactionSource = authorInteractionSource,
-								indication = ripple,
 								onClick = onAuthorClick
 							)
 					) {
@@ -490,12 +485,6 @@ fun ArticleCard(
 			Row(
 				verticalAlignment = Alignment.CenterVertically,
 				modifier = Modifier
-					.clickable(
-						onClick = bookmarkButtonClickLambda,
-						enabled = style.addToBookmarksButtonEnabled,
-						interactionSource = addToBookmarksInteractionSource,
-						indication = null
-					)
 					.padding(vertical = style.innerPadding)
 					.weight(1f)
 					.fillMaxHeight()
@@ -509,8 +498,6 @@ fun ArticleCard(
 							)
 						},
 						enabled = style.addToBookmarksButtonEnabled,
-						interactionSource = addToBookmarksInteractionSource,
-						indication = ripple,
 					)
 					.onGloballyPositioned {
 						bounds = it.size
@@ -586,8 +573,6 @@ fun ArticleCard(
 					.absolutePadding(4.dp)
 					.clip(style.innerElementsShape)
 					.clickable(
-						interactionSource = commentsInteractionSource,
-						ripple,
 						enabled = style.commentsButtonEnabled,
 						onClick = onCommentsClick
 					)

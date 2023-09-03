@@ -182,12 +182,12 @@ class CompanyController {
 
     @Serializable
     data class CompanyWhoIs (
-        val aboutHtml: String,
-        val sectors: List<Sector>,
-        val teamMembers: List<TeamMember>,
-        val developmentStages: List<DevelopmentStage>,
-        val tags: List<Tag>,
-        val badges: List<Badge>
+        val aboutHtml: String?,
+        //val sectors: List<Sector>,
+        //val teamMembers: List<TeamMember>,
+        //val developmentStages: List<DevelopmentStage>,
+        //val tags: List<Tag>,
+        //val badges: List<Badge>
     ) {
         @Serializable
         data class DevelopmentStage(

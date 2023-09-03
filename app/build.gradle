@@ -33,6 +33,11 @@ android {
             matchingFallbacks = ["release"]
             debuggable false
         }
+        debug {
+
+            debuggable true
+            applicationIdSuffix ".debug"
+        }
 
     }
     compileOptions {

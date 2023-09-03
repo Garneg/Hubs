@@ -344,6 +344,7 @@ fun ArticleScreen(
 		if (isOffline) {
 			offlineArticle?.let { article ->
 				val flingSpec = rememberSplineBasedDecay<Float>()
+				
 				Row {
 					Column(
 						modifier = Modifier

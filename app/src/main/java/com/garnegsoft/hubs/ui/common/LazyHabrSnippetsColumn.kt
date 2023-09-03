@@ -1,6 +1,14 @@
 package com.garnegsoft.hubs.ui.common
 
 import android.annotation.SuppressLint
+import android.util.Log
+import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.splineBasedDecay
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -11,11 +19,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HabrSnippet
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Composable
 fun <T : HabrSnippet> LazyHabrSnippetsColumn(
@@ -52,10 +63,31 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     LaunchedEffect(key1 = derivedItemsCount) {
         doPageLoad = true
     }
-
+    
+    val density = LocalDensity.current
     LazyColumn(
         modifier = modifier,
         state = lazyListState,
+        flingBehavior = object : FlingBehavior {
+            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                var lastValue = 0f
+                var lastVelocity = 0f
+                AnimationState(
+                    initialValue = 0f,
+                    initialVelocity = initialVelocity * 1.3f
+                ).animateDecay(splineBasedDecay(density)) {
+                    val delta = value - lastValue
+                    val consumed = scrollBy(delta)
+                    lastValue = value
+                    lastVelocity = velocity
+                    
+                    if (consumed == 0f)
+                        cancelAnimation()
+                }
+                
+                return lastVelocity
+            }
+        },
         contentPadding = contentPadding,
         verticalArrangement = verticalArrangement,
         horizontalAlignment = horizontalAlignment
