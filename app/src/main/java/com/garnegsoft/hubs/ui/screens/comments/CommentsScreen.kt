@@ -366,7 +366,7 @@ fun CommentsScreen(
 						}
 					}
 					
-					if (threadsData?.commentAccess?.canComment == true) {
+					if (threadsData?.commentAccess?.canComment == true || commentsData?.commentAccess?.canComment == true) {
 						AnimatedVisibility(
 							visible = if (parentComment != null) true else false,
 							enter = expandVertically(expandFrom = Alignment.Bottom),
