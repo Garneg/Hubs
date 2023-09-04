@@ -38,36 +38,40 @@ class MeController {
 
     }
 
+    // I comment those fields just in case habr api will change. I don't actually need them for now, but
+    // may be in future they will be useful, so i can't just delete them
     @Serializable
     private data class Me(
         var id: String,
         var alias: String,
-        var fullname: String?,
+//        var fullname: String?,
         var avatarUrl: String?,
-        var groups: List<String>,
-        var settings: Settings,
-        var crc32: String,
-        var gaUid: String,
-        var availableInvitesCount: Long,
-        var email: String,
-        var scoreStats: ScoreStats,
-        var unreadConversationCount: Long,
-        var notificationUnreadCounters: NotificationUnreadCounters,
+//        var groups: List<String>,
+//        var settings: Settings,
+//        var crc32: String,
+//        var gaUid: String,
+//        var availableInvitesCount: Int,
+//        var email: String,
+//        var scoreStats: ScoreStats,
+//        var unreadConversationCount: Int,
+//        var notificationUnreadCounters: NotificationUnreadCounters,
     )
 
     @Serializable
     private data class NotificationUnreadCounters(
-        var posts_and_comments: Long,
-        var subscribers: Long,
-        var mentions: Long,
-        var system: Long,
-        var applications: Long
+        var publicationComments: Int,
+        var publicationCommentsByAuthor: Int,
+        var total: Int,
+        var subscribers: Int,
+        var mentions: Int,
+        var system: Int,
+        var applications: Int
     )
 
     @Serializable
     private data class ScoreStats(
-        val score: Long,
-        val votesCount: Long
+        val score: Int,
+        val votesCount: Int
     )
 
     @Serializable
@@ -80,8 +84,8 @@ class MeController {
 
     @Serializable
     private data class ChargeSettings(
-        var postVoteCount: Long,
-        var commentVoteCount: Long
+        var postVoteCount: Int,
+        var commentVoteCount: Int
     )
 
     @Serializable
