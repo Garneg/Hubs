@@ -318,6 +318,14 @@ fun SettingsScreen(
 									indication = rememberRipple()
 								) {
 									useThreadsComments = !useThreadsComments
+									viewModel.viewModelScope.launch {
+										context.settingsDataStore.edit { prefs ->
+											prefs.set(
+												HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode,
+												if (useThreadsComments) HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Threads.ordinal else HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal
+											)
+										}
+									}
 								}
 								.padding(start = 4.dp)
 								.height(48.dp),
