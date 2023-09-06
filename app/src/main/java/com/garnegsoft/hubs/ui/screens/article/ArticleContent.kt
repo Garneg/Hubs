@@ -228,13 +228,15 @@ fun ArticleContent(
 			}
 			
 			item {
+				fontSize?.let {
+					Text(
+						text = article.title,
+						fontSize = (it + 4f).sp,
+						fontWeight = FontWeight.W700,
+						color = MaterialTheme.colors.onBackground
+					)
+				}
 				
-				Text(
-					text = article.title,
-					fontSize = 22.sp,
-					fontWeight = FontWeight.W700,
-					color = MaterialTheme.colors.onBackground
-				)
 				Spacer(modifier = Modifier.height(4.dp))
 				Row(
 					modifier = Modifier.fillMaxWidth(),
