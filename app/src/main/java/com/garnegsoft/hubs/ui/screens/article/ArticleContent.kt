@@ -126,7 +126,6 @@ fun ArticleContent(
 							color = MaterialTheme.colors.onError
 						)
 					}
-					
 					Spacer(modifier = Modifier.height(16.dp))
 				}
 			}
@@ -134,9 +133,11 @@ fun ArticleContent(
 			if (article.postType == PostType.Megaproject && article.metadata != null) {
 				item {
 					AsyncImage(
-						article.metadata.mainImageUrl,
-						"",
-						modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+						model = article.metadata.mainImageUrl,
+						contentDescription = "",
+						modifier = Modifier
+							.fillMaxWidth()
+							.clip(RoundedCornerShape(8.dp)),
 					)
 					Spacer(Modifier.height(8.dp))
 				}
@@ -239,10 +240,7 @@ fun ArticleContent(
 							color = MaterialTheme.colors.onBackground
 						)
 						Spacer(modifier = Modifier.weight(1f))
-						Text(
-							article.timePublished, color = Color.Gray,
-							fontSize = 12.sp, fontWeight = FontWeight.W400
-						)
+						
 					}
 					Spacer(modifier = Modifier.height(8.dp))
 				}
@@ -257,6 +255,20 @@ fun ArticleContent(
 					color = MaterialTheme.colors.onBackground
 				)
 				Spacer(modifier = Modifier.height(4.dp))
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.Start
+				) {
+					Text(
+						text = article.timePublished,
+						color = MaterialTheme.colors.onBackground.copy(0.6f),
+						fontSize = 14.sp,
+						fontWeight = FontWeight.W500
+					)
+				}
+				
+				Spacer(Modifier.height(4.dp))
+				
 				Row(
 					verticalAlignment = Alignment.CenterVertically,
 				) {
