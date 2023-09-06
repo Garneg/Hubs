@@ -66,7 +66,6 @@ fun ArticleContent(
 	val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
 	
 	Box() {
-		val flingSpec = rememberSplineBasedDecay<Float>()
 		val contentNodes by viewModel.parsedArticleContent.observeAsState()
 		val fontSize by context.settingsDataStoreFlowWithDefault(
 			HubsDataStore.Settings.Keys.ArticleScreen.FontSize,
@@ -144,7 +143,7 @@ fun ArticleContent(
 			}
 			
 			if (article.isCorporative) {
-				item { 
+				item {
 					val companyAlias = article.hubs.find { it.isCorporative }!!.alias
 					
 					var companyTitle: String? by rememberSaveable {
@@ -186,8 +185,7 @@ fun ArticleContent(
 								fontSize = 14.sp,
 								color = MaterialTheme.colors.onBackground
 							)
-						}
-						else {
+						} else {
 							Box(modifier = Modifier.size(34.dp))
 						}
 						
@@ -206,33 +204,16 @@ fun ArticleContent(
 							.clickable(onClick = { onAuthorClicked() }),
 						verticalAlignment = Alignment.CenterVertically,
 					) {
-						if (article.author.avatarUrl != null)
+						if (article.author.avatarUrl != null) {
 							AsyncImage(
 								modifier = Modifier
-									.size(34.dp)
+									.size(38.dp)
 									.clip(RoundedCornerShape(8.dp))
 									.background(Color.White),
 								model = article.author.avatarUrl,
 								contentDescription = ""
 							)
-						else
-							Icon(
-								modifier = Modifier
-									.size(34.dp)
-									.border(
-										width = 2.dp,
-										color = placeholderColorLegacy(article.author.alias),
-										shape = RoundedCornerShape(8.dp)
-									)
-									.background(
-										Color.White,
-										shape = RoundedCornerShape(8.dp)
-									)
-									.padding(2.dp),
-								painter = painterResource(id = R.drawable.user_avatar_placeholder),
-								contentDescription = "",
-								tint = placeholderColorLegacy(article.author.alias)
-							)
+						}
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(
 							text = article.author.alias, fontWeight = FontWeight.W600,
@@ -456,20 +437,21 @@ fun ArticleContent(
 			}
 			mostReadingArticles?.let {
 				items(it) {
-					Box(modifier = Modifier
-						.clip(RoundedCornerShape(8.dp))
-						.clickable { onArticleClick(it.id) }
-						.padding(bottom = 8.dp)
-						.padding(8.dp)
-					) {
-						ArticleShort(article = it)
-					}
+					ArticleShort(
+						article = it,
+						onClick = {
+							onArticleClick(it.id)
+						}
+					)
 				}
 			}
 			
 		}
 		
-		val scrollBarAlpha by animateFloatAsState(targetValue = if (state.isScrollInProgress) 1f else 0f, tween(600))
+		val scrollBarAlpha by animateFloatAsState(
+			targetValue = if (state.isScrollInProgress) 1f else 0f,
+			tween(600)
+		)
 		val density = LocalDensity.current
 		
 		val scrollBarColor = MaterialTheme.colors.onBackground.copy(0.25f)
