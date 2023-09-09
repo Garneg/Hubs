@@ -17,7 +17,6 @@ class OfflineArticlesController {
 				}
 			} else {
 				return _dao!!
-				
 			}
 			
 		}

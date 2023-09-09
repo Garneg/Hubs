@@ -93,17 +93,13 @@ fun ArticleContent(
 				fitScreenWidth = false
 			)
 		}
-		
 		val state = rememberLazyListState()
 		val updatedPolls by viewModel.updatedPolls.observeAsState()
 		
-		
 		LazyColumn(
-			modifier = Modifier
-				.fillMaxSize(),
+			modifier = Modifier.fillMaxSize(),
 			state = state,
-			contentPadding = PaddingValues(16.dp),
-			verticalArrangement = Arrangement.spacedBy(0.dp)
+			contentPadding = PaddingValues(16.dp)
 		) {
 			if (article.editorVersion == EditorVersion.FirstVersion) {
 				item {

@@ -116,28 +116,28 @@ interface OfflineArticlesDao{
      * @return article entity by **article_id**, not just by id
      */
     @Query("SELECT * FROM $ARTICLES_TABLE_NAME WHERE article_id = :articleId")
-    suspend fun _getArticleById(articleId: Int): OfflineArticle
+    fun getArticleById(articleId: Int): OfflineArticle
 
     @Query("SELECT EXISTS (SELECT * FROM $ARTICLES_TABLE_NAME WHERE article_id = :articleId)")
-    suspend fun exists(articleId: Int): Boolean
+    fun exists(articleId: Int): Boolean
 
     @Query("SELECT EXISTS (SELECT * FROM $ARTICLES_TABLE_NAME WHERE article_id = :articleId)")
     fun existsFlow(articleId: Int): Flow<Boolean>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertSnippet(entity: OfflineArticleSnippet)
+    fun insertSnippet(entity: OfflineArticleSnippet)
 
     @Delete
-    suspend fun deleteSnippet(entity: OfflineArticleSnippet)
+    fun deleteSnippet(entity: OfflineArticleSnippet)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(entity: OfflineArticle)
+    fun insert(entity: OfflineArticle)
 
     @Query("DELETE FROM $ARTICLES_TABLE_NAME WHERE article_id = :id")
-    suspend fun delete(id: Int)
+    fun delete(id: Int)
 
     @Query("DELETE FROM $SNIPPETS_TABLE_NAME WHERE article_id = :id")
-    suspend fun deleteSnippet(id: Int)
+    fun deleteSnippet(id: Int)
 
     /**
      * @return list of article entities from older to newer

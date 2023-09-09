@@ -6,24 +6,18 @@ import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.HubsList
 import com.garnegsoft.hubs.api.article.offline.OfflineArticle
-import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -48,7 +42,7 @@ class ArticleScreenViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO){
             val dao = context.offlineArticlesDatabase.articlesDao()
             if (dao.exists(id)) {
-                _offlineArticle.postValue(dao._getArticleById(id))
+                _offlineArticle.postValue(dao.getArticleById(id))
 
             } else {
                 withContext(Dispatchers.Main){
