@@ -32,30 +32,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.settingsDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlow
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class SettingsScreenViewModel : ViewModel() {
-	fun getTheme(context: Context): Flow<HubsDataStore.Settings.Keys.ThemeModes?> {
-		return context.settingsDataStoreFlow(HubsDataStore.Settings.Keys.Theme)
-			.map {
-				it?.let {
-					HubsDataStore.Settings.Keys.ThemeModes.values().get(it)
-				} ?: HubsDataStore.Settings.Keys.ThemeModes.Undetermined
-			}
+	fun getTheme(context: Context): Flow<HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme> {
+		return HubsDataStore.Settings
+			.getValueFlow(context, HubsDataStore.Settings.Theme.ColorSchemeMode)
+			.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
 	}
 	
-	fun setTheme(context: Context, theme: HubsDataStore.Settings.Keys.ThemeModes) {
+	fun setTheme(context: Context, theme: HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme) {
 		viewModelScope.launch(Dispatchers.IO) {
-			context.settingsDataStore.edit {
-				it.set(HubsDataStore.Settings.Keys.Theme, theme.ordinal)
-			}
+			HubsDataStore.Settings.edit(context, HubsDataStore.Settings.Theme.ColorSchemeMode, theme.ordinal)
 		}
 	}
 }
@@ -127,16 +118,16 @@ fun SettingsScreen(
 							val isSystemInDarkTheme = isSystemInDarkTheme()
 							var useSystemDefinedTheme by rememberSaveable {
 								mutableStateOf(
-									it == HubsDataStore.Settings.Keys.ThemeModes.SystemDefined ||
-										it == HubsDataStore.Settings.Keys.ThemeModes.Undetermined
+									it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined ||
+										it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined
 								)
 							}
 							val sharedInteractionSource = remember { MutableInteractionSource() }
 							var useDarkTheme by remember {
 								mutableStateOf(
-									if (it == HubsDataStore.Settings.Keys.ThemeModes.SystemDefined) {
+									if (it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined) {
 										isSystemInDarkTheme
-									} else it == HubsDataStore.Settings.Keys.ThemeModes.Dark
+									} else it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
 								)
 							}
 							
@@ -151,12 +142,12 @@ fun SettingsScreen(
 									viewModel.setTheme(
 										context,
 										if (useSystemDefinedTheme) {
-											HubsDataStore.Settings.Keys.ThemeModes.SystemDefined
+											HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined
 										} else {
 											if (isSystemInDarkTheme)
-												HubsDataStore.Settings.Keys.ThemeModes.Dark
+												HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
 											else
-												HubsDataStore.Settings.Keys.ThemeModes.Light
+												HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light
 										}
 									)
 								}
@@ -174,12 +165,12 @@ fun SettingsScreen(
 											viewModel.setTheme(
 												context,
 												if (useSystemDefinedTheme) {
-													HubsDataStore.Settings.Keys.ThemeModes.SystemDefined
+													HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined
 												} else {
 													if (isSystemInDarkTheme)
-														HubsDataStore.Settings.Keys.ThemeModes.Dark
+														HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
 													else
-														HubsDataStore.Settings.Keys.ThemeModes.Light
+														HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light
 												}
 											)
 										},
@@ -215,9 +206,9 @@ fun SettingsScreen(
 									viewModel.setTheme(
 										context,
 										if (useDarkTheme)
-											HubsDataStore.Settings.Keys.ThemeModes.Dark
+											HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
 										else
-											HubsDataStore.Settings.Keys.ThemeModes.Light
+											HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light
 									)
 								}
 								.padding(start = 4.dp)
@@ -240,9 +231,9 @@ fun SettingsScreen(
 											viewModel.setTheme(
 												context,
 												if (useDarkTheme)
-													HubsDataStore.Settings.Keys.ThemeModes.Dark
+													HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
 												else
-													HubsDataStore.Settings.Keys.ThemeModes.Light
+													HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light
 											)
 										},
 										interactionSource = isDarkThemeInteractionSource
@@ -279,10 +270,9 @@ fun SettingsScreen(
 					
 				}
 			}
-			val commentsDisplayMode by context.settingsDataStoreFlowWithDefault(
-				HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode,
-				HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal
-			).collectAsState(initial = null)
+			val commentsDisplayMode by HubsDataStore.Settings
+				.getValueFlow(context, HubsDataStore.Settings.CommentsDisplayMode)
+				.collectAsState(initial = null)
 			
 			commentsDisplayMode?.let {
 				Column(
@@ -305,7 +295,7 @@ fun SettingsScreen(
 					) {
 						val commentsModeSwitchInteractionSource =
 							remember { MutableInteractionSource() }
-						var useThreadsComments by remember { mutableStateOf(it == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Threads.ordinal) }
+						var useThreadsComments by remember { mutableStateOf(it == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads.ordinal) }
 						Column(
 							verticalArrangement = Arrangement.spacedBy(4.dp)
 						) {
@@ -319,12 +309,12 @@ fun SettingsScreen(
 								) {
 									useThreadsComments = !useThreadsComments
 									viewModel.viewModelScope.launch {
-										context.settingsDataStore.edit { prefs ->
-											prefs.set(
-												HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode,
-												if (useThreadsComments) HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Threads.ordinal else HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal
+										HubsDataStore.Settings
+											.edit(
+												context, HubsDataStore.Settings.CommentsDisplayMode,
+												if (useThreadsComments) HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads.ordinal
+												else HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default.ordinal
 											)
-										}
 									}
 								}
 								.padding(start = 4.dp)
@@ -342,12 +332,11 @@ fun SettingsScreen(
 										onCheckedChange = {
 											useThreadsComments = it
 											viewModel.viewModelScope.launch {
-												context.settingsDataStore.edit { prefs ->
-													prefs.set(
-														HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode,
-														if (it) HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Threads.ordinal else HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal
+												HubsDataStore.Settings
+													.edit(context, HubsDataStore.Settings.CommentsDisplayMode,
+														if (useThreadsComments) HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads.ordinal
+														else HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default.ordinal
 													)
-												}
 											}
 											
 										},

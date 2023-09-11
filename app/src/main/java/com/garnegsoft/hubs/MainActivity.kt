@@ -38,7 +38,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.me.Me
 import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
@@ -70,7 +69,6 @@ var cookies: String by mutableStateOf("")
 var authorized: Boolean = false
 
 val Context.authDataStore by preferencesDataStore(HubsDataStore.Auth.DataStoreName)
-val Context.settingsDataStore by preferencesDataStore(HubsDataStore.Settings.DataStoreName)
 val Context.lastReadDataStore by preferencesDataStore(HubsDataStore.LastRead.DataStoreName)
 
 
@@ -112,26 +110,15 @@ class MainActivity : ComponentActivity() {
 				}
 			}
 		
-		
-		
 		intent.dataString?.let { Log.e("intentData", it) }
 		HabrApi.initialize(this)
 		
 		setContent {
 			key(cookies) {
-			val themeMode by settingsDataStoreFlowWithDefault(
-				HubsDataStore.Settings.Keys.Theme,
-				HubsDataStore.Settings.Keys.ThemeModes.Undetermined.ordinal
-			).collectAsState(initial = null)
-			
-			val theme by remember(themeMode) {
-				mutableStateOf(
-					themeMode?.let {
-						HubsDataStore.Settings.Keys.ThemeModes.values()[it]
-					} ?: HubsDataStore.Settings.Keys.ThemeModes.Undetermined
-				
-				)
-			}
+			val themeMode by HubsDataStore.Settings
+				.getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
+				.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+				.collectAsState(initial = null)
 			
 			var userInfo: Me? by remember { mutableStateOf(null) }
 			val userInfoUpdateBlock = remember {
@@ -147,10 +134,10 @@ class MainActivity : ComponentActivity() {
 				})
 			if (themeMode != null && authStatus != null) {
 				HubsTheme(
-					darkTheme = when (theme) {
-						HubsDataStore.Settings.Keys.ThemeModes.Undetermined -> isSystemInDarkTheme()
-						HubsDataStore.Settings.Keys.ThemeModes.SystemDefined -> isSystemInDarkTheme()
-						HubsDataStore.Settings.Keys.ThemeModes.Dark -> true
+					darkTheme = when (themeMode) {
+						HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
+						HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
+						HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
 						else -> false
 					}
 				) {

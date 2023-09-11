@@ -20,15 +20,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.settingsDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlow
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -37,16 +34,19 @@ import kotlinx.coroutines.launch
 
 class ArticleScreenSettingsScreenViewModel : ViewModel() {
 
-    val Context.fontSize: Flow<Float?>
+    val Context.fontSize: Flow<Float>
         get() {
-            return this.settingsDataStoreFlow(HubsDataStore.Settings.Keys.ArticleScreen.FontSize)
+            return HubsDataStore.Settings
+                .getValueFlow(this, HubsDataStore.Settings.ArticleScreen.FontSize)
     }
 
     fun Context.setFontSize(size: Float) {
         viewModelScope.launch(Dispatchers.IO) {
-            settingsDataStore.edit {
-                it.set(HubsDataStore.Settings.Keys.ArticleScreen.FontSize, size)
-            }
+            HubsDataStore.Settings.edit(
+                this@setFontSize,
+                HubsDataStore.Settings.ArticleScreen.FontSize,
+                size
+            )
         }
     }
 
@@ -60,9 +60,7 @@ fun ArticleScreenSettingsScreen(
     val viewModel = viewModel<ArticleScreenSettingsScreenViewModel>()
 
     val context = LocalContext.current
-
-
-
+    
     val defaultFontSize = MaterialTheme.typography.body1.fontSize.value
     val originalFontSize: Float? by with(viewModel) { context.fontSize.collectAsState(initial = defaultFontSize) }
     var fontSize: Float? by remember { mutableStateOf(null) }

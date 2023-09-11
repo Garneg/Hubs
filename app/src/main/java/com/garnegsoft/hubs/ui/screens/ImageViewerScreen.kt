@@ -2,7 +2,11 @@ package com.garnegsoft.hubs.ui.screens
 
 import android.os.Build
 import android.util.Log
+import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.rememberSplineBasedDecay
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
@@ -29,6 +33,8 @@ import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
 import coil.request.ImageRequest
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
@@ -77,7 +83,7 @@ fun ImageViewScreen(
 
 
     val screenHeight = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
-
+    val splineBasedDecay = rememberSplineBasedDecay<Float>()
     Box(modifier = Modifier
         .fillMaxSize()
         .draggable(
@@ -88,8 +94,21 @@ fun ImageViewScreen(
                 isDragging = true
             },
             onDragStopped = {
-                if (it.absoluteValue > 8000f || offset.absoluteValue > screenHeight / 3){
-                    onBack()
+                if (it.absoluteValue > 8000f || offset.absoluteValue > screenHeight / 3) {
+                    launch {
+                        var lastValue = 0f
+                        AnimationState(
+                            initialValue = 0f,
+                            initialVelocity = it
+                        ).animateDecay(splineBasedDecay) {
+                            offset += value - lastValue
+                            lastValue = value
+                        }
+                    }
+                    launch {
+                        delay(50)
+                        onBack()
+                    }
                 } else {
                     isDragging = false
                     offset = 0f

@@ -39,8 +39,6 @@ import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.company.CompanyController
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
 import kotlinx.coroutines.Dispatchers
@@ -67,18 +65,12 @@ fun ArticleContent(
 	
 	Box() {
 		val contentNodes by viewModel.parsedArticleContent.observeAsState()
-		val fontSize by context.settingsDataStoreFlowWithDefault(
-			HubsDataStore.Settings.Keys.ArticleScreen.FontSize,
-			MaterialTheme.typography.body1.fontSize.value
-		).collectAsState(
-			initial = null
-		)
-		val lineHeightFactor by context.settingsDataStoreFlowWithDefault(
-			HubsDataStore.Settings.Keys.ArticleScreen.LineHeightFactor,
-			1.5f
-		).collectAsState(
-			initial = null
-		)
+		val fontSize by HubsDataStore.Settings
+			.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
+			.collectAsState(
+				initial = null
+			)
+		
 		val color = MaterialTheme.colors.onSurface
 		val spanStyle = remember(fontSize, color) {
 			SpanStyle(

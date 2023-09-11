@@ -47,7 +47,6 @@ import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.ui.common.ArticleCard
 import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
@@ -106,27 +105,24 @@ fun CommentsScreen(
 	
 	val context = LocalContext.current
 	
-	val commentsDisplayMode by context.settingsDataStoreFlowWithDefault(
-		HubsDataStore.Settings.Keys.Comments.CommentsDisplayMode,
-		HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default.ordinal
-	).collectAsState(
-		initial = null
-	)
+	val commentsDisplayMode by HubsDataStore.Settings
+		.getValueFlow(context, HubsDataStore.Settings.CommentsDisplayMode)
+		.collectAsState(initial = null)
 	
 	commentsDisplayMode?.let {
-		val mode = HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.values()[it]
+		val mode = HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.values()[it]
 		LaunchedEffect(key1 = Unit) {
 			if (
-				(mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Threads &&
+				(mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads &&
 					!viewModel.threadsData.isInitialized)
 				||
-				(mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default
+				(mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default
 					&&
 					!viewModel.commentsData.isInitialized)
 			) {
 				launch(Dispatchers.IO) {
 					viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
-					if (mode == HubsDataStore.Settings.Keys.Comments.CommentsDisplayModes.Default) {
+					if (mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default) {
 						CommentsListController.getComments(parentPostId)?.let {
 							viewModel.commentsData.postValue(it)
 						}
