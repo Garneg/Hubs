@@ -8,33 +8,27 @@ import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
-import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateColor
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.InternalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
@@ -72,7 +66,7 @@ import kotlinx.coroutines.runBlocking
 
 
 // TODO: shouldn't be singleton
-var cookies: String = ""
+var cookies: String by mutableStateOf("")
 var authorized: Boolean = false
 
 val Context.authDataStore by preferencesDataStore(HubsDataStore.Auth.DataStoreName)
@@ -81,7 +75,6 @@ val Context.lastReadDataStore by preferencesDataStore(HubsDataStore.LastRead.Dat
 
 
 class MainActivity : ComponentActivity() {
-	@OptIn(ExperimentalAnimationApi::class, InternalAnimationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -110,7 +103,7 @@ class MainActivity : ComponentActivity() {
 					result?.let { res ->
 						authDataStore.edit {
 							it[HubsDataStore.Auth.Keys.Cookies] = res.split("; ")
-								.find { it.startsWith("connect_sid") }!! + "; hl=ru; fl=ru"
+								.find { it.startsWith("connect_sid") }!!
 							it[HubsDataStore.Auth.Keys.Authorized] = true
 							authorized = true
 							//cookies = result
@@ -120,10 +113,12 @@ class MainActivity : ComponentActivity() {
 			}
 		
 		
+		
 		intent.dataString?.let { Log.e("intentData", it) }
 		HabrApi.initialize(this)
 		
 		setContent {
+			key(cookies) {
 			val themeMode by settingsDataStoreFlowWithDefault(
 				HubsDataStore.Settings.Keys.Theme,
 				HubsDataStore.Settings.Keys.ThemeModes.Undetermined.ordinal
@@ -509,6 +504,7 @@ class MainActivity : ComponentActivity() {
 					
 				}
 			}
+		}
 		}
 		
 		Log.e("ExternalLink", intent.data.toString())

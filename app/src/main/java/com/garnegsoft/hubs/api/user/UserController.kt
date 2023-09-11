@@ -62,7 +62,6 @@ class UserController {
 
                 return result
             }
-            return null
         }
 
         private fun _note(path: String, args: Map<String, String>? = null): Note? {
@@ -175,8 +174,7 @@ class UserController {
 
         }
     }
-
-
+    
     @Serializable
     data class Note(
         var text: String?
