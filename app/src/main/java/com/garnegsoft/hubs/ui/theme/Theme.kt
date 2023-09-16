@@ -15,6 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.glance.GlanceComposable
+import androidx.glance.GlanceTheme
+import androidx.glance.material.ColorProviders
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.material3.MaterialTheme as Material3Theme
 
@@ -97,5 +100,20 @@ fun HubsM3Theme() {
 
         }
 
+    }
+}
+
+@GlanceComposable
+@Composable
+fun HubsWidgetTheme(
+    content: @Composable () -> Unit
+) {
+    GlanceTheme(
+        colors = ColorProviders(
+            light = LightColorPalette,
+            dark = DarkColorPalette
+        )
+    ) {
+        content()
     }
 }

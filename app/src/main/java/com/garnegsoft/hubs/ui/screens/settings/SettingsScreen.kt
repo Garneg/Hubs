@@ -1,6 +1,8 @@
 package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -364,6 +366,24 @@ fun SettingsScreen(
 				}
 			}
 			
+			Row(
+				modifier = Modifier
+					.fillMaxWidth()
+					.clickable {
+						try {
+							val process = Runtime
+								.getRuntime()
+								.exec("logcat -d -f /sdcard/Documents/hubs-logs.txt")
+							process.waitFor()
+							Toast.makeText(context, "logs done", Toast.LENGTH_SHORT).show()
+						} catch (ex: Exception) {
+							
+						}
+					}
+					.padding(12.dp)
+			) {
+				Text(text = "Снять логи")
+			}
 			
 		}
 	}

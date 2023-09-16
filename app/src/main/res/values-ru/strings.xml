@@ -33,4 +33,5 @@
     <string name="publications_tab">Публикации</string>
     <string name="follow_button_label">Подписаться</string>
     <string name="following_button_label">Вы подписаны</string>
+    <string name="news_widget_description">Новости</string>
 </resources>

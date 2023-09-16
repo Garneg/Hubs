@@ -38,10 +38,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.lifecycle.coroutineScope
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
@@ -69,6 +74,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
 
 
 // TODO: shouldn't be singleton
@@ -85,6 +91,16 @@ class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
+		
+		val workRequest = PeriodicWorkRequestBuilder<NewsWidgetUpdateWorker>(
+			15, TimeUnit.MINUTES
+		).build()
+		
+		WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+			"update_news_work",
+			ExistingPeriodicWorkPolicy.KEEP,
+			workRequest
+		)
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		

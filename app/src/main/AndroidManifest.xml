@@ -16,6 +16,7 @@
         tools:targetApi="34">
 
         <receiver android:name=".NewsWidgetReceiver"
+            android:label="@string/news_widget_description"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
