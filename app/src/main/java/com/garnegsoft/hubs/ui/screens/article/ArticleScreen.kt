@@ -42,9 +42,9 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
@@ -598,9 +598,7 @@ fun ArticleScreen(
 					mutableStateOf(false)
 				}
 				LaunchedEffect(key1 = Unit, block = {
-					context.lastReadDataStore.edit {
-						it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
-					}
+					LastReadArticleController.setLastArticle(context, articleId)
 					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
 						val element =
 							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!

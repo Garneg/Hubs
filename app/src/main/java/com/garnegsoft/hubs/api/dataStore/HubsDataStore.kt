@@ -47,6 +47,7 @@ object HubsDataStore {
 //			val TextWrapMode = intPreferencesKey("article_text_wrap")
 //			val Indent = intPreferencesKey("article_indent")
 		}
+		
 		object CommentsDisplayMode : DataStorePreference<Int> {
 			
 			override val key = intPreferencesKey("comment_display_mode")
@@ -60,37 +61,16 @@ object HubsDataStore {
 		}
 	}
 	
-	object LegacySettings {
-		const val DataStoreName = "settings"
-		
-		
-		object Keys {
-			
-			
-		
-			
-			
-		}
+	object Auth : SingleDataStore(name = "auth") {
+		val Authorized = DataStorePreference.BooleanPreference("authorized", false)
+		val Cookies = DataStorePreference.StringPreference("cookies", "")
 	}
 	
-	object Auth {
-		const val DataStoreName = "auth"
+	object LastRead : SingleDataStore(name = "last_read") {
 		
-		object Keys {
-			val Authorized = booleanPreferencesKey("authorized")
-			val Cookies = stringPreferencesKey("cookies")
-		}
+		val LastArticleRead = DataStorePreference.IntPreference("last_article", 0)
+		//val LastArticleReadPosition = intPreferencesKey("last_article_position")
 		
-		
-	}
-	
-	object LastRead {
-		const val DataStoreName = "last_read"
-		
-		object Keys {
-			val LastArticleRead = intPreferencesKey("last_article")
-			val LastArticleReadPosition = intPreferencesKey("last_article_position")
-		}
 	}
 	
 }
@@ -103,7 +83,28 @@ interface DataStorePreference<T> {
 		name: String,
 		override val defaultValue: Float
 	) : DataStorePreference<Float> {
-		override val key: Preferences.Key<Float> = floatPreferencesKey(name)
+		override val key = floatPreferencesKey(name)
+	}
+	
+	class BooleanPreference(
+		name: String,
+		override val defaultValue: Boolean
+	) : DataStorePreference<Boolean> {
+		override val key = booleanPreferencesKey(name)
+	}
+	
+	class StringPreference(
+		name: String,
+		override val defaultValue: String
+	) : DataStorePreference<String> {
+		override val key = stringPreferencesKey(name)
+	}
+	
+	class IntPreference(
+		name: String,
+		override val defaultValue: Int
+	) : DataStorePreference<Int> {
+		override val key = intPreferencesKey(name)
 	}
 	
 }

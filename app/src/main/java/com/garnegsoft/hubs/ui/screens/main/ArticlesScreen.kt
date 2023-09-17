@@ -21,11 +21,10 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.dataStore.authDataStoreFlowWithDefault
-import com.garnegsoft.hubs.api.dataStore.lastReadDataStoreFlow
+import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
-import com.garnegsoft.hubs.lastReadDataStore
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
@@ -49,11 +48,9 @@ fun ArticlesScreen(
 ) {
 	val context = LocalContext.current
 	var isAuthorized by rememberSaveable() { mutableStateOf(false) }
-	val authorizedState by context.authDataStoreFlowWithDefault(
-		HubsDataStore.Auth.Keys.Authorized,
-		false
-	)
+	val authorizedState by AuthDataController.isAuthorizedFlow(context)
 		.collectAsState(initial = null)
+	
 	LaunchedEffect(key1 = authorizedState, block = {
 		isAuthorized = authorizedState == true
 	})
@@ -62,8 +59,8 @@ fun ArticlesScreen(
 	
 	val scaffoldState = rememberScaffoldState()
 	
-	val lastArticleRead by context.lastReadDataStoreFlow(HubsDataStore.LastRead.Keys.LastArticleRead)
-		.collectAsState(initial = -1)
+	val lastArticleRead by LastReadArticleController.getLastArticleFlow(context)
+		.collectAsState(initial = null)
 	
 	var showSnackBar by rememberSaveable {
 		mutableStateOf(true)
@@ -85,9 +82,7 @@ fun ArticlesScreen(
 					if (snackbarResult == SnackbarResult.ActionPerformed) {
 						launch(Dispatchers.Main) { onArticleClicked(it.id) }
 					} else {
-						context.lastReadDataStore.edit {
-							it[HubsDataStore.LastRead.Keys.LastArticleRead] = 0
-						}
+						LastReadArticleController.clearLastArticle(context)
 					}
 					showSnackBar = false
 					

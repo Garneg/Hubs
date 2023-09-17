@@ -2,17 +2,13 @@ package com.garnegsoft.hubs.ui.common.snippetsPages
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import com.garnegsoft.hubs.api.CollapsingContentState
-import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.company.CompaniesListModel
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.CompanyCard
-import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
+import com.garnegsoft.hubs.ui.common.DefaultCompanyIndicator
 
 
 @Composable
@@ -23,13 +19,7 @@ fun CompaniesListPage(
 	doInitialLoading: Boolean = true,
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	onCompanyClick: (alias: String) -> Unit,
-	cardIndicator: @Composable (CompanySnippet) -> Unit = {
-		Text(
-			it.statistics.rating.toString(),
-			fontWeight = FontWeight.W400,
-			color = DefaultRatingIndicatorColor
-		)
-	}
+	cardIndicator: @Composable (CompanySnippet) -> Unit = { DefaultCompanyIndicator(company = it) }
 ) {
 	CommonPage(
 		listModel = listModel,

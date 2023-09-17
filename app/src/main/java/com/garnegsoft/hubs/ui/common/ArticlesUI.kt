@@ -221,16 +221,18 @@ fun ArticleCard(
 						}
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(
-							it.alias,
+							modifier = Modifier.weight(1f),
+							text = it.alias,
 							style = style.authorTextStyle,
 							overflow = TextOverflow.Ellipsis,
 							maxLines = 1
 						)
-						Spacer(modifier = Modifier.width(4.dp))
 					}
+					
 				}
 			}
 			
+			Spacer(modifier = Modifier.width(style.innerPadding))
 			
 			// Published time
 			Text(

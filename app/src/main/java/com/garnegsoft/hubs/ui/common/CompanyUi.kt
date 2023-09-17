@@ -46,13 +46,7 @@ private fun defaultCompanyCardStyle(): CompanyCardStyle {
 fun CompanyCard(
     company: CompanySnippet,
     style: CompanyCardStyle = defaultCompanyCardStyle(),
-    indicator: @Composable () -> Unit = {
-        Text(
-            company.statistics.rating.toString(),
-            fontWeight = FontWeight.W400,
-            color = DefaultRatingIndicatorColor
-        )
-    },
+    indicator: @Composable () -> Unit = { DefaultCompanyIndicator(company = company) },
     onClick: () -> Unit
 ) {
     Row(
@@ -130,3 +124,17 @@ data class CompanyCardStyle(
     val showDescription: Boolean = false,
     val descriptionMaxLines: Int = 1
 )
+
+@Composable
+fun DefaultCompanyIndicator(
+    company: CompanySnippet
+) {
+    val rating = remember {
+        String.format("%.1f", company.statistics.rating).replace(',', '.')
+    }
+    Text(
+        text = rating,
+        fontWeight = FontWeight.W400,
+        color = DefaultRatingIndicatorColor
+    )
+}
