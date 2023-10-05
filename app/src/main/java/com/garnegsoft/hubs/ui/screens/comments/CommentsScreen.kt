@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -30,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +56,7 @@ import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
+import kotlin.math.roundToInt
 
 
 class CommentsScreenViewModel : ViewModel() {
@@ -171,7 +174,7 @@ fun CommentsScreen(
 				)
 			}
 		) {
-			var parentComment: Comment? by remember {
+			var answeringComment: Comment? by remember {
 				mutableStateOf(null)
 			}
 			val showArticleHeader by remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }
@@ -297,13 +300,21 @@ fun CommentsScreen(
 							) { index, it ->
 								
 								Column(horizontalAlignment = Alignment.End) {
-									
+									val parentComment = remember {
+										commentsData!!.comments.firstOrNull { com -> com.id == it.parentCommentId }
+									}
+									val parentCommentIndex = remember {
+										parentComment?.let {
+											return@remember commentsData!!.comments.indexOf(it)
+										} ?: 0
+									}
+									val coroutineScope = rememberCoroutineScope()
 									CommentItem(
 										modifier = Modifier
 											.padding(start = 20.dp * it.level.coerceAtMost(5)),
 										comment = it,
 										onAuthorClick = { onUserClicked(it.author.alias) },
-										parentComment = commentsData!!.comments.firstOrNull { com -> com.id == it.parentCommentId },
+										parentComment = parentComment,
 										highlight = it.id == commentId,
 										showReplyButton = commentsData!!.commentAccess.canComment,
 										onShare = {
@@ -321,7 +332,14 @@ fun CommentsScreen(
 											)
 										},
 										onReplyClick = {
-											parentComment = it
+											answeringComment = it
+										},
+										onParentCommentSnippetClick = {
+											coroutineScope.launch {
+												lazyListState.animateScrollToItem(parentCommentIndex + 1,
+													-articleHeaderOffset.toInt()
+												)
+											}
 										}
 									) {
 										Column {
@@ -364,18 +382,18 @@ fun CommentsScreen(
 					
 					if (threadsData?.commentAccess?.canComment == true || commentsData?.commentAccess?.canComment == true) {
 						AnimatedVisibility(
-							visible = if (parentComment != null) true else false,
+							visible = if (answeringComment != null) true else false,
 							enter = expandVertically(expandFrom = Alignment.Bottom),
 							exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
 						) {
-							val comment = parentComment
+							val comment = answeringComment
 							Column {
 								Divider()
 								val coroutineScope = rememberCoroutineScope()
 								Row(modifier = Modifier
 									.clickable {
 										val index =
-											commentsData?.comments?.indexOf(parentComment) ?: 0
+											commentsData?.comments?.indexOf(answeringComment) ?: 0
 										coroutineScope.launch {
 											lazyListState.animateScrollToItem(index)
 										}
@@ -412,7 +430,7 @@ fun CommentsScreen(
 										
 									}
 									Spacer(modifier = Modifier.width(4.dp))
-									IconButton(onClick = { parentComment = null }) {
+									IconButton(onClick = { answeringComment = null }) {
 										Icon(
 											imageVector = Icons.Outlined.Close,
 											contentDescription = "",
@@ -430,7 +448,7 @@ fun CommentsScreen(
 								viewModel.comment(
 									text = it,
 									postId = parentPostId,
-									parentCommentId = parentComment?.id
+									parentCommentId = answeringComment?.id
 								)
 								commentTextFieldFocusRequester.freeFocus()
 							})
