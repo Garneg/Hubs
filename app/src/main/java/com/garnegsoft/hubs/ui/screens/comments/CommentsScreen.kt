@@ -160,6 +160,7 @@ fun CommentsScreen(
 				}
 			}
 		})
+		val coroutineScope = rememberCoroutineScope()
 		
 		Scaffold(
 			topBar = {
@@ -308,7 +309,6 @@ fun CommentsScreen(
 											return@remember commentsData!!.comments.indexOf(it)
 										} ?: 0
 									}
-									val coroutineScope = rememberCoroutineScope()
 									CommentItem(
 										modifier = Modifier
 											.padding(start = 20.dp * it.level.coerceAtMost(5)),
@@ -335,9 +335,9 @@ fun CommentsScreen(
 											answeringComment = it
 										},
 										onParentCommentSnippetClick = {
-											coroutineScope.launch {
+											coroutineScope.launch(Dispatchers.Main) {
 												lazyListState.animateScrollToItem(parentCommentIndex + 1,
-													-articleHeaderOffset.toInt()
+													-articleHeaderOffset.roundToInt()
 												)
 											}
 										}
@@ -389,7 +389,7 @@ fun CommentsScreen(
 							val comment = answeringComment
 							Column {
 								Divider()
-								val coroutineScope = rememberCoroutineScope()
+								
 								Row(modifier = Modifier
 									.clickable {
 										val index =
@@ -486,9 +486,9 @@ fun CommentsScreen(
 									)
 									Spacer(modifier = Modifier.width(8.dp))
 								}
-								
+
 								Column(
-								
+
 								) {
 									it.author?.run {
 										Text(
@@ -499,7 +499,7 @@ fun CommentsScreen(
 											overflow = TextOverflow.Ellipsis
 										)
 									}
-									
+
 									Text(
 										text = articleSnippet?.title!!,
 										style = MaterialTheme.typography.body2,
