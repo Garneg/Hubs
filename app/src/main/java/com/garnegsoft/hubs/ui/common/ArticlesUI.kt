@@ -118,8 +118,8 @@ data class ArticleCardStyle(
 	
 	val hubsTextStyle: TextStyle = TextStyle(
 		color = textColor.copy(alpha = 0.5f),
-		fontSize = 12.sp,
-		fontWeight = FontWeight.W600
+		fontSize = 14.sp,
+		fontWeight = FontWeight.W500
 	)
 
 )

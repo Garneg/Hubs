@@ -48,6 +48,16 @@ object HubsDataStore {
 //			val Indent = intPreferencesKey("article_indent")
 		}
 		
+		object ArticleCard {
+			val TextSnippetFontSize = DataStorePreference.FloatPreference("article_card_snippet_font_size", 16f)
+			val ShowTextSnippet = DataStorePreference.BooleanPreference("article_card_show_snippet", true)
+			val ShowImage = DataStorePreference.BooleanPreference("article_card_show_image", true)
+			val ShowAuthor = DataStorePreference.BooleanPreference("article_card_show_author", true)
+			val TitleFontSize = DataStorePreference.FloatPreference("article_card_title_font_size", 20f)
+			val ShowHubs = DataStorePreference.BooleanPreference("article_card_show_hubs", true)
+			
+		}
+		
 		object CommentsDisplayMode : DataStorePreference<Int> {
 			
 			override val key = intPreferencesKey("comment_display_mode")
