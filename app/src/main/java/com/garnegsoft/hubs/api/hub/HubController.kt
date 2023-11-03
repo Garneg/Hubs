@@ -30,7 +30,7 @@ class HubController {
             return get(path = "hubs/$alias/profile")
         }
 
-        fun get(path: String, args: Map<String, String>? = null): Hub? {
+        private fun get(path: String, args: Map<String, String>? = null): Hub? {
             var raw = getProfile(path, args)
 
             var result: Hub? = null

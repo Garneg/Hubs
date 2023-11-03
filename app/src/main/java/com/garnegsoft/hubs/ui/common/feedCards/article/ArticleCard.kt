@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.feedCards.article
 
 import ArticleController
 import android.widget.Toast
@@ -6,26 +6,21 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,111 +31,13 @@ import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
-import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDao
-import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
-import com.garnegsoft.hubs.ui.theme.SecondaryColor
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-
-/**
- * Style of the [ArticleCard]
- */
-@Immutable
-data class ArticleCardStyle(
-	val innerPadding: Dp = 16.dp,
-	val innerElementsShape: Shape = RoundedCornerShape(10.dp),
-	val cardShape: Shape = RoundedCornerShape(26.dp),
-	
-	val showImage: Boolean = true,
-	
-	val showTextSnippet: Boolean = true,
-	
-	val showHubsList: Boolean = true,
-	
-	val commentsButtonEnabled: Boolean = true,
-	
-	val addToBookmarksButtonEnabled: Boolean = false,
-	
-	val backgroundColor: Color = Color.White,
-	
-	val textColor: Color = Color.Black,
-	
-	val authorAvatarSize: Dp = 34.dp,
-	
-	val snippetMaxLines: Int = 4,
-	
-	val rippleColor: Color = textColor,
-	
-	val imageLoadingIndicatorColor: Color = SecondaryColor,
-	
-	val titleTextStyle: TextStyle = TextStyle(
-		color = textColor,
-		fontSize = 20.sp,
-		fontWeight = FontWeight.W700,
-	),
-	
-	val snippetTextStyle: TextStyle = TextStyle(
-		color = textColor.copy(alpha = 0.75f),
-		fontSize = 16.sp,
-		fontWeight = FontWeight.W400,
-		lineHeight = 16.sp.times(1.25f)
-	),
-	
-	val authorTextStyle: TextStyle = TextStyle(
-		color = textColor,
-		fontSize = 14.sp,
-		fontWeight = FontWeight.W600
-	),
-	
-	val publishedTimeTextStyle: TextStyle = TextStyle(
-		color = textColor.copy(alpha = 0.5f),
-		fontSize = 12.sp,
-		fontWeight = FontWeight.W400
-	),
-	
-	/**
-	 * Text style of statistics row, note that text color for score indicator won't apply if it is non-zero value (will be red or green)
-	 */
-	val statisticsColor: Color = textColor.copy(alpha = 0.5f),
-	
-	val statisticsTextStyle: TextStyle = TextStyle(
-		color = statisticsColor,
-		fontSize = 15.sp,
-		fontWeight = FontWeight.W400
-	),
-	
-	val hubsTextStyle: TextStyle = TextStyle(
-		color = textColor.copy(alpha = 0.5f),
-		fontSize = 14.sp,
-		fontWeight = FontWeight.W500
-	)
-
-)
-
-@Composable
-@ReadOnlyComposable
-fun defaultArticleCardStyle(): ArticleCardStyle {
-	return ArticleCardStyle(
-		backgroundColor = MaterialTheme.colors.surface,
-		textColor = MaterialTheme.colors.onSurface,
-		statisticsColor = MaterialTheme.colors.onSurface
-			.copy(
-				alpha = if (MaterialTheme.colors.isLight) {
-					0.75f
-				} else {
-					0.5f
-				}
-			
-			),
-	)
-}
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -150,7 +47,7 @@ fun ArticleCard(
 	onClick: () -> Unit,
 	onAuthorClick: () -> Unit,
 	onCommentsClick: () -> Unit,
-	style: ArticleCardStyle = defaultArticleCardStyle().copy(addToBookmarksButtonEnabled = article.relatedData != null)
+	style: ArticleCardStyle
 ) {
 	
 	Column(
@@ -453,7 +350,11 @@ fun ArticleCard(
 								addedToBookmarksCount--
 								addedToBookmarksCount =
 									addedToBookmarksCount.coerceAtLeast(0)
-								if (!ArticleController.removeFromBookmarks(article.id, article.type == PostType.News)) {
+								if (!ArticleController.removeFromBookmarks(
+										article.id,
+										article.type == PostType.News
+									)
+								) {
 									addedToBookmarks = true
 									addedToBookmarksCount++
 									addedToBookmarksCount =
@@ -463,7 +364,11 @@ fun ArticleCard(
 							} else {
 								addedToBookmarks = true
 								addedToBookmarksCount++
-								if (!ArticleController.addToBookmarks(article.id, article.type == PostType.News)) {
+								if (!ArticleController.addToBookmarks(
+										article.id,
+										article.type == PostType.News
+									)
+								) {
 									addedToBookmarks = false
 									addedToBookmarksCount--
 									addedToBookmarksCount =
@@ -483,6 +388,7 @@ fun ArticleCard(
 			}
 			
 			val hapticFeedback = LocalHapticFeedback.current
+			val addToBookmarksButtonEnabled = remember { style.bookmarksButtonAllowedBeEnabled && article.relatedData != null }
 			//Added to bookmarks
 			Row(
 				verticalAlignment = Alignment.CenterVertically,
@@ -499,7 +405,7 @@ fun ArticleCard(
 								HapticFeedbackType.LongPress
 							)
 						},
-						enabled = style.addToBookmarksButtonEnabled,
+						enabled = addToBookmarksButtonEnabled,
 					)
 					.onGloballyPositioned {
 						bounds = it.size
@@ -530,10 +436,12 @@ fun ArticleCard(
 					cardStyle = style,
 					onSaveClick = {
 						coroutineScope.launch(Dispatchers.IO) {
-							val downloaded = OfflineArticlesController.downloadArticle(article.id, context)
+							val downloaded =
+								OfflineArticlesController.downloadArticle(article.id, context)
 							if (downloaded) {
 								withContext(Dispatchers.Main) {
-									Toast.makeText(context, "Статья скачана!", Toast.LENGTH_SHORT).show()
+									Toast.makeText(context, "Статья скачана!", Toast.LENGTH_SHORT)
+										.show()
 								}
 							}
 						}
@@ -541,7 +449,8 @@ fun ArticleCard(
 					},
 					onDeleteClick = {
 						coroutineScope.launch(Dispatchers.IO) {
-							val deleted = OfflineArticlesController.deleteArticle(article.id, context)
+							val deleted =
+								OfflineArticlesController.deleteArticle(article.id, context)
 							if (deleted) {
 								withContext(Dispatchers.Main) {
 									Toast.makeText(context, "Статья удалена!", Toast.LENGTH_SHORT)

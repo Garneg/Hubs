@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.feedCards.comment
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -49,11 +49,11 @@ private fun defaultCommentCardStyle(): CommentCardStyle {
 
 @Composable
 fun CommentCard(
-    comment: CommentSnippet,
-    style: CommentCardStyle = defaultCommentCardStyle(),
-    onCommentClick: () -> Unit,
-    onAuthorClick: () -> Unit,
-    onParentPostClick: () -> Unit
+	comment: CommentSnippet,
+	style: CommentCardStyle = defaultCommentCardStyle(),
+	onCommentClick: () -> Unit,
+	onAuthorClick: () -> Unit,
+	onParentPostClick: () -> Unit
 ) {
     Column(
         modifier = Modifier

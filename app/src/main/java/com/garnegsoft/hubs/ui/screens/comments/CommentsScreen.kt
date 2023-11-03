@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import ArticleController
 import android.content.Intent
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
@@ -31,7 +30,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,8 +47,8 @@ import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.ui.common.ArticleCard
-import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers
@@ -201,19 +199,24 @@ fun CommentsScreen(
 						contentPadding = PaddingValues(8.dp),
 						verticalArrangement = Arrangement.spacedBy(8.dp)
 					) {
+						
 						if (articleSnippet != null) {
 							item {
-								ArticleCard(
-									article = articleSnippet,
-									onClick = onArticleClicked,
-									style = defaultArticleCardStyle().copy(
-										showImage = false,
-										showTextSnippet = false,
-										addToBookmarksButtonEnabled = articleSnippet.relatedData != null
-									),
-									onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-									onCommentsClick = { }
+								val articleCardStyle = ArticleCardStyle.defaultArticleCardStyle()?.copy(
+									showImage = false,
+									showTextSnippet = false,
+									bookmarksButtonAllowedBeEnabled = articleSnippet.relatedData != null
 								)
+								articleCardStyle?.let {
+									ArticleCard(
+										article = articleSnippet,
+										onClick = onArticleClicked,
+										style = it,
+										onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+										onCommentsClick = { }
+									)
+								}
+								
 							}
 						}
 						

@@ -22,14 +22,14 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.ui.common.ArticleCardStyle
-import com.garnegsoft.hubs.ui.common.defaultArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle.Companion.defaultArticleCardStyle
 
 @Composable
 fun OfflineArticleCard(
     article: OfflineArticleSnippet,
     onClick: () -> Unit,
-    style: ArticleCardStyle = defaultArticleCardStyle()
+    style: ArticleCardStyle = ArticleCardStyle()
 ) {
     Column(
         modifier = Modifier

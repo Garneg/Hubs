@@ -1,7 +1,12 @@
 package com.garnegsoft.hubs
 
+import android.app.appsearch.GlobalSearchSession
 import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.ui.screens.main.NewsFilter
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -60,6 +65,25 @@ class ExampleUnitTest {
         assertEquals("https://assets.habr.com/habr-web/img/avatars/076.png", endString)
         
     }
-
+    
+    @Test
+    fun test_flowShit() {
+        val flow = getFlow()
+        GlobalScope.launch {
+            flow.collectLatest {
+                println(it)
+            }
+        }
+        while (true){}
+    }
+    
+    fun getFlow() = flow<Int> {
+        var counter = 0
+        while (true) {
+            counter++
+            emit(counter)
+        }
+    }
+    
 
 }

@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.feedCards.hub
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,10 +39,10 @@ fun defaultHubCardStyle(): HubCardStyle {
 
 @Composable
 fun HubCard(
-    hub: HubSnippet,
-    style: HubCardStyle = defaultHubCardStyle(),
-    onClick: () -> Unit,
-    indicator: @Composable (hub: HubSnippet) -> Unit = {
+	hub: HubSnippet,
+	style: HubCardStyle = defaultHubCardStyle(),
+	onClick: () -> Unit,
+	indicator: @Composable (hub: HubSnippet) -> Unit = {
         Text(
             text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
             fontWeight = FontWeight.W400,

@@ -8,7 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.garnegsoft.hubs.api.user.UsersListModel
 import com.garnegsoft.hubs.api.user.list.UserSnippet
-import com.garnegsoft.hubs.ui.common.UserCard
+import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
 

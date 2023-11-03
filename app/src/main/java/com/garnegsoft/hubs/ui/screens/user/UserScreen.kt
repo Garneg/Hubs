@@ -25,7 +25,7 @@ import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
-import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
+import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommonPageWithFilter
