@@ -29,7 +29,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle.Companio
 fun OfflineArticleCard(
     article: OfflineArticleSnippet,
     onClick: () -> Unit,
-    style: ArticleCardStyle = ArticleCardStyle()
+    style: ArticleCardStyle
 ) {
     Column(
         modifier = Modifier

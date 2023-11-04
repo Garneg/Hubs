@@ -116,7 +116,7 @@ fun ArticleCard(
 								contentDescription = "avatar",
 								onState = { })
 						}
-						Spacer(modifier = Modifier.width(4.dp))
+						Spacer(modifier = Modifier.width(8.dp))
 						Text(
 							modifier = Modifier.weight(1f),
 							text = it.alias,

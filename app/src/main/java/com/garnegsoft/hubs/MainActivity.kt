@@ -11,12 +11,17 @@ import androidx.activity.compose.setContent
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -158,7 +163,7 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									"articles",
-									exitTransition = { ExitTransition.None },
+									//exitTransition = { ExitTransition.None },
 									popEnterTransition = { EnterTransition.None }
 								) {
 									
@@ -224,27 +229,45 @@ class MainActivity : ComponentActivity() {
 									deepLinks = ArticleNavDeepLinks,
 									enterTransition = {
 										scaleIn(
-											tween(200, easing = EaseOut),
+											tween(150, easing = EaseInOut),
 											0.9f
 										) + fadeIn(
-											tween(durationMillis = 200, easing = EaseIn)
+											tween(durationMillis = 150, easing = EaseIn)
+										) + slideInVertically(
+											tween(durationMillis = 150, easing = EaseIn),
+											initialOffsetY = { it / 9 }
+										)
+									},
+									popEnterTransition = {
+										scaleIn(
+											tween(150, easing = EaseInOut),
+											0.9f
+										) + fadeIn(
+											tween(durationMillis = 150, easing = EaseIn)
+										) + slideInVertically(
+											tween(durationMillis = 150, easing = EaseIn),
+											initialOffsetY = { it / 9 }
 										)
 									},
 									exitTransition = {
-										ExitTransition.None
-									},
-									popExitTransition = {
 										scaleOut(
-											tween(200, easing = EaseOut),
+											tween(150, easing = EaseIn),
 											0.9f
 										) + fadeOut(
-											tween(200, easing = EaseOut)
+											tween(150, easing = EaseOut)
 										)
 										
 									},
-									popEnterTransition = {
-										EnterTransition.None
-									}
+									popExitTransition = {
+										scaleOut(
+											tween(150, easing = EaseOut),
+											0.9f
+										) + fadeOut(
+											tween(150, easing = EaseOut)
+										)
+										
+									},
+									
 								) {
 									
 									val id = it.arguments?.getString("id")?.toIntOrNull()
