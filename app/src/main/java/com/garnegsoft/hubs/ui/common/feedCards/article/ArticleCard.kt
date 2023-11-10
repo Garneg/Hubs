@@ -151,7 +151,7 @@ fun ArticleCard(
 		)
 		Spacer(modifier = Modifier.height(0.dp))
 		Row(
-			modifier = Modifier.padding(horizontal = style.innerPadding),
+			modifier = Modifier.padding(horizontal = style.innerPadding, vertical = 2.dp),
 			verticalAlignment = Alignment.CenterVertically,
 		) {
 			if (article.complexity != PostComplexity.None) {

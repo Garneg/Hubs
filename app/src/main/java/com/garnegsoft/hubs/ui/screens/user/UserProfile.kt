@@ -248,9 +248,7 @@ internal fun UserProfile(
 										text = "Заметка", style = MaterialTheme.typography.subtitle1
 									)
 								},
-								divider = {
-									//                        Divider()
-								}
+								divider = {  }
 							) {
 								Column(
 									modifier = Modifier
@@ -277,8 +275,8 @@ internal fun UserProfile(
 					val whoIs by viewModel.whoIs.observeAsState()
 					val hubs by viewModel.subscribedHubs.observeAsState()
 					
-					if (!whoIs?.aboutHtml.isNullOrBlank() || whoIs!!.badges.isNotEmpty()
-						|| whoIs!!.invite != null || whoIs!!.contacts.isNotEmpty()
+					if ((whoIs != null && (!whoIs?.aboutHtml.isNullOrBlank() || whoIs!!.badges.isNotEmpty()
+						|| whoIs!!.invite != null || whoIs!!.contacts.isNotEmpty()))
 						|| !hubs?.list.isNullOrEmpty()
 					) {
 						Column(
