@@ -202,11 +202,12 @@ fun CommentsScreen(
 						
 						if (articleSnippet != null) {
 							item {
-								val articleCardStyle = ArticleCardStyle.defaultArticleCardStyle()?.copy(
-									showImage = false,
-									showTextSnippet = false,
-									bookmarksButtonAllowedBeEnabled = articleSnippet.relatedData != null
-								)
+								val articleCardStyle =
+									ArticleCardStyle.defaultArticleCardStyle()?.copy(
+										showImage = false,
+										showTextSnippet = false,
+										bookmarksButtonAllowedBeEnabled = articleSnippet.relatedData != null
+									)
 								articleCardStyle?.let {
 									ArticleCard(
 										article = articleSnippet,
@@ -339,7 +340,8 @@ fun CommentsScreen(
 										},
 										onParentCommentSnippetClick = {
 											coroutineScope.launch(Dispatchers.Main) {
-												lazyListState.animateScrollToItem(parentCommentIndex + 1,
+												lazyListState.animateScrollToItem(
+													parentCommentIndex + 1,
 													-articleHeaderOffset.roundToInt()
 												)
 											}
@@ -478,31 +480,19 @@ fun CommentsScreen(
 									.padding(8.dp),
 								verticalAlignment = Alignment.CenterVertically
 							) {
-								it.imageUrl?.let {
-									AsyncImage(
-										modifier = Modifier
-											.fillMaxHeight()
-											.aspectRatio(1f)
-											.clip(RoundedCornerShape(4.dp)),
-										model = articleSnippet?.imageUrl, contentDescription = null,
-										contentScale = ContentScale.Crop
-									)
-									Spacer(modifier = Modifier.width(8.dp))
-								}
-
+								
+								
 								Column(
-
+									modifier = Modifier.weight(1f)
 								) {
-									it.author?.run {
-										Text(
-											text = alias,
-											style = MaterialTheme.typography.body2,
-											fontWeight = FontWeight.W500,
-											maxLines = 1,
-											overflow = TextOverflow.Ellipsis
-										)
-									}
-
+									Text(
+										text = articleSnippet.author?.alias ?: "",
+										style = MaterialTheme.typography.body2,
+										fontWeight = FontWeight.W500,
+										maxLines = 1,
+										overflow = TextOverflow.Ellipsis
+									)
+									
 									Text(
 										text = articleSnippet?.title!!,
 										style = MaterialTheme.typography.body2,
@@ -510,6 +500,7 @@ fun CommentsScreen(
 										overflow = TextOverflow.Ellipsis
 									)
 								}
+								
 							}
 							Divider(modifier = Modifier.align(Alignment.BottomCenter))
 						}

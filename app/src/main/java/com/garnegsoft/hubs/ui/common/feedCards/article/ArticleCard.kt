@@ -19,8 +19,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -190,7 +193,7 @@ fun ArticleCard(
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = "${article.readingTime} мин",
+				text = remember { "${article.readingTime} мин" },
 				color = style.statisticsColor,
 				fontWeight = FontWeight.W500,
 				fontSize = 14.sp
@@ -213,15 +216,29 @@ fun ArticleCard(
 			}
 		}
 		
-		var hubsText by remember { mutableStateOf("") }
+		var hubsText by remember { mutableStateOf(buildAnnotatedString {  }) }
 		
 		LaunchedEffect(key1 = Unit, block = {
-			if (hubsText == "") {
-				hubsText = article.hubs!!.joinToString(separator = ", ") {
-					if (it.isProfiled)
-						(it.title + "*").replace(" ", "\u00A0")
-					else
-						it.title.replace(" ", "\u00A0")
+			if (hubsText.text == "") {
+				hubsText = buildAnnotatedString {
+					article.hubs!!.forEachIndexed { index, it ->
+						val textFunc = if (it.isProfiled) {
+							{ append((it.title + "*").replace(" ", "\u00A0")) }
+						}
+						else{
+							{ append(it.title.replace(" ", "\u00A0")) }
+						}
+						if (it.relatedData != null && it.relatedData.isSubscribed){
+							withStyle(SpanStyle(color = Color(0xE351A843))) {
+								textFunc()
+							}
+						} else {
+							textFunc()
+						}
+						if (index < article.hubs.size - 1){
+							append(", ")
+						}
+					}
 				}
 			}
 		})

@@ -55,7 +55,7 @@ object HubsDataStore {
 			val ShowAuthor = DataStorePreference.BooleanPreference("article_card_show_author", true)
 			val TitleFontSize = DataStorePreference.FloatPreference("article_card_title_font_size", 20f)
 			val ShowHubs = DataStorePreference.BooleanPreference("article_card_show_hubs", true)
-			
+			val TextSnippetMaxLines = DataStorePreference.IntPreference("article_card_snippet_max_lines", 4)
 		}
 		
 		object CommentsDisplayMode : DataStorePreference<Int> {

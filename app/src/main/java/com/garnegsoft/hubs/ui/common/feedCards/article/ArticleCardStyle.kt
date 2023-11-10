@@ -4,8 +4,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
@@ -14,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.size.Size
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 
@@ -100,6 +103,7 @@ data class ArticleCardStyle(
 
 ) {
 	companion object {
+		
 		@Composable
 		fun defaultArticleCardStyle(): ArticleCardStyle? {
 			val showImage by HubsDataStore.Settings.getValueFlow(
@@ -117,10 +121,28 @@ data class ArticleCardStyle(
 				HubsDataStore.Settings.ArticleCard.TextSnippetFontSize
 			).collectAsState(initial = null)
 			
-			if (showImage == null || showTextSnippet == null || textSnippetFontSize == null)
+			val textSnippetMaxLines by HubsDataStore.Settings.getValueFlow(
+				LocalContext.current,
+				HubsDataStore.Settings.ArticleCard.TextSnippetMaxLines
+			).collectAsState(initial = null)
+			
+			if (showImage == null || showTextSnippet == null || textSnippetFontSize == null || textSnippetMaxLines == null)
 				return null
 			
-			return ArticleCardStyle(
+			val colors = MaterialTheme.colors
+			val defaultCardStyle = remember {
+				ArticleCardStyle(textColor = colors.onSurface,
+					statisticsColor = colors.onSurface.copy(
+					alpha = if (colors.isLight) {
+						0.75f
+					} else {
+						0.5f
+					}
+					
+					))
+			}
+			
+			return defaultCardStyle.copy(
 				backgroundColor = MaterialTheme.colors.surface,
 				textColor = MaterialTheme.colors.onSurface,
 				statisticsColor = MaterialTheme.colors.onSurface
@@ -132,8 +154,19 @@ data class ArticleCardStyle(
 						}
 					
 					),
+				snippetTextStyle = defaultCardStyle.snippetTextStyle.copy(
+					fontSize = textSnippetFontSize!!.sp
+				),
+				showImage = showImage!!,
+				showTextSnippet = showTextSnippet!!,
+				snippetMaxLines = textSnippetMaxLines!!
 			)
 		}
 	}
+}
+
+class lol {
+	var aboba: Int = 0
+	
 }
 
