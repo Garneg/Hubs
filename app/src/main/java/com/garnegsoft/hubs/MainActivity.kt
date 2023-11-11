@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs
 
 
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.webkit.CookieManager
@@ -9,19 +8,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -35,8 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,7 +47,7 @@ import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsThreadScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
 import com.garnegsoft.hubs.ui.screens.hub.HubScreen
-import com.garnegsoft.hubs.ui.screens.main.ArticlesScreen
+import com.garnegsoft.hubs.ui.screens.main.MainScreen
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
@@ -66,7 +59,6 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -167,7 +159,7 @@ class MainActivity : ComponentActivity() {
 									popEnterTransition = { EnterTransition.None }
 								) {
 									
-									ArticlesScreen(
+									MainScreen(
 										viewModelStoreOwner = it,
 										onSearchClicked = { navController.navigate("search") },
 										onArticleClicked = {

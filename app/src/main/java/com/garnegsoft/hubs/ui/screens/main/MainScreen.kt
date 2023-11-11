@@ -17,16 +17,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.*
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.*
-import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.HubsListPage
@@ -36,7 +33,7 @@ import kotlinx.coroutines.*
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun ArticlesScreen(
+fun MainScreen(
 	viewModelStoreOwner: ViewModelStoreOwner,
 	onArticleClicked: (articleId: Int) -> Unit,
 	onSearchClicked: () -> Unit,

@@ -7,7 +7,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExitToApp
@@ -80,14 +82,13 @@ fun AuthorizedMenu(
 	}
 	val menuTransition = updateTransition(targetState = expanded)
 	
-	
 	val alpha by menuTransition.animateFloat(
 		transitionSpec = {
 			if (this.targetState)
 				tween(150)
 			else
-				tween(150, )
-				
+				tween(150)
+			
 		}
 	) {
 		if (it) 1f else 0.0f
@@ -124,6 +125,7 @@ fun AuthorizedMenu(
 			properties = PopupProperties(true),
 			onDismissRequest = { expanded = false }
 		) {
+			
 			Box(
 				modifier = Modifier
 					.alpha(alpha)
@@ -140,6 +142,7 @@ fun AuthorizedMenu(
 						Modifier
 							.width(intrinsicSize = IntrinsicSize.Max)
 							.widthIn(min = 150.dp)
+							.verticalScroll(rememberScrollState())
 					) {
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
@@ -175,16 +178,22 @@ fun AuthorizedMenu(
 										tint = placeholderColorLegacy(userAlias)
 									)
 								}
-							}, onClick = onProfileClick
+							}, onClick = {
+								onProfileClick()
+								expanded = false
+							}
 						)
 						Divider(
-							modifier = Modifier.padding(
-								horizontal = 12.dp,
-								vertical = 4.dp
-							).graphicsLayer {
-								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
-								this.alpha = itemsAnimation + 0.55f
-							}
+							modifier = Modifier
+								.padding(
+									horizontal = 12.dp,
+									vertical = 4.dp
+								)
+								.graphicsLayer {
+									this.translationY =
+										-itemsOffset + itemsOffset * itemsAnimation
+									this.alpha = itemsAnimation + 0.55f
+								}
 						)
 						
 						MenuItem(
@@ -198,7 +207,10 @@ fun AuthorizedMenu(
 									contentDescription = "",
 									tint = MaterialTheme.colors.onBackground
 								)
-							}, onClick = onArticlesClick
+							}, onClick = {
+								onArticlesClick()
+								expanded = false
+							}
 						)
 						
 						MenuItem(
@@ -207,12 +219,16 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.4f
 							},
 							title = "Комментарии", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.comments_icon),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onCommentsClick)
+								Icon(
+									painter = painterResource(id = R.drawable.comments_icon),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onCommentsClick()
+								expanded = false
+							}
+						)
 						
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
@@ -220,12 +236,16 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.3f
 							},
 							title = "Закладки", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.bookmark),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onBookmarksClick)
+								Icon(
+									painter = painterResource(id = R.drawable.bookmark),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onBookmarksClick()
+								expanded = false
+							}
+						)
 						
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
@@ -233,12 +253,16 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.2f
 							},
 							title = "Скачанные", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.download),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onSavedArticlesClick)
+								Icon(
+									painter = painterResource(id = R.drawable.download),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onSavedArticlesClick()
+								expanded = false
+							}
+						)
 						
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
@@ -246,21 +270,28 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.1f
 							},
 							title = "Настройки", icon = {
-							Icon(
-								imageVector = Icons.Outlined.Settings,
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onSettingsClick)
+								Icon(
+									imageVector = Icons.Outlined.Settings,
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onSettingsClick()
+								expanded = false
+							}
+						)
 						
 						Divider(
-							modifier = Modifier.padding(
-								horizontal = 12.dp,
-								vertical = 4.dp
-							).graphicsLayer {
-								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
-								this.alpha = itemsAnimation + 0.05f
-							}
+							modifier = Modifier
+								.padding(
+									horizontal = 12.dp,
+									vertical = 4.dp
+								)
+								.graphicsLayer {
+									this.translationY =
+										-itemsOffset + itemsOffset * itemsAnimation
+									this.alpha = itemsAnimation + 0.05f
+								}
 						)
 						
 						MenuItem(
@@ -269,20 +300,23 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.0f
 							},
 							title = "О приложении", icon = {
-							Icon(
-								imageVector = Icons.Outlined.Info,
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onAboutClick)
+								Icon(
+									imageVector = Icons.Outlined.Info,
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onAboutClick()
+								expanded = false
+							}
+						)
 					}
 				}
 			}
-			
 		}
 	}
-	
 }
+
 
 @Composable
 fun UnauthorizedMenu(
@@ -307,7 +341,10 @@ fun UnauthorizedMenu(
 				contentDescription = "",
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onLoginClick)
+		}, onClick = {
+			onLoginClick()
+			expanded = false
+		})
 		
 		MenuItem(title = "Скачанные", icon = {
 			Icon(
@@ -315,7 +352,10 @@ fun UnauthorizedMenu(
 				contentDescription = "",
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onSavedArticlesClick)
+		}, onClick = {
+			onSavedArticlesClick()
+			expanded = false
+		})
 		
 		MenuItem(title = "Настройки", icon = {
 			Icon(
@@ -323,7 +363,10 @@ fun UnauthorizedMenu(
 				contentDescription = "",
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onSettingsClick)
+		}, onClick = {
+			onSettingsClick()
+			expanded = false
+		})
 		
 		Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 		
@@ -334,7 +377,10 @@ fun UnauthorizedMenu(
 				modifier = Modifier.size(24.dp),
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onAboutClick)
+		}, onClick = {
+			onAboutClick()
+			expanded = false
+		})
 	}
 }
 
