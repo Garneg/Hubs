@@ -50,6 +50,17 @@
             android:name=".AuthActivity"
             android:exported="false"
             android:theme="@style/Theme.Hubs.Auth" />
+
+        <provider
+            android:name=".ui.screens.settings.LogFileProvider"
+            android:authorities="com.garnegsoft.hubs.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/log_file_path" />
+        </provider>
+
     </application>
 
 </manifest>
