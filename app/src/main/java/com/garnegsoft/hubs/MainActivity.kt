@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseOut
@@ -18,6 +20,8 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
@@ -29,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.coroutineScope
 import androidx.navigation.compose.NavHost
@@ -54,6 +59,7 @@ import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
+import com.garnegsoft.hubs.ui.screens.user.LogoutConfirmDialog
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.HubsTheme
@@ -69,6 +75,7 @@ var authorized: Boolean = false
 
 
 class MainActivity : ComponentActivity() {
+	@OptIn(ExperimentalAnimationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -115,7 +122,9 @@ class MainActivity : ComponentActivity() {
 		intent.dataString?.let { Log.e("intentData", it) }
 		HabrApi.initialize(this)
 		
+		
 		setContent {
+			
 			key(cookies) {
 				val themeMode by HubsDataStore.Settings
 					.getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
@@ -155,7 +164,7 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									"articles",
-									//exitTransition = { ExitTransition.None },
+									
 									popEnterTransition = { EnterTransition.None }
 								) {
 									
@@ -188,7 +197,11 @@ class MainActivity : ComponentActivity() {
 													onProfileClick = { navController.navigate("user/${userInfo!!.alias}") },
 													onArticlesClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Articles}") },
 													onCommentsClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Comments}") },
-													onBookmarksClick = { navController.navigate("user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}") },
+													onBookmarksClick = {
+														navController.navigate(
+															"user/${userInfo!!.alias}?page=${UserScreenPages.Bookmarks}"
+														)
+													},
 													onSavedArticlesClick = {
 														navController.navigate(
 															"savedArticles"
@@ -201,7 +214,9 @@ class MainActivity : ComponentActivity() {
 												UnauthorizedMenu(
 													onLoginClick = {
 														authActivityLauncher.launch(Unit)
-														lifecycle.coroutineScope.launch(Dispatchers.IO) { userInfoUpdateBlock() }
+														lifecycle.coroutineScope.launch(
+															Dispatchers.IO
+														) { userInfoUpdateBlock() }
 													},
 													onSavedArticlesClick = {
 														navController.navigate(
@@ -231,14 +246,8 @@ class MainActivity : ComponentActivity() {
 										)
 									},
 									popEnterTransition = {
-										scaleIn(
-											tween(150, easing = EaseInOut),
-											0.9f
-										) + fadeIn(
-											tween(durationMillis = 150, easing = EaseIn)
-										) + slideInVertically(
-											tween(durationMillis = 150, easing = EaseIn),
-											initialOffsetY = { it / 9 }
+										fadeIn(
+											tween(durationMillis = 50, easing = EaseIn)
 										)
 									},
 									exitTransition = {
@@ -259,8 +268,7 @@ class MainActivity : ComponentActivity() {
 										)
 										
 									},
-									
-								) {
+									) {
 									
 									val id = it.arguments?.getString("id")?.toIntOrNull()
 									val offline =
@@ -353,7 +361,16 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									route = "comments/{postId}?commentId={commentId}",
-									deepLinks = CommentsScreenNavDeepLinks
+									deepLinks = CommentsScreenNavDeepLinks,
+									popExitTransition = {
+										scaleOut(
+											tween(150, easing = EaseOut),
+											0.9f
+										) + fadeOut(
+											tween(150, easing = EaseOut)
+										)
+										
+									}
 								) {
 									val postId = it.arguments!!.getString("postId")!!
 									val commentId = it.arguments?.getString("commentId")
@@ -377,7 +394,8 @@ class MainActivity : ComponentActivity() {
 								}
 								
 								composable("thread/{articleId}/{threadId}") {
-									val articleId = it.arguments!!.getString("articleId")?.toInt()
+									val articleId =
+										it.arguments!!.getString("articleId")?.toInt()
 									val threadId = it.arguments!!.getString("threadId")?.toInt()
 									
 									CommentsThreadScreen(
@@ -391,7 +409,17 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									route = "user/{alias}?page={page}",
-									deepLinks = UserScreenNavDeepLinks
+									deepLinks = UserScreenNavDeepLinks,
+									popExitTransition = {
+										scaleOut(
+											tween(150, easing = EaseOut),
+											0.9f
+										) + fadeOut(
+											tween(150, easing = EaseOut)
+										)
+										
+									},
+									
 								) {
 									
 									val page =
@@ -411,6 +439,22 @@ class MainActivity : ComponentActivity() {
 									val alias = it.arguments!!.getString("alias")!!
 									
 									val logoutCoroutineScope = rememberCoroutineScope()
+									var showLogoutConfirmationDialog by remember { mutableStateOf(false) }
+									LogoutConfirmDialog(
+										show = showLogoutConfirmationDialog,
+										onDismiss = { showLogoutConfirmationDialog = false },
+										onProceed = {
+											logoutCoroutineScope.launch {
+												AuthDataController.clearAuthData(this@MainActivity)
+												
+												authorized = false
+												navController.popBackStack(
+													"articles",
+													inclusive = false
+												)
+												showLogoutConfirmationDialog = false
+											}
+										})
 									UserScreen(
 										isAppUser = alias == userInfo?.alias,
 										initialPage = deepLinkPage ?: page,
@@ -433,25 +477,32 @@ class MainActivity : ComponentActivity() {
 										onCompanyClick = { navController.navigate("company/$it") },
 										viewModelStoreOwner = it,
 										onLogout = {
-											logoutCoroutineScope.launch {
-												AuthDataController.clearAuthData(this@MainActivity)
-												
-												authorized = false
-												navController.popBackStack(
-													"articles",
-													inclusive = false
-												)
-											}
+											showLogoutConfirmationDialog = true
 										},
 										onHubClicked = {
 											navController.navigate("hub/$it")
 										}
 									)
+									if (this.transition.isRunning) {
+										Box(
+											modifier = Modifier
+												.fillMaxSize()
+												.pointerInput(this.transition.isRunning) {})
+									}
 								}
 								
 								composable(
 									"hub/{alias}",
-									deepLinks = HubScreenNavDeepLinks
+									deepLinks = HubScreenNavDeepLinks,
+									popExitTransition = {
+										scaleOut(
+											tween(150, easing = EaseOut),
+											0.9f
+										) + fadeOut(
+											tween(150, easing = EaseOut)
+										)
+										
+									}
 								) {
 									val alias = it.arguments?.getString("alias")
 									HubScreen(alias = alias!!, viewModelStoreOwner = it,
@@ -471,6 +522,15 @@ class MainActivity : ComponentActivity() {
 								composable(
 									"company/{alias}",
 									deepLinks = CompanyScreenNavDeepLinks,
+									popExitTransition = {
+										scaleOut(
+											tween(150, easing = EaseOut),
+											0.9f
+										) + fadeOut(
+											tween(150, easing = EaseOut)
+										)
+										
+									}
 								) {
 									val alias = it.arguments?.getString("alias")!!
 									CompanyScreen(

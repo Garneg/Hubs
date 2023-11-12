@@ -18,6 +18,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.authorized
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
 import com.garnegsoft.hubs.ui.screens.settings.cards.ExperimentalFeaturesSettingsCard
 import com.garnegsoft.hubs.ui.screens.settings.cards.OtherCard
@@ -57,7 +58,7 @@ class SettingsScreenViewModel : ViewModel() {
 		
 		val info = """
 				Версия приложения: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
-	
+				Был авторизован: ${authorized}
 				Имя устройства: ${Build.BRAND} ${Build.MODEL} (${android.os.Build.DEVICE})
 				Версия ОС (SDK): ${Build.VERSION.SDK_INT}
 				Процессор: ${Build.HARDWARE}
