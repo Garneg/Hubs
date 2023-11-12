@@ -91,34 +91,16 @@ fun ArticleCard(
 								onClick = onAuthorClick
 							)
 					) {
-						if (it.avatarUrl.isNullOrBlank()) {
-							Icon(
-								modifier = Modifier
-									.size(style.authorAvatarSize)
-									.clip(style.innerElementsShape)
-									.background(Color.White)
-									.border(
-										BorderStroke(
-											2.dp,
-											placeholderColorLegacy(article.author.alias)
-										),
-										shape = style.innerElementsShape
-									)
-									.padding(2.dp),
-								painter = painterResource(id = R.drawable.user_avatar_placeholder),
-								contentDescription = "",
-								tint = placeholderColorLegacy(article.author.alias)
-							)
-						} else {
-							AsyncImage(
-								modifier = Modifier
-									.size(style.authorAvatarSize)
-									.clip(style.innerElementsShape)
-									.background(Color.White),
-								model = it.avatarUrl,
-								contentDescription = "avatar",
-								onState = { })
-						}
+						
+						AsyncImage(
+							modifier = Modifier
+								.size(style.authorAvatarSize)
+								.clip(style.innerElementsShape)
+								.background(Color.White),
+							model = it.avatarUrl,
+							contentDescription = "avatar",
+							onState = { })
+						
 						Spacer(modifier = Modifier.width(8.dp))
 						Text(
 							modifier = Modifier.weight(1f),
@@ -216,7 +198,7 @@ fun ArticleCard(
 			}
 		}
 		
-		var hubsText by remember { mutableStateOf(buildAnnotatedString {  }) }
+		var hubsText by remember { mutableStateOf(buildAnnotatedString { }) }
 		
 		LaunchedEffect(key1 = Unit, block = {
 			if (hubsText.text == "") {
@@ -224,18 +206,17 @@ fun ArticleCard(
 					article.hubs!!.forEachIndexed { index, it ->
 						val textFunc = if (it.isProfiled) {
 							{ append((it.title + "*").replace(" ", "\u00A0")) }
-						}
-						else{
+						} else {
 							{ append(it.title.replace(" ", "\u00A0")) }
 						}
-						if (it.relatedData != null && it.relatedData.isSubscribed){
+						if (it.relatedData != null && it.relatedData.isSubscribed) {
 							withStyle(SpanStyle(color = Color(0xE351A843))) {
 								textFunc()
 							}
 						} else {
 							textFunc()
 						}
-						if (index < article.hubs.size - 1){
+						if (index < article.hubs.size - 1) {
 							append(", ")
 						}
 					}
@@ -405,7 +386,8 @@ fun ArticleCard(
 			}
 			
 			val hapticFeedback = LocalHapticFeedback.current
-			val addToBookmarksButtonEnabled = remember { style.bookmarksButtonAllowedBeEnabled && article.relatedData != null }
+			val addToBookmarksButtonEnabled =
+				remember { style.bookmarksButtonAllowedBeEnabled && article.relatedData != null }
 			//Added to bookmarks
 			Row(
 				verticalAlignment = Alignment.CenterVertically,

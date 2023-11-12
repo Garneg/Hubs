@@ -79,7 +79,7 @@ fun UserScreen(
 								sendIntent.putExtra(
 									Intent.EXTRA_TEXT,
 									if (user.fullname != null)
-										"${user.fullname} (${user.alias}) — https://habr.com/ru/users/${user.alias}/"
+										"${user.fullname} (@${user.alias}) — https://habr.com/ru/users/${user.alias}/"
 									else
 										"${user.alias} — https://habr.com/ru/users/${user.alias}/"
 								)

@@ -149,21 +149,23 @@ fun SearchScreen(
 						imeAction = ImeAction.Search
 					),
 					keyboardActions = KeyboardActions {
-						keyboardController?.hide()
-						if (searchTextValue.startsWith(".id")) {
-							if (searchTextValue.drop(3).isDigitsOnly())
-								onArticleClicked(searchTextValue.drop(3).toInt())
-						} else {
-							currentQuery = searchTextValue
-							
-							
-							viewModel.articlesListModel.editFilter(
-								ArticlesSearchFilter(
-									order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
-									query = currentQuery
+						if (searchTextValue.isNotBlank()) {
+							keyboardController?.hide()
+							if (searchTextValue.startsWith(".id")) {
+								if (searchTextValue.drop(3).isDigitsOnly())
+									onArticleClicked(searchTextValue.drop(3).toInt())
+							} else {
+								currentQuery = searchTextValue
+								
+								
+								viewModel.articlesListModel.editFilter(
+									ArticlesSearchFilter(
+										order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
+										query = currentQuery
+									)
 								)
-							)
-							showPages = true
+								showPages = true
+							}
 						}
 					},
 					singleLine = true,

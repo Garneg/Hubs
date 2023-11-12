@@ -85,7 +85,6 @@ fun CommentCard(
         )
         Column(
             modifier = Modifier
-                .clickable(onClick = onCommentClick)
                 .padding(
                     top = style.padding
                         .calculateTopPadding()
@@ -99,13 +98,14 @@ fun CommentCard(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .clip(style.avatarShape)
+                        .clickable(onClick = onAuthorClick)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .height(style.avatarSize)
-                            .clip(style.avatarShape)
-                            .clickable(onClick = onAuthorClick)
+                        
                     ) {
                         if (comment.author.avatarUrl != null) {
                             AsyncImage(
@@ -132,12 +132,12 @@ fun CommentCard(
                                 tint = placeholderColorLegacy(comment.author.alias)
                             )
                         }
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = comment.author.alias,
                             style = style.authorAliasTextStyle
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        
                     }
                 }
 

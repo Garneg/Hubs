@@ -361,16 +361,7 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									route = "comments/{postId}?commentId={commentId}",
-									deepLinks = CommentsScreenNavDeepLinks,
-									popExitTransition = {
-										scaleOut(
-											tween(150, easing = EaseOut),
-											0.9f
-										) + fadeOut(
-											tween(150, easing = EaseOut)
-										)
-										
-									}
+									deepLinks = CommentsScreenNavDeepLinks
 								) {
 									val postId = it.arguments!!.getString("postId")!!
 									val commentId = it.arguments?.getString("commentId")
@@ -410,15 +401,7 @@ class MainActivity : ComponentActivity() {
 								composable(
 									route = "user/{alias}?page={page}",
 									deepLinks = UserScreenNavDeepLinks,
-									popExitTransition = {
-										scaleOut(
-											tween(150, easing = EaseOut),
-											0.9f
-										) + fadeOut(
-											tween(150, easing = EaseOut)
-										)
-										
-									},
+									popExitTransition = { fadeOut(tween(50)) },
 									
 								) {
 									
@@ -493,16 +476,7 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									"hub/{alias}",
-									deepLinks = HubScreenNavDeepLinks,
-									popExitTransition = {
-										scaleOut(
-											tween(150, easing = EaseOut),
-											0.9f
-										) + fadeOut(
-											tween(150, easing = EaseOut)
-										)
-										
-									}
+									deepLinks = HubScreenNavDeepLinks
 								) {
 									val alias = it.arguments?.getString("alias")
 									HubScreen(alias = alias!!, viewModelStoreOwner = it,
@@ -522,15 +496,6 @@ class MainActivity : ComponentActivity() {
 								composable(
 									"company/{alias}",
 									deepLinks = CompanyScreenNavDeepLinks,
-									popExitTransition = {
-										scaleOut(
-											tween(150, easing = EaseOut),
-											0.9f
-										) + fadeOut(
-											tween(150, easing = EaseOut)
-										)
-										
-									}
 								) {
 									val alias = it.arguments?.getString("alias")!!
 									CompanyScreen(
