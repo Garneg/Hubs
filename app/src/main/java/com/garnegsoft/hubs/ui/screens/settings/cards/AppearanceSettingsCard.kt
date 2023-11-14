@@ -41,6 +41,7 @@ import com.garnegsoft.hubs.ui.screens.settings.noRipple
 @Composable
 fun AppearanceSettingsCard(
 	viewModel: SettingsScreenViewModel,
+	onFeedSettings: () -> Unit,
 	onArticleScreenSettings: () -> Unit
 ) {
 	val context = LocalContext.current
@@ -197,6 +198,15 @@ fun AppearanceSettingsCard(
 					contentDescription = null
 				)
 			}
+			SettingsCardItem(
+				title = "Внешний вид ленты", onClick = onFeedSettings,
+				trailingIcon = {
+					Icon(
+						modifier = Modifier.padding(12.dp),
+						imageVector = Icons.Default.ArrowForward,
+						contentDescription = null)
+				}
+			)
 		}
 		
 	}

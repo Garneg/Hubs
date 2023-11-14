@@ -232,7 +232,8 @@ fun ArticleCard(
 		
 		
 		// Snippet
-		if (style.showTextSnippet)
+		if (style.showTextSnippet) {
+			Spacer(modifier = Modifier.height(2.dp))
 			Text(
 				modifier = Modifier.padding(horizontal = style.innerPadding),
 				text = article.textSnippet,
@@ -240,10 +241,10 @@ fun ArticleCard(
 				overflow = TextOverflow.Ellipsis,
 				style = style.snippetTextStyle
 			)
-		
+		}
 		// Image to draw attention (a.k.a. KDPV)
 		if (style.showImage && !article.imageUrl.isNullOrBlank()) {
-			Spacer(modifier = Modifier.height(4.dp))
+			Spacer(modifier = Modifier.height(6.dp))
 			AsyncImage(
 				modifier = Modifier
 					.padding(horizontal = style.innerPadding)

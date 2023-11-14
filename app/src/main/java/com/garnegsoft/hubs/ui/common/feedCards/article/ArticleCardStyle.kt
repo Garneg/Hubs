@@ -126,7 +126,14 @@ data class ArticleCardStyle(
 				HubsDataStore.Settings.ArticleCard.TextSnippetMaxLines
 			).collectAsState(initial = null)
 			
-			if (showImage == null || showTextSnippet == null || textSnippetFontSize == null || textSnippetMaxLines == null)
+			val titleFontSize by HubsDataStore.Settings.getValueFlow(
+				LocalContext.current,
+				HubsDataStore.Settings.ArticleCard.TitleFontSize
+			).collectAsState(initial = null)
+			
+			if (showImage == null || showTextSnippet == null
+				|| textSnippetFontSize == null || textSnippetMaxLines == null
+				|| titleFontSize == null)
 				return null
 			
 			val colors = MaterialTheme.colors
@@ -157,6 +164,7 @@ data class ArticleCardStyle(
 				snippetTextStyle = defaultCardStyle.snippetTextStyle.copy(
 					fontSize = textSnippetFontSize!!.sp
 				),
+				titleTextStyle = defaultCardStyle.titleTextStyle.copy(fontSize = titleFontSize!!.sp),
 				showImage = showImage!!,
 				showTextSnippet = showTextSnippet!!,
 				snippetMaxLines = textSnippetMaxLines!!

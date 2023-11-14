@@ -58,6 +58,7 @@ import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
+import com.garnegsoft.hubs.ui.screens.settings.FeedSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
 import com.garnegsoft.hubs.ui.screens.user.LogoutConfirmDialog
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
@@ -349,6 +350,9 @@ class MainActivity : ComponentActivity() {
 										},
 										onArticleScreenSettings = {
 											navController.navigate("article_settings")
+										},
+										onFeedSettings = {
+											navController.navigate("feed_settings")
 										}
 									)
 								}
@@ -356,6 +360,12 @@ class MainActivity : ComponentActivity() {
 								composable(route = "article_settings") {
 									ArticleScreenSettingsScreen(
 										onBack = { navController.popBackStack() }
+									)
+								}
+								
+								composable(route = "feed_settings") {
+									FeedSettingsScreen(
+										onBack = { navController.popBackStack()}
 									)
 								}
 								

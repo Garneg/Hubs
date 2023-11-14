@@ -52,9 +52,7 @@ object HubsDataStore {
 			val TextSnippetFontSize = DataStorePreference.FloatPreference("article_card_snippet_font_size", 16f)
 			val ShowTextSnippet = DataStorePreference.BooleanPreference("article_card_show_snippet", true)
 			val ShowImage = DataStorePreference.BooleanPreference("article_card_show_image", true)
-			val ShowAuthor = DataStorePreference.BooleanPreference("article_card_show_author", true)
 			val TitleFontSize = DataStorePreference.FloatPreference("article_card_title_font_size", 20f)
-			val ShowHubs = DataStorePreference.BooleanPreference("article_card_show_hubs", true)
 			val TextSnippetMaxLines = DataStorePreference.IntPreference("article_card_snippet_max_lines", 4)
 		}
 		

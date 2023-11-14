@@ -91,6 +91,7 @@ class SettingsScreenViewModel : ViewModel() {
 fun SettingsScreen(
 	onBack: () -> Unit,
 	onArticleScreenSettings: () -> Unit,
+	onFeedSettings: () -> Unit
 ) {
 	val viewModel = viewModel<SettingsScreenViewModel>()
 	
@@ -120,7 +121,8 @@ fun SettingsScreen(
 		) {
 			AppearanceSettingsCard(
 				viewModel = viewModel,
-				onArticleScreenSettings = onArticleScreenSettings
+				onArticleScreenSettings = onArticleScreenSettings,
+				onFeedSettings = onFeedSettings
 			)
 			ExperimentalFeaturesSettingsCard(viewModel = viewModel)
 			OtherCard(viewModel = viewModel)

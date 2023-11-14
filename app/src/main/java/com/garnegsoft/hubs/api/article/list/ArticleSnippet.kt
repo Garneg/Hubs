@@ -71,11 +71,6 @@ data class ArticleSnippet(
     val imageUrl: String?,
 
     /**
-     * Tags of the post
-     */
-    val tags: List<String>? = null,
-
-    /**
      * Format of the post
      */
     val format: ArticleFormat?,

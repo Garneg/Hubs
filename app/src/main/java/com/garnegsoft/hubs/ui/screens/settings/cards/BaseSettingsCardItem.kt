@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.settings.cards
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +15,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 
 @Composable
 fun SettingsCardItem(
 	title: String,
 	interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 	onClick: () -> Unit,
-	trailingSlot: @Composable () -> Unit = {},
+	trailingIcon: @Composable () -> Unit = {},
 	enabled: Boolean = true
 ) {
 	Row(modifier = Modifier
@@ -40,7 +38,7 @@ fun SettingsCardItem(
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		Text(modifier = Modifier.weight(1f), text = title)
-		trailingSlot()
+		trailingIcon()
 	}
 	
 }
