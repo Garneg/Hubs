@@ -1,6 +1,12 @@
 package com.garnegsoft.hubs
 
 
+import android.content.ComponentName
+import android.content.Intent
+import android.content.pm.ShortcutInfo
+import android.content.pm.ShortcutManager
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.CookieManager
@@ -34,8 +40,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.coroutineScope
+import androidx.navigation.NavDeepLink
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -68,6 +78,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 
 
 // TODO: shouldn't be singleton
@@ -116,12 +127,31 @@ class MainActivity : ComponentActivity() {
 						)
 						authorized = true
 						
+						launch(Dispatchers.IO) {
+							MeController.getMe()?.let {
+								val shortcut = ShortcutInfoCompat.Builder(this@MainActivity, "bookmarks_shortcut")
+									.setIntent(
+										Intent(Intent.ACTION_VIEW).apply {
+											`package` = BuildConfig.APPLICATION_ID
+											data = Uri.parse("https://habr.com/users/${it.alias}/bookmarks")
+										}
+									)
+									.setIcon(IconCompat.createWithResource(this@MainActivity, R.drawable.bookmarks_shortcut_icon))
+									.setShortLabel("Закладки")
+									.setLongLabel("Закладки")
+									.build()
+								ShortcutManagerCompat.pushDynamicShortcut(this@MainActivity, shortcut)
+								
+							}
+							
+						}
 					}
 				}
 			}
 		
 		intent.dataString?.let { Log.e("intentData", it) }
 		HabrApi.initialize(this)
+		
 		
 		
 		setContent {
@@ -438,6 +468,9 @@ class MainActivity : ComponentActivity() {
 										onDismiss = { showLogoutConfirmationDialog = false },
 										onProceed = {
 											logoutCoroutineScope.launch {
+												val shortcuts = ShortcutManagerCompat.getDynamicShortcuts(this@MainActivity).map { it.id }
+												ShortcutManagerCompat.disableShortcuts(this@MainActivity, shortcuts, "Вы вышли из приложения!")
+												
 												AuthDataController.clearAuthData(this@MainActivity)
 												
 												authorized = false
@@ -530,7 +563,10 @@ class MainActivity : ComponentActivity() {
 									}
 								}
 								
-								composable("savedArticles") {
+								composable(
+									route = "savedArticles",
+									deepLinks = listOf(NavDeepLink("hubs://saved-articles"))
+								) {
 									OfflineArticlesScreen(
 										onBack = { navController.popBackStack() },
 										onArticleClick = { navController.navigate("article/$it?offline=true") }

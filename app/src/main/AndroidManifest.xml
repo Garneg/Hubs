@@ -33,6 +33,10 @@
                 android:name="android.app.lib_name"
                 android:value="" />
 
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts"/>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

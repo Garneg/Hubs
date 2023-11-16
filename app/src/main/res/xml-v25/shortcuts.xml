@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="compose"
+        android:enabled="true"
+        android:icon="@drawable/saved_articles_shortcut_icon"
+        android:shortcutShortLabel="Сохраненные"
+        android:shortcutLongLabel="Сохраненные статьи"
+        android:shortcutDisabledMessage="@string/employees_tab">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hubs://saved-articles"
+            android:targetPackage="com.garnegsoft.hubs.debug"
+            android:targetClass="com.garnegsoft.hubs.MainActivity" />
+        <!-- If your shortcut is associated with multiple intents, include them
+             here. The last intent in the list determines what the user sees when
+             they launch this shortcut. -->
+<!--        <categories android:name="android.shortcut.conversation" />-->
+        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
+    </shortcut>
+</shortcuts>
