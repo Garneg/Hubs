@@ -216,13 +216,7 @@ fun parseChildElements(
                                     .find { it.tag == "url" }
                                     ?.let {
                                         if (it.item.startsWith("http")) {
-                                            Log.e(
-                                                "URL Clicked",
-                                                it.item
-                                            )
-                                            var intent =
-                                                Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                                            context.startActivity(intent)
+                                            HandleUrl(context, it.item)
                                         }
                                     }
                             })
@@ -265,12 +259,8 @@ fun parseChildElements(
                 onClick = {
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
                         if (it.item.startsWith("http")) {
-                            Log.e(
-                                "URL Clicked",
-                                it.item
-                            )
-                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                            context.startActivity(intent)
+                            HandleUrl(context, it.item)
+    
                         }
                     }
                 })

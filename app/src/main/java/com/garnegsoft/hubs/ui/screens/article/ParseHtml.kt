@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -44,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImagePainter
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -298,13 +300,8 @@ fun parseElement(
 									.find { it.tag == "url" }
 									?.let {
 										if (it.item.startsWith("http")) {
-											Log.e(
-												"URL Clicked",
-												it.item
-											)
-											var intent =
-												Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-											context.startActivity(intent)
+											HandleUrl(context, it.item)
+											
 										}
 									}
 							}
@@ -358,12 +355,7 @@ fun parseElement(
 				onClick = {
 					currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
 						if (it.item.startsWith("http")) {
-							Log.e(
-								"URL Clicked",
-								it.item
-							)
-							val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-							context.startActivity(intent)
+							HandleUrl(context, it.item)
 						}
 					}
 				}
@@ -423,12 +415,7 @@ fun parseElement(
 					onClick = {
 						currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
 							if (it.item.startsWith("http")) {
-								Log.e(
-									"URL Clicked",
-									it.item
-								)
-								val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-								context.startActivity(intent)
+								HandleUrl(context, it.item)
 							}
 						}
 					})
@@ -959,5 +946,18 @@ fun Code(
 			}
 		}
 	}
+}
+
+fun HandleUrl(context: Context, url: String) {
+	Log.e(
+		"URL Clicked",
+		url
+	)
+	val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+		if (url.startsWith("https://habr.com")){
+			this.`package` = BuildConfig.APPLICATION_ID
+		}
+	}
+	context.startActivity(intent)
 }
 
