@@ -68,7 +68,6 @@ data class ArticleCardStyle(
 		color = textColor.copy(alpha = 0.75f),
 		fontSize = 16.sp,
 		fontWeight = FontWeight.W400,
-		lineHeight = 16.sp.times(1.25f)
 	),
 	
 	val authorTextStyle: TextStyle = TextStyle(

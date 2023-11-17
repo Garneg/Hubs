@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.sharp.KeyboardArrowDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -171,6 +172,19 @@ fun CommentsScreen(
 						}
 					}
 				)
+			},
+			floatingActionButton = {
+				
+				ExtendedFloatingActionButton(
+					text = {
+						//Text(text = "Назад")
+						   },
+					onClick = { /*TODO*/ },
+					icon = {
+						Icon(imageVector = Icons.Sharp.KeyboardArrowDown, contentDescription = null)
+					},
+					elevation = FloatingActionButtonDefaults.elevation(4.dp, 0.dp)
+				)
 			}
 		) {
 			var answeringComment: Comment? by remember {
@@ -226,10 +240,7 @@ fun CommentsScreen(
 								items = threadsData.threads,
 								key = { index, it -> it.root.id }
 							) { index, it ->
-								val context = LocalContext.current
-								
 								Column(horizontalAlignment = Alignment.End) {
-									
 									CommentItem(
 										comment = it.root,
 										onAuthorClick = {
@@ -313,58 +324,62 @@ fun CommentsScreen(
 											return@remember commentsData!!.comments.indexOf(it)
 										} ?: 0
 									}
-									CommentItem(
-										modifier = Modifier
-											.padding(start = 20.dp * it.level.coerceAtMost(5)),
-										comment = it,
-										onAuthorClick = { onUserClicked(it.author.alias) },
-										parentComment = parentComment,
-										highlight = it.id == commentId,
-										showReplyButton = commentsData!!.commentAccess.canComment,
-										onShare = {
-											val intent = Intent(Intent.ACTION_SEND)
-											intent.putExtra(
-												Intent.EXTRA_TEXT,
-												"https://habr.com/p/${parentPostId}/comments/#comment_${it.id}"
-											)
-											intent.setType("text/plain")
-											context.startActivity(
-												Intent.createChooser(
-													intent,
-													null
+									if (it.deleted){
+										DeletedCommentItem(modifier = Modifier.padding(start = 20.dp * it.level.coerceAtMost(5)))
+									} else {
+										CommentItem(
+											modifier = Modifier
+												.padding(start = 20.dp * it.level.coerceAtMost(5)),
+											comment = it,
+											onAuthorClick = { onUserClicked(it.author.alias) },
+											parentComment = parentComment,
+											highlight = it.id == commentId,
+											showReplyButton = commentsData!!.commentAccess.canComment,
+											onShare = {
+												val intent = Intent(Intent.ACTION_SEND)
+												intent.putExtra(
+													Intent.EXTRA_TEXT,
+													"https://habr.com/p/${parentPostId}/comments/#comment_${it.id}"
 												)
-											)
-										},
-										onReplyClick = {
-											answeringComment = it
-										},
-										onParentCommentSnippetClick = {
-											coroutineScope.launch(Dispatchers.Main) {
-												lazyListState.animateScrollToItem(
-													parentCommentIndex + 1,
-													-articleHeaderOffset.roundToInt()
+												intent.setType("text/plain")
+												context.startActivity(
+													Intent.createChooser(
+														intent,
+														null
+													)
 												)
+											},
+											onReplyClick = {
+												answeringComment = it
+											},
+											onParentCommentSnippetClick = {
+												coroutineScope.launch(Dispatchers.Main) {
+													lazyListState.animateScrollToItem(
+														parentCommentIndex + 1,
+														-articleHeaderOffset.roundToInt()
+													)
+												}
 											}
-										}
-									) {
-										Column {
-											it.let {
-												SelectionContainer {
-													((parseElement(
-														it.message, SpanStyle(
-															fontSize = 16.sp,
-															color = MaterialTheme.colors.onSurface
-														),
-														onViewImageRequest = onImageClick
-													).second)?.let { it1 ->
-														it1(
-															SpanStyle(
+										) {
+											Column {
+												it.let {
+													SelectionContainer {
+														((parseElement(
+															it.message, SpanStyle(
 																fontSize = 16.sp,
 																color = MaterialTheme.colors.onSurface
 															),
-															elementsSettings
-														)
-													})
+															onViewImageRequest = onImageClick
+														).second)?.let { it1 ->
+															it1(
+																SpanStyle(
+																	fontSize = 16.sp,
+																	color = MaterialTheme.colors.onSurface
+																),
+																elementsSettings
+															)
+														})
+													}
 												}
 											}
 										}

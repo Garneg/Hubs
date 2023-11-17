@@ -34,5 +34,7 @@
     <string name="publications_tab">Publications</string>
     <string name="follow_button_label">Follow</string>
     <string name="following_button_label">Following</string>
+    <string name="saved_articles_shortcut_long_label">Saved Articles</string>
+    <string name="saved_articles_shortcut_short_label">Saved</string>
 
 </resources>

@@ -86,20 +86,26 @@ fun CommentItem(
                         .background(MaterialTheme.colors.secondary)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Column {
-                    Text(
-                        text = it.author.alias,
-                        color = MaterialTheme.colors.secondary,
-                        fontWeight = FontWeight.W500
-                    )
-                    Text(
-                        text = Jsoup.parse(it.message).child(0).child(1).child(0).children().firstOrNull {
-                            Log.e("current tag", it.tagName())
-                            it.tagName() != "blockquote"
-                        }?.text() ?: "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                if (it.deleted){
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.CenterStart){
+                        Text(text = "Удаленное сообщение", color = MaterialTheme.colors.onSurface.copy(0.5f))
+                    }
+                } else {
+                    Column {
+                        Text(
+                            text = it.author.alias,
+                            color = MaterialTheme.colors.secondary,
+                            fontWeight = FontWeight.W500
+                        )
+                        Text(
+                            text = Jsoup.parse(it.message).text() ?: "",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
             }

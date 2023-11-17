@@ -33,6 +33,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RangeSlider
 import androidx.compose.material.Slider
+import androidx.compose.material.SliderColors
+import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TopAppBar
@@ -109,6 +111,12 @@ class FeedSettingsScreenViewModel : ViewModel() {
 			HubsDataStore.Settings.edit(context, HubsDataStore.Settings.ArticleCard.TextSnippetMaxLines, lines)
 		}
 	}
+	
+	fun ChangeSnippetFontSize(context: Context, size: Float) {
+		viewModelScope.launch {
+			HubsDataStore.Settings.edit(context, HubsDataStore.Settings.ArticleCard.TextSnippetFontSize, size)
+		}
+	}
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -145,9 +153,7 @@ fun FeedSettingsScreen(
 							.height(4.dp)
 							.width(32.dp)
 							.clip(RoundedCornerShape(50))
-							.background(
-								MaterialTheme.colors.onBackground.copy(0.15f)
-							)
+							.background(MaterialTheme.colors.onBackground.copy(0.15f))
 					)
 				}
 				Spacer(modifier = Modifier.height(16.dp))
@@ -171,7 +177,8 @@ fun FeedSettingsScreen(
 								Checkbox(checked = it, onCheckedChange = {
 									viewModel.ChangeShowImageSetting(context, it)
 								})
-							})
+							}
+						)
 					}
 					
 					val showTextSnippet by HubsDataStore.Settings.getValueFlow(
@@ -203,17 +210,47 @@ fun FeedSettingsScreen(
 							Text(text = "Размер шрифта заголовка: ${"%.1f".format(sliderValue)}")
 							Slider(
 								value = sliderValue,
-								valueRange = 16f..26f,
-								steps = 4,
+								valueRange = 16f..28f,
+								steps = 5,
 								onValueChange = {
 									sliderValue = it
 								},
 								onValueChangeFinished = {
 									viewModel.ChangeTitleFontSizeSetting(context, sliderValue)
-								})
+								},
+								colors = ArticleScreenSettingsSliderColors
+							)
 						}
 						
 						
+					}
+					
+					val snippetFontSize by HubsDataStore.Settings.getValueFlow(
+						LocalContext.current,
+						HubsDataStore.Settings.ArticleCard.TextSnippetFontSize
+					).collectAsState(initial = null)
+					
+					snippetFontSize?.let {
+						Column(
+							modifier = Modifier.padding(4.dp)
+						) {
+							var sliderValue by remember { mutableStateOf(it) }
+							
+							Text(text = "Размер шрифта начала статьи: ${"%.0f".format(sliderValue)}",)
+							Slider(
+								value = sliderValue,
+								enabled = showTextSnippet ?: false,
+								valueRange = 12f..24f,
+								steps = 5,
+								onValueChange = {
+									sliderValue = it
+								},
+								onValueChangeFinished = {
+									viewModel.ChangeSnippetFontSize(context, sliderValue)
+								},
+								colors = ArticleScreenSettingsSliderColors
+							)
+						}
 					}
 					
 					val snippetMaxLines by HubsDataStore.Settings.getValueFlow(
@@ -238,10 +275,12 @@ fun FeedSettingsScreen(
 								},
 								onValueChangeFinished = {
 									viewModel.ChangeSnippetMaxLinesSetting(context, sliderValue.toInt())
-								}
+								},
+								colors = ArticleScreenSettingsSliderColors
 							)
 						}
 					}
+					
 				}
 				
 			}
