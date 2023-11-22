@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
+import android.widget.EditText
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -19,7 +20,6 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -44,6 +45,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.AsyncGifImage
@@ -287,6 +289,7 @@ fun parseElement(
 					childrenComposables.add { localSpanStyle, settings ->
 						//Text(text = thisElementCurrentText)
 						var context = LocalContext.current
+						val focusManager = LocalFocusManager.current
 						ClickableText(
 							text = thisElementCurrentText,
 							style = LocalTextStyle.current.copy(
@@ -296,11 +299,12 @@ fun parseElement(
 								color = localSpanStyle.color
 							),
 							onClick = {
+								focusManager.clearFocus(true)
 								thisElementCurrentText.getStringAnnotations(it, it)
 									.find { it.tag == "url" }
 									?.let {
 										if (it.item.startsWith("http")) {
-											HandleUrl(context, it.item)
+											handleUrl(context, it.item)
 											
 										}
 									}
@@ -349,13 +353,15 @@ fun parseElement(
 				),
 				color = localSpanStyle.color
 			)
+			val focusManager = LocalFocusManager.current
 			ClickableText(
 				text = currentText,
 				style = style,
 				onClick = {
+					focusManager.clearFocus(true)
 					currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
 						if (it.item.startsWith("http")) {
-							HandleUrl(context, it.item)
+							handleUrl(context, it.item)
 						}
 					}
 				}
@@ -403,6 +409,7 @@ fun parseElement(
 		"figcaption" -> if (element.text().isNotEmpty())
 			{ localSpanStyle, settings ->
 				val context = LocalContext.current
+				val focusManager = LocalFocusManager.current
 				ClickableText(
 					modifier = Modifier
 						.fillMaxWidth()
@@ -413,9 +420,10 @@ fun parseElement(
 						textAlign = TextAlign.Center
 					),
 					onClick = {
+						focusManager.clearFocus(true)
 						currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
 							if (it.item.startsWith("http")) {
-								HandleUrl(context, it.item)
+								handleUrl(context, it.item)
 							}
 						}
 					})
@@ -456,18 +464,17 @@ fun parseElement(
 				AsyncGifImage(
 					model = sourceUrl,
 					modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .clip(RoundedCornerShape(4.dp))
-                        .clickable(enabled = onViewImageRequest != null) {
-                            onViewImageRequest?.invoke(sourceUrl)
-                        }
-                        .background(
-                            if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
-                                0.75f
-                            ) else Color.Transparent
-                        )
-                        .aspectRatio(aspectRatio),
+						.padding(bottom = 8.dp)
+						.clip(RoundedCornerShape(4.dp))
+						.clickable(enabled = onViewImageRequest != null) {
+							onViewImageRequest?.invoke(sourceUrl)
+						}
+						.background(
+							if (!MaterialTheme.colors.isLight) MaterialTheme.colors.onBackground.copy(
+								0.75f
+							) else Color.Transparent
+						)
+						.aspectRatio(aspectRatio),
 					contentScale = ContentScale.FillWidth,
 					onState = {
 						if (!isLoaded && it is AsyncImagePainter.State.Success) {
@@ -516,14 +523,16 @@ fun parseElement(
 				.tagName() == "pre"
 		) { localSpanStyle, settings ->
 			Box(Modifier.padding(bottom = 4.dp)) {
-				Code(
-					code = element.text(),
-					language = LanguagesMap.getOrElse(
-						element.attr("class"),
-						{ element.attr("class") }),
-					spanStyle = localSpanStyle,
-					elementSettings = settings
-				)
+				DisableSelection {
+					Code(
+						code = element.text(),
+						language = LanguagesMap.getOrElse(
+							element.attr("class"),
+							{ element.attr("class") }),
+						spanStyle = localSpanStyle,
+						elementSettings = settings
+					)
+				}
 			}
 			resultAnnotatedString = buildAnnotatedString { }
 		} else
@@ -877,10 +886,7 @@ fun Code(
 	elementSettings: ElementSettings,
 	modifier: Modifier = Modifier
 ) {
-	Column(
-		modifier
-			.clip(RoundedCornerShape(4.dp))
-	) {
+	Column(modifier.clip(RoundedCornerShape(4.dp))) {
 		Surface(
 			color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
 			modifier = Modifier.fillMaxWidth()
@@ -948,7 +954,7 @@ fun Code(
 	}
 }
 
-fun HandleUrl(context: Context, url: String) {
+fun handleUrl(context: Context, url: String) {
 	Log.e(
 		"URL Clicked",
 		url

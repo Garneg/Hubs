@@ -247,7 +247,11 @@ fun ArticleScreen(
 											addedToBookmarksCount--
 											addedToBookmarksCount =
 												addedToBookmarksCount.coerceAtLeast(0)
-											if (!ArticleController.removeFromBookmarks(article.id, article.postType == PostType.News)) {
+											if (!ArticleController.removeFromBookmarks(
+													article.id,
+													article.postType == PostType.News
+												)
+											) {
 												addedToBookmarks = true
 												addedToBookmarksCount++
 												addedToBookmarksCount =
@@ -257,7 +261,11 @@ fun ArticleScreen(
 										} else {
 											addedToBookmarks = true
 											addedToBookmarksCount++
-											if (!ArticleController.addToBookmarks(article.id, article.postType == PostType.News)) {
+											if (!ArticleController.addToBookmarks(
+													article.id,
+													article.postType == PostType.News
+												)
+											) {
 												addedToBookmarks = false
 												addedToBookmarksCount--
 												addedToBookmarksCount =
@@ -619,15 +627,18 @@ fun ArticleScreen(
 				
 				})
 				Box(modifier = Modifier.padding(it)) {
-					if (nodeParsed && fontSize != null)
-						ArticleContent(
-							article = article,
-							onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
-							onHubClicked = onHubClicked,
-							onCompanyClick = onCompanyClick,
-							onViewImageRequest = onViewImageRequest,
-							onArticleClick = onArticleClick
-						)
+					if (nodeParsed && fontSize != null) {
+						SelectionContainer {
+							ArticleContent(
+								article = article,
+								onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
+								onHubClicked = onHubClicked,
+								onCompanyClick = onCompanyClick,
+								onViewImageRequest = onViewImageRequest,
+								onArticleClick = onArticleClick
+							)
+						}
+					}
 				}
 			} ?: Box(
 				modifier = Modifier

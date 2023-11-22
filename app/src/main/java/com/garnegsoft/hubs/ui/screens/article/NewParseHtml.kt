@@ -1,14 +1,12 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import android.content.Intent
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -204,6 +202,7 @@ fun parseChildElements(
                     childrenComposables.add { localSpanStyle, settings ->
                         //Text(text = thisElementCurrentText)
                         var context = LocalContext.current
+                        val focusManager = LocalFocusManager.current
                         ClickableText(
                             text = thisElementCurrentText,
                             style = LocalTextStyle.current.copy(
@@ -212,11 +211,12 @@ fun parseChildElements(
                                 )
                             ),
                             onClick = {
+                                focusManager.clearFocus(true)
                                 thisElementCurrentText.getStringAnnotations(it, it)
                                     .find { it.tag == "url" }
                                     ?.let {
                                         if (it.item.startsWith("http")) {
-                                            HandleUrl(context, it.item)
+                                            handleUrl(context, it.item)
                                         }
                                     }
                             })
@@ -249,6 +249,7 @@ fun parseChildElements(
         childrenComposables.add { localSpanStyle, settings ->
             //Text(text = currentText)
             val context = LocalContext.current
+            val focusManager = LocalFocusManager.current
             ClickableText(
                 text = currentText,
                 style = LocalTextStyle.current.copy(
@@ -257,9 +258,10 @@ fun parseChildElements(
                     )
                 ),
                 onClick = {
+                    focusManager.clearFocus(true)
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {
                         if (it.item.startsWith("http")) {
-                            HandleUrl(context, it.item)
+                            handleUrl(context, it.item)
     
                         }
                     }
