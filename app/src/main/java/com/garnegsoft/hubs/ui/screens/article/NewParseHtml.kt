@@ -247,7 +247,6 @@ fun parseChildElements(
     if (!currentText.text.isBlank() && isBlock)
 
         childrenComposables.add { localSpanStyle, settings ->
-            //Text(text = currentText)
             val context = LocalContext.current
             val focusManager = LocalFocusManager.current
             ClickableText(

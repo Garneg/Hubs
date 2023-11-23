@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.article.Article
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -39,6 +40,7 @@ fun HubsRow(
                     .clickable { if (it.isCorporative) onCompanyClicked(it.alias) else onHubClicked(it.alias) },
                 text = hubTitle,
                 style = TextStyle(
+                    fontSize = 16.sp,
                     color = Color.Gray,
                     fontWeight = FontWeight.W500
                 )

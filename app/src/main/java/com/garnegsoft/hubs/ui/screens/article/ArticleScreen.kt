@@ -623,9 +623,7 @@ fun ArticleScreen(
 						nodeParsed = true
 					}
 				})
-				LaunchedEffect(key1 = fontSize, block = {
 				
-				})
 				Box(modifier = Modifier.padding(it)) {
 					if (nodeParsed && fontSize != null) {
 						SelectionContainer {

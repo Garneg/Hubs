@@ -362,10 +362,7 @@ fun ArticleContent(
 					FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 						article.hubs.forEach {
 							HubChip(
-								if (it.isProfiled)
-									it.title + "*"
-								else
-									it.title
+								title = if (it.isProfiled) it.title + "*" else it.title
 							) {
 								if (it.isCorporative)
 									onCompanyClick(it.alias)

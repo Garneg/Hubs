@@ -60,6 +60,7 @@ fun HubChip(
 @Composable
 fun HubChip(
     title: String,
+    isSubscribed: Boolean = false,
     onClick: () -> Unit
 ) {
     Text(
