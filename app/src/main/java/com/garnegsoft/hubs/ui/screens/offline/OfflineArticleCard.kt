@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
@@ -42,7 +43,7 @@ fun OfflineArticleCard(
         article.authorName?.let {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (article.authorAvatarUrl != null) {
-                    AsyncImage(
+                    AsyncGifImage(
                         modifier = Modifier
                             .size(style.authorAvatarSize)
                             .clip(style.innerElementsShape),
@@ -121,7 +122,7 @@ fun OfflineArticleCard(
         )
         if (article.thumbnailUrl != null) {
             Spacer(modifier = Modifier.height(4.dp))
-            AsyncImage(
+            AsyncGifImage(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(16f / 9f)

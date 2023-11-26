@@ -9,7 +9,7 @@ import com.garnegsoft.hubs.api.PostType
 /**
  * Represents article
  */
-class Article(
+data class Article(
 
     val id: Int,
 

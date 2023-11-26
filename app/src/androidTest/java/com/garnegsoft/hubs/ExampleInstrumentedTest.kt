@@ -20,5 +20,7 @@ class ExampleInstrumentedTest {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.garnegsoft.hubs", appContext.packageName)
+        
+        
     }
 }

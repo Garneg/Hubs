@@ -1,5 +1,7 @@
 package com.garnegsoft.hubs.ui.screens
 
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.util.Log
 import androidx.compose.animation.core.AnimationState
@@ -28,10 +30,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toDrawable
+import coil.decode.DataSource
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
+import coil.fetch.DrawableResult
+import coil.fetch.FetchResult
+import coil.fetch.Fetcher
 import coil.request.ImageRequest
+import com.garnegsoft.hubs.api.CommonImageRequestFetcher
+import com.garnegsoft.hubs.api.offlineResourcesDir
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -39,6 +48,7 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import java.io.File
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -49,7 +59,7 @@ fun ImageViewScreen(
     model: Any,
     onBack: () -> Unit
 ) {
-
+    val context = LocalContext.current
     val zoomableState = rememberZoomableState(
         autoApplyTransformations = false,
         zoomSpec = ZoomSpec(maxZoomFactor = 3f, preventOverOrUnderZoom = false)
@@ -123,8 +133,7 @@ fun ImageViewScreen(
                 .fillMaxSize()
                 .offset { IntOffset(0, (if (isDragging) offset else animatedOffset).roundToInt()) },
             state = state,
-            model =
-            ImageRequest.Builder(LocalContext.current)
+            model = ImageRequest.Builder(LocalContext.current)
                 .data(model)
                 .decoderFactory(SvgDecoder.Factory())
                 .decoderFactory(
@@ -134,6 +143,9 @@ fun ImageViewScreen(
                         GifDecoder.Factory()
                     }
                 )
+                .fetcherFactory(Fetcher.Factory { data, options, imageLoader ->
+                    CommonImageRequestFetcher(data, context)
+                })
                 .crossfade(true)
                 .build(),
             contentDescription = null,

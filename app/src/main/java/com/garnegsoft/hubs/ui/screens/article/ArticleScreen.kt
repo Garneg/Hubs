@@ -40,6 +40,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
@@ -386,7 +387,7 @@ fun ArticleScreen(
 								verticalAlignment = Alignment.CenterVertically,
 							) {
 								if (article.authorAvatarUrl != null)
-									AsyncImage(
+									AsyncGifImage(
 										modifier = Modifier
 											.size(34.dp)
 											.clip(RoundedCornerShape(8.dp))

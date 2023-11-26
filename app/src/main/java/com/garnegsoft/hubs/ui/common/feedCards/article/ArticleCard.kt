@@ -435,29 +435,11 @@ fun ArticleCard(
 					bounds = bounds,
 					cardStyle = style,
 					onSaveClick = {
-						coroutineScope.launch(Dispatchers.IO) {
-							val downloaded =
-								OfflineArticlesController.downloadArticle(article.id, context)
-							if (downloaded) {
-								withContext(Dispatchers.Main) {
-									Toast.makeText(context, "Статья скачана!", Toast.LENGTH_SHORT)
-										.show()
-								}
-							}
-						}
+						OfflineArticlesController.downloadArticle(article.id, context)
 						showPopup = false
 					},
 					onDeleteClick = {
-						coroutineScope.launch(Dispatchers.IO) {
-							val deleted =
-								OfflineArticlesController.deleteArticle(article.id, context)
-							if (deleted) {
-								withContext(Dispatchers.Main) {
-									Toast.makeText(context, "Статья удалена!", Toast.LENGTH_SHORT)
-										.show()
-								}
-							}
-						}
+						OfflineArticlesController.deleteArticle(article.id, context)
 						showPopup = false
 					},
 					onDismissRequest = { showPopup = false },
