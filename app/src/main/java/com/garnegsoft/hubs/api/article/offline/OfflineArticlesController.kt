@@ -6,19 +6,13 @@ import android.content.Context
 import android.os.Build
 import android.os.Looper
 import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.graphics.drawable.toBitmap
-import androidx.core.graphics.drawable.toIcon
 import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.article.Article
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -50,7 +44,7 @@ class OfflineArticlesController {
 		}
 		
 		fun downloadArticle(articleId: Int, context: Context) {
-			val request = OneTimeWorkRequestBuilder<OfflineArticleResourcesLoadWorker>()
+			val request = OneTimeWorkRequestBuilder<DownloadOfflineArticleResourcesWorker>()
 				.setInputData(Data.Builder().putInt("ARTICLE_ID", articleId).build())
 				.build()
 			WorkManager.getInstance(context).enqueue(request)
@@ -83,13 +77,54 @@ class OfflineArticlesController {
 			return false
 		}
 		
-		class OfflineArticleResourcesLoadWorker(
+		class DownloadOfflineArticleResourcesWorker(
 			appContext: Context,
 			params: WorkerParameters
 		) : CoroutineWorker(appContext, params) {
 			override suspend fun getForegroundInfo(): ForegroundInfo {
 				val notification = if (Build.VERSION.SDK_INT > 26) {
-					Notification.Builder(applicationContext, "asklsfls")
+					Notification.Builder(applicationContext, "download_article_worker_channel")
+						.setSmallIcon(R.drawable.download).build()
+				} else {
+					Notification()
+				}
+				return ForegroundInfo(0, notification)
+				
+			}
+			override suspend fun doWork(): Result {
+				setForeground(getForegroundInfo())
+				val articleId = inputData.getInt("ARTICLE_ID", -1)
+				if (articleId < 1) {
+					Looper.prepare()
+					Toast.makeText(
+						applicationContext,
+						"Invalid article id was passed to the worker!",
+						Toast.LENGTH_SHORT
+					).show()
+					return Result.failure()
+				}
+				withContext(Dispatchers.IO) {
+					_downloadArticle(articleId, applicationContext)
+					Looper.prepare()
+					Toast.makeText(
+						applicationContext,
+						"Done!",
+						Toast.LENGTH_SHORT
+					).show()
+				}
+				return Result.success()
+			}
+			
+		}
+		
+		
+		class DeleteOfflineArticleResourcesWorker(
+			appContext: Context,
+			params: WorkerParameters
+		) : CoroutineWorker(appContext, params) {
+			override suspend fun getForegroundInfo(): ForegroundInfo {
+				val notification = if (Build.VERSION.SDK_INT > 26) {
+					Notification.Builder(applicationContext, "delete_article_worker_channel")
 						.setSmallIcon(R.drawable.download).build()
 				} else {
 					Notification()
