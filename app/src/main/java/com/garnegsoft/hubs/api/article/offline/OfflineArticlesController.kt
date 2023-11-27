@@ -68,6 +68,26 @@ class OfflineArticlesController {
 		}
 		
 		fun deleteArticle(articleId: Int, context: Context): Boolean {
+			val request = OneTimeWorkRequestBuilder<DeleteOfflineArticleResourcesWorker>()
+				.setInputData(Data.Builder().putInt("ARTICLE_ID", articleId).build())
+				.build()
+			WorkManager.getInstance(context).enqueue(request)
+			
+			return false
+		}
+		
+		private fun _deleteArticle(articleId: Int, context: Context): Boolean {
+			
+			val dir = File(context.filesDir, "offline_resources")
+			if (!dir.exists())
+				return false
+			
+			val thisArticleDir = File(dir, articleId.toString())
+			
+			if (!thisArticleDir.exists() || !thisArticleDir.deleteRecursively())
+				return false
+			
+			
 			val dao = getDao(context)
 			if (dao.exists(articleId)) {
 				dao.delete(articleId)
@@ -108,7 +128,7 @@ class OfflineArticlesController {
 					Looper.prepare()
 					Toast.makeText(
 						applicationContext,
-						"Done!",
+						"Статья скачана!",
 						Toast.LENGTH_SHORT
 					).show()
 				}
@@ -125,7 +145,7 @@ class OfflineArticlesController {
 			override suspend fun getForegroundInfo(): ForegroundInfo {
 				val notification = if (Build.VERSION.SDK_INT > 26) {
 					Notification.Builder(applicationContext, "delete_article_worker_channel")
-						.setSmallIcon(R.drawable.download).build()
+						.setSmallIcon(R.drawable.offline).build()
 				} else {
 					Notification()
 				}
@@ -145,11 +165,11 @@ class OfflineArticlesController {
 					return Result.failure()
 				}
 				withContext(Dispatchers.IO) {
-					_downloadArticle(articleId, applicationContext)
+					_deleteArticle(articleId, applicationContext)
 					Looper.prepare()
 					Toast.makeText(
 						applicationContext,
-						"Done!",
+						"Статья удалена из сохраненных!",
 						Toast.LENGTH_SHORT
 					).show()
 				}
