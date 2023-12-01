@@ -5,6 +5,12 @@ plugins {
     id "kotlin-kapt"
 }
 
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('HHmmddMMyy')
+    return formattedDate
+}
+
 android {
     namespace "com.garnegsoft.hubs"
     compileSdk 34
@@ -37,6 +43,7 @@ android {
         debug {
             debuggable true
             applicationIdSuffix ".debug"
+            versionNameSuffix "-build" + getDate()
         }
 
     }

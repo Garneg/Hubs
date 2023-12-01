@@ -87,7 +87,6 @@ class OfflineArticlesController {
 			if (!thisArticleDir.exists() || !thisArticleDir.deleteRecursively())
 				return false
 			
-			
 			val dao = getDao(context)
 			if (dao.exists(articleId)) {
 				dao.delete(articleId)

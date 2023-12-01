@@ -113,7 +113,7 @@ val Context.offlineArticlesDatabase: OfflineArticlesDatabase
 interface OfflineArticlesDao{
 
     /**
-     * @return article entity by **article_id**, not just by id
+     * @return article entity by **article_id**, not by room table id
      */
     @Query("SELECT * FROM $ARTICLES_TABLE_NAME WHERE article_id = :articleId")
     fun getArticleById(articleId: Int): OfflineArticle
@@ -154,11 +154,10 @@ interface OfflineArticlesDao{
 }
 
 @TypeConverters(HubsConverter::class)
-@Database(entities = [OfflineArticleSnippet::class, InArticleImageEntity::class, OfflineArticle::class], version = 1)
+@Database(entities = [OfflineArticleSnippet::class, OfflineArticle::class], version = 1)
 abstract class OfflineArticlesDatabase : RoomDatabase() {
 
     abstract fun articlesDao(): OfflineArticlesDao
-    abstract fun imagesDao(): InArticleImagesDao
 
     companion object {
         @Volatile
