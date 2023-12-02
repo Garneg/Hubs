@@ -154,7 +154,7 @@ interface OfflineArticlesDao{
 }
 
 @TypeConverters(HubsConverter::class)
-@Database(entities = [OfflineArticleSnippet::class, OfflineArticle::class], version = 1)
+@Database(entities = [OfflineArticleSnippet::class, OfflineArticle::class], version = 2)
 abstract class OfflineArticlesDatabase : RoomDatabase() {
 
     abstract fun articlesDao(): OfflineArticlesDao
@@ -169,6 +169,7 @@ abstract class OfflineArticlesDatabase : RoomDatabase() {
                     klass = OfflineArticlesDatabase::class.java,
                     name = DATABASE_NAME
                 )
+                    
                     .addTypeConverter(HubsConverter()).build()
                 instance = inst
                 inst

@@ -1,7 +1,5 @@
 package com.garnegsoft.hubs
 
-
-import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
