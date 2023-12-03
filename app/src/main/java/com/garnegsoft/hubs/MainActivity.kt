@@ -59,6 +59,7 @@ import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsThreadScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
+import com.garnegsoft.hubs.ui.screens.history.HistoryScreen
 import com.garnegsoft.hubs.ui.screens.hub.HubScreen
 import com.garnegsoft.hubs.ui.screens.main.MainScreen
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
@@ -253,7 +254,7 @@ class MainActivity : ComponentActivity() {
 														)
 													},
 													onSettingsClick = { navController.navigate("settings") },
-													onAboutClick = { navController.navigate("about") }
+													onAboutClick = { navController.navigate("history") }
 												)
 											}
 										}
@@ -576,6 +577,10 @@ class MainActivity : ComponentActivity() {
 									ImageViewScreen(
 										model = url!!,
 										onBack = { navController.popBackStack() })
+								}
+								
+								composable("history"){
+									HistoryScreen()
 								}
 							})
 						

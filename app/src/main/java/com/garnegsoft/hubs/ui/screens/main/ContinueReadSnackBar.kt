@@ -28,8 +28,8 @@ fun ContinueReadSnackBar(
     Row(modifier = Modifier
         .fillMaxWidth()
         .padding(16.dp)
-        .shadow(8.dp, shape = RoundedCornerShape(10.dp))
-        .clip(RoundedCornerShape(10.dp))
+        .shadow(8.dp, shape = RoundedCornerShape(18.dp))
+        .clip(RoundedCornerShape(18.dp))
         .background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else Color(
             0xFF414141
         )

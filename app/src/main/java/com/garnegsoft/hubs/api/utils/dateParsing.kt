@@ -95,3 +95,8 @@ fun formatFoundationDate(day: String?, month: String?, year: String?): String? {
     }
     return result.ifEmpty { null }
 }
+
+fun formatTimestamp(timestamp: Long): String {
+    val date = Date(timestamp)
+    return customOutputFormatter.format(date)
+}

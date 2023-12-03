@@ -44,6 +44,10 @@ import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.history.HistoryArticle
+import com.garnegsoft.hubs.api.history.HistoryController
+import com.garnegsoft.hubs.api.history.HistoryDatabase
+import com.garnegsoft.hubs.api.history.HistoryEntity
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.api.utils.formatTime
@@ -53,6 +57,7 @@ import com.garnegsoft.hubs.ui.theme.RatingNegative
 import com.garnegsoft.hubs.ui.theme.RatingPositive
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
@@ -87,6 +92,7 @@ fun ArticleScreen(
 			if (isOffline) {
 				viewModel.loadArticleFromLocalDatabase(articleId, context)
 			} else {
+				
 				viewModel.loadArticle(articleId)
 			}
 		}
@@ -154,6 +160,7 @@ fun ArticleScreen(
 		backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
 		bottomBar = {
 			article?.let { article ->
+				
 				BottomAppBar(
 					elevation = 0.dp,
 					backgroundColor = MaterialTheme.colors.surface,
@@ -608,6 +615,9 @@ fun ArticleScreen(
 				}
 				LaunchedEffect(key1 = Unit, block = {
 					LastReadArticleController.setLastArticle(context, articleId)
+					withContext(Dispatchers.IO){
+						HistoryController.insertArticle(articleId, context)
+					}
 					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
 						val element =
 							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
