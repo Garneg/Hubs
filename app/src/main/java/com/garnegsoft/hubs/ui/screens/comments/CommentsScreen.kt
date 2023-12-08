@@ -318,6 +318,12 @@ fun CommentsScreen(
 						.padding(it)
 						.imePadding()
 				) {
+					val articleCardStyle =
+						ArticleCardStyle.defaultArticleCardStyle()?.copy(
+							showImage = false,
+							showTextSnippet = false,
+							bookmarksButtonAllowedBeEnabled = articleSnippet?.relatedData != null
+						)
 					LazyColumn(
 						state = lazyListState,
 						modifier = Modifier.weight(1f),
@@ -327,12 +333,7 @@ fun CommentsScreen(
 						
 						if (articleSnippet != null) {
 							item {
-								val articleCardStyle =
-									ArticleCardStyle.defaultArticleCardStyle()?.copy(
-										showImage = false,
-										showTextSnippet = false,
-										bookmarksButtonAllowedBeEnabled = articleSnippet.relatedData != null
-									)
+								
 								articleCardStyle?.let {
 									ArticleCard(
 										article = articleSnippet,
