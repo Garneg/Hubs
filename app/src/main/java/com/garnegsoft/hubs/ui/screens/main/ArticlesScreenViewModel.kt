@@ -22,14 +22,14 @@ class ArticlesScreenViewModel : ViewModel() {
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("custom" to "true"),
-		initialFilter = MyFeedFilter(showNews = false)
+		baseArgs = arrayOf("myFeed" to "true", "complexity" to "all", "score" to "all"),
+		initialFilter = MyFeedFilter(showNews = false, showArticles = true)
 	)
 	
 	val articlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		initialFilter = ArticlesFilterState(showLast = true, complexity = PostComplexity.None)
+		initialFilter = ArticlesFilterState(showLast = true, complexity = PostComplexity.None),
 	)
 	
 	val newsListModel = ArticlesListModel(
