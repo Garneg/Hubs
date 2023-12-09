@@ -177,8 +177,6 @@ fun ArticlesFilterDialog(
 			
 		}
 	}
-	
-	
 }
 
 data class ArticlesFilterState(
@@ -191,9 +189,7 @@ data class ArticlesFilterState(
 		var argsMap: Map<String, String> =
 			if (showLast) {
 				if (minRating == -1) {
-					mapOf(
-						"sort" to "rating",
-					)
+					mapOf("sort" to "rating",)
 				} else {
 					mapOf(
 						"sort" to "rating",
@@ -245,7 +241,6 @@ data class ArticlesFilterState(
 			PostComplexity.High -> ", сложные"
 			PostComplexity.Medium -> ", средние"
 			PostComplexity.Low -> ", простые"
-			
 			else -> ""
 		}
 		
