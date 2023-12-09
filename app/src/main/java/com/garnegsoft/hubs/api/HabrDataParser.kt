@@ -7,12 +7,14 @@ import kotlinx.serialization.json.decodeFromJsonElement
 class HabrDataParser<T> {
     companion object{
         inline fun <reified T> parseJson(json: String): T {
-            val customJson = Json { ignoreUnknownKeys = true }
+            val customJson = Json { isLenient = true
+                ignoreUnknownKeys = true }
             return parseJson(customJson.parseToJsonElement(json))
         }
 
         inline fun <reified T> parseJson(json: JsonElement): T {
-            val customJson = Json { ignoreUnknownKeys = true }
+            val customJson = Json { isLenient = true
+                ignoreUnknownKeys = true }
             return parseJson(json, customJson)
         }
 

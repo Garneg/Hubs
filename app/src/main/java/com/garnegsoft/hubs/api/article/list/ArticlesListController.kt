@@ -1,6 +1,9 @@
 import android.util.Log
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.*
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.article.list.Post
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
@@ -18,7 +21,7 @@ class ArticlesListController {
 		 * @return articles list normally, if empty - no articles found with that path and/or args.
 		 * *null* if path or/and args are invalid or status code is not 200
 		 **/
-		private fun get(path: String, args: Map<String, String>? = null): ArticlesList? {
+		private fun get(path: String, args: Map<String, String>? = null): PublicationsList? {
 			var response = HabrApi.get(path, args)
 			
 			if (response != null && response.code != 200) {
@@ -29,12 +32,15 @@ class ArticlesListController {
 				var responseJson = Json.parseToJsonElement(response!!.body!!.string())
 				var articles = kotlin.run {
 					var articlesIds =
-						HabrDataParser.parseJson<List<Int>>((responseJson.jsonObject["publicationIds"] ?: responseJson.jsonObject["articleIds"])!!.jsonArray)
+						HabrDataParser.parseJson<List<Int>>(
+							(responseJson.jsonObject["publicationIds"]
+								?: responseJson.jsonObject["articleIds"])!!.jsonArray
+						)
 					var pagesCount = responseJson.jsonObject["pagesCount"]?.jsonPrimitive?.intOrNull
 					
 					
 					var articleIdsfinal = mutableListOf<Int>()
-					val articlesRefs = mutableMapOf<String, Article>()
+					val articlesRefs = mutableMapOf<String, Publication>()
 					
 					
 					
@@ -42,7 +48,10 @@ class ArticlesListController {
 						try {
 							articlesRefs += mapOf(
 								it.toString() to HabrDataParser.parseJson(
-									(responseJson.jsonObject["publicationRefs"] ?: responseJson.jsonObject["articleRefs"])!!.jsonObject.get(it.toString())!!
+									(responseJson.jsonObject["publicationRefs"]
+										?: responseJson.jsonObject["articleRefs"])!!.jsonObject.get(
+										it.toString()
+									)!!
 								)
 							)
 							articleIdsfinal.add(it)
@@ -56,24 +65,24 @@ class ArticlesListController {
 					}
 					
 					
-					ArticlesList(
-						articleIds = articleIdsfinal,
-						articleRefs = articlesRefs,
+					PublicationsList(
+						publicationIds = articleIdsfinal,
+						publicationRefs = articlesRefs,
 						pagesCount = pagesCount
 					)
 				}
 				
 				
-				articles.articleRefs.values.forEach {
+				articles.publicationRefs.values.forEach {
 					it.apply {
 						timePublished = formatTime(timePublished)
-						if (author?.avatarUrl.isNullOrBlank() && author != null){
+						if (author?.avatarUrl.isNullOrBlank() && author != null) {
 							author!!.avatarUrl = placeholderAvatarUrl(author!!.alias)
 						} else {
 							author?.avatarUrl =
 								"https:" + author?.avatarUrl?.replace("habrastorage", "hsto")
 						}
-						if (leadData?.imageUrl == null && leadData?.textHtml!!.contains("<img"))
+						if (leadData != null && leadData?.imageUrl == null && leadData?.textHtml!!.contains("<img"))
 							leadData?.imageUrl = Jsoup.parse(leadData!!.textHtml!!)
 								.getElementsByTag("img")[0]?.attr("src")
 						
@@ -83,8 +92,8 @@ class ArticlesListController {
 						if (leadData?.imageUrl == null && leadData?.image?.url != null) {
 							leadData?.imageUrl = leadData?.image?.url
 						}
-						if (leadData.imageUrl != null) {
-							leadData.imageUrl = leadData.imageUrl?.replace("http:", "https:")
+						if (leadData?.imageUrl != null) {
+							leadData!!.imageUrl = leadData!!.imageUrl?.replace("http:", "https:")
 						}
 					}
 				}
@@ -109,8 +118,8 @@ class ArticlesListController {
 			var articles = arrayListOf<ArticleSnippet>()
 			
 			if (raw != null) {
-				raw.articleIds?.forEach { id ->
-					raw.articleRefs.get(id.toString())?.let {
+				raw.publicationIds?.forEach { id ->
+					raw.publicationRefs.get(id.toString())?.let {
 						articles.add(
 							ArticleSnippet(
 								id = it.id,
@@ -118,7 +127,7 @@ class ArticlesListController {
 								isCorporative = it.isCorporative,
 								title = Jsoup.parse(it.titleHtml).text(),
 								editorVersion = EditorVersion.fromString(it.editorVersion),
-								type = PostType.fromString(it.postType),
+								type = PostType.fromString(it.publicationType),
 								author = if (it.author != null) {
 									com.garnegsoft.hubs.api.article.Article.Author(
 										alias = it.author!!.alias,
@@ -138,10 +147,10 @@ class ArticlesListController {
 									votesCountMinus = it.statistics.votesCountMinus,
 									votesCountPlus = it.statistics.votesCountPlus
 								),
-								imageUrl = it.leadData.imageUrl,
-								textSnippet = it.leadData.textHtml,
+								imageUrl = it.leadData!!.imageUrl,
+								textSnippet = it.leadData!!.textHtml,
 								complexity = PostComplexity.fromString(it.complexity),
-								readingTime = it.readingTime,
+								readingTime = it.readingTime!!,
 								relatedData = it.relatedData?.let {
 									com.garnegsoft.hubs.api.article.Article.RelatedData(
 										unreadComments = it.unreadCommentsCount,
@@ -161,6 +170,26 @@ class ArticlesListController {
 			}
 			
 			return result
+		}
+		
+		
+		fun getPosts(
+			path: String,
+			args: Map<String, String>? = null
+		): HabrList<Post>? {
+			return get(path, args)?.let {
+				HabrList(it.publicationRefs.values.map {
+					Post(
+						it.id,
+						it.textHtml!!,
+						Article.Author(it.author!!.alias, avatarUrl = it.author!!.avatarUrl),
+						Article.Statistics(0, 0, 0, 0, 0, 0),
+						emptyList(),
+						it.timePublished
+					)
+				}, it.pagesCount!!)
+			}
+			
 		}
 		
 		
@@ -192,32 +221,33 @@ class ArticlesListController {
 	}
 	
 	@Serializable
-	data class ArticlesList(
-		var articleIds: MutableList<Int>,
-		var articleRefs: Map<String, Article>,
+	data class PublicationsList(
+		var publicationIds: MutableList<Int>,
+		var publicationRefs: Map<String, Publication>,
 		var pagesCount: Int?
 	)
 	
 	@Serializable
-	data class Article(
+	data class Publication(
 		var id: Int,
 		var timePublished: String,
 		var isCorporative: Boolean,
-		var titleHtml: String,
+		var titleHtml: String? = null,
 		var lang: String,
 		var editorVersion: String,
-		var postType: String,
-		var postLabels: ArrayList<ArticlesListLabel>?,
-		var author: ArticlesListAuthor? = null,
+		var publicationType: String,
+		var postLabels: ArrayList<ArticlesListLabel>? = null,
+		var author: PublicationListAuthor? = null,
+		var textHtml: String? = null,
 		var statistics: ArticlesListStatistics,
 		var hubs: ArrayList<ArticlesListHub>,
 		var flows: ArrayList<ArticlesListFlow>?,
-		var leadData: ArticlesListLeadData,
+		var leadData: ArticlesListLeadData? = null,
 		var status: String?,
 		var tags: ArrayList<ArticlesListTag>? = null,
-		var format: String?,
-		var readingTime: Int,
-		var complexity: String?,
+		var format: String? = null,
+		var readingTime: Int? = null,
+		var complexity: String? = null,
 		var relatedData: RelatedData?
 	)
 	
@@ -240,7 +270,7 @@ class ArticlesListController {
 	}
 	
 	@Serializable
-	data class ArticlesListAuthor(
+	data class PublicationListAuthor(
 		var id: String,
 		var alias: String,
 		var fullname: String? = null,

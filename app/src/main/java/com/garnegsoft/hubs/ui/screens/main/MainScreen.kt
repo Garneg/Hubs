@@ -27,6 +27,7 @@ import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.HubsListPage
+import com.garnegsoft.hubs.ui.common.snippetsPages.PostsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 import kotlinx.coroutines.*
 
@@ -52,7 +53,7 @@ fun MainScreen(
 		isAuthorized = authorizedState == true
 	})
 	
-	val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
+	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
 	
 	val scaffoldState = rememberScaffoldState()
 	
@@ -154,6 +155,9 @@ fun MainScreen(
 									ArticlesFilterDialog(defVals, onDissmis, onDone)
 								}
 							)
+						},
+						"Посты" to {
+							PostsListPage(data = viewModel.postsListModel)
 						},
 						"Новости" to {
 							ArticlesListPageWithFilter(

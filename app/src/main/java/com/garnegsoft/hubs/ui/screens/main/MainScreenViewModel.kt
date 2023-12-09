@@ -1,23 +1,16 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.api.article.PostsListModel
 import com.garnegsoft.hubs.api.company.CompaniesListModel
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.hub.HubsListModel
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.user.UsersListModel
-import com.garnegsoft.hubs.api.user.list.UserSnippet
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
-class ArticlesScreenViewModel : ViewModel() {
+class MainScreenViewModel : ViewModel() {
 	
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",
@@ -30,6 +23,12 @@ class ArticlesScreenViewModel : ViewModel() {
 		path = "articles",
 		coroutineScope = viewModelScope,
 		initialFilter = ArticlesFilterState(showLast = true, complexity = PostComplexity.None)
+	)
+	
+	val postsListModel = PostsListModel(
+		path = "articles",
+		coroutineScope = viewModelScope,
+		"posts" to "true", "sort" to "all"
 	)
 	
 	val newsListModel = ArticlesListModel(
