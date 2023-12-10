@@ -86,6 +86,7 @@ data class HistoryArticle(
 	val articleId: Int,
 	val title: String,
 	val authorAlias: String,
+	val authorAvatarUrl: String,
 	val thumbnailUrl: String?,
 ) : HistoryType() {
 	override val actionType: HistoryActionType = HistoryActionType.Article

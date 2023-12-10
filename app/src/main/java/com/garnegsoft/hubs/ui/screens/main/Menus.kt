@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,6 +48,7 @@ fun AuthorizedMenu(
 	onCommentsClick: () -> Unit,
 	onBookmarksClick: () -> Unit,
 	onSavedArticlesClick: () -> Unit,
+	onHistoryClick: () -> Unit,
 	onSettingsClick: () -> Unit,
 	onAboutClick: () -> Unit,
 ) {
@@ -57,7 +59,7 @@ fun AuthorizedMenu(
 				modifier = Modifier
 					.size(32.dp)
 					.clip(RoundedCornerShape(8.dp))
-					.background(Color.White),
+					.background(if (MaterialTheme.colors.isLight) Color.Transparent else Color.White),
 				contentScale = ContentScale.FillBounds,
 				model = avatarUrl, contentDescription = ""
 			)
@@ -192,14 +194,14 @@ fun AuthorizedMenu(
 								.graphicsLayer {
 									this.translationY =
 										-itemsOffset + itemsOffset * itemsAnimation
-									this.alpha = itemsAnimation + 0.55f
+									this.alpha = itemsAnimation + 0.6f
 								}
 						)
 						
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
 								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
-								this.alpha = itemsAnimation + 0.5f
+								this.alpha = itemsAnimation + 0.55f
 							},
 							title = "Статьи", icon = {
 								Icon(
@@ -216,7 +218,7 @@ fun AuthorizedMenu(
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
 								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
-								this.alpha = itemsAnimation + 0.4f
+								this.alpha = itemsAnimation + 0.5f
 							},
 							title = "Комментарии", icon = {
 								Icon(
@@ -233,7 +235,7 @@ fun AuthorizedMenu(
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
 								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
-								this.alpha = itemsAnimation + 0.3f
+								this.alpha = itemsAnimation + 0.4f
 							},
 							title = "Закладки", icon = {
 								Icon(
@@ -250,7 +252,7 @@ fun AuthorizedMenu(
 						MenuItem(
 							modifier = Modifier.graphicsLayer {
 								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
-								this.alpha = itemsAnimation + 0.2f
+								this.alpha = itemsAnimation + 0.3f
 							},
 							title = "Скачанные", icon = {
 								Icon(
@@ -260,6 +262,25 @@ fun AuthorizedMenu(
 								)
 							}, onClick = {
 								onSavedArticlesClick()
+								expanded = false
+							}
+						)
+						
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.2f
+							},
+							title = "История",
+							icon = {
+								Icon(
+									imageVector = Icons.Outlined.Star,
+									contentDescription = null,
+									tint = MaterialTheme.colors.onBackground
+								)
+							},
+							onClick = {
+								onHistoryClick()
 								expanded = false
 							}
 						)
@@ -323,6 +344,7 @@ fun UnauthorizedMenu(
 	onLoginClick: () -> Unit,
 	onAboutClick: () -> Unit,
 	onSettingsClick: () -> Unit,
+	onHistoryClick: () -> Unit,
 	onSavedArticlesClick: () -> Unit
 ) {
 	var expanded by remember { mutableStateOf(false) }
@@ -356,6 +378,18 @@ fun UnauthorizedMenu(
 			onSavedArticlesClick()
 			expanded = false
 		})
+		
+		MenuItem(
+			title = "История",
+			icon = {
+				Icon(
+					imageVector = Icons.Outlined.Star,
+					contentDescription = null,
+					tint = MaterialTheme.colors.onBackground
+				)
+			},
+			onClick = { onHistoryClick() }
+		)
 		
 		MenuItem(title = "Настройки", icon = {
 			Icon(

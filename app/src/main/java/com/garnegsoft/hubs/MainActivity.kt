@@ -237,6 +237,7 @@ class MainActivity : ComponentActivity() {
 															"savedArticles"
 														)
 													},
+													onHistoryClick = { navController.navigate("history")},
 													onSettingsClick = { navController.navigate("settings") },
 													onAboutClick = { navController.navigate("about") }
 												)
@@ -253,8 +254,9 @@ class MainActivity : ComponentActivity() {
 															"savedArticles"
 														)
 													},
+													onHistoryClick = { navController.navigate("history")},
 													onSettingsClick = { navController.navigate("settings") },
-													onAboutClick = { navController.navigate("history") }
+													onAboutClick = { navController.navigate("about") }
 												)
 											}
 										}
@@ -580,7 +582,13 @@ class MainActivity : ComponentActivity() {
 								}
 								
 								composable("history"){
-									HistoryScreen()
+									HistoryScreen(
+										onBack = { navController.popBackStack() },
+										onArticleClick = { navController.navigate("article/$it")},
+										onUserClick = { navController.navigate("user/$it")},
+										onHubClick = { navController.navigate("hub/$it")},
+										onCompanyClick = { navController.navigate("company/$it")}
+									)
 								}
 							})
 						

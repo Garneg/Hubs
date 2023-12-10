@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.history
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,11 +9,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -24,13 +28,16 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.history.HistoryArticle
 import com.garnegsoft.hubs.api.history.HistoryEntity
 import com.garnegsoft.hubs.api.utils.formatTimestamp
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 
 
 @Composable
 fun ArticleHistoryCard(
 	entity: HistoryEntity,
-	articleData: HistoryArticle
+	articleData: HistoryArticle,
+	onClick: () -> Unit,
+	style: ArticleCardStyle
 ) {
 	HubsTheme {
 		Column() {
@@ -51,30 +58,45 @@ fun ArticleHistoryCard(
 			Spacer(modifier = Modifier.height(8.dp))
 			Row(
 				modifier = Modifier
-					.clip(RoundedCornerShape(26.dp))
-					.background(MaterialTheme.colors.surface)
-					.padding(14.dp)
+					.clip(style.cardShape)
+					.clickable(onClick = onClick)
+					.background(style.backgroundColor)
+					.padding(style.innerPadding)
 			) {
 				Column(modifier = Modifier.weight(1f)) {
-					Text(
-						text = articleData.authorAlias,
-						fontWeight = FontWeight.W500,
-						color = MaterialTheme.colors.onSurface.copy(0.5f)
-					)
+					Row(verticalAlignment = Alignment.CenterVertically) {
+						AsyncImage(
+							modifier = Modifier
+								.size(style.authorAvatarSize)
+								.clip(style.innerElementsShape),
+							model = articleData.authorAvatarUrl,
+							contentDescription = null)
+						Spacer(modifier = Modifier.width(6.dp))
+						Text(
+							text = articleData.authorAlias,
+							fontWeight = FontWeight.W500,
+							color = MaterialTheme.colors.onSurface.copy(0.5f)
+						)
+					}
+					Spacer(modifier = Modifier.height(2.dp))
 					Text(
 						text = articleData.title,
 						fontSize = 18.sp,
 						fontWeight = FontWeight.W500
 					)
 				}
-				AsyncImage(
-					modifier = Modifier
-						.size(80.dp)
-						.clip(RoundedCornerShape(14.dp)),
-					model = articleData.thumbnailUrl,
-					contentDescription = null,
-					contentScale = ContentScale.Crop
-				)
+				articleData.thumbnailUrl?.let {
+					Spacer(modifier = Modifier.width(style.innerPadding.div(2)))
+					AsyncImage(
+						modifier = Modifier
+							.size(80.dp)
+							.clip(style.innerElementsShape),
+						model = articleData.thumbnailUrl,
+						contentDescription = null,
+						contentScale = ContentScale.Crop
+					)
+				}
+				
 			}
 		}
 	}
