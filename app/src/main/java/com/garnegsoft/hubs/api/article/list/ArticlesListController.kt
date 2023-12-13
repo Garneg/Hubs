@@ -36,8 +36,6 @@ class ArticlesListController {
 					var articleIdsfinal = mutableListOf<Int>()
 					val articlesRefs = mutableMapOf<String, Article>()
 					
-					
-					
 					articlesIds.forEach {
 						try {
 							articlesRefs += mapOf(

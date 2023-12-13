@@ -58,7 +58,7 @@ enum class HistoryActionType {
 interface HistoryDao {
 	
 	@Upsert
-	fun insertEvent(event: HistoryEntity)
+	fun insertEvent(event: HistoryEntity): Long
 	
 	@Query("SELECT * FROM history ORDER BY timestamp DESC LIMIT :eventsPerPage OFFSET :pageNumber * :eventsPerPage")
 	fun getEventsPaged(pageNumber: Int, eventsPerPage: Int = 20): List<HistoryEntity>
