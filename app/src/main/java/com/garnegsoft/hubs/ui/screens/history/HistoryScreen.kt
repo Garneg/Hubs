@@ -110,8 +110,8 @@ fun HistoryScreen(
 								) {
 									Box(
 										modifier = Modifier
-											.padding(vertical = 2.dp)
-											.shadow(1.dp, CircleShape)
+											.padding(vertical = 0.dp)
+											.shadow(0.dp, CircleShape)
 											.clip(CircleShape)
 											.background(MaterialTheme.colors.surface)
 											.border(

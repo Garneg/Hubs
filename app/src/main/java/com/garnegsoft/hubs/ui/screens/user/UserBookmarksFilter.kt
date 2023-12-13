@@ -1,11 +1,14 @@
 package com.garnegsoft.hubs.ui.screens.user
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
@@ -54,17 +57,19 @@ fun UserBookmarksFilter(
 		}
 	) {
 		TitledColumn(title = "Тип закладок") {
-			HubsFilterChip(
-				selected = bookmarksType == UserBookmarksFilter.Bookmarks.Articles,
-				onClick = { bookmarksType = UserBookmarksFilter.Bookmarks.Articles }
-			) {
-				Text(text = "Статьи")
-			}
-			HubsFilterChip(
-				selected = bookmarksType == UserBookmarksFilter.Bookmarks.News,
-				onClick = { bookmarksType = UserBookmarksFilter.Bookmarks.News }
-			) {
-				Text(text = "Новости")
+			Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+				HubsFilterChip(
+					selected = bookmarksType == UserBookmarksFilter.Bookmarks.Articles,
+					onClick = { bookmarksType = UserBookmarksFilter.Bookmarks.Articles }
+				) {
+					Text(text = "Статьи")
+				}
+				HubsFilterChip(
+					selected = bookmarksType == UserBookmarksFilter.Bookmarks.News,
+					onClick = { bookmarksType = UserBookmarksFilter.Bookmarks.News }
+				) {
+					Text(text = "Новости")
+				}
 			}
 			// TODO: Add comments bookmarks 
 //			HubsFilterChip(

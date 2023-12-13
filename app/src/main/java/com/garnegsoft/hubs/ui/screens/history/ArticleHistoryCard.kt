@@ -41,21 +41,21 @@ fun ArticleHistoryCard(
 ) {
 	HubsTheme {
 		Column() {
-			Row(
-				modifier = Modifier
-					.padding(horizontal = 12.dp)
-					.fillMaxWidth(),
-			) {
-				Text(text = "Статья", color = MaterialTheme.colors.onBackground.copy(0.4f),
-					fontWeight = FontWeight.W500,)
-				Spacer(modifier = Modifier.weight(1f))
-				Text(
-					text = remember { formatTimestamp(entity.timestamp) }, color = MaterialTheme.colors.onBackground.copy(0.4f),
-					fontWeight = FontWeight.W500,
-					textAlign = TextAlign.End)
-			}
-			
-			Spacer(modifier = Modifier.height(8.dp))
+//			Row(
+//				modifier = Modifier
+//					.padding(horizontal = 12.dp)
+//					.fillMaxWidth(),
+//			) {
+//				Text(text = "Статья", color = MaterialTheme.colors.onBackground.copy(0.4f),
+//					fontWeight = FontWeight.W500,)
+//				Spacer(modifier = Modifier.weight(1f))
+//				Text(
+//					text = remember { formatTimestamp(entity.timestamp) }, color = MaterialTheme.colors.onBackground.copy(0.4f),
+//					fontWeight = FontWeight.W500,
+//					textAlign = TextAlign.End)
+//			}
+//
+//			Spacer(modifier = Modifier.height(8.dp))
 			Row(
 				modifier = Modifier
 					.clip(style.cardShape)

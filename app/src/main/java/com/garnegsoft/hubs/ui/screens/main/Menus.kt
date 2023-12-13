@@ -274,7 +274,7 @@ fun AuthorizedMenu(
 							title = "История",
 							icon = {
 								Icon(
-									imageVector = Icons.Outlined.Star,
+									painter = painterResource(id = R.drawable.history),
 									contentDescription = null,
 									tint = MaterialTheme.colors.onBackground
 								)
@@ -383,7 +383,7 @@ fun UnauthorizedMenu(
 			title = "История",
 			icon = {
 				Icon(
-					imageVector = Icons.Outlined.Star,
+					painter = painterResource(id = R.drawable.history),
 					contentDescription = null,
 					tint = MaterialTheme.colors.onBackground
 				)
