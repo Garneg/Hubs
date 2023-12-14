@@ -83,8 +83,24 @@ fun RenderHtml(
 			spanStyle = spanStyle
 		)
 	}
+	val context = LocalContext.current
 	Column {
-		result.first?.let { Text(it) }
+		result.first?.let { text ->
+			ClickableText(
+				text = text,
+				style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
+				onClick = {
+					text.getStringAnnotations(it, it)
+						.find { it.tag == "url" }
+						?.let {
+							if (it.item.startsWith("http")) {
+								handleUrl(context, it.item)
+								
+							}
+						}
+				}
+				)
+		}
 		result.second?.invoke(spanStyle, elementSettings)
 	}
 	

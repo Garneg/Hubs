@@ -98,8 +98,7 @@ class MainActivity : ComponentActivity() {
 		lifecycle.coroutineScope.launch {
 			cookiesFlow.collect {
 				cookies = it
-				// Clear all data that was loaded before authorization (article feeds)
-				this@MainActivity.viewModelStore.clear()
+				
 			}
 		}
 		
