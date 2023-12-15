@@ -11,8 +11,8 @@ import kotlinx.coroutines.launch
 
 
 abstract class AbstractSnippetListModel<S>(
-        override val path: String,
-        override val baseArgs: Map<String, String>,
+        open val path: String,
+        open val baseArgs: Map<String, String>,
         initialFilter: Filter? = null,
         open val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
 ) : HabrSnippetListModel<S> where S : HabrSnippet {
@@ -43,7 +43,7 @@ abstract class AbstractSnippetListModel<S>(
     override val isRefreshing: LiveData<Boolean> get() = _isRefreshing
     
     private val _isLoadingNextPage = MutableLiveData(false)
-    val isLoadingNextPage: LiveData<Boolean> get() = _isLoadingNextPage
+    override val isLoadingNextPage: LiveData<Boolean> get() = _isLoadingNextPage
 
     private val _lastLoadedPage = MutableLiveData<Int>()
     override val lastLoadedPage: LiveData<Int>
@@ -98,8 +98,6 @@ abstract class AbstractSnippetListModel<S>(
 
 
 interface HabrSnippetListModel<T> where T : HabrSnippet {
-    val path: String
-    val baseArgs: Map<String, String>
     val data: LiveData<HabrList<T>?>
 
     val lastLoadedPage: LiveData<Int>
@@ -107,6 +105,8 @@ interface HabrSnippetListModel<T> where T : HabrSnippet {
     val isLoading: LiveData<Boolean>
 
     val isRefreshing: LiveData<Boolean>
+    
+    val isLoadingNextPage: LiveData<Boolean>
 
     fun load(args: Map<String, String>): HabrList<T>?
 
@@ -117,6 +117,5 @@ interface HabrSnippetListModel<T> where T : HabrSnippet {
     fun loadFirstPage()
 
 }
-
 
 

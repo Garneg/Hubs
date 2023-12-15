@@ -42,6 +42,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.history.HistoryActionType
 import com.garnegsoft.hubs.api.history.HistoryDatabase
 import com.garnegsoft.hubs.api.history.HistoryEntity
+import com.garnegsoft.hubs.api.history.HistoryEntityListModel
 import com.garnegsoft.hubs.api.history.getArticle
 import com.garnegsoft.hubs.api.utils.formatFoundationDate
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
@@ -52,14 +53,11 @@ import java.util.Calendar
 import java.util.Date
 
 
-class HistoryScreenViewModel : ViewModel() {
-	val elements = MutableLiveData<List<HistoryEntity>>()
-	fun getFirstElements(context: Context) {
-		viewModelScope.launch(Dispatchers.IO) {
-			val result = HistoryDatabase.getDb(context).dao().getEventsPaged(0)
-			elements.postValue(result)
-		}
-	}
+class HistoryScreenViewModel(context: Context) : ViewModel() {
+	val model = HistoryEntityListModel(
+		coroutineScope = viewModelScope,
+		dao = HistoryDatabase.getDb(context).dao()
+	)
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -72,11 +70,8 @@ fun HistoryScreen(
 	onCompanyClick: (alias: String) -> Unit,
 ) {
 	val context = LocalContext.current
-	val viewModel = viewModel<HistoryScreenViewModel>()
-	val elements by viewModel.elements.observeAsState()
-	LaunchedEffect(key1 = Unit, block = {
-		viewModel.getFirstElements(context)
-	})
+	val viewModel = viewModel<HistoryScreenViewModel> { HistoryScreenViewModel(context)}
+	
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -90,70 +85,7 @@ fun HistoryScreen(
 		}
 	) {
 		Box(modifier = Modifier.padding(it)) {
-			ArticleCardStyle.defaultArticleCardStyle()?.let {
-				LazyColumn(
-					contentPadding = PaddingValues(8.dp),
-					verticalArrangement = Arrangement.spacedBy(8.dp)
-				) {
-					var lastDay = 0
-					
-					elements?.forEach { entity ->
-						val calendar =
-							Calendar.getInstance().apply { time = Date(entity.timestamp) }
-						val dayOfEvent = calendar.get(Calendar.DAY_OF_YEAR)
-						
-						if (dayOfEvent != lastDay) {
-							stickyHeader {
-								Row(
-									modifier = Modifier.fillMaxWidth(),
-									horizontalArrangement = Arrangement.Center
-								) {
-									Box(
-										modifier = Modifier
-											.padding(vertical = 0.dp)
-											.shadow(0.dp, CircleShape)
-											.clip(CircleShape)
-											.background(MaterialTheme.colors.surface)
-											.border(
-												1.dp,
-												MaterialTheme.colors.onBackground.copy(0.1f),
-												CircleShape
-											)
-											.padding(horizontal = 12.dp, vertical = 4.dp)
-									) {
-										Text(
-											text = remember {
-												formatFoundationDate(
-													calendar.get(
-														Calendar.DAY_OF_MONTH
-													).toString(),
-													(calendar.get(Calendar.MONTH) + 1).toString(),
-													calendar.get(Calendar.YEAR).toString()
-												)!!
-											},
-											fontWeight = FontWeight.W500,
-											color = MaterialTheme.colors.onBackground.copy(0.5f)
-										)
-									}
-								}
-							}
-						}
-						item {
-							if (entity.actionType == HistoryActionType.Article) {
-								
-								ArticleHistoryCard(
-									entity = entity,
-									articleData = remember { entity.getArticle() },
-									onClick = { onArticleClick(entity.getArticle().articleId) },
-									style = it
-								)
-								
-							}
-						}
-						lastDay = dayOfEvent
-					}
-				}
-			}
+			HistoryLazyColumn(model = viewModel.model, onArticleClick = onArticleClick)
 		}
 	}
 }

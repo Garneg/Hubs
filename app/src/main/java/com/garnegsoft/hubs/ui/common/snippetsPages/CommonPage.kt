@@ -19,6 +19,7 @@ import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrSnippet
 import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
+import com.garnegsoft.hubs.api.article.HabrSnippetListModel
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.LazyHabrSnippetsColumn
@@ -27,7 +28,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun <T : HabrSnippet> CommonPage(
-	listModel: AbstractSnippetListModel<T>,
+	listModel: HabrSnippetListModel<T>,
 	lazyListState: LazyListState = rememberLazyListState(),
 	collapsingBar: (@Composable () -> Unit)? = null,
 	doInitialLoading: Boolean = true,

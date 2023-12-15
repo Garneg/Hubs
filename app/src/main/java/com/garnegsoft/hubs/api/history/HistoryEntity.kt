@@ -7,23 +7,17 @@ import androidx.room.Database
 import androidx.room.Delete
 import androidx.room.Entity
 import androidx.room.Ignore
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
 import androidx.room.Upsert
-import kotlinx.coroutines.flow.Flow
+import com.garnegsoft.hubs.api.HabrSnippet
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.sql.Time
-import java.sql.Timestamp
 import java.util.Calendar
-import java.util.Date
+import kotlin.math.ceil
 
 @Entity(tableName = "history")
 data class HistoryEntity(
@@ -41,8 +35,8 @@ data class HistoryEntity(
 	val timestamp: Long,
 	
 	@PrimaryKey(autoGenerate = true)
-	val id: Int = 0
-)
+	override val id: Int = 0
+) : HabrSnippet
 
 enum class HistoryActionType {
 	Undefined,
@@ -60,8 +54,8 @@ interface HistoryDao {
 	@Upsert
 	fun insertEvent(event: HistoryEntity): Long
 	
-	@Query("SELECT * FROM history ORDER BY timestamp DESC LIMIT :eventsPerPage OFFSET :pageNumber * :eventsPerPage")
-	fun getEventsPaged(pageNumber: Int, eventsPerPage: Int = 20): List<HistoryEntity>
+	@Query("SELECT * FROM history ORDER BY timestamp DESC LIMIT :eventsPerPage OFFSET :pageIndex * :eventsPerPage")
+	fun getEventsPaged(pageIndex: Int, eventsPerPage: Int = 20): List<HistoryEntity>
 	
 	@Delete
 	fun deleteEvent(event: HistoryEntity)
@@ -69,6 +63,12 @@ interface HistoryDao {
 	@Query("DELETE FROM history")
 	fun clearAll()
 	
+	@Query("SELECT COUNT(id) FROM history")
+	fun eventsCount(): Int
+	
+	fun pagesCount(eventsPerPage: Int = 20): Int {
+		return ceil(eventsCount().toFloat() / eventsPerPage).toInt()
+	}
 }
 
 @Serializable
