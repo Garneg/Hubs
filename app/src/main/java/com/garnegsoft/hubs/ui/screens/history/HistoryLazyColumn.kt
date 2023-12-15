@@ -43,7 +43,9 @@ fun HistoryLazyColumn(
 	onArticleClick: (Int) -> Unit
 ) {
 	LaunchedEffect(key1 = Unit, block = {
-		model.loadFirstPage()
+		if (!model.data.isInitialized) {
+			model.loadFirstPage()
+		}
 	})
 	
 	val list by model.data.observeAsState()
@@ -77,7 +79,7 @@ fun HistoryLazyColumn(
 									) {
 										Box(
 											modifier = Modifier
-												.padding(vertical = 0.dp)
+												.padding(vertical = 2.dp)
 												.shadow(0.dp, CircleShape)
 												.clip(CircleShape)
 												.background(MaterialTheme.colors.surface)

@@ -82,6 +82,8 @@ var authorized: Boolean = false
 
 
 class MainActivity : ComponentActivity() {
+	
+	
 	@OptIn(ExperimentalAnimationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
