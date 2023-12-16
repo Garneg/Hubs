@@ -140,6 +140,8 @@ fun MainScreen(
 				val authorsLazyListState = rememberLazyListState()
 				val companiesLazyListState = rememberLazyListState()
 				
+				
+				
 				val pages = remember(key1 = isAuthorized) {
 					var map = mapOf<String, @Composable () -> Unit>(
 						"Статьи" to {

@@ -586,6 +586,7 @@ class MainActivity : ComponentActivity() {
 									route = "savedArticles",
 									deepLinks = listOf(NavDeepLink("hubs://saved-articles"))
 								) {
+									
 									OfflineArticlesScreen(
 										onBack = { navController.popBackStack() },
 										onArticleClick = { navController.navigate("article/$it?offline=true") }
