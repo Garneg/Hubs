@@ -522,7 +522,8 @@ class MainActivity : ComponentActivity() {
 								
 								composable(
 									"hub/{alias}",
-									deepLinks = HubScreenNavDeepLinks
+									deepLinks = HubScreenNavDeepLinks,
+									popExitTransition = { fadeOut(tween(50)) }
 								) {
 									val alias = it.arguments?.getString("alias")
 									HubScreen(alias = alias!!, viewModelStoreOwner = it,
@@ -538,10 +539,18 @@ class MainActivity : ComponentActivity() {
 										onUserClick = { navController.navigate("user/$it") },
 										onCommentsClick = { navController.navigate("comments/$it") }
 									)
+									
+									if (this.transition.isRunning) {
+										Box(
+											modifier = Modifier
+												.fillMaxSize()
+												.pointerInput(this.transition.isRunning) {})
+									}
 								}
 								composable(
 									"company/{alias}",
 									deepLinks = CompanyScreenNavDeepLinks,
+									popExitTransition = { fadeOut(tween(50)) }
 								) {
 									val alias = it.arguments?.getString("alias")!!
 									CompanyScreen(
@@ -558,6 +567,13 @@ class MainActivity : ComponentActivity() {
 										onCommentsClick = { navController.navigate("comments/$it") },
 										onUserClick = { navController.navigate("user/$it") }
 									)
+									
+									if (this.transition.isRunning) {
+										Box(
+											modifier = Modifier
+												.fillMaxSize()
+												.pointerInput(this.transition.isRunning) {})
+									}
 								}
 								
 								composable("about") {
