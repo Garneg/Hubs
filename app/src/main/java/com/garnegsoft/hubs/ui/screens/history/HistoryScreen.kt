@@ -75,6 +75,7 @@ fun HistoryScreen(
 	Scaffold(
 		topBar = {
 			TopAppBar(
+				elevation = 0.dp,
 				title = { Text(text = "История") },
 				navigationIcon = {
 					IconButton(onClick = onBack) {

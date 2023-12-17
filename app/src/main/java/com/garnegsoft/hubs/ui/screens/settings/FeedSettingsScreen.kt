@@ -53,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -62,6 +63,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostComplexity
 import com.garnegsoft.hubs.api.PostType
@@ -133,6 +135,7 @@ fun FeedSettingsScreen(
 		scaffoldState = scaffoldState,
 		topBar = {
 			TopAppBar(
+				elevation = 0.dp,
 				title = { Text(text = "Лента") },
 				navigationIcon = {
 					IconButton(onClick = onBack) {
@@ -292,7 +295,7 @@ fun FeedSettingsScreen(
 		Column(
 			modifier = Modifier.padding(it)
 		) {
-			val fakeArticles = remember { listOf(TestArticle, SecondArticle) }
+			val fakeArticles = listOf(TestArticle, SecondArticle)
 			ArticleCardStyle.defaultArticleCardStyle()?.let { style ->
 				LazyColumn(
 					contentPadding = PaddingValues(8.dp),
@@ -319,7 +322,9 @@ fun FeedSettingsScreen(
 	}
 }
 
-val TestArticle = ArticleSnippet(
+val TestArticle
+	@Composable
+	get() = ArticleSnippet(
 	0,
 	"вчера, 06:32",
 	false,
@@ -337,8 +342,8 @@ val TestArticle = ArticleSnippet(
 		Article.Hub("", true, false, ".NET", Article.Hub.RelatedData(true)),
 		Article.Hub("", false, false, "Карьера в IT", null)
 	),
-	"""Как мне дальше двигаться по карьере? - такой вопрос многие задавали себе как в начале своего пути так и позже не только в IT, но и в других сферах. Спектор этого вопроса охватывает почти все работящее население планеты, ведь карьера для человека сегодня дело очень серъезное бла бла мне надоело писать эту заглушку, извините.""".trimMargin(),
-	"https://mykaleidoscope.ru/x/uploads/posts/2022-09/1663365833_63-mykaleidoscope-ru-p-pozdravlenie-s-povisheniem-vkontakte-65.jpg",
+	stringResource(id = R.string.settings_first_article_snippet_text),
+	"https://megapicture.com/non-existing-picture.png",
 	null,
 	15,
 	PostComplexity.Low,
@@ -346,11 +351,14 @@ val TestArticle = ArticleSnippet(
 	false
 )
 
-val SecondArticle = ArticleSnippet(
+
+val SecondArticle
+	@Composable
+	get() = ArticleSnippet(
 	0,
 	"вчера, 03:28",
 	false,
-	"Кажется, мы слишком сильно ускорились",
+	"Игорь уничтожил нам серверную!!!",
 	EditorVersion.FirstVersion,
 	PostType.Unknown,
 	listOf(),
@@ -360,11 +368,10 @@ val SecondArticle = ArticleSnippet(
 	),
 	Article.Statistics(45, 12, 4000, -14, 0, 0),
 	listOf(
-		Article.Hub("", true, false, "Программирование", null),
-		Article.Hub("", true, false, "Rust", Article.Hub.RelatedData(true))
+		Article.Hub("", false, false, "Системное администрирование", null),
 	),
-	"Перейдя на новый проект, который в компании писали тогда уже год на языке программирования Rust, и посмотрев как работают мои коллеги, стараясь применить каждую оптимизацию для более быстрого вычисления, я понял, что то не так, кажется мы слишком ускорили наш проект.",
-	"https://i.ytimg.com/vi/YEVdOWsg6ik/maxresdefault.jpg",
+	stringResource(R.string.settings_second_article_snippet_text),
+		"https://megapicture.com/non-existing-picture.png",
 	null,
 	10,
 	PostComplexity.None,
