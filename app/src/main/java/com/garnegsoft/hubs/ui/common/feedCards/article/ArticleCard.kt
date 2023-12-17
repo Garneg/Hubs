@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
@@ -134,12 +134,12 @@ fun ArticleCard(
 			modifier = Modifier.padding(horizontal = style.innerPadding, vertical = 2.dp),
 			verticalAlignment = Alignment.CenterVertically,
 		) {
-			if (article.complexity != PostComplexity.None) {
-				val postComplexityColor = remember {
+			if (article.complexity != PublicationComplexity.None) {
+				val publicationComplexityColor = remember {
 					when (article.complexity) {
-						PostComplexity.Low -> Color(0xFF4CBE51)
-						PostComplexity.Medium -> Color(0xFFEEBC25)
-						PostComplexity.High -> Color(0xFFEB3B2E)
+						PublicationComplexity.Low -> Color(0xFF4CBE51)
+						PublicationComplexity.Medium -> Color(0xFFEEBC25)
+						PublicationComplexity.High -> Color(0xFFEB3B2E)
 						else -> style.statisticsColor
 					}
 				}
@@ -147,17 +147,17 @@ fun ArticleCard(
 					modifier = Modifier.size(height = 10.dp, width = 20.dp),
 					painter = painterResource(id = R.drawable.speedmeter_hard),
 					contentDescription = "",
-					tint = postComplexityColor
+					tint = publicationComplexityColor
 				)
 				Spacer(modifier = Modifier.width(4.dp))
 				Text(
 					text = when (article.complexity) {
-						PostComplexity.Low -> "Простой"
-						PostComplexity.Medium -> "Средний"
-						PostComplexity.High -> "Сложный"
+						PublicationComplexity.Low -> "Простой"
+						PublicationComplexity.Medium -> "Средний"
+						PublicationComplexity.High -> "Сложный"
 						else -> ""
 					},
-					color = postComplexityColor,
+					color = publicationComplexityColor,
 					fontWeight = FontWeight.W500,
 					fontSize = 14.sp
 				

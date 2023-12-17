@@ -97,9 +97,9 @@ fun <T : HabrSnippet> BaseHubsLazyColumn(
     val derivedItemsCount by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
     val isLastDerived by remember {
         derivedStateOf {
-            // will work only if controller loads more than 5 snippets per page
-            if (data.list.size > 4 && lazyListState.layoutInfo.totalItemsCount > 4)
-                lazyListState.layoutInfo.totalItemsCount - 5 <= lazyListState.layoutInfo.visibleItemsInfo.last().index
+            // will work only if controller loads more than 8 snippets per page
+            if (data.list.size > 8 && lazyListState.layoutInfo.totalItemsCount > 8)
+                lazyListState.layoutInfo.totalItemsCount - 7 <= lazyListState.layoutInfo.visibleItemsInfo.last().index
             else
                 false
         }

@@ -1,35 +1,27 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.CompaniesListModel
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.hub.HubsListModel
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.user.UsersListModel
-import com.garnegsoft.hubs.api.user.list.UserSnippet
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class ArticlesScreenViewModel : ViewModel() {
 	
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("myFeed" to "true", "complexity" to "all", "score" to "all"),
-		initialFilter = MyFeedFilter(showNews = false, showArticles = true)
+		baseArgs = arrayOf("myFeed" to "true"),
+		initialFilter = MyFeedFilter(showNews = false, showArticles = true, minRating = -1, complexity = PublicationComplexity.None)
 	)
 	
 	val articlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		initialFilter = ArticlesFilterState(showLast = true, complexity = PostComplexity.None)
+		initialFilter = ArticlesFilterState(showLast = true, complexity = PublicationComplexity.None)
 	)
 	
 	val newsListModel = ArticlesListModel(

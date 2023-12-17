@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 
@@ -39,6 +40,7 @@ fun TitledColumn(
     modifier: Modifier = Modifier,
     horizontalAlignment: Alignment.Horizontal = Alignment.Start,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    spaceAfterTitle: Dp = 6.dp,
     titleStyle: TextStyle = MaterialTheme.typography.subtitle2.copy(color = MaterialTheme.colors.onSurface),
     content: @Composable ColumnScope.() -> Unit
 ) {
@@ -47,7 +49,7 @@ fun TitledColumn(
         horizontalAlignment = horizontalAlignment,
         verticalArrangement = verticalArrangement,
         title = { Text(text = title, style = titleStyle) },
-        divider = { Spacer(modifier = Modifier.height(6.dp)) },
+        divider = { Spacer(modifier = Modifier.height(spaceAfterTitle)) },
         content = content
     )
 }

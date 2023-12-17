@@ -35,12 +35,12 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.screens.user.HubChip
+import com.garnegsoft.hubs.ui.common.HubChip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.*
@@ -243,30 +243,30 @@ fun ArticleContent(
 				Row(
 					verticalAlignment = Alignment.CenterVertically,
 				) {
-					if (article.complexity != PostComplexity.None) {
+					if (article.complexity != PublicationComplexity.None) {
 						Icon(
 							modifier = Modifier.size(height = 10.dp, width = 20.dp),
 							painter = painterResource(id = R.drawable.speedmeter_hard),
 							contentDescription = "",
 							tint = when (article.complexity) {
-								PostComplexity.Low -> Color(0xFF4CBE51)
-								PostComplexity.Medium -> Color(0xFFEEBC25)
-								PostComplexity.High -> Color(0xFFEB3B2E)
+								PublicationComplexity.Low -> Color(0xFF4CBE51)
+								PublicationComplexity.Medium -> Color(0xFFEEBC25)
+								PublicationComplexity.High -> Color(0xFFEB3B2E)
 								else -> Color.Red
 							}
 						)
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(
 							text = when (article.complexity) {
-								PostComplexity.Low -> "Простой"
-								PostComplexity.Medium -> "Средний"
-								PostComplexity.High -> "Сложный"
+								PublicationComplexity.Low -> "Простой"
+								PublicationComplexity.Medium -> "Средний"
+								PublicationComplexity.High -> "Сложный"
 								else -> ""
 							},
 							color = when (article.complexity) {
-								PostComplexity.Low -> Color(0xFF4CBE51)
-								PostComplexity.Medium -> Color(0xFFEEBC25)
-								PostComplexity.High -> Color(0xFFEB3B2E)
+								PublicationComplexity.Low -> Color(0xFF4CBE51)
+								PublicationComplexity.Medium -> Color(0xFFEEBC25)
+								PublicationComplexity.High -> Color(0xFFEB3B2E)
 								else -> Color.Red
 							},
 							fontWeight = FontWeight.W500,

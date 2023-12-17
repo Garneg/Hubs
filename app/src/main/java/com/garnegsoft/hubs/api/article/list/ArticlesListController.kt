@@ -138,7 +138,7 @@ class ArticlesListController {
 								),
 								imageUrl = it.leadData.imageUrl,
 								textSnippet = it.leadData.textHtml,
-								complexity = PostComplexity.fromString(it.complexity),
+								complexity = PublicationComplexity.fromString(it.complexity),
 								readingTime = it.readingTime,
 								relatedData = it.relatedData?.let {
 									com.garnegsoft.hubs.api.article.Article.RelatedData(

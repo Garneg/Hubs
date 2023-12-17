@@ -16,17 +16,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.screens.main.ArticlesFilterState
 
 data class HubArticlesFilter(
 	val showLast: Boolean,
 	val minRating: Int = -1,
 	val period: FilterPeriod = FilterPeriod.Day,
-	val complexity: PostComplexity
+	val complexity: PublicationComplexity
 ) : Filter {
 	override fun toArgsMap(): Map<String, String> {
 		return if (showLast){
@@ -45,12 +44,12 @@ data class HubArticlesFilter(
 					FilterPeriod.AllTime -> "alltime"
 				}
 			)
-		} + if (complexity != PostComplexity.None) {
+		} + if (complexity != PublicationComplexity.None) {
 			mapOf(
 				"complexity" to when (complexity) {
-					PostComplexity.Low -> "easy"
-					PostComplexity.Medium -> "medium"
-					PostComplexity.High -> "hard"
+					PublicationComplexity.Low -> "easy"
+					PublicationComplexity.Medium -> "medium"
+					PublicationComplexity.High -> "hard"
 					else -> throw IllegalArgumentException("mapping of this complexity is not supported")
 				}
 			)
@@ -73,9 +72,9 @@ data class HubArticlesFilter(
 				FilterPeriod.AllTime -> "все время"
 			}
 		} + when (complexity) {
-			PostComplexity.High -> ", сложные"
-			PostComplexity.Medium -> ", средние"
-			PostComplexity.Low -> ", простые"
+			PublicationComplexity.High -> ", сложные"
+			PublicationComplexity.Medium -> ", средние"
+			PublicationComplexity.Low -> ", простые"
 			
 			else -> ""
 		}
@@ -214,23 +213,23 @@ fun HubArticlesFilter(
 					horizontalArrangement = Arrangement.spacedBy(8.dp)
 				) {
 					HubsFilterChip(
-						selected = complexity == PostComplexity.None,
-						onClick = { complexity = PostComplexity.None }) {
+						selected = complexity == PublicationComplexity.None,
+						onClick = { complexity = PublicationComplexity.None }) {
 						Text(text = "Все")
 					}
 					HubsFilterChip(
-						selected = complexity == PostComplexity.Low,
-						onClick = { complexity = PostComplexity.Low }) {
+						selected = complexity == PublicationComplexity.Low,
+						onClick = { complexity = PublicationComplexity.Low }) {
 						Text(text = "Простой")
 					}
 					HubsFilterChip(
-						selected = complexity == PostComplexity.Medium,
-						onClick = { complexity = PostComplexity.Medium }) {
+						selected = complexity == PublicationComplexity.Medium,
+						onClick = { complexity = PublicationComplexity.Medium }) {
 						Text(text = "Средний")
 					}
 					HubsFilterChip(
-						selected = complexity == PostComplexity.High,
-						onClick = { complexity = PostComplexity.High }) {
+						selected = complexity == PublicationComplexity.High,
+						onClick = { complexity = PublicationComplexity.High }) {
 						Text(text = "Сложный")
 					}
 					
