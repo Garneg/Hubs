@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.feedCards.user
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -51,12 +51,12 @@ private fun defaultUserCardStyle(): UserCardStyle {
 
 @Composable
 fun UserCard(
-    user: UserSnippet,
-    style: UserCardStyle = defaultUserCardStyle(),
-    indicator: @Composable () -> Unit = {
+	user: UserSnippet,
+	style: UserCardStyle = defaultUserCardStyle(),
+	indicator: @Composable () -> Unit = {
         Text(text = user.rating.toString(), fontWeight = FontWeight.W400, color = DefaultRatingIndicatorColor)
     },
-    onClick: () -> Unit
+	onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier

@@ -156,49 +156,54 @@ fun CommentsThreadScreen(
 					items(
 						items = collection.comments.toList()
 					) {
-						CommentItem(
-							modifier = Modifier
-								.padding(
-									start = 20.dp.times(it.level.coerceAtMost(5))
-								),
-							comment = it,
-							highlight = false,
-							showReplyButton = collection.commentAccess.canComment,
-							onAuthorClick = { onAuthor(it.author.alias) },
-							onShare = {
-								val intent = Intent(Intent.ACTION_SEND)
-								intent.putExtra(
-									Intent.EXTRA_TEXT,
-									"https://habr.com/p/${articleId}/comments/#comment_${it.id}"
-								)
-								intent.setType("text/plain")
-								context.startActivity(Intent.createChooser(intent, null))
-							},
-							onReplyClick = {
-								parentComment = it
-							}
-						) {
-							Column {
-								it.let {
-									SelectionContainer {
-										((parseElement(
-											it.message, SpanStyle(
-												fontSize = 16.sp,
-												color = MaterialTheme.colors.onSurface
-											),
-											onViewImageRequest = onImageClick
-										).second)?.let { it1 ->
-											it1(
-												SpanStyle(
+						if (it.deleted){
+							DeletedCommentItem(modifier = Modifier.padding(start = 20.dp.times(it.level.coerceAtMost(5))))
+						}
+						else {
+							CommentItem(
+								modifier = Modifier
+									.padding(
+										start = 20.dp.times(it.level.coerceAtMost(5))
+									),
+								comment = it,
+								highlight = false,
+								showReplyButton = collection.commentAccess.canComment,
+								onAuthorClick = { onAuthor(it.author.alias) },
+								onShare = {
+									val intent = Intent(Intent.ACTION_SEND)
+									intent.putExtra(
+										Intent.EXTRA_TEXT,
+										"https://habr.com/p/${articleId}/comments/#comment_${it.id}"
+									)
+									intent.setType("text/plain")
+									context.startActivity(Intent.createChooser(intent, null))
+								},
+								onReplyClick = {
+									parentComment = it
+								}
+							) {
+								Column {
+									it.let {
+										SelectionContainer {
+											((parseElement(
+												it.message, SpanStyle(
 													fontSize = 16.sp,
 													color = MaterialTheme.colors.onSurface
 												),
-												elementsSettings
-											)
-										})
+												onViewImageRequest = onImageClick
+											).second)?.let { it1 ->
+												it1(
+													SpanStyle(
+														fontSize = 16.sp,
+														color = MaterialTheme.colors.onSurface
+													),
+													elementsSettings
+												)
+											})
+										}
 									}
+									
 								}
-								
 							}
 						}
 					}

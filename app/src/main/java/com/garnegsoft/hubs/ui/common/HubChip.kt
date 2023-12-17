@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.screens.user
+package com.garnegsoft.hubs.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -60,6 +60,7 @@ fun HubChip(
 @Composable
 fun HubChip(
     title: String,
+    isSubscribed: Boolean = false,
     onClick: () -> Unit
 ) {
     Text(

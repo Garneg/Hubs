@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-    <background>
-        <color android:color="#69ABCA" />
+    <background android:drawable="@drawable/winter_launcher_icon">
+        <color android:color="#69ABCD" />
     </background>
-    <foreground android:drawable="@drawable/foreground_filled" />
+    <foreground android:drawable="@drawable/winter_launcher_icon_foreground" />
 </adaptive-icon>

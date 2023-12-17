@@ -38,7 +38,7 @@ fun formatTime(time: String): String {
     var result = String()
     
     val localedTime = defaultInputFormatter.parse(time.split('+')[0].replace('T', ' '))!!
-    localedTime.time = localedTime.time + TimeZone.getDefault().rawOffset + TimeZone.getDefault().dstSavings
+    localedTime.time = localedTime.time + TimeZone.getDefault().getOffset(Date().time)
     
     var todayCallendar = Calendar.getInstance()
     var publishCalendar = Calendar.getInstance()
@@ -94,4 +94,9 @@ fun formatFoundationDate(day: String?, month: String?, year: String?): String? {
         result += it.toInt().toString()
     }
     return result.ifEmpty { null }
+}
+
+fun formatTimestamp(timestamp: Long): String {
+    val date = Date(timestamp)
+    return customOutputFormatter.format(date)
 }

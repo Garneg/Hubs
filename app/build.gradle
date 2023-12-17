@@ -5,6 +5,12 @@ plugins {
     id "kotlin-kapt"
 }
 
+def getDate() {
+    def date = new Date()
+    def formattedDate = date.format('HHmmddMMyy')
+    return formattedDate
+}
+
 android {
     namespace "com.garnegsoft.hubs"
     compileSdk 34
@@ -13,8 +19,8 @@ android {
         applicationId "com.garnegsoft.hubs"
         minSdk 23
         targetSdk 34
-        versionCode 12
-        versionName "2.3.4"
+        versionCode 13
+        versionName "2.4.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -26,6 +32,7 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+
         }
         benchmark {
             proguardFiles "proguard-rules.pro"
@@ -34,9 +41,9 @@ android {
             debuggable false
         }
         debug {
-
             debuggable true
-            applicationIdSuffix ".debug"
+//            applicationIdSuffix ".debug"
+            versionNameSuffix "-build" + getDate()
         }
 
     }
@@ -51,7 +58,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "1.4.7"
+        kotlinCompilerExtensionVersion "1.5.3"
     }
     packagingOptions {
         resources {
@@ -64,27 +71,29 @@ kapt {
 }
 
 dependencies {
-    var m3version = "1.1.1"
+    var m3version = "1.1.2"
     implementation "androidx.compose.material3:material3:$m3version"
+
+    implementation "androidx.work:work-runtime-ktx:2.9.0"
 
     implementation "androidx.profileinstaller:profileinstaller:1.3.1"
 
-    implementation "androidx.compose.runtime:runtime-livedata:1.5.0"
+    implementation "androidx.compose.runtime:runtime-livedata:1.5.4"
 
     implementation "me.saket.telephoto:zoomable-image-coil:0.4.0"
 
     implementation "org.jsoup:jsoup:1.16.1"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.5.1"
     implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.core:core-ktx:1.10.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.1"
-    implementation "androidx.activity:activity-compose:1.7.2"
+    implementation "androidx.core:core-ktx:1.12.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
+    implementation "androidx.activity:activity-compose:1.8.1"
     implementation "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-    implementation "androidx.compose.material:material:1.5.0"
+    implementation "androidx.compose.material:material:1.5.4"
     implementation "com.squareup.okhttp3:okhttp:4.11.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
 
     implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
 
@@ -98,14 +107,15 @@ dependencies {
     implementation "io.coil-kt:coil-svg:$coil_version"
 
     implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.0"
-    implementation "androidx.browser:browser:1.6.0"
-    implementation "com.google.android.material:material:1.9.0"
+    implementation "androidx.browser:browser:1.7.0"
+    implementation "com.google.android.material:material:1.10.0"
     implementation "androidx.constraintlayout:constraintlayout:2.1.4"
-    implementation "androidx.core:core-ktx:1.10.1"
+    implementation "androidx.core:core-ktx:1.12.0"
     implementation "androidx.coordinatorlayout:coordinatorlayout:1.2.0"
 
     implementation "androidx.datastore:datastore-preferences:1.0.0"
     implementation "androidx.room:room-ktx:$room_version"
+    implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
 
     testImplementation "junit:junit:4.13.2"

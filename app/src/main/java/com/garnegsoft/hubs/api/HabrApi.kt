@@ -36,6 +36,11 @@ class HabrApi {
                 .build()
 
         }
+        
+        // Shouldn't be used in production. Use only in tests
+        fun setHttpClient(client: OkHttpClient) {
+            HttpClient = client
+        }
 
         fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")

@@ -5,11 +5,14 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
-import com.garnegsoft.hubs.ui.common.ArticleCard
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.FilterElement
 import kotlinx.coroutines.launch
 
@@ -22,20 +25,25 @@ fun ArticlesListPage(
 	onArticleSnippetClick: (articleId: Int) -> Unit,
 	onArticleAuthorClick: (authorAlias: String) -> Unit,
 	onArticleCommentsClick: (articleId: Int) -> Unit,
-	doInitialLoading: Boolean = true
+	doInitialLoading: Boolean = true,
 ) {
-	CommonPage(
-		listModel = listModel,
-		lazyListState = lazyListState,
-		collapsingBar = filterIndicator,
-		doInitialLoading = doInitialLoading
-	) {
-		ArticleCard(
-			article = it,
-			onClick = { onArticleSnippetClick(it.id) },
-			onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
-			onCommentsClick = { onArticleCommentsClick(it.id) }
-		)
+	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
+	
+	cardsStyle?.let { articleCardStyle ->
+		CommonPage(
+			listModel = listModel,
+			lazyListState = lazyListState,
+			collapsingBar = filterIndicator,
+			doInitialLoading = doInitialLoading
+		) {
+			ArticleCard(
+				article = it,
+				onClick = { onArticleSnippetClick(it.id) },
+				onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
+				onCommentsClick = { onArticleCommentsClick(it.id) },
+				style = articleCardStyle
+			)
+		}
 	}
 }
 
@@ -61,18 +69,24 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	doInitialLoading: Boolean = true,
 	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
 ) {
-	CommonPageWithFilter(
-		listModel = listModel, filterDialog = filterDialog,
-		filter = filter,
-		doInitialLoading = doInitialLoading,
-		lazyListState = lazyListState,
-		collapsingContentState = collapsingContentState
-	) {
-		ArticleCard(
-			article = it,
-			onClick = { onArticleSnippetClick(it.id) },
-			onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
-			onCommentsClick = { onArticleCommentsClick(it.id) }
-		)
+	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
+	
+	cardsStyle?.let { style ->
+		CommonPageWithFilter(
+			listModel = listModel, filterDialog = filterDialog,
+			filter = filter,
+			doInitialLoading = doInitialLoading,
+			lazyListState = lazyListState,
+			collapsingContentState = collapsingContentState
+		) {
+			ArticleCard(
+				article = it,
+				onClick = { onArticleSnippetClick(it.id) },
+				onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
+				onCommentsClick = { onArticleCommentsClick(it.id) },
+				style = style
+			)
+		}
 	}
+	
 }

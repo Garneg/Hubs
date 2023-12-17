@@ -4,17 +4,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.company.CompaniesListModel
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.hub.Hub
 import com.garnegsoft.hubs.api.hub.HubController
-import com.garnegsoft.hubs.api.hub.HubsListModel
 import com.garnegsoft.hubs.api.user.UsersListModel
-import com.garnegsoft.hubs.api.user.list.UserSnippet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -43,7 +38,7 @@ class HubScreenViewModel(val alias: String) : ViewModel() {
 			showLast = true,
 			minRating = -1,
 			period = FilterPeriod.Day,
-			complexity = PostComplexity.None
+			complexity = PublicationComplexity.None
 		)
 	)
 	

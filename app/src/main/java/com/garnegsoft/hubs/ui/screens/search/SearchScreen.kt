@@ -50,6 +50,9 @@ import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
+import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
+import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
+import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -146,21 +149,23 @@ fun SearchScreen(
 						imeAction = ImeAction.Search
 					),
 					keyboardActions = KeyboardActions {
-						keyboardController?.hide()
-						if (searchTextValue.startsWith(".id")) {
-							if (searchTextValue.drop(3).isDigitsOnly())
-								onArticleClicked(searchTextValue.drop(3).toInt())
-						} else {
-							currentQuery = searchTextValue
-							
-							
-							viewModel.articlesListModel.editFilter(
-								ArticlesSearchFilter(
-									order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
-									query = currentQuery
+						if (searchTextValue.isNotBlank()) {
+							keyboardController?.hide()
+							if (searchTextValue.startsWith(".id")) {
+								if (searchTextValue.drop(3).isDigitsOnly())
+									onArticleClicked(searchTextValue.drop(3).toInt())
+							} else {
+								currentQuery = searchTextValue
+								
+								
+								viewModel.articlesListModel.editFilter(
+									ArticlesSearchFilter(
+										order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
+										query = currentQuery
+									)
 								)
-							)
-							showPages = true
+								showPages = true
+							}
 						}
 					},
 					singleLine = true,

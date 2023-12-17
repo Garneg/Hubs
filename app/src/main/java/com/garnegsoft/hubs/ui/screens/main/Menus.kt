@@ -1,26 +1,30 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
@@ -34,7 +38,6 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import kotlinx.coroutines.delay
 
 @Composable
 fun AuthorizedMenu(
@@ -45,6 +48,7 @@ fun AuthorizedMenu(
 	onCommentsClick: () -> Unit,
 	onBookmarksClick: () -> Unit,
 	onSavedArticlesClick: () -> Unit,
+	onHistoryClick: () -> Unit,
 	onSettingsClick: () -> Unit,
 	onAboutClick: () -> Unit,
 ) {
@@ -55,7 +59,7 @@ fun AuthorizedMenu(
 				modifier = Modifier
 					.size(32.dp)
 					.clip(RoundedCornerShape(8.dp))
-					.background(Color.White),
+					.background(if (MaterialTheme.colors.isLight) Color.Transparent else Color.White),
 				contentScale = ContentScale.FillBounds,
 				model = avatarUrl, contentDescription = ""
 			)
@@ -78,27 +82,35 @@ fun AuthorizedMenu(
 		}
 		
 	}
-	var visible by rememberSaveable {
-		mutableStateOf(false)
-	}
-	LaunchedEffect(key1 = expanded, block = {
-		if (expanded) {
-			visible = expanded
-		}
-	})
-	LaunchedEffect(key1 = visible, block = {
-		delay(150)
-		if (!visible) {
-			expanded = false
-		}
-		
-	})
-	val alpha by animateFloatAsState(
-		targetValue = if (visible) 1f else 0.0f,
-		animationSpec = tween(150)
-	)
+	val menuTransition = updateTransition(targetState = expanded)
 	
-	if (expanded) {
+	val alpha by menuTransition.animateFloat(
+		transitionSpec = {
+			if (this.targetState)
+				tween(150)
+			else
+				tween(150)
+			
+		}
+	) {
+		if (it) 1f else 0.0f
+	}
+	
+	val itemsAnimation by menuTransition.animateFloat(
+		transitionSpec = {
+			if (this.targetState)
+				tween(150, 50)
+			else
+				tween(100)
+			
+		}
+	) {
+		if (it) 1f else 0.0f
+	}
+	
+	val itemsOffset = 20
+	
+	if (menuTransition.targetState || expanded || menuTransition.currentState) {
 		Popup(
 			popupPositionProvider = object : PopupPositionProvider {
 				override fun calculatePosition(
@@ -113,8 +125,9 @@ fun AuthorizedMenu(
 				
 			},
 			properties = PopupProperties(true),
-			onDismissRequest = { visible = false }
+			onDismissRequest = { expanded = false }
 		) {
+			
 			Box(
 				modifier = Modifier
 					.alpha(alpha)
@@ -131,111 +144,207 @@ fun AuthorizedMenu(
 						Modifier
 							.width(intrinsicSize = IntrinsicSize.Max)
 							.widthIn(min = 150.dp)
+							.verticalScroll(rememberScrollState())
 					) {
-						MenuItem(title = userAlias, icon = {
-							if (avatarUrl != null) {
-								AsyncImage(
-									modifier = Modifier
-										.size(32.dp)
-										.clip(RoundedCornerShape(8.dp))
-										.background(Color.White),
-									contentScale = ContentScale.FillBounds,
-									model = avatarUrl, contentDescription = ""
-								)
-							} else {
-								Icon(
-									modifier = Modifier
-										.size(32.dp)
-										.border(
-											width = 2.dp, color = placeholderColorLegacy(userAlias),
-											shape = RoundedCornerShape(8.dp)
-										)
-										.background(
-											Color.White,
-											shape = RoundedCornerShape(8.dp)
-										)
-										.padding(2.5.dp),
-									painter = painterResource(id = R.drawable.user_avatar_placeholder),
-									contentDescription = "",
-									tint = placeholderColorLegacy(userAlias)
-								)
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.6f
+							},
+							title = userAlias, icon = {
+								if (avatarUrl != null) {
+									AsyncImage(
+										modifier = Modifier
+											.size(32.dp)
+											.clip(RoundedCornerShape(8.dp))
+											.background(Color.White),
+										contentScale = ContentScale.FillBounds,
+										model = avatarUrl, contentDescription = ""
+									)
+								} else {
+									Icon(
+										modifier = Modifier
+											.size(32.dp)
+											.border(
+												width = 2.dp,
+												color = placeholderColorLegacy(userAlias),
+												shape = RoundedCornerShape(8.dp)
+											)
+											.background(
+												Color.White,
+												shape = RoundedCornerShape(8.dp)
+											)
+											.padding(2.5.dp),
+										painter = painterResource(id = R.drawable.user_avatar_placeholder),
+										contentDescription = "",
+										tint = placeholderColorLegacy(userAlias)
+									)
+								}
+							}, onClick = {
+								onProfileClick()
+								expanded = false
 							}
-						}, onClick = onProfileClick)
+						)
 						Divider(
-							modifier = Modifier.padding(
-								horizontal = 12.dp,
-								vertical = 4.dp
-							)
+							modifier = Modifier
+								.padding(
+									horizontal = 12.dp,
+									vertical = 4.dp
+								)
+								.graphicsLayer {
+									this.translationY =
+										-itemsOffset + itemsOffset * itemsAnimation
+									this.alpha = itemsAnimation + 0.6f
+								}
 						)
 						
-						MenuItem(title = "Статьи", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.article),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onArticlesClick)
-						
-						MenuItem(title = "Комментарии", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.comments_icon),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onCommentsClick)
-						
-						MenuItem(title = "Закладки", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.bookmark),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onBookmarksClick)
-						
-						MenuItem(title = "Скачанные", icon = {
-							Icon(
-								painter = painterResource(id = R.drawable.download),
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onSavedArticlesClick)
-						
-						MenuItem(title = "Настройки", icon = {
-							Icon(
-								imageVector = Icons.Outlined.Settings,
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onSettingsClick)
-						
-						Divider(
-							modifier = Modifier.padding(
-								horizontal = 12.dp,
-								vertical = 4.dp
-							)
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.55f
+							},
+							title = "Статьи", icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.article),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onArticlesClick()
+								expanded = false
+							}
 						)
 						
-						MenuItem(title = "О приложении", icon = {
-							Icon(
-								imageVector = Icons.Outlined.Info,
-								contentDescription = "",
-								tint = MaterialTheme.colors.onBackground
-							)
-						}, onClick = onAboutClick)
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.5f
+							},
+							title = "Комментарии", icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.comments_icon),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onCommentsClick()
+								expanded = false
+							}
+						)
+						
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.4f
+							},
+							title = "Закладки", icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.bookmark),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onBookmarksClick()
+								expanded = false
+							}
+						)
+						
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.3f
+							},
+							title = "Скачанные", icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.download),
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onSavedArticlesClick()
+								expanded = false
+							}
+						)
+						
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.2f
+							},
+							title = "История",
+							icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.history),
+									contentDescription = null,
+									tint = MaterialTheme.colors.onBackground
+								)
+							},
+							onClick = {
+								onHistoryClick()
+								expanded = false
+							}
+						)
+						
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.1f
+							},
+							title = "Настройки", icon = {
+								Icon(
+									imageVector = Icons.Outlined.Settings,
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onSettingsClick()
+								expanded = false
+							}
+						)
+						
+						Divider(
+							modifier = Modifier
+								.padding(
+									horizontal = 12.dp,
+									vertical = 4.dp
+								)
+								.graphicsLayer {
+									this.translationY =
+										-itemsOffset + itemsOffset * itemsAnimation
+									this.alpha = itemsAnimation + 0.05f
+								}
+						)
+						
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.0f
+							},
+							title = "О приложении", icon = {
+								Icon(
+									imageVector = Icons.Outlined.Info,
+									contentDescription = "",
+									tint = MaterialTheme.colors.onBackground
+								)
+							}, onClick = {
+								onAboutClick()
+								expanded = false
+							}
+						)
 					}
 				}
 			}
-			
 		}
 	}
-	
 }
+
 
 @Composable
 fun UnauthorizedMenu(
 	onLoginClick: () -> Unit,
 	onAboutClick: () -> Unit,
 	onSettingsClick: () -> Unit,
+	onHistoryClick: () -> Unit,
 	onSavedArticlesClick: () -> Unit
 ) {
 	var expanded by remember { mutableStateOf(false) }
@@ -254,7 +363,10 @@ fun UnauthorizedMenu(
 				contentDescription = "",
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onLoginClick)
+		}, onClick = {
+			onLoginClick()
+			expanded = false
+		})
 		
 		MenuItem(title = "Скачанные", icon = {
 			Icon(
@@ -262,7 +374,25 @@ fun UnauthorizedMenu(
 				contentDescription = "",
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onSavedArticlesClick)
+		}, onClick = {
+			onSavedArticlesClick()
+			expanded = false
+		})
+		
+		MenuItem(
+			title = "История",
+			icon = {
+				Icon(
+					painter = painterResource(id = R.drawable.history),
+					contentDescription = null,
+					tint = MaterialTheme.colors.onBackground
+				)
+			},
+			onClick = {
+				onHistoryClick()
+				expanded = false
+			}
+		)
 		
 		MenuItem(title = "Настройки", icon = {
 			Icon(
@@ -270,7 +400,10 @@ fun UnauthorizedMenu(
 				contentDescription = "",
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onSettingsClick)
+		}, onClick = {
+			onSettingsClick()
+			expanded = false
+		})
 		
 		Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 		
@@ -281,18 +414,22 @@ fun UnauthorizedMenu(
 				modifier = Modifier.size(24.dp),
 				tint = MaterialTheme.colors.onBackground
 			)
-		}, onClick = onAboutClick)
+		}, onClick = {
+			onAboutClick()
+			expanded = false
+		})
 	}
 }
 
 @Composable
 fun MenuItem(
 	title: String,
+	modifier: Modifier = Modifier,
 	icon: @Composable () -> Unit,
 	onClick: () -> Unit
 ) {
 	Row(
-		modifier = Modifier
+		modifier = modifier
 			.clickable(onClick = onClick)
 			.padding(14.dp),
 		verticalAlignment = Alignment.CenterVertically

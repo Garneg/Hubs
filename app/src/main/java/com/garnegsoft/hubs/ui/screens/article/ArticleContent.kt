@@ -35,14 +35,12 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.company.CompanyController
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.screens.user.HubChip
+import com.garnegsoft.hubs.ui.common.HubChip
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.*
@@ -66,20 +64,13 @@ fun ArticleContent(
 	val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
 	
 	Box() {
-		val flingSpec = rememberSplineBasedDecay<Float>()
 		val contentNodes by viewModel.parsedArticleContent.observeAsState()
-		val fontSize by context.settingsDataStoreFlowWithDefault(
-			HubsDataStore.Settings.Keys.ArticleScreen.FontSize,
-			MaterialTheme.typography.body1.fontSize.value
-		).collectAsState(
-			initial = null
-		)
-		val lineHeightFactor by context.settingsDataStoreFlowWithDefault(
-			HubsDataStore.Settings.Keys.ArticleScreen.LineHeightFactor,
-			1.5f
-		).collectAsState(
-			initial = null
-		)
+		val fontSize by HubsDataStore.Settings
+			.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
+			.collectAsState(
+				initial = null
+			)
+		
 		val color = MaterialTheme.colors.onSurface
 		val spanStyle = remember(fontSize, color) {
 			SpanStyle(
@@ -94,17 +85,13 @@ fun ArticleContent(
 				fitScreenWidth = false
 			)
 		}
-		
 		val state = rememberLazyListState()
 		val updatedPolls by viewModel.updatedPolls.observeAsState()
 		
-		
 		LazyColumn(
-			modifier = Modifier
-				.fillMaxSize(),
+			modifier = Modifier.fillMaxSize(),
 			state = state,
-			contentPadding = PaddingValues(16.dp),
-			verticalArrangement = Arrangement.spacedBy(0.dp)
+			contentPadding = PaddingValues(16.dp)
 		) {
 			if (article.editorVersion == EditorVersion.FirstVersion) {
 				item {
@@ -126,7 +113,6 @@ fun ArticleContent(
 							color = MaterialTheme.colors.onError
 						)
 					}
-					
 					Spacer(modifier = Modifier.height(16.dp))
 				}
 			}
@@ -134,16 +120,18 @@ fun ArticleContent(
 			if (article.postType == PostType.Megaproject && article.metadata != null) {
 				item {
 					AsyncImage(
-						article.metadata.mainImageUrl,
-						"",
-						modifier = Modifier.clip(RoundedCornerShape(8.dp)),
+						model = article.metadata.mainImageUrl,
+						contentDescription = "",
+						modifier = Modifier
+							.fillMaxWidth()
+							.clip(RoundedCornerShape(8.dp)),
 					)
 					Spacer(Modifier.height(8.dp))
 				}
 			}
 			
 			if (article.isCorporative) {
-				item { 
+				item {
 					val companyAlias = article.hubs.find { it.isCorporative }!!.alias
 					
 					var companyTitle: String? by rememberSaveable {
@@ -185,8 +173,7 @@ fun ArticleContent(
 								fontSize = 14.sp,
 								color = MaterialTheme.colors.onBackground
 							)
-						}
-						else {
+						} else {
 							Box(modifier = Modifier.size(34.dp))
 						}
 						
@@ -205,33 +192,16 @@ fun ArticleContent(
 							.clickable(onClick = { onAuthorClicked() }),
 						verticalAlignment = Alignment.CenterVertically,
 					) {
-						if (article.author.avatarUrl != null)
+						if (article.author.avatarUrl != null) {
 							AsyncImage(
 								modifier = Modifier
-									.size(34.dp)
+									.size(38.dp)
 									.clip(RoundedCornerShape(8.dp))
 									.background(Color.White),
 								model = article.author.avatarUrl,
 								contentDescription = ""
 							)
-						else
-							Icon(
-								modifier = Modifier
-									.size(34.dp)
-									.border(
-										width = 2.dp,
-										color = placeholderColorLegacy(article.author.alias),
-										shape = RoundedCornerShape(8.dp)
-									)
-									.background(
-										Color.White,
-										shape = RoundedCornerShape(8.dp)
-									)
-									.padding(2.dp),
-								painter = painterResource(id = R.drawable.user_avatar_placeholder),
-								contentDescription = "",
-								tint = placeholderColorLegacy(article.author.alias)
-							)
+						}
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(
 							text = article.author.alias, fontWeight = FontWeight.W600,
@@ -239,51 +209,64 @@ fun ArticleContent(
 							color = MaterialTheme.colors.onBackground
 						)
 						Spacer(modifier = Modifier.weight(1f))
-						Text(
-							article.timePublished, color = Color.Gray,
-							fontSize = 12.sp, fontWeight = FontWeight.W400
-						)
+						
 					}
 					Spacer(modifier = Modifier.height(8.dp))
 				}
 			}
 			
 			item {
+				fontSize?.let {
+					Text(
+						text = article.title,
+						fontSize = (it + 4f).sp,
+						fontWeight = FontWeight.W700,
+						color = MaterialTheme.colors.onBackground
+					)
+				}
 				
-				Text(
-					text = article.title,
-					fontSize = 22.sp,
-					fontWeight = FontWeight.W700,
-					color = MaterialTheme.colors.onBackground
-				)
 				Spacer(modifier = Modifier.height(4.dp))
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					horizontalArrangement = Arrangement.Start
+				) {
+					Text(
+						text = article.timePublished,
+						color = MaterialTheme.colors.onBackground.copy(0.6f),
+						fontSize = 14.sp,
+						fontWeight = FontWeight.W500
+					)
+				}
+				
+				Spacer(Modifier.height(4.dp))
+				
 				Row(
 					verticalAlignment = Alignment.CenterVertically,
 				) {
-					if (article.complexity != PostComplexity.None) {
+					if (article.complexity != PublicationComplexity.None) {
 						Icon(
 							modifier = Modifier.size(height = 10.dp, width = 20.dp),
 							painter = painterResource(id = R.drawable.speedmeter_hard),
 							contentDescription = "",
 							tint = when (article.complexity) {
-								PostComplexity.Low -> Color(0xFF4CBE51)
-								PostComplexity.Medium -> Color(0xFFEEBC25)
-								PostComplexity.High -> Color(0xFFEB3B2E)
+								PublicationComplexity.Low -> Color(0xFF4CBE51)
+								PublicationComplexity.Medium -> Color(0xFFEEBC25)
+								PublicationComplexity.High -> Color(0xFFEB3B2E)
 								else -> Color.Red
 							}
 						)
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(
 							text = when (article.complexity) {
-								PostComplexity.Low -> "Простой"
-								PostComplexity.Medium -> "Средний"
-								PostComplexity.High -> "Сложный"
+								PublicationComplexity.Low -> "Простой"
+								PublicationComplexity.Medium -> "Средний"
+								PublicationComplexity.High -> "Сложный"
 								else -> ""
 							},
 							color = when (article.complexity) {
-								PostComplexity.Low -> Color(0xFF4CBE51)
-								PostComplexity.Medium -> Color(0xFFEEBC25)
-								PostComplexity.High -> Color(0xFFEB3B2E)
+								PublicationComplexity.Low -> Color(0xFF4CBE51)
+								PublicationComplexity.Medium -> Color(0xFFEEBC25)
+								PublicationComplexity.High -> Color(0xFFEB3B2E)
 								else -> Color.Red
 							},
 							fontWeight = FontWeight.W500,
@@ -379,10 +362,7 @@ fun ArticleContent(
 					FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 						article.hubs.forEach {
 							HubChip(
-								if (it.isProfiled)
-									it.title + "*"
-								else
-									it.title
+								title = if (it.isProfiled) it.title + "*" else it.title
 							) {
 								if (it.isCorporative)
 									onCompanyClick(it.alias)
@@ -444,20 +424,21 @@ fun ArticleContent(
 			}
 			mostReadingArticles?.let {
 				items(it) {
-					Box(modifier = Modifier
-						.clip(RoundedCornerShape(8.dp))
-						.clickable { onArticleClick(it.id) }
-						.padding(bottom = 8.dp)
-						.padding(8.dp)
-					) {
-						ArticleShort(article = it)
-					}
+					ArticleShort(
+						article = it,
+						onClick = {
+							onArticleClick(it.id)
+						}
+					)
 				}
 			}
 			
 		}
 		
-		val scrollBarAlpha by animateFloatAsState(targetValue = if (state.isScrollInProgress) 1f else 0f, tween(600))
+		val scrollBarAlpha by animateFloatAsState(
+			targetValue = if (state.isScrollInProgress) 1f else 0f,
+			tween(600)
+		)
 		val density = LocalDensity.current
 		
 		val scrollBarColor = MaterialTheme.colors.onBackground.copy(0.25f)

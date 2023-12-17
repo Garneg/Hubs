@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.feedCards.comment
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,8 +30,8 @@ import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 
 
 @Composable
@@ -49,11 +49,11 @@ private fun defaultCommentCardStyle(): CommentCardStyle {
 
 @Composable
 fun CommentCard(
-    comment: CommentSnippet,
-    style: CommentCardStyle = defaultCommentCardStyle(),
-    onCommentClick: () -> Unit,
-    onAuthorClick: () -> Unit,
-    onParentPostClick: () -> Unit
+	comment: CommentSnippet,
+	style: CommentCardStyle = defaultCommentCardStyle(),
+	onCommentClick: () -> Unit,
+	onAuthorClick: () -> Unit,
+	onParentPostClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -85,7 +85,6 @@ fun CommentCard(
         )
         Column(
             modifier = Modifier
-                .clickable(onClick = onCommentClick)
                 .padding(
                     top = style.padding
                         .calculateTopPadding()
@@ -99,13 +98,14 @@ fun CommentCard(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .clip(style.avatarShape)
+                        .clickable(onClick = onAuthorClick)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .height(style.avatarSize)
-                            .clip(style.avatarShape)
-                            .clickable(onClick = onAuthorClick)
+                        
                     ) {
                         if (comment.author.avatarUrl != null) {
                             AsyncImage(
@@ -132,12 +132,12 @@ fun CommentCard(
                                 tint = placeholderColorLegacy(comment.author.alias)
                             )
                         }
-                        Spacer(modifier = Modifier.width(4.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = comment.author.alias,
                             style = style.authorAliasTextStyle
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
+                        
                     }
                 }
 
@@ -180,8 +180,8 @@ fun CommentCard(
                                 ""
                             } + it,
                             color = when {
-                                it > 0 -> RatingPositive
-                                it < 0 -> RatingNegative
+                                it > 0 -> RatingPositiveColor
+                                it < 0 -> RatingNegativeColor
                                 else -> style.textColor
                             }
         

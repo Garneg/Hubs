@@ -19,6 +19,9 @@ val UserScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/users/{alias}/{deepLinkPage}/{subPage}"),
     NavDeepLink("https://habr.com/users/{alias}"),
     NavDeepLink("https://habr.com/users/{alias}/"),
+    NavDeepLink("https://habr.com/users/{alias}/{deepLinkPage}"),
+        NavDeepLink("https://habr.com/users/{alias}/{deepLinkPage}/")
+    
 )
 
 val HubScreenNavDeepLinks = listOf(

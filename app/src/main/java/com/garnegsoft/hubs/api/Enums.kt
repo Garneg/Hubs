@@ -11,17 +11,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.ExperimentalTextApi
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 
 
@@ -97,14 +94,14 @@ enum class PostType {
     }
 }
 
-enum class PostComplexity {
+enum class PublicationComplexity {
     Low,
     Medium,
     High,
     None;
 
     companion object{
-        fun fromString(complexity: String?): PostComplexity {
+        fun fromString(complexity: String?): PublicationComplexity {
 //            if (complexity == null)
 //                return PostComplexity.None
             return when(complexity){

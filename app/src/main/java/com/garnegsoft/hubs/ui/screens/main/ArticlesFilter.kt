@@ -8,11 +8,10 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
@@ -150,23 +149,23 @@ fun ArticlesFilterDialog(
 					horizontalArrangement = Arrangement.spacedBy(8.dp)
 				) {
 					HubsFilterChip(
-						selected = complexity == PostComplexity.None,
-						onClick = { complexity = PostComplexity.None }) {
+						selected = complexity == PublicationComplexity.None,
+						onClick = { complexity = PublicationComplexity.None }) {
 						Text(text = "Все")
 					}
 					HubsFilterChip(
-						selected = complexity == PostComplexity.Low,
-						onClick = { complexity = PostComplexity.Low }) {
+						selected = complexity == PublicationComplexity.Low,
+						onClick = { complexity = PublicationComplexity.Low }) {
 						Text(text = "Простой")
 					}
 					HubsFilterChip(
-						selected = complexity == PostComplexity.Medium,
-						onClick = { complexity = PostComplexity.Medium }) {
+						selected = complexity == PublicationComplexity.Medium,
+						onClick = { complexity = PublicationComplexity.Medium }) {
 						Text(text = "Средний")
 					}
 					HubsFilterChip(
-						selected = complexity == PostComplexity.High,
-						onClick = { complexity = PostComplexity.High }) {
+						selected = complexity == PublicationComplexity.High,
+						onClick = { complexity = PublicationComplexity.High }) {
 						Text(text = "Сложный")
 					}
 					
@@ -177,23 +176,19 @@ fun ArticlesFilterDialog(
 			
 		}
 	}
-	
-	
 }
 
 data class ArticlesFilterState(
 	val showLast: Boolean,
 	val minRating: Int = -1,
 	val period: FilterPeriod = FilterPeriod.Day,
-	val complexity: PostComplexity
+	val complexity: PublicationComplexity
 ) : Filter {
 	override fun toArgsMap(): Map<String, String> {
 		var argsMap: Map<String, String> =
 			if (showLast) {
 				if (minRating == -1) {
-					mapOf(
-						"sort" to "rating",
-					)
+					mapOf("sort" to "rating",)
 				} else {
 					mapOf(
 						"sort" to "rating",
@@ -213,12 +208,12 @@ data class ArticlesFilterState(
 				)
 			}
 		
-		if (complexity != PostComplexity.None) {
+		if (complexity != PublicationComplexity.None) {
 			argsMap += mapOf(
 				"complexity" to when (complexity) {
-					PostComplexity.Low -> "easy"
-					PostComplexity.Medium -> "medium"
-					PostComplexity.High -> "hard"
+					PublicationComplexity.Low -> "easy"
+					PublicationComplexity.Medium -> "medium"
+					PublicationComplexity.High -> "hard"
 					else -> throw IllegalArgumentException("mapping of this complexity is not supported")
 				}
 			)
@@ -242,10 +237,9 @@ data class ArticlesFilterState(
 				FilterPeriod.AllTime -> "все время"
 			}
 		} + when (complexity) {
-			PostComplexity.High -> ", сложные"
-			PostComplexity.Medium -> ", средние"
-			PostComplexity.Low -> ", простые"
-			
+			PublicationComplexity.High -> ", сложные"
+			PublicationComplexity.Medium -> ", средние"
+			PublicationComplexity.Low -> ", простые"
 			else -> ""
 		}
 		

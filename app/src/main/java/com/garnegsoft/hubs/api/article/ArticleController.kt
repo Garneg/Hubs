@@ -152,7 +152,7 @@ class ArticleController {
                     metadata = if (it.metadata != null) com.garnegsoft.hubs.api.article.Article.Metadata(
                         it.metadata!!.mainImageUrl
                     ) else null,
-                    complexity = PostComplexity.fromString(it.complexity),
+                    complexity = PublicationComplexity.fromString(it.complexity),
                     readingTime = it.readingTime,
                     relatedData = it.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
@@ -255,7 +255,7 @@ class ArticleController {
                         )
 
                     },
-                    complexity = PostComplexity.fromString(formatted.complexity),
+                    complexity = PublicationComplexity.fromString(formatted.complexity),
                     readingTime = formatted.readingTime,
                     relatedData = formatted.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(

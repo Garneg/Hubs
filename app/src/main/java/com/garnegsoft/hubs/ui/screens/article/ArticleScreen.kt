@@ -5,10 +5,8 @@ import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
@@ -37,27 +35,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.lastReadDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.screens.user.HubChip
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
@@ -78,12 +73,11 @@ fun ArticleScreen(
 	isOffline: Boolean = false
 ) {
 	val context = LocalContext.current
-	val fontSize by context.settingsDataStoreFlowWithDefault(
-		HubsDataStore.Settings.Keys.ArticleScreen.FontSize,
-		MaterialTheme.typography.body1.fontSize.value
-	).collectAsState(
-		initial = null
-	)
+	val fontSize by HubsDataStore.Settings
+		.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
+		.collectAsState(
+			initial = null
+		)
 	val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
 	val article by viewModel.article.observeAsState()
 	val offlineArticle by viewModel.offlineArticle.observeAsState()
@@ -93,6 +87,7 @@ fun ArticleScreen(
 			if (isOffline) {
 				viewModel.loadArticleFromLocalDatabase(articleId, context)
 			} else {
+				
 				viewModel.loadArticle(articleId)
 			}
 		}
@@ -160,6 +155,7 @@ fun ArticleScreen(
 		backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
 		bottomBar = {
 			article?.let { article ->
+				
 				BottomAppBar(
 					elevation = 0.dp,
 					backgroundColor = MaterialTheme.colors.surface,
@@ -200,9 +196,9 @@ fun ArticleScreen(
 							else
 								article.statistics.score.toString(),
 							color = if (article.statistics.score > 0)
-								RatingPositive
+								RatingPositiveColor
 							else if (article.statistics.score < 0)
-								RatingNegative
+								RatingNegativeColor
 							else
 								statisticsColor,
 							fontWeight = FontWeight.W500
@@ -254,7 +250,11 @@ fun ArticleScreen(
 											addedToBookmarksCount--
 											addedToBookmarksCount =
 												addedToBookmarksCount.coerceAtLeast(0)
-											if (!ArticleController.removeFromBookmarks(article.id, article.postType == PostType.News)) {
+											if (!ArticleController.removeFromBookmarks(
+													article.id,
+													article.postType == PostType.News
+												)
+											) {
 												addedToBookmarks = true
 												addedToBookmarksCount++
 												addedToBookmarksCount =
@@ -264,7 +264,11 @@ fun ArticleScreen(
 										} else {
 											addedToBookmarks = true
 											addedToBookmarksCount++
-											if (!ArticleController.addToBookmarks(article.id, article.postType == PostType.News)) {
+											if (!ArticleController.addToBookmarks(
+													article.id,
+													article.postType == PostType.News
+												)
+											) {
 												addedToBookmarks = false
 												addedToBookmarksCount--
 												addedToBookmarksCount =
@@ -310,7 +314,7 @@ fun ArticleScreen(
 											modifier = Modifier
 												.size(8.dp)
 												.clip(CircleShape)
-												.background(RatingPositive)
+												.background(RatingPositiveColor)
 										)
 									}
 								}
@@ -385,7 +389,7 @@ fun ArticleScreen(
 								verticalAlignment = Alignment.CenterVertically,
 							) {
 								if (article.authorAvatarUrl != null)
-									AsyncImage(
+									AsyncGifImage(
 										modifier = Modifier
 											.size(34.dp)
 											.clip(RoundedCornerShape(8.dp))
@@ -587,13 +591,6 @@ fun ArticleScreen(
 			}
 		} else {
 			article?.let { article ->
-				
-				val lineHeightFactor by context.settingsDataStoreFlowWithDefault(
-					HubsDataStore.Settings.Keys.ArticleScreen.LineHeightFactor,
-					1.5f
-				).collectAsState(
-					initial = null
-				)
 				val color = MaterialTheme.colors.onSurface
 				val spanStyle = remember(fontSize, color) {
 					SpanStyle(
@@ -612,8 +609,9 @@ fun ArticleScreen(
 					mutableStateOf(false)
 				}
 				LaunchedEffect(key1 = Unit, block = {
-					context.lastReadDataStore.edit {
-						it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
+					LastReadArticleController.setLastArticle(context, articleId)
+					withContext(Dispatchers.IO){
+						HistoryController.insertArticle(articleId, context)
 					}
 					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
 						val element =
@@ -631,19 +629,20 @@ fun ArticleScreen(
 						nodeParsed = true
 					}
 				})
-				LaunchedEffect(key1 = fontSize, block = {
 				
-				})
 				Box(modifier = Modifier.padding(it)) {
-					if (nodeParsed && fontSize != null)
-						ArticleContent(
-							article = article,
-							onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
-							onHubClicked = onHubClicked,
-							onCompanyClick = onCompanyClick,
-							onViewImageRequest = onViewImageRequest,
-							onArticleClick = onArticleClick
-						)
+					if (nodeParsed && fontSize != null) {
+						SelectionContainer {
+							ArticleContent(
+								article = article,
+								onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
+								onHubClicked = onHubClicked,
+								onCompanyClick = onCompanyClick,
+								onViewImageRequest = onViewImageRequest,
+								onArticleClick = onArticleClick
+							)
+						}
+					}
 				}
 			} ?: Box(
 				modifier = Modifier

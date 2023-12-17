@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.common
+package com.garnegsoft.hubs.ui.common.feedCards.company
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -44,16 +44,10 @@ private fun defaultCompanyCardStyle(): CompanyCardStyle {
 
 @Composable
 fun CompanyCard(
-    company: CompanySnippet,
-    style: CompanyCardStyle = defaultCompanyCardStyle(),
-    indicator: @Composable () -> Unit = {
-        Text(
-            company.statistics.rating.toString(),
-            fontWeight = FontWeight.W400,
-            color = DefaultRatingIndicatorColor
-        )
-    },
-    onClick: () -> Unit
+	company: CompanySnippet,
+	style: CompanyCardStyle = defaultCompanyCardStyle(),
+	indicator: @Composable () -> Unit = { DefaultCompanyIndicator(company = company) },
+	onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -130,3 +124,17 @@ data class CompanyCardStyle(
     val showDescription: Boolean = false,
     val descriptionMaxLines: Int = 1
 )
+
+@Composable
+fun DefaultCompanyIndicator(
+    company: CompanySnippet
+) {
+    val rating = remember {
+        String.format("%.1f", company.statistics.rating).replace(',', '.')
+    }
+    Text(
+        text = rating,
+        fontWeight = FontWeight.W400,
+        color = DefaultRatingIndicatorColor
+    )
+}

@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -31,8 +30,8 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.delay
 import org.jsoup.Jsoup
 
@@ -86,25 +85,32 @@ fun CommentItem(
                         .background(MaterialTheme.colors.secondary)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Column {
-                    Text(
-                        text = it.author.alias,
-                        color = MaterialTheme.colors.secondary,
-                        fontWeight = FontWeight.W500
-                    )
-                    Text(
-                        text = Jsoup.parse(it.message).child(0).child(1).child(0).children().firstOrNull {
-                            Log.e("current tag", it.tagName())
-                            it.tagName() != "blockquote"
-                        }?.text() ?: "",
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                if (it.deleted){
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                        contentAlignment = Alignment.CenterStart){
+                        Text(text = "Удаленное сообщение", color = MaterialTheme.colors.onSurface.copy(0.5f))
+                    }
+                } else {
+                    Column {
+                        Text(
+                            text = it.author.alias,
+                            color = MaterialTheme.colors.secondary,
+                            fontWeight = FontWeight.W500
+                        )
+                        Text(
+                            text = Jsoup.parse(it.message).text() ?: "",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
 
             }
 
             Spacer(modifier = Modifier.height(8.dp))
+            
         }
 
 
@@ -276,8 +282,8 @@ fun CommentItem(
                                         ""
                                     } + comment.score,
                                     color = when {
-                                        comment.score > 0 -> RatingPositive
-                                        comment.score < 0 -> RatingNegative
+                                        comment.score > 0 -> RatingPositiveColor
+                                        comment.score < 0 -> RatingNegativeColor
                                         else -> statisticsColor
                                     }
                                 )

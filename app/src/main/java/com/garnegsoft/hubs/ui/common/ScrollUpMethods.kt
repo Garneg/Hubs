@@ -31,10 +31,12 @@ import org.jsoup.select.Elements
 sealed interface ScrollUpMethods {
     companion object {
         suspend fun scrollLazyList(lazyListState: LazyListState){
-            lazyListState.scrollToItem(
-                0,
-                lazyListState.firstVisibleItemScrollOffset
-            )
+            if (lazyListState.firstVisibleItemIndex > 3) {
+                lazyListState.scrollToItem(
+                    2,
+                    lazyListState.firstVisibleItemScrollOffset
+                )
+            }
             lazyListState.animateScrollToItem(0)
         }
 

@@ -25,7 +25,7 @@ import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
-import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
+import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommonPageWithFilter
@@ -74,17 +74,19 @@ fun UserScreen(
 					
 					IconButton(
 						onClick = {
-							val sendIntent = Intent(Intent.ACTION_SEND)
-							sendIntent.putExtra(
-								Intent.EXTRA_TEXT,
-								if (viewModel.user.value?.fullname != null)
-									"${viewModel.user.value!!.fullname} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
-								else
-									"${viewModel.user.value!!.alias} — https://habr.com/ru/users/${viewModel.user.value!!.alias}/"
-							)
-							sendIntent.setType("text/plain")
-							val shareIntent = Intent.createChooser(sendIntent, null)
-							context.startActivity(shareIntent)
+							viewModel.user.value?.let { user ->
+								val sendIntent = Intent(Intent.ACTION_SEND)
+								sendIntent.putExtra(
+									Intent.EXTRA_TEXT,
+									if (user.fullname != null)
+										"${user.fullname} (@${user.alias}) — https://habr.com/ru/users/${user.alias}/"
+									else
+										"${user.alias} — https://habr.com/ru/users/${user.alias}/"
+								)
+								sendIntent.setType("text/plain")
+								val shareIntent = Intent.createChooser(sendIntent, null)
+								context.startActivity(shareIntent)
+							}
 						}) {
 						Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
 					}
@@ -193,8 +195,7 @@ fun UserScreen(
 										}
 									)
 								}
-							}
-							else {
+							} else {
 								CommonPageWithFilter<CommentSnippet, UserBookmarksFilter>(
 									listModel = viewModel.commentsBookmarksModel,
 									filterDialog = { defaultValues, onDismiss, onDone ->
@@ -210,7 +211,12 @@ fun UserScreen(
 								) {
 									CommentCard(
 										comment = it,
-										onCommentClick = { onCommentClicked(it.parentPost.id, it.id) },
+										onCommentClick = {
+											onCommentClicked(
+												it.parentPost.id,
+												it.id
+											)
+										},
 										onAuthorClick = { onUserClicked(it.author.alias) },
 										onParentPostClick = { onArticleClicked(it.parentPost.id) })
 								}
@@ -286,18 +292,31 @@ fun UserScreen(
 				if (pagesMap.size > 1) {
 					HabrScrollableTabRow(pagerState = pagerState, tabs = tabs) { index, title ->
 						when {
-							title.startsWith("Профиль") -> { ScrollUpMethods.scrollNormalList(profilePageScrollState) }
+							title.startsWith("Профиль") -> {
+								ScrollUpMethods.scrollNormalList(profilePageScrollState)
+							}
+							
 							title.startsWith("Публикации") -> {
 								articlesFilterContentState.show()
 								ScrollUpMethods.scrollLazyList(articlesLazyListState)
 							}
-							title.startsWith("Комментарии") -> { ScrollUpMethods.scrollLazyList(commentsLazyListState) }
+							
+							title.startsWith("Комментарии") -> {
+								ScrollUpMethods.scrollLazyList(commentsLazyListState)
+							}
+							
 							title.startsWith("Закладки") -> {
 								bookmarksFilterContentState.show()
 								ScrollUpMethods.scrollLazyList(bookmarksLazyListState)
 							}
-							title.startsWith("Подписчики") -> { ScrollUpMethods.scrollLazyList(followersLazyListState) }
-							title.startsWith("Подписки") -> { ScrollUpMethods.scrollLazyList(subscriptionsLazyListState) }
+							
+							title.startsWith("Подписчики") -> {
+								ScrollUpMethods.scrollLazyList(followersLazyListState)
+							}
+							
+							title.startsWith("Подписки") -> {
+								ScrollUpMethods.scrollLazyList(subscriptionsLazyListState)
+							}
 							
 						}
 					}

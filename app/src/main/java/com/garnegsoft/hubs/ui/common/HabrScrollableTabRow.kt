@@ -22,73 +22,75 @@ import kotlin.math.absoluteValue
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HabrScrollableTabRow(
-    pagerState: PagerState,
-    tabs: List<String>,
-    onCurrentPositionTabClick: suspend CoroutineScope.(index: Int, title: String) -> Unit = { i, t -> }
+	pagerState: PagerState,
+	tabs: List<String>,
+	onCurrentPositionTabClick: suspend CoroutineScope.(index: Int, title: String) -> Unit = { i, t -> }
 ) {
-    val pagerStateCoroutineScope = rememberCoroutineScope()
-
-    ScrollableTabRow(
-        selectedTabIndex = pagerState.currentPage,
-        edgePadding = 8.dp,
-        divider = {
-            Divider()
-        },
-        backgroundColor = MaterialTheme.colors.surface,
-        indicator = {
-            TabRowDefaults.Indicator(
-                modifier = Modifier.customTabIndicatorOffset(
-                    currentTabPosition = it[pagerState.currentPage],
-                    offset = pagerState.currentPageOffsetFraction,
-                    nextTabPosition =
-                    when {
-                        pagerState.currentPageOffsetFraction < 0 -> it[pagerState.currentPage - 1]
-                        pagerState.currentPageOffsetFraction > 0 -> it[pagerState.currentPage + 1]
-                        else -> it[pagerState.currentPage]
-                    }
-
-                )
-                    .padding(horizontal = 8.dp)
-                    .clip(CircleShape)
-            )
-        },
-        contentColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.secondary else MaterialTheme.colors.primary
-    ) {
-        tabs.forEachIndexed { index, title ->
-            Tab(
-                selected = index == pagerState.currentPage,
-                onClick = {
-                    pagerStateCoroutineScope.launch {
-                        if (pagerState.currentPage == index)
-                            onCurrentPositionTabClick(this, index, title)
-                        else
-                            pagerState.animateScrollToPage(index)
-
-                    }
-                },
-            ) {
-                Text(
-                    title,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
-                    fontWeight = FontWeight.W500,
-                )
-            }
-        }
-    }
+	val pagerStateCoroutineScope = rememberCoroutineScope()
+	
+	ScrollableTabRow(
+		modifier = Modifier.fillMaxWidth(),
+		selectedTabIndex = pagerState.currentPage,
+		edgePadding = 8.dp,
+		divider = {
+			Divider()
+		},
+		backgroundColor = MaterialTheme.colors.surface,
+		indicator = {
+			TabRowDefaults.Indicator(
+				modifier = Modifier
+					.customTabIndicatorOffset(
+						currentTabPosition = it[pagerState.currentPage],
+						offset = pagerState.currentPageOffsetFraction,
+						nextTabPosition =
+						when {
+							pagerState.currentPageOffsetFraction < 0 -> it[pagerState.currentPage - 1]
+							pagerState.currentPageOffsetFraction > 0 -> it[pagerState.currentPage + 1]
+							else -> it[pagerState.currentPage]
+						}
+					
+					)
+					.padding(horizontal = 8.dp)
+					.clip(CircleShape)
+			)
+		},
+		contentColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.secondary else MaterialTheme.colors.primary
+	) {
+		tabs.forEachIndexed { index, title ->
+			Tab(
+				selected = index == pagerState.currentPage,
+				onClick = {
+					pagerStateCoroutineScope.launch {
+						if (pagerState.currentPage == index)
+							onCurrentPositionTabClick(this, index, title)
+						else
+							pagerState.animateScrollToPage(index)
+						
+					}
+				},
+			) {
+				Text(
+					title,
+					modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+					fontWeight = FontWeight.W500,
+				)
+			}
+		}
+	}
 }
 
 fun Modifier.customTabIndicatorOffset(
-    currentTabPosition: TabPosition,
-    offset: Float,
-    nextTabPosition: TabPosition,
+	currentTabPosition: TabPosition,
+	offset: Float,
+	nextTabPosition: TabPosition,
 ): Modifier {
-    val indicatorWidth =
-        currentTabPosition.width + (nextTabPosition.width - currentTabPosition.width) * offset.absoluteValue
-    val indicatorOffset =
-        currentTabPosition.left + (nextTabPosition.left - currentTabPosition.left) * offset.absoluteValue
-
-    return fillMaxWidth()
-        .wrapContentSize(Alignment.BottomStart)
-        .offset(x = indicatorOffset)
-        .width(indicatorWidth)
+	val indicatorWidth =
+		currentTabPosition.width + (nextTabPosition.width - currentTabPosition.width) * offset.absoluteValue
+	val indicatorOffset =
+		currentTabPosition.left + (nextTabPosition.left - currentTabPosition.left) * offset.absoluteValue
+	
+	return fillMaxWidth()
+		.wrapContentSize(Alignment.BottomStart)
+		.offset(x = indicatorOffset)
+		.width(indicatorWidth)
 }
