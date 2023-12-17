@@ -307,6 +307,7 @@ internal fun UserProfile(
 								) {
 									whoIs?.let { whoIs ->
 										whoIs.badges.let {
+											
 											TitledColumn(title = "Значки") {
 												FlowRow(
 													horizontalArrangement = Arrangement.spacedBy(8.dp),
