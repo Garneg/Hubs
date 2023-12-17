@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -31,8 +30,8 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.delay
 import org.jsoup.Jsoup
 
@@ -283,8 +282,8 @@ fun CommentItem(
                                         ""
                                     } + comment.score,
                                     color = when {
-                                        comment.score > 0 -> RatingPositive
-                                        comment.score < 0 -> RatingNegative
+                                        comment.score > 0 -> RatingPositiveColor
+                                        comment.score < 0 -> RatingNegativeColor
                                         else -> statisticsColor
                                     }
                                 )

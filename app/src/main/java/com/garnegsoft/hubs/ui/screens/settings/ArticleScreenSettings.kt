@@ -23,10 +23,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.screens.article.HubsRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
@@ -216,26 +220,13 @@ fun ArticleScreenSettingsScreen(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .border(
-                            width = 2.dp,
-                            color = placeholderColorLegacy("Boomburum"),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .background(
-                            Color.White,
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(2.dp),
-                    painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                    contentDescription = "",
-                    tint = placeholderColorLegacy("Boomburum")
-                )
+                AsyncImage(
+                    modifier = Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)),
+                    model = "https://assets.habr.com/habr-web/img/avatars/012.png", contentDescription = null)
+                
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "Boomburum", fontWeight = FontWeight.W600,
+                    text = "squada", fontWeight = FontWeight.W600,
                     fontSize = 14.sp,
                     color = MaterialTheme.colors.onBackground
                 )
@@ -243,7 +234,7 @@ fun ArticleScreenSettingsScreen(
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = "Пример публикации",
-                fontSize = 22.sp,
+                fontSize = ((fontSize ?: originalFontSize ?: defaultFontSize) + 4f).sp,
                 fontWeight = FontWeight.W700,
                 color = MaterialTheme.colors.onBackground
             )
@@ -268,12 +259,18 @@ fun ArticleScreenSettingsScreen(
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = "Разработка, Программирование*, Habr, Jetpack Compose*", style = TextStyle(
-                    color = Color.Gray,
-                    fontWeight = FontWeight.W500
-                )
+            HubsRow(
+                hubs = listOf(
+                    Article.Hub("", false, false, "Разработка", null),
+                    Article.Hub("", true, false, "Программирование", Article.Hub.RelatedData(true)),
+                    Article.Hub("", false, false, "Habr", null),
+                    Article.Hub("", true, false, "Jetpack Compose", null)
+                    
+                ),
+                onHubClicked = {  },
+                onCompanyClicked = {  }
             )
+            
             Spacer(modifier = Modifier.height(8.dp))
 
             val animatedLineHeightFactor by animateFloatAsState(targetValue = lineHeightFactor)

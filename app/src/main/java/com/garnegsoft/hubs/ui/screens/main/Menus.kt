@@ -388,7 +388,10 @@ fun UnauthorizedMenu(
 					tint = MaterialTheme.colors.onBackground
 				)
 			},
-			onClick = { onHistoryClick() }
+			onClick = {
+				onHistoryClick()
+				expanded = false
+			}
 		)
 		
 		MenuItem(title = "Настройки", icon = {

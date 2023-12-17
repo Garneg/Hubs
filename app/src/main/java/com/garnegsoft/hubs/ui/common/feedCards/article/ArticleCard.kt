@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.common.feedCards.article
 
 import ArticleController
-import android.widget.Toast
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -35,12 +34,11 @@ import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -210,7 +208,7 @@ fun ArticleCard(
 							{ append(it.title.replace(" ", "\u00A0")) }
 						}
 						if (it.relatedData != null && it.relatedData.isSubscribed) {
-							withStyle(SpanStyle(color = Color(0xE351A843))) {
+							withStyle(SpanStyle(color = HubSubscribedColor)) {
 								textFunc()
 							}
 						} else {
@@ -292,14 +290,14 @@ fun ArticleCard(
 					Text(
 						text = '+' + article.statistics.score.toString(),
 						style = style.statisticsTextStyle,
-						color = RatingPositive
+						color = RatingPositiveColor
 					)
 				} else
 					if (article.statistics.score < 0) {
 						Text(
 							text = article.statistics.score.toString(),
 							style = style.statisticsTextStyle,
-							color = RatingNegative
+							color = RatingNegativeColor
 						)
 					} else {
 						Text(
@@ -479,7 +477,7 @@ fun ArticleCard(
 									modifier = Modifier
 										.size(8.dp)
 										.clip(CircleShape)
-										.background(RatingPositive)
+										.background(RatingPositiveColor)
 								)
 							}
 						}

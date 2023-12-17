@@ -13,15 +13,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.ui.theme.HubsTheme
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 
 @Composable
 fun ArticleShort(
@@ -57,13 +55,13 @@ fun ArticleShort(
                 if (article.statistics.score > 0) {
                     Text(
                         text = '+' + article.statistics.score.toString(),
-                        color = RatingPositive,
+                        color = RatingPositiveColor,
                     )
                 } else {
                     if (article.statistics.score < 0) {
                         Text(
                             text = article.statistics.score.toString(),
-                            color = RatingNegative
+                            color = RatingNegativeColor
                         )
                     } else {
                         Text(

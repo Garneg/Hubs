@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -29,6 +29,7 @@ fun HubsRow(
         horizontalArrangement = Arrangement.spacedBy(2.dp),
         verticalArrangement = Arrangement.spacedBy(2.dp)
     ) {
+        
         hubs.forEachIndexed() { index, it ->
             val hubTitle = remember {
                 (if (it.isProfiled) it.title + "*" else it.title) + if (index != hubs.lastIndex) ", " else ""
@@ -41,7 +42,7 @@ fun HubsRow(
                 text = hubTitle,
                 style = TextStyle(
                     fontSize = 16.sp,
-                    color = Color.Gray,
+                    color = if (it.relatedData?.isSubscribed == true) HubSubscribedColor else Color.Gray,
                     fontWeight = FontWeight.W500
                 )
             )

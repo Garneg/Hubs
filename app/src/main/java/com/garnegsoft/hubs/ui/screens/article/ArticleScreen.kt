@@ -35,26 +35,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
-import com.garnegsoft.hubs.api.history.HistoryArticle
 import com.garnegsoft.hubs.api.history.HistoryController
-import com.garnegsoft.hubs.api.history.HistoryDatabase
-import com.garnegsoft.hubs.api.history.HistoryEntity
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.user.HubChip
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -201,9 +196,9 @@ fun ArticleScreen(
 							else
 								article.statistics.score.toString(),
 							color = if (article.statistics.score > 0)
-								RatingPositive
+								RatingPositiveColor
 							else if (article.statistics.score < 0)
-								RatingNegative
+								RatingNegativeColor
 							else
 								statisticsColor,
 							fontWeight = FontWeight.W500
@@ -319,7 +314,7 @@ fun ArticleScreen(
 											modifier = Modifier
 												.size(8.dp)
 												.clip(CircleShape)
-												.background(RatingPositive)
+												.background(RatingPositiveColor)
 										)
 									}
 								}

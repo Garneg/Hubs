@@ -33,8 +33,8 @@ import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -169,12 +169,12 @@ internal fun UserProfile(
 									fontWeight = FontWeight.W600,
 									color =
 									if (user.score > 0)
-										RatingPositive
+										RatingPositiveColor
 									else
 										if (user.score == 0)
 											MaterialTheme.colors.onSurface
 										else
-											RatingNegative
+											RatingNegativeColor
 								)
 								Text(
 									text = "Карма",

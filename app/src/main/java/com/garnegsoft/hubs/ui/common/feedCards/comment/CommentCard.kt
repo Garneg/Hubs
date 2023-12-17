@@ -30,8 +30,8 @@ import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 
 
 @Composable
@@ -180,8 +180,8 @@ fun CommentCard(
                                 ""
                             } + it,
                             color = when {
-                                it > 0 -> RatingPositive
-                                it < 0 -> RatingNegative
+                                it > 0 -> RatingPositiveColor
+                                it < 0 -> RatingNegativeColor
                                 else -> style.textColor
                             }
         
