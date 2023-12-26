@@ -294,7 +294,7 @@ internal fun UserProfile(
 									style = MaterialTheme.typography.subtitle1
 								)
 							}, divider = {
-//                    Divider()
+//                              Divider()
 							}) {
 								Column(
 									modifier = Modifier.padding(
@@ -307,13 +307,16 @@ internal fun UserProfile(
 								) {
 									whoIs?.let { whoIs ->
 										whoIs.badges.let {
-											
-											TitledColumn(title = "Значки") {
-												FlowRow(
-													horizontalArrangement = Arrangement.spacedBy(8.dp),
-													verticalArrangement = Arrangement.spacedBy(8.dp)
-												) {
-													it.forEach { Badge(title = it.title) }
+											if (it.isNotEmpty()) {
+												TitledColumn(title = "Значки") {
+													FlowRow(
+														horizontalArrangement = Arrangement.spacedBy(
+															8.dp
+														),
+														verticalArrangement = Arrangement.spacedBy(8.dp)
+													) {
+														it.forEach { Badge(title = it.title) }
+													}
 												}
 											}
 										}

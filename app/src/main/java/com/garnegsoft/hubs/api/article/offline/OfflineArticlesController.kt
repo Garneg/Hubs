@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.api.article.offline
 import ArticleController
 import android.app.Notification
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Looper
 import android.widget.Toast
@@ -107,11 +108,14 @@ class OfflineArticlesController {
 				} else {
 					Notification()
 				}
+				
+				
 				return ForegroundInfo(0, notification)
 				
 			}
 			override suspend fun doWork(): Result {
 				setForeground(getForegroundInfo())
+				
 				val articleId = inputData.getInt("ARTICLE_ID", -1)
 				if (articleId < 1) {
 					Looper.prepare()
