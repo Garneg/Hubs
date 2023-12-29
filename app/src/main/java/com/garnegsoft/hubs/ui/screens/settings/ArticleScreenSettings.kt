@@ -213,8 +213,8 @@ fun ArticleScreenSettingsScreen(
                         MaterialTheme.colors.background
                     }
                 )
-                .padding(it)
                 .verticalScroll(rememberScrollState())
+                .padding(it)
                 .padding(16.dp)
         ) {
             Row(

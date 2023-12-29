@@ -107,7 +107,7 @@ fun CollapsingContent(
 
             return Offset.Zero
         }
-
+        
     }
 
     Box(
@@ -125,7 +125,7 @@ fun CollapsingContent(
                 }
                 .onGloballyPositioned {
                     state.contentHeight.floatValue = it.size.height.toFloat()
-                    collapsingContentHeightDp = it.size.height.toFloat() / density.density
+                    collapsingContentHeightDp = (it.size.height.toFloat() / density.density)
                 }
 
         ) {

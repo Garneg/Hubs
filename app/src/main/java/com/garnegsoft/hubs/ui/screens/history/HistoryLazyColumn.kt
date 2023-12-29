@@ -18,6 +18,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,8 +51,10 @@ fun HistoryLazyColumn(
 	
 	val list by model.data.observeAsState()
 	
+	val lastLoadedPage by model.lastLoadedPage.observeAsState()
+	
 	list?.let { data ->
-		val lastLoadedPage by model.lastLoadedPage.observeAsState()
+		
 		BaseHubsLazyColumn(
 			data = data,
 			onScrollEnd = {
@@ -109,31 +112,30 @@ fun HistoryLazyColumn(
 							}
 							item {
 								if (entity.actionType == HistoryActionType.Article) {
-									
 									ArticleHistoryCard(
 										entity = entity,
 										articleData = remember { entity.getArticle() },
 										onClick = { onArticleClick(entity.getArticle().articleId) },
 										style = it
 									)
-									
 								}
 							}
 							lastDay = dayOfEvent
 						}
-						lastLoadedPage?.let {
-							if (data.pagesCount > it) {
-								item {
-									Box(modifier = Modifier.fillMaxWidth()) {
-										CircularProgressIndicator(
-											modifier = Modifier.align(
-												Alignment.Center
-											)
+						
+						
+						if (lastLoadedPage != null && data.pagesCount > lastLoadedPage!! + 1) {
+							item {
+								Box(modifier = Modifier.fillMaxWidth()) {
+									CircularProgressIndicator(
+										modifier = Modifier.align(
+											Alignment.Center
 										)
-									}
+									)
 								}
 							}
 						}
+						
 					}
 				}
 			},

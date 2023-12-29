@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -18,11 +19,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
@@ -339,7 +342,18 @@ internal fun UserProfile(
 										
 										whoIs.invite?.let {
 											TitledColumn(title = "Приглашен") {
-												Text(text = "${it.inviteDate} по приглашению от ${it.inviterAlias ?: "НЛО"}")
+												val context = LocalContext.current
+												ClickableText(
+													text = remember { AnnotatedString("${it.inviteDate} по приглашению от ${it.inviterAlias ?: "НЛО"}") },
+													onClick = { letterIndex ->
+														it.inviterAlias?.let {
+															val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://habr.com/ru/users/$it")).apply {
+																setPackage(BuildConfig.APPLICATION_ID)
+															}
+															context.startActivity(Intent.createChooser(intent, null))
+															
+														}
+													})
 											}
 										}
 										

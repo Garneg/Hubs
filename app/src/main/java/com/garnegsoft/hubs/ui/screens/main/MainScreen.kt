@@ -52,7 +52,7 @@ fun MainScreen(
 		isAuthorized = authorizedState == true
 	})
 	
-	val viewModel = viewModel<ArticlesScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
+	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
 	
 	val scaffoldState = rememberScaffoldState()
 	
@@ -139,7 +139,6 @@ fun MainScreen(
 				val hubsLazyListState = rememberLazyListState()
 				val authorsLazyListState = rememberLazyListState()
 				val companiesLazyListState = rememberLazyListState()
-				
 				
 				
 				val pages = remember(key1 = isAuthorized) {

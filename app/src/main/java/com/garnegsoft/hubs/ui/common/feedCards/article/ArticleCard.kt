@@ -258,176 +258,68 @@ fun ArticleCard(
 			)
 			
 		}
-		
-		//Stats
-		Row(
-			modifier = Modifier
-				.padding(horizontal = style.innerPadding)
-				.height(38.dp + style.innerPadding * 2)
-				.fillMaxWidth()
-				.clip(style.innerElementsShape),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.Center
-		) {
-			
-			//Rating
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.weight(1f)
-					.padding(vertical = style.innerPadding),
-				horizontalArrangement = Arrangement.Center
-			) {
-				Icon(
-					painter = painterResource(id = R.drawable.rating),
-					contentDescription = null,
-					modifier = Modifier.size(18.dp),
-					tint = style.statisticsColor
-				)
-				
-				Spacer(modifier = Modifier.width(4.dp))
-				if (article.statistics.score > 0) {
-					Text(
-						text = '+' + article.statistics.score.toString(),
-						style = style.statisticsTextStyle,
-						color = RatingPositiveColor
-					)
-				} else
-					if (article.statistics.score < 0) {
-						Text(
-							text = article.statistics.score.toString(),
-							style = style.statisticsTextStyle,
-							color = RatingNegativeColor
-						)
-					} else {
-						Text(
-							text = article.statistics.score.toString(),
-							style = style.statisticsTextStyle
-						)
-					}
-			}
-			
-			//Views
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.weight(1f)
-					.padding(vertical = style.innerPadding),
-				horizontalArrangement = Arrangement.Center
-			
-			) {
-				Icon(
-					painter = painterResource(id = R.drawable.views_icon),
-					contentDescription = null,
-					modifier = Modifier.size(18.dp),
-					tint = style.statisticsColor
-				)
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(
-					text = formatLongNumbers(article.statistics.readingCount),
-					style = style.statisticsTextStyle
-				)
-			}
-			val addToBookmarksInteractionSource = remember { MutableInteractionSource() }
-			val bookmarksCoroutineScope = rememberCoroutineScope()
-			
-			var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
-				mutableStateOf(article.relatedData?.bookmarked ?: false)
-			}
-			var addedToBookmarksCount by rememberSaveable(article.relatedData?.bookmarked) {
-				mutableStateOf(article.statistics.bookmarksCount)
-			}
-			
-			val bookmarkButtonClickLambda: () -> Unit = remember {
-				{
-					article.relatedData?.let {
-						bookmarksCoroutineScope.launch(Dispatchers.IO) {
-							if (addedToBookmarks) {
+		var addedToBookmarks by rememberSaveable {
+			mutableStateOf(article.relatedData?.bookmarked ?: false)
+		}
+		var addedToBookmarksCount by rememberSaveable(addedToBookmarks) {
+			mutableStateOf(article.statistics.bookmarksCount)
+		}
+		val bookmarksCoroutineScope = rememberCoroutineScope()
+		val bookmarkButtonClickLambda: () -> Unit = remember {
+			{
+				article.relatedData?.let {
+					bookmarksCoroutineScope.launch(Dispatchers.IO) {
+						if (addedToBookmarks) {
+							addedToBookmarks = false
+							addedToBookmarksCount--
+							addedToBookmarksCount =
+								addedToBookmarksCount.coerceAtLeast(0)
+							if (!ArticleController.removeFromBookmarks(
+									article.id,
+									article.type == PostType.News
+								)
+							) {
+								addedToBookmarks = true
+								addedToBookmarksCount++
+								addedToBookmarksCount =
+									addedToBookmarksCount.coerceAtLeast(0)
+							}
+							
+						} else {
+							addedToBookmarks = true
+							addedToBookmarksCount++
+							if (!ArticleController.addToBookmarks(
+									article.id,
+									article.type == PostType.News
+								)
+							) {
 								addedToBookmarks = false
 								addedToBookmarksCount--
 								addedToBookmarksCount =
 									addedToBookmarksCount.coerceAtLeast(0)
-								if (!ArticleController.removeFromBookmarks(
-										article.id,
-										article.type == PostType.News
-									)
-								) {
-									addedToBookmarks = true
-									addedToBookmarksCount++
-									addedToBookmarksCount =
-										addedToBookmarksCount.coerceAtLeast(0)
-								}
-								
-							} else {
-								addedToBookmarks = true
-								addedToBookmarksCount++
-								if (!ArticleController.addToBookmarks(
-										article.id,
-										article.type == PostType.News
-									)
-								) {
-									addedToBookmarks = false
-									addedToBookmarksCount--
-									addedToBookmarksCount =
-										addedToBookmarksCount.coerceAtLeast(0)
-								}
 							}
 						}
 					}
-					
 				}
+				
 			}
-			var showPopup by rememberSaveable {
-				mutableStateOf(false)
-			}
-			var bounds by remember {
-				mutableStateOf(IntSize.Zero)
-			}
-			
-			val hapticFeedback = LocalHapticFeedback.current
-			val addToBookmarksButtonEnabled =
-				remember { style.bookmarksButtonAllowedBeEnabled && article.relatedData != null }
-			//Added to bookmarks
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.padding(vertical = style.innerPadding)
-					.weight(1f)
-					.fillMaxHeight()
-					.clip(style.innerElementsShape)
-					.combinedClickable(
-						onClick = bookmarkButtonClickLambda,
-						onLongClick = {
-							showPopup = true
-							hapticFeedback.performHapticFeedback(
-								HapticFeedbackType.LongPress
-							)
-						},
-						enabled = addToBookmarksButtonEnabled,
-					)
-					.onGloballyPositioned {
-						bounds = it.size
-					},
-				horizontalArrangement = Arrangement.Center
-			) {
-				Icon(
-					painter = article.relatedData?.let {
-						if (addedToBookmarks)
-							painterResource(id = R.drawable.bookmark_filled)
-						else
-							null
-					} ?: painterResource(id = R.drawable.bookmark),
-					contentDescription = null,
-					modifier = Modifier.size(18.dp),
-					tint = style.statisticsColor
-				)
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(
-					text = addedToBookmarksCount.toString(),
-					style = style.statisticsTextStyle
-				)
-				val context = LocalContext.current
-				val coroutineScope = rememberCoroutineScope()
+		}
+		
+		
+		val context = LocalContext.current
+		var showPopup by rememberSaveable {
+			mutableStateOf(false)
+		}
+		
+		val hapticFeedback = LocalHapticFeedback.current
+		
+		ArticleStats(
+			statistics = article.statistics,
+			addedToBookmarks = article.relatedData?.bookmarked ?: false,
+			onAddToBookmarksClicked = bookmarkButtonClickLambda,
+			onCommentsClick = onCommentsClick,
+			unreadCommentsCount = article.relatedData?.let { if (it.unreadComments < article.statistics.commentsCount) it.unreadComments else 0 } ?: 0,
+			saveArticlePopup = { bounds ->
 				SaveArticlePopup(
 					show = showPopup,
 					bounds = bounds,
@@ -443,70 +335,15 @@ fun ArticleCard(
 					onDismissRequest = { showPopup = false },
 					articleId = article.id
 				)
-				
-			}
-			
-			val commentsInteractionSource = remember { MutableInteractionSource() }
-			//Comments
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.Center,
-				modifier = Modifier
-					.weight(1f)
-					.clickable(
-						interactionSource = commentsInteractionSource,
-						indication = null,
-						enabled = style.commentsButtonEnabled,
-						onClick = onCommentsClick
-					)
-					.padding(vertical = style.innerPadding)
-					.fillMaxHeight()
-					.absolutePadding(4.dp)
-					.clip(style.innerElementsShape)
-					.clickable(
-						enabled = style.commentsButtonEnabled,
-						onClick = onCommentsClick
-					)
-			) {
-				
-				BadgedBox(
-					badge = {
-						article.relatedData?.let {
-							if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
-								Box(
-									modifier = Modifier
-										.size(8.dp)
-										.clip(CircleShape)
-										.background(RatingPositiveColor)
-								)
-							}
-						}
-						
-					}
-				) {
-					Row(
-						modifier = Modifier.padding(horizontal = 8.dp),
-						verticalAlignment = Alignment.CenterVertically
-					) {
-						Icon(
-							painter = painterResource(id = R.drawable.comments_icon),
-							contentDescription = null,
-							modifier = Modifier.size(18.dp),
-							tint = style.statisticsColor
-						)
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							text = formatLongNumbers(article.statistics.commentsCount),
-							style = style.statisticsTextStyle,
-							overflow = TextOverflow.Clip,
-							maxLines = 1
-						)
-					}
-					
-				}
-				
-				
-			}
-		}
+			},
+			onShowSavingPopup = {
+				showPopup = true
+				hapticFeedback.performHapticFeedback(
+					HapticFeedbackType.LongPress
+				)
+			},
+			bookmarksButtonEnabled = article.relatedData != null,
+			style = style
+		)
 	}
 }
