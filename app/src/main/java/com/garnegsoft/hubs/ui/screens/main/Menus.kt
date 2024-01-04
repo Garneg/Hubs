@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -37,13 +38,14 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.MenuItem
 
 @Composable
 fun AuthorizedMenu(
 	userAlias: String,
-	avatarUrl: String?,
+	//avatarUrl: String?,
 	onProfileClick: () -> Unit,
 	onArticlesClick: () -> Unit,
 	onCommentsClick: () -> Unit,
@@ -54,33 +56,22 @@ fun AuthorizedMenu(
 	onAboutClick: () -> Unit,
 ) {
 	var expanded by remember { mutableStateOf(false) }
+	val avatarFilename by HubsDataStore.Auth.getValueFlow(
+		LocalContext.current,
+		HubsDataStore.Auth.AvatarFileName
+	).collectAsState(initial = "")
 	IconButton(onClick = { expanded = true }) {
-		if (avatarUrl != null) {
-			AsyncImage(
-				modifier = Modifier
-					.size(32.dp)
-					.clip(RoundedCornerShape(8.dp))
-					.background(if (MaterialTheme.colors.isLight) Color.Transparent else Color.White),
-				contentScale = ContentScale.FillBounds,
-				model = avatarUrl, contentDescription = ""
-			)
-		} else {
-			Icon(
-				modifier = Modifier
-					.size(32.dp)
-					.clip(RoundedCornerShape(8.dp))
-					.border(
-						width = 2.dp, color = placeholderColorLegacy(userAlias),
-						shape = RoundedCornerShape(8.dp)
-					)
-					.padding(1.dp)
-					.background(Color.White)
-					.padding(1.5.dp),
-				painter = painterResource(id = R.drawable.user_avatar_placeholder),
-				contentDescription = "",
-				tint = placeholderColorLegacy(userAlias)
-			)
-		}
+		
+		AsyncImage(
+			modifier = Modifier
+				.size(32.dp)
+				.clip(RoundedCornerShape(8.dp))
+				.background(if (MaterialTheme.colors.isLight) Color.Transparent else Color.White),
+			contentScale = ContentScale.FillBounds,
+			model = LocalContext.current.filesDir.toString() + "/$avatarFilename",
+			contentDescription = ""
+		)
+		
 		
 	}
 	val menuTransition = updateTransition(targetState = expanded)
@@ -153,34 +144,17 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.6f
 							},
 							title = userAlias, icon = {
-								if (avatarUrl != null) {
-									AsyncImage(
-										modifier = Modifier
-											.size(32.dp)
-											.clip(RoundedCornerShape(8.dp))
-											.background(Color.White),
-										contentScale = ContentScale.FillBounds,
-										model = avatarUrl, contentDescription = ""
-									)
-								} else {
-									Icon(
-										modifier = Modifier
-											.size(32.dp)
-											.border(
-												width = 2.dp,
-												color = placeholderColorLegacy(userAlias),
-												shape = RoundedCornerShape(8.dp)
-											)
-											.background(
-												Color.White,
-												shape = RoundedCornerShape(8.dp)
-											)
-											.padding(2.5.dp),
-										painter = painterResource(id = R.drawable.user_avatar_placeholder),
-										contentDescription = "",
-										tint = placeholderColorLegacy(userAlias)
-									)
-								}
+								
+								AsyncImage(
+									modifier = Modifier
+										.size(32.dp)
+										.clip(RoundedCornerShape(8.dp))
+										.background(Color.White),
+									contentScale = ContentScale.FillBounds,
+									model = LocalContext.current.filesDir.toString() + "/$avatarFilename",
+									contentDescription = ""
+								)
+								
 							}, onClick = {
 								onProfileClick()
 								expanded = false

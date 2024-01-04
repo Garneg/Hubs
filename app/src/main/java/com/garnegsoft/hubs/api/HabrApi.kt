@@ -5,7 +5,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.garnegsoft.hubs.BuildConfig
-import com.garnegsoft.hubs.cookies
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_RESPONSE
@@ -22,8 +21,10 @@ class HabrApi {
         private const val baseAddress = "https://habr.com"
         private lateinit var HttpClient: OkHttpClient
         private var csrfToken: String? = null
+        private var cookies: String = ""
 
-        fun initialize(context: Context){
+        fun initialize(context: Context, cookies: String){
+            this.cookies = cookies
             HttpClient = OkHttpClient.Builder()
                 .addInterceptor(Interceptor {
                     val req = it.request()
