@@ -140,6 +140,12 @@ interface OfflineArticlesDao {
 	@Query("DELETE FROM $SNIPPETS_TABLE_NAME WHERE article_id = :id")
 	fun deleteSnippet(id: Int)
 	
+	@Query("DELETE FROM $SNIPPETS_TABLE_NAME ")
+	fun clearSnippetsTable()
+	
+	@Query("DELETE FROM $ARTICLES_TABLE_NAME")
+	fun clearArticlesTable()
+	
 	/**
 	 * @return list of article entities from older to newer
 	 */

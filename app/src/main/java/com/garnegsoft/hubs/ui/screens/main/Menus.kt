@@ -38,6 +38,7 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.common.MenuItem
 
 @Composable
 fun AuthorizedMenu(
@@ -206,8 +207,7 @@ fun AuthorizedMenu(
 							title = "Статьи", icon = {
 								Icon(
 									painter = painterResource(id = R.drawable.article),
-									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
+									contentDescription = ""
 								)
 							}, onClick = {
 								onArticlesClick()
@@ -224,7 +224,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.comments_icon),
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onCommentsClick()
@@ -241,7 +240,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.bookmark),
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onBookmarksClick()
@@ -258,7 +256,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.download),
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onSavedArticlesClick()
@@ -276,7 +273,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.history),
 									contentDescription = null,
-									tint = MaterialTheme.colors.onBackground
 								)
 							},
 							onClick = {
@@ -294,7 +290,6 @@ fun AuthorizedMenu(
 								Icon(
 									imageVector = Icons.Outlined.Settings,
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onSettingsClick()
@@ -324,7 +319,6 @@ fun AuthorizedMenu(
 								Icon(
 									imageVector = Icons.Outlined.Info,
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onAboutClick()
@@ -361,7 +355,6 @@ fun UnauthorizedMenu(
 			Icon(
 				imageVector = Icons.Outlined.ExitToApp,
 				contentDescription = "",
-				tint = MaterialTheme.colors.onBackground
 			)
 		}, onClick = {
 			onLoginClick()
@@ -372,7 +365,6 @@ fun UnauthorizedMenu(
 			Icon(
 				painter = painterResource(id = R.drawable.download),
 				contentDescription = "",
-				tint = MaterialTheme.colors.onBackground
 			)
 		}, onClick = {
 			onSavedArticlesClick()
@@ -385,7 +377,6 @@ fun UnauthorizedMenu(
 				Icon(
 					painter = painterResource(id = R.drawable.history),
 					contentDescription = null,
-					tint = MaterialTheme.colors.onBackground
 				)
 			},
 			onClick = {
@@ -398,7 +389,6 @@ fun UnauthorizedMenu(
 			Icon(
 				imageVector = Icons.Outlined.Settings,
 				contentDescription = "",
-				tint = MaterialTheme.colors.onBackground
 			)
 		}, onClick = {
 			onSettingsClick()
@@ -407,40 +397,19 @@ fun UnauthorizedMenu(
 		
 		Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 		
-		MenuItem(title = "О приложении", icon = {
-			Icon(
-				imageVector = Icons.Outlined.Info,
-				contentDescription = "",
-				modifier = Modifier.size(24.dp),
-				tint = MaterialTheme.colors.onBackground
-			)
-		}, onClick = {
-			onAboutClick()
-			expanded = false
-		})
+		MenuItem(
+			title = "О приложении",
+			icon = {
+				Icon(
+					imageVector = Icons.Outlined.Info,
+					contentDescription = "",
+					modifier = Modifier.size(24.dp),
+				)
+			},
+			onClick = {
+				onAboutClick()
+				expanded = false
+			})
 	}
 }
 
-@Composable
-fun MenuItem(
-	title: String,
-	modifier: Modifier = Modifier,
-	icon: @Composable () -> Unit,
-	onClick: () -> Unit
-) {
-	Row(
-		modifier = modifier
-			.clickable(onClick = onClick)
-			.padding(14.dp),
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		icon()
-		Spacer(modifier = Modifier.width(14.dp))
-		Text(
-			title,
-			color = MaterialTheme.colors.onBackground
-		)
-		Spacer(modifier = Modifier.width(14.dp))
-		Spacer(modifier = Modifier.weight(1f))
-	}
-}

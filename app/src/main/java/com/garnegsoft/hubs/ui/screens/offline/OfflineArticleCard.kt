@@ -1,13 +1,27 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material.ripple.RippleAlpha
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,19 +39,26 @@ import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle.Companion.defaultArticleCardStyle
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OfflineArticleCard(
     article: OfflineArticleSnippet,
     onClick: () -> Unit,
+    onDelete: () -> Unit,
     style: ArticleCardStyle
 ) {
+    var showDeleteButton by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(style.cardShape)
             .background(style.backgroundColor)
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onLongClick = { showDeleteButton = true },
+                onClick = onClick
+            )
             .padding(style.innerPadding)
     ) {
         article.authorName?.let {
@@ -74,7 +95,7 @@ fun OfflineArticleCard(
         }
         Text(text = article.title, style = style.titleTextStyle)
 
-        var hubsText by remember { mutableStateOf("") }
+        var hubsText by rememberSaveable { mutableStateOf("") }
 
         LaunchedEffect(key1 = Unit, block = {
             if (hubsText == "") {
@@ -139,6 +160,43 @@ fun OfflineArticleCard(
             )
 
         }
-
+        
+        AnimatedVisibility(
+            visible = showDeleteButton,
+            enter = fadeIn() + scaleIn()
+        ) {
+            Column {
+                Spacer(modifier = Modifier.height(style.innerPadding / 2))
+                CompositionLocalProvider(
+                    LocalRippleTheme provides object : RippleTheme {
+                        @Composable
+                        override fun defaultColor(): Color {
+                            return RatingNegativeColor
+                        }
+    
+                        @Composable
+                        override fun rippleAlpha(): RippleAlpha {
+                            return RippleAlpha(0.1f, 0.1f, 0.1f, 0.1f)
+                        }
+    
+                    }
+                ) {
+                    TextButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp)
+                            .clip(style.innerElementsShape),
+                        onClick = onDelete,
+                        colors = ButtonDefaults.textButtonColors(
+                            backgroundColor = RatingNegativeColor.copy(
+                                0.08f
+                            )
+                        )
+                    ) {
+                        Text(text = "Удалить")
+                    }
+                }
+            }
+        }
     }
 }

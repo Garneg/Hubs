@@ -40,7 +40,7 @@ fun Poll(
 	
 	Column(
 		verticalArrangement = Arrangement.spacedBy(16.dp),
-		modifier = Modifier.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.onBackground)
+		modifier = Modifier.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background)
 	) {
 		Text(
 			text = poll.title,

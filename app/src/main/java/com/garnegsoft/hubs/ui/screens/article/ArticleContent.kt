@@ -9,8 +9,10 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
@@ -422,14 +424,22 @@ fun ArticleContent(
 					}
 				}
 			}
-			mostReadingArticles?.let {
-				items(it) {
-					ArticleShort(
-						article = it,
-						onClick = {
-							onArticleClick(it.id)
+			mostReadingArticles?.let { list ->
+				
+				itemsIndexed(list) { index, it ->
+					DisableSelection {
+						Column {
+							ArticleShort(
+								article = it,
+								onClick = {
+									onArticleClick(it.id)
+								}
+							)
+							if (index != list.lastIndex) {
+								Spacer(modifier = Modifier.height(8.dp))
+							}
 						}
-					)
+					}
 				}
 			}
 			

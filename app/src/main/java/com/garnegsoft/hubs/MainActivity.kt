@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs
 
-import android.app.ActivityManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -61,7 +60,7 @@ import com.garnegsoft.hubs.ui.screens.hub.HubScreen
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.MainScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
-import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesScreen
+import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesListScreen
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.FeedSettingsScreen
@@ -587,7 +586,7 @@ class MainActivity : ComponentActivity() {
 									deepLinks = listOf(NavDeepLink("hubs://saved-articles"))
 								) {
 									
-									OfflineArticlesScreen(
+									OfflineArticlesListScreen(
 										onBack = { navController.popBackStack() },
 										onArticleClick = { navController.navigate("article/$it?offline=true") }
 									)

@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
 import android.content.Context
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,26 +13,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.article.offline.OfflineArticle
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
+import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
-import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import kotlinx.coroutines.flow.Flow
 
@@ -40,8 +41,9 @@ class OfflineArticleScreenViewModel(context: Context) : ViewModel() {
 	val articles: Flow<List<OfflineArticleSnippet>> = dao.getAllSnippetsSortedByIdDesc()
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OfflineArticlesScreen(
+fun OfflineArticlesListScreen(
 	onBack: () -> Unit,
 	onArticleClick: (articleId: Int) -> Unit
 ) {
@@ -50,15 +52,20 @@ fun OfflineArticlesScreen(
 	val viewModel = viewModel { OfflineArticleScreenViewModel(context) }
 	
 	val articles by viewModel.articles.collectAsState(initial = null)
-	
+	var showMenu by remember { mutableStateOf(false) }
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = { Text("Сохраненные публикации") },
+				title = { Text("Сохранённые") },
 				elevation = 0.dp,
 				navigationIcon = {
 					IconButton(onClick = onBack) {
-						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "back")
+						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "назад")
+					}
+				},
+				actions = {
+					IconButton(onClick = { showMenu = true}) {
+						Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "меню")
 					}
 				}
 			)
@@ -104,11 +111,19 @@ fun OfflineArticlesScreen(
 							items = articlesList,
 							key = { it.articleId }
 						) {
-							OfflineArticleCard(
-								article = it,
-								onClick = { onArticleClick(it.articleId) },
-								style = style
-							)
+							Box(modifier = Modifier.animateItemPlacement()) {
+								OfflineArticleCard(
+									article = it,
+									onClick = { onArticleClick(it.articleId) },
+									onDelete = {
+										OfflineArticlesController.deleteArticle(
+											it.articleId,
+											context
+										)
+									},
+									style = style
+								)
+							}
 						}
 					}
 				}

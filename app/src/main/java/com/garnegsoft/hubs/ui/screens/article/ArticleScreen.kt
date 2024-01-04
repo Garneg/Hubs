@@ -189,7 +189,7 @@ fun ArticleScreen(
 							contentDescription = "",
 							tint = statisticsColor
 						)
-						Spacer(modifier = Modifier.width(4.dp))
+						Spacer(modifier = Modifier.width(1.dp))
 						Text(
 							if (article.statistics.score > 0)
 								"+" + article.statistics.score.toString()
