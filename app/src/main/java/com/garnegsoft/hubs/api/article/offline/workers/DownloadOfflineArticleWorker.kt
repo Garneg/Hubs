@@ -1,10 +1,16 @@
 package com.garnegsoft.hubs.api.article.offline.workers
 
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
 import android.os.Looper
+import android.webkit.WebView
 import android.widget.Toast
+import androidx.core.app.NotificationChannelCompat
+import androidx.core.view.doOnPreDraw
+import androidx.core.view.drawToBitmap
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -25,20 +31,35 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.io.File
 
+val downloadArticleNotificationChannelId = "download_article_worker_channel"
+
 class DownloadOfflineArticleWorker(
 	appContext: Context,
 	params: WorkerParameters
 ) : CoroutineWorker(appContext, params) {
+	
 	override suspend fun getForegroundInfo(): ForegroundInfo {
-		val notification = if (Build.VERSION.SDK_INT > 26) {
+		
+		if (Build.VERSION.SDK_INT >= 26){
+			val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			
+			if (notificationManager.notificationChannels.find { it.id == downloadArticleNotificationChannelId } == null) {
+				val channel = NotificationChannel(downloadArticleNotificationChannelId, "Article Download", NotificationManager.IMPORTANCE_DEFAULT)
+				notificationManager.createNotificationChannel(channel)
+			}
+		}
+		
+		val notification = if (Build.VERSION.SDK_INT >= 26) {
 			Notification.Builder(applicationContext, "download_article_worker_channel")
-				.setSmallIcon(R.drawable.download).build()
+				.setSmallIcon(R.drawable.article_download)
+				.setContentTitle("Статья загружается...")
+				.setProgress(0, 0, true)
+				.build()
 		} else {
 			Notification()
 		}
 		
-		
-		return ForegroundInfo(0, notification)
+		return ForegroundInfo(inputData.getInt("ARTICLE_ID", 0), notification)
 		
 	}
 	override suspend fun doWork(): Result {
@@ -49,7 +70,17 @@ class DownloadOfflineArticleWorker(
 			withContext(Dispatchers.Main) {
 				Toast.makeText(
 					applicationContext,
-					"Invalid article id was passed to the worker!",
+					"Не удалось скачать статью. (невозможный id)",
+					Toast.LENGTH_SHORT
+				).show()
+			}
+			return Result.failure()
+		}
+		if (checkArticleLoaded()) {
+			withContext(Dispatchers.Main) {
+				Toast.makeText(
+					applicationContext,
+					"Статья уже загружается или загружена",
 					Toast.LENGTH_SHORT
 				).show()
 			}
@@ -66,6 +97,10 @@ class DownloadOfflineArticleWorker(
 			}
 		}
 		return Result.success()
+	}
+	
+	private fun checkArticleLoaded(): Boolean {
+		return File(applicationContext.articles_offline_resource_dir, inputData.getInt("ARTICLE_ID", 0).toString()).exists()
 	}
 	
 	private fun downloadArticle(articleId: Int, context: Context): Boolean {

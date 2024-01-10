@@ -34,13 +34,14 @@ class MeDataUpdateWorker(
 			if (me == null) {
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.Alias, "")
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.AvatarFileName, "")
+				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.LastAvatarUrlDownloaded, "")
 				val avatarFile = File(applicationContext.filesDir, avatarFileName)
 				avatarFile.delete()
 			}
 			me?.let { me ->
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.Alias, me.alias)
 				val newAvatarUrl = me.avatarUrl ?: placeholderAvatarUrl(me.alias)
-				if (lastAvatarUrl != newAvatarUrl) {
+				if (lastAvatarUrl != newAvatarUrl || avatarFileName == "" || !File(applicationContext.filesDir, avatarFileName).exists()) {
 					val request = Request.Builder()
 						.get()
 						.url(newAvatarUrl)

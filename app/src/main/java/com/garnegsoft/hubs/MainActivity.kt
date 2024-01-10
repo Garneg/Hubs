@@ -1,7 +1,11 @@
 package com.garnegsoft.hubs
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.webkit.CookieManager
@@ -34,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.NotificationCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -101,14 +106,6 @@ class MainActivity : ComponentActivity() {
 			authStatus = isAuthorizedFlow.firstOrNull()
 			HabrApi.initialize(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
 		}
-		
-		
-		
-		val authActivityLauncher =
-			registerForActivityResult(AuthActivityResultContract()) { it ->
-				
-			}
-		
 		
 		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
 			.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
