@@ -5,6 +5,8 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -37,6 +39,7 @@ import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
+import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -94,7 +97,9 @@ fun ArticleCard(
 							modifier = Modifier
 								.size(style.authorAvatarSize)
 								.clip(style.innerElementsShape)
-								.background(Color.White),
+								// I set shape here because it works better and white rounded corners are
+								// less visible. Although, it's still noticeable :(
+								.background(color = Color.White, shape = style.innerElementsShape),
 							model = it.avatarUrl,
 							contentDescription = "avatar",
 							onState = { })
@@ -184,12 +189,12 @@ fun ArticleCard(
 					modifier = Modifier.size(14.dp),
 					painter = painterResource(id = R.drawable.translate),
 					contentDescription = "",
-					tint = style.statisticsColor
+					tint = TranslationLabelColor
 				)
 				Spacer(modifier = Modifier.width(2.dp))
 				Text(
 					text = "Перевод",
-					color = style.statisticsColor,
+					color = TranslationLabelColor,
 					fontSize = 14.sp,
 					fontWeight = FontWeight.W500
 				)
@@ -198,6 +203,7 @@ fun ArticleCard(
 		
 		var hubsText by remember { mutableStateOf(buildAnnotatedString { }) }
 		
+		// TODO: This concatenation takes some time and leads to laggy scroll of feeds. Needs to be refactored
 		LaunchedEffect(key1 = Unit, block = {
 			if (hubsText.text == "") {
 				hubsText = buildAnnotatedString {

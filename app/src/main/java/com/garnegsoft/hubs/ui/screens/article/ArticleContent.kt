@@ -43,6 +43,7 @@ import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.*
@@ -297,12 +298,12 @@ fun ArticleContent(
 							painter = painterResource(id = R.drawable.translate),
 							modifier = Modifier.size(14.dp),
 							contentDescription = "",
-							tint = statisticsColor
+							tint = TranslationLabelColor
 						)
 						Spacer(modifier = Modifier.width(4.dp))
 						Text(
 							text = "Перевод",
-							color = statisticsColor,
+							color = TranslationLabelColor,
 							fontWeight = FontWeight.W500,
 							fontSize = 14.sp
 						)

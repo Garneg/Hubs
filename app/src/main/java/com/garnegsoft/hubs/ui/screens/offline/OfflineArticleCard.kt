@@ -40,6 +40,7 @@ import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle.Companion.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -126,12 +127,12 @@ fun OfflineArticleCard(
                     modifier = Modifier.size(14.dp),
                     painter = painterResource(id = R.drawable.translate),
                     contentDescription = "",
-                    tint = style.statisticsColor
+                    tint = TranslationLabelColor
                 )
                 Spacer(modifier = Modifier.width(2.dp))
                 Text(
                     text = "Перевод",
-                    color = style.statisticsColor,
+                    color = TranslationLabelColor,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.W500
                 )

@@ -15,3 +15,4 @@ val RatingPositiveColor = Color(0xFF4CBE51)
 val RatingNegativeColor = Color(0xFFC43333)
 
 val HubSubscribedColor = Color(0xE351A843)
+val TranslationLabelColor = Color(0xFF229CE6)
