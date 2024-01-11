@@ -13,15 +13,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,11 +51,25 @@ fun OfflineArticlesListScreen(
 	onBack: () -> Unit,
 	onArticleClick: (articleId: Int) -> Unit
 ) {
-	
 	val context = LocalContext.current
 	val viewModel = viewModel { OfflineArticleScreenViewModel(context) }
 	
+	val lazyListState = rememberLazyListState()
+	
+	
 	val articles by viewModel.articles.collectAsState(initial = null)
+	var firstArticleId by rememberSaveable { mutableStateOf(0) }
+	
+	LaunchedEffect(key1 = articles?.firstOrNull()?.articleId, block = {
+		if (firstArticleId > 0 && articles?.firstOrNull()?.articleId != null && articles?.firstOrNull()?.articleId != firstArticleId ) {
+			lazyListState.scrollToItem(0)
+			firstArticleId = articles?.firstOrNull()!!.articleId
+		} else {
+			firstArticleId = articles?.firstOrNull()?.articleId ?: 0
+		}
+	})
+	
+	
 	var showMenu by remember { mutableStateOf(false) }
 	Scaffold(
 		topBar = {
@@ -104,6 +122,7 @@ fun OfflineArticlesListScreen(
 						modifier = Modifier
 							.fillMaxSize()
 							.padding(it),
+						state = lazyListState,
 						verticalArrangement = Arrangement.spacedBy(8.dp),
 						contentPadding = PaddingValues(8.dp)
 					) {

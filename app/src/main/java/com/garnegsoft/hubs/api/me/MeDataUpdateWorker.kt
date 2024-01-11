@@ -48,7 +48,7 @@ class MeDataUpdateWorker(
 						.build()
 					val response = OkHttpClient().newCall(request).execute()
 					response.body?.bytes()?.let {
-						val filename = "user_avatar" + Calendar.getInstance().get(Calendar.SECOND) + ".png"
+						val filename = "user_avatar" + Calendar.getInstance().time.time + ".png"
 						val avatarFile = File(applicationContext.filesDir, filename)
 						avatarFile.createNewFile()
 						avatarFile.writeBytes(it)
