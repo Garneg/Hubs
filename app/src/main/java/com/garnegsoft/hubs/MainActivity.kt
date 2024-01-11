@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -12,6 +13,7 @@ import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
@@ -23,21 +25,39 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -81,7 +101,10 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -96,6 +119,8 @@ class MainActivity : ComponentActivity() {
 
 //		(this.getSystemService(ACTIVITY_SERVICE) as ActivityManager)
 //			.clearApplicationUserData()
+		val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+		
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
@@ -114,36 +139,35 @@ class MainActivity : ComponentActivity() {
 		
 		intent.dataString?.let { Log.e("intentData", it) }
 		
-		
-		
-			setContent {
-				val cookies by cookiesFlow.collectAsState(initial = "")
-				key(cookies) {
-					val themeMode by HubsDataStore.Settings
-						.getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
-						.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
-						.collectAsState(initial = null)
-					
-					if (themeMode != null && authStatus != null) {
-						HubsTheme(
-							darkTheme = when (themeMode) {
-								HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
-								HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
-								HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
-								else -> false
-							}
-						) {
-							val navController = rememberNavController()
-							
-							MainNavigationGraph(parentActivity = this, navController = navController)
-							
+		setContent {
+			val cookies by cookiesFlow.collectAsState(initial = "")
+			key(cookies) {
+				val themeMode by HubsDataStore.Settings
+					.getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
+					.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+					.collectAsState(initial = null)
+				
+				if (themeMode != null && authStatus != null) {
+					HubsTheme(
+						darkTheme = when (themeMode) {
+							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
+							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
+							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
+							else -> false
 						}
+					) {
+						val navController = rememberNavController()
+						
+						MainNavigationGraph(
+							parentActivity = this@MainActivity,
+							navController = navController
+						)
 					}
 				}
 			}
-			
-			Log.e("ExternalLink", intent.data.toString())
-			
+		}
+		
+		Log.e("ExternalLink", intent.data.toString())
 		
 	}
 }

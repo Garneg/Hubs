@@ -122,6 +122,9 @@ fun MainNavigationGraph(
 					onHubClicked = {
 						navController.navigate("hub/$it")
 					},
+					onSavedArticles = {
+						navController.navigate("savedArticles")
+					},
 					menu = {
 						val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(
 							LocalContext.current, 
