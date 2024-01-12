@@ -459,7 +459,7 @@ fun ArticleScreen(
 								Spacer(modifier = Modifier.width(12.dp))
 								if (article.isTranslation) {
 									Icon(
-										painter = painterResource(id = R.drawable.translate),
+										painter = painterResource(id = R.drawable.translation),
 										modifier = Modifier.size(14.dp),
 										contentDescription = "",
 										tint = statisticsColor

@@ -80,11 +80,6 @@ fun OfflineArticlesListScreen(
 					IconButton(onClick = onBack) {
 						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "назад")
 					}
-				},
-				actions = {
-					IconButton(onClick = { showMenu = true}) {
-						Icon(imageVector = Icons.Outlined.MoreVert, contentDescription = "меню")
-					}
 				}
 			)
 			

@@ -1,15 +1,11 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ButtonDefaults
@@ -33,14 +29,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
-import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle.Companion.defaultArticleCardStyle
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 
@@ -133,7 +127,7 @@ fun OfflineArticleCard(
 				Spacer(modifier = Modifier.width(12.dp))
 				Icon(
 					modifier = Modifier.size(14.dp),
-					painter = painterResource(id = R.drawable.translate),
+					painter = painterResource(id = R.drawable.translation),
 					contentDescription = "",
 					tint = TranslationLabelColor
 				)

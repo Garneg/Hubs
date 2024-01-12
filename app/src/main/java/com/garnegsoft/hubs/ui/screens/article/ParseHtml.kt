@@ -970,6 +970,9 @@ fun Code(
 	}
 }
 
+/**
+ * Handles url. If url refers to habr, opens this link via app
+ */
 fun handleUrl(context: Context, url: String) {
 	Log.e(
 		"URL Clicked",

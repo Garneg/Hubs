@@ -4,9 +4,6 @@ import ArticleController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -16,7 +13,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -25,7 +21,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -35,10 +30,7 @@ import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
-import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
-import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -187,7 +179,7 @@ fun ArticleCard(
 				Spacer(modifier = Modifier.width(12.dp))
 				Icon(
 					modifier = Modifier.size(14.dp),
-					painter = painterResource(id = R.drawable.translate),
+					painter = painterResource(id = R.drawable.translation),
 					contentDescription = "",
 					tint = TranslationLabelColor
 				)
@@ -231,7 +223,8 @@ fun ArticleCard(
 		if (style.showHubsList)
 			Text(
 				modifier = Modifier.padding(horizontal = style.innerPadding),
-				text = hubsText, style = style.hubsTextStyle
+				text = hubsText, style = style.hubsTextStyle,
+				minLines = if (hubsText.text == "") 2 else 1 // todo: remove this hack after fixing hubs string formatting on fly
 			)
 		
 		

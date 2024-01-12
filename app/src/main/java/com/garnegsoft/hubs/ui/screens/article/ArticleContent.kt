@@ -295,7 +295,7 @@ fun ArticleContent(
 					Spacer(modifier = Modifier.width(12.dp))
 					if (article.translationData.isTranslation) {
 						Icon(
-							painter = painterResource(id = R.drawable.translate),
+							painter = painterResource(id = R.drawable.translation),
 							modifier = Modifier.size(14.dp),
 							contentDescription = "",
 							tint = TranslationLabelColor
