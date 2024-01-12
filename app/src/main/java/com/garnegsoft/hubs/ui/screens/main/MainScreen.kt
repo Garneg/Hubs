@@ -258,28 +258,12 @@ fun MainScreen(
 				})
 				
 				if (showNoInternetConnectionElement){
-					Box(modifier = Modifier
-						.fillMaxSize()
-						.padding(32.dp), contentAlignment = Alignment.Center){
-						Column(
-							horizontalAlignment = Alignment.CenterHorizontally
-						) {
-							Text(text = "Нет интернета", style = MaterialTheme.typography.subtitle1,
-								textAlign = TextAlign.Center)
-							Spacer(modifier = Modifier.height(8.dp))
-							Text(text = "Сейчас вы не можете читать Хабр, без подключения вам доступны только ранее скачанные вами статьи. \nПопробуйте установить соединение еще раз, если сеть снова появилась.",
-								style = MaterialTheme.typography.body1,
-								color = MaterialTheme.colors.onBackground.copy(0.5f),
-								textAlign = TextAlign.Center)
-							Spacer(modifier = Modifier.height(32.dp))
-							Button(onClick = onSavedArticles, elevation = null) {
-								Text(text = "Скачанные статьи")
-							}
-							TextButton(onClick = { checkInternetConnection = true }) {
-								Text(text = "Попробовать еще раз")
-							}
-						}
-					}
+					
+					NoInternetElement(
+						onTryAgain = { checkInternetConnection = true },
+						onSavedArticles = onSavedArticles
+					)
+					
 				} else {
 					
 					HabrScrollableTabRow(
