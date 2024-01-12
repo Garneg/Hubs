@@ -48,6 +48,7 @@ import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 fun ArticleStats(
 	statistics: Article.Statistics,
 	addedToBookmarks: Boolean,
+	bookmarksCount: Int,
 	onAddToBookmarksClicked: () -> Unit,
 	onCommentsClick: () -> Unit,
 	unreadCommentsCount: Int,
@@ -165,7 +166,7 @@ fun ArticleStats(
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = statistics.bookmarksCount.toString(),
+				text = bookmarksCount.toString(),
 				style = style.statisticsTextStyle
 			)
 			saveArticlePopup(bounds)

@@ -257,11 +257,11 @@ fun ArticleCard(
 			)
 			
 		}
-		var addedToBookmarks by rememberSaveable {
+		var addedToBookmarks by remember {
 			mutableStateOf(article.relatedData?.bookmarked ?: false)
 		}
-		var addedToBookmarksCount by rememberSaveable(addedToBookmarks) {
-			mutableStateOf(article.statistics.bookmarksCount)
+		var addedToBookmarksCount by remember {
+			mutableIntStateOf(article.statistics.bookmarksCount)
 		}
 		val bookmarksCoroutineScope = rememberCoroutineScope()
 		val bookmarkButtonClickLambda: () -> Unit = remember {
@@ -314,7 +314,8 @@ fun ArticleCard(
 		
 		ArticleStats(
 			statistics = article.statistics,
-			addedToBookmarks = article.relatedData?.bookmarked ?: false,
+			addedToBookmarks = addedToBookmarks,
+			bookmarksCount = addedToBookmarksCount,
 			onAddToBookmarksClicked = bookmarkButtonClickLambda,
 			onCommentsClick = onCommentsClick,
 			unreadCommentsCount = article.relatedData?.let { if (it.unreadComments < article.statistics.commentsCount) it.unreadComments else 0 } ?: 0,
