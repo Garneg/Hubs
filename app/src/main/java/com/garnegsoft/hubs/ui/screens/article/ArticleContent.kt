@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -446,33 +447,8 @@ fun ArticleContent(
 			
 		}
 		
-		val scrollBarAlpha by animateFloatAsState(
-			targetValue = if (state.isScrollInProgress) 1f else 0f,
-			tween(600)
-		)
-		val density = LocalDensity.current
+		ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = state)
 		
-		val scrollBarColor = MaterialTheme.colors.onBackground.copy(0.25f)
-		
-		Canvas(modifier = Modifier
-			.align(Alignment.TopEnd)
-			.width(4.dp)
-			.fillMaxHeight(), onDraw = {
-			val topLeft = Offset(
-				0f,
-				(this.size.height * state.firstVisibleItemIndex / state.layoutInfo.totalItemsCount)
-			)
-			val barHeight =
-				this.size.height.roundToInt() / (state.layoutInfo.totalItemsCount / state.layoutInfo.visibleItemsInfo.size).toFloat()
-			drawRoundRect(
-				color = scrollBarColor,
-				topLeft = topLeft,
-				alpha = if (state.isScrollInProgress) 1f else scrollBarAlpha,
-				size = Size(width = 3f * density.density, height = barHeight),
-				cornerRadius = CornerRadius(400f, 400f)
-			)
-			
-		})
 	}
 	
 }
@@ -482,6 +458,39 @@ enum class ReadMoreMode {
 	News,
 	Similar,
 	Blog
+}
+
+@Composable
+fun ScrollBar(
+	modifier: Modifier,
+	lazyListState: LazyListState,
+	color: Color = MaterialTheme.colors.onBackground.copy(0.25f)
+) {
+	val scrollBarAlpha by animateFloatAsState(
+		targetValue = if (lazyListState.isScrollInProgress) 1f else 0f,
+		tween(600)
+	)
+	val draw by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount > 0 } }
+	if (draw) {
+		Canvas(modifier = modifier
+			.width(4.dp)
+			.fillMaxHeight(), onDraw = {
+			val topLeft = Offset(
+				0f,
+				(this.size.height * lazyListState.firstVisibleItemIndex / lazyListState.layoutInfo.totalItemsCount)
+			)
+			val barHeight =
+				this.size.height.roundToInt() / (lazyListState.layoutInfo.totalItemsCount / lazyListState.layoutInfo.visibleItemsInfo.size).toFloat()
+			drawRoundRect(
+				color = color,
+				topLeft = topLeft,
+				alpha = if (lazyListState.isScrollInProgress) 1f else scrollBarAlpha,
+				size = Size(width = 3f * density, height = barHeight),
+				cornerRadius = CornerRadius(400f, 400f)
+			)
+			
+		})
+	}
 }
 
 //object : FlingBehavior {

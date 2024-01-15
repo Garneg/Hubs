@@ -54,6 +54,7 @@ import com.garnegsoft.hubs.HubScreenNavDeepLinks
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.UserScreenNavDeepLinks
 import com.garnegsoft.hubs.api.HabrApi
+import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
@@ -70,6 +71,7 @@ import com.garnegsoft.hubs.ui.screens.hub.HubScreen
 import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.MainScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
+import com.garnegsoft.hubs.ui.screens.offline.OfflineArticleScreen
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesListScreen
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
@@ -79,7 +81,6 @@ import com.garnegsoft.hubs.ui.screens.user.LogoutConfirmDialog
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 
@@ -127,7 +128,7 @@ fun MainNavigationGraph(
 					},
 					menu = {
 						val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(
-							LocalContext.current, 
+							LocalContext.current,
 							HubsDataStore.Auth.Authorized
 						)
 						val showAuthorizedMenu by isAuthorizedFlow.collectAsState(
@@ -159,58 +160,67 @@ fun MainNavigationGraph(
 							)
 						} else {
 							
-							val authActivityLauncher = rememberLauncherForActivityResult(contract = AuthActivityResultContract()) {
-								CookieManager.getInstance().removeAllCookies(null)
-								parentActivity.lifecycle.coroutineScope.launch {
-									it?.let { result ->
-										HubsDataStore.Auth.edit(
-											context = parentActivity,
-											pref = HubsDataStore.Auth.Cookies,
-											value = result.split("; ").find { it.startsWith("connect_sid") }!!
-										)
-										
-										HubsDataStore.Auth.edit(
-											context = parentActivity,
-											pref = HubsDataStore.Auth.Authorized,
-											value = true
-										)
-										HabrApi.initialize(parentActivity, result)
-										launch(Dispatchers.IO) {
-											MeController.getMe()?.let {
-												val shortcut = ShortcutInfoCompat.Builder(
-													parentActivity,
-													"bookmarks_shortcut"
-												)
-													.setIntent(
-														Intent(Intent.ACTION_VIEW).apply {
-															`package` = BuildConfig.APPLICATION_ID
-															data =
-																Uri.parse("https://habr.com/users/${it.alias}/bookmarks")
-														}
+							val authActivityLauncher =
+								rememberLauncherForActivityResult(contract = AuthActivityResultContract()) {
+									CookieManager.getInstance().removeAllCookies(null)
+									parentActivity.lifecycle.coroutineScope.launch {
+										it?.let { result ->
+											HubsDataStore.Auth.edit(
+												context = parentActivity,
+												pref = HubsDataStore.Auth.Cookies,
+												value = result.split("; ")
+													.find { it.startsWith("connect_sid") }!!
+											)
+											
+											HubsDataStore.Auth.edit(
+												context = parentActivity,
+												pref = HubsDataStore.Auth.Authorized,
+												value = true
+											)
+											HabrApi.initialize(parentActivity, result)
+											launch(Dispatchers.IO) {
+												MeController.getMe()?.let {
+													val shortcut = ShortcutInfoCompat.Builder(
+														parentActivity,
+														"bookmarks_shortcut"
 													)
-													.setIcon(
-														IconCompat.createWithResource(
-															parentActivity,
-															R.drawable.bookmarks_shortcut_icon
+														.setIntent(
+															Intent(Intent.ACTION_VIEW).apply {
+																`package` =
+																	BuildConfig.APPLICATION_ID
+																data =
+																	Uri.parse("https://habr.com/users/${it.alias}/bookmarks")
+															}
 														)
+														.setIcon(
+															IconCompat.createWithResource(
+																parentActivity,
+																R.drawable.bookmarks_shortcut_icon
+															)
+														)
+														.setShortLabel("Закладки")
+														.setLongLabel("Закладки")
+														.build()
+													ShortcutManagerCompat.pushDynamicShortcut(
+														parentActivity,
+														shortcut
 													)
-													.setShortLabel("Закладки")
-													.setLongLabel("Закладки")
-													.build()
-												ShortcutManagerCompat.pushDynamicShortcut(
-													parentActivity,
-													shortcut
-												)
-												
+													
+												}
+												val updateMeDataRequest =
+													OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
+														.setConstraints(
+															Constraints(
+																requiredNetworkType = NetworkType.CONNECTED
+															)
+														)
+														.build()
+												WorkManager.getInstance(parentActivity)
+													.enqueue(updateMeDataRequest)
 											}
-											val updateMeDataRequest = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
-												.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
-												.build()
-											WorkManager.getInstance(parentActivity).enqueue(updateMeDataRequest)
 										}
 									}
 								}
-							}
 							
 							UnauthorizedMenu(
 								onLoginClick = {
@@ -268,10 +278,7 @@ fun MainNavigationGraph(
 					
 				},
 			) {
-				
 				val id = it.arguments?.getString("id")?.toIntOrNull()
-				val offline =
-					it.arguments?.getString("offline")?.toBooleanStrict()
 				
 				val clearLastArticle = remember {
 					{
@@ -292,7 +299,6 @@ fun MainNavigationGraph(
 				
 				ArticleScreen(
 					articleId = id!!,
-					isOffline = offline ?: false,
 					onBackButtonClicked = {
 						clearLastArticle()
 						if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
@@ -327,6 +333,57 @@ fun MainNavigationGraph(
 				)
 				
 				
+			}
+			
+			composable(
+				route = "offlineArticle/{articleId}",
+				enterTransition = {
+					scaleIn(
+						tween(150, easing = EaseInOut),
+						0.9f
+					) + fadeIn(
+						tween(durationMillis = 150, easing = EaseIn)
+					) + slideInVertically(
+						tween(durationMillis = 150, easing = EaseIn),
+						initialOffsetY = { it / 9 }
+					)
+				},
+				popEnterTransition = {
+					fadeIn(
+						tween(durationMillis = 50, easing = EaseIn)
+					)
+				},
+				exitTransition = {
+					scaleOut(
+						tween(150, easing = EaseIn),
+						0.9f
+					) + fadeOut(
+						tween(150, easing = EaseOut)
+					)
+					
+				},
+				popExitTransition = {
+					scaleOut(
+						tween(150, easing = EaseOut),
+						0.9f
+					) + fadeOut(
+						tween(150, easing = EaseOut)
+					)
+					
+				}
+				) {
+				val articleId = it.arguments!!.getString("articleId")!!.toInt()
+				
+				OfflineArticleScreen(
+					articleId = articleId,
+					onSwitchToNormalMode = { navController.navigate("article/$articleId") },
+					onViewImageRequest = { navController.navigate("imageViewer?imageUrl=$it") },
+					onBack = { navController.popBackStack() },
+					onDelete = {
+						OfflineArticlesController.deleteArticle(articleId, parentActivity)
+						navController.popBackStack()
+					}
+				)
 			}
 			
 			composable(route = "search") {
@@ -455,9 +512,10 @@ fun MainNavigationGraph(
 							AuthDataController.clearAuthData(context)
 							HabrApi.initialize(context, "")
 							
-							val updateMeDataRequest = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
-								.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
-								.build()
+							val updateMeDataRequest =
+								OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
+									.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+									.build()
 							WorkManager.getInstance(context).enqueue(updateMeDataRequest)
 							
 							navController.popBackStack(
@@ -574,10 +632,9 @@ fun MainNavigationGraph(
 				route = "savedArticles",
 				deepLinks = listOf(NavDeepLink("hubs://saved-articles"))
 			) {
-				
 				OfflineArticlesListScreen(
 					onBack = { navController.popBackStack() },
-					onArticleClick = { navController.navigate("article/$it?offline=true") }
+					onArticleClick = { navController.navigate("offlineArticle/$it") }
 				)
 			}
 			

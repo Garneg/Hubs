@@ -17,11 +17,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,7 +38,7 @@ import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import kotlinx.coroutines.flow.Flow
 
-class OfflineArticleScreenViewModel(context: Context) : ViewModel() {
+class OfflineArticlesListScreenViewModel(context: Context) : ViewModel() {
 	private val dao = OfflineArticlesDatabase.getDb(context).articlesDao()
 	val articles: Flow<List<OfflineArticleSnippet>> = dao.getAllSnippetsSortedByIdDesc()
 }
@@ -52,7 +50,7 @@ fun OfflineArticlesListScreen(
 	onArticleClick: (articleId: Int) -> Unit
 ) {
 	val context = LocalContext.current
-	val viewModel = viewModel { OfflineArticleScreenViewModel(context) }
+	val viewModel = viewModel { OfflineArticlesListScreenViewModel(context) }
 	
 	val lazyListState = rememberLazyListState()
 	
