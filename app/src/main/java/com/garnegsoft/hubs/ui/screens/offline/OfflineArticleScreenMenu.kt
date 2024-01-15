@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import com.garnegsoft.hubs.ui.common.MenuBaseContainer
+import com.garnegsoft.hubs.ui.common.BaseMenuContainer
 import com.garnegsoft.hubs.ui.common.MenuItem
 
 
@@ -43,7 +43,7 @@ fun OfflineArticleScreenMenu(
 			onDismissRequest = onDismiss
 		) {
 			
-			MenuBaseContainer {
+			BaseMenuContainer {
 				MenuItem(
 					title = "Перейти в обычный режим",
 					icon = {
