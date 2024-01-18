@@ -38,7 +38,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.font.SystemFontFamily
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,6 +50,9 @@ import com.garnegsoft.hubs.ui.screens.article.CODE_ALPHA_VALUE
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.jvm.internal.MutablePropertyReference
+import kotlin.reflect.KMutableProperty
+import kotlin.reflect.KMutableProperty0
 
 
 @Preview
@@ -104,8 +109,8 @@ func main() {
 	})
 	routes.InitMainApiRoutes(router, serverConfig, wordsCollection)
 	routes.InitAdminApiRoutes(router, serverConfig, db)
-	var a = 0xFF
-	var b = 0b110101
+	var a = 0xFF_ea1_sports
+	var b = 0b110101_101f()
 	if len(serverConfig.TLSCertificates1) > 0 {
 		go func() {
 			println(http.ListenAndServe(serverConfig.BindAddress+":80", handlers.HttpToHttpsHandler{}).Error())
@@ -168,7 +173,7 @@ func InitializeMongoClient(config configuration.ServerConfig) (*mongo.Client, er
 	} else {
 		opts = options.Client().ApplyURI(config.MongoDBConnectionString).SetServerAPIOptions(serverAPIVersion)
 	}
-
+	
 	return mongo.Connect(context.Background(), opts)
 }
 
@@ -181,66 +186,12 @@ func (handler interceptedHandler) ServeHTTP0x111(response http.ResponseWriter, r
 	responseRef := &response
 	handler.interceptionFunction(*responseRef, request, handler.interceptedHandler)
 }
-		""".trimIndent().replace("\t", "    "), language = "go", spanStyle = SpanStyle()
+		""".trimIndent().replace("\t", "   "), language = "go", spanStyle = SpanStyle()
 			)
 		}
 	}
 }
 
-val stringLiteralSpanStyle = SpanStyle(
-	color = Color(0xFF579737),
-	
-	)
-val keywordSpanStyle = SpanStyle(
-	color = Color(0xFF2F6BA7),
-	
-	)
-
-val keywordsList = listOf(
-	"any", "break", "default", "error", "func",
-	"interface", "select", "case", "defer", "go",
-	"map", "struct", "chan", "else", "goto",
-	"package", "switch", "const", "fallthrough", "if",
-	"range", "type", "continue", "for", "import",
-	"return", "var", "nil",
-	
-	//base types
-	"int", "int8", "int16", "int32", "int64",
-	"uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
-	"float32", "float64",
-	"complex64", "complex128",
-	"string", "byte", "rune", "bool", "error"
-)
-
-val commentsSpanStyle = SpanStyle(
-	color = Color.Gray,
-	fontStyle = FontStyle.Italic
-)
-
-val functionCallSpanStyle = SpanStyle(
-	color = Color(0xFF418071)
-)
-
-val numberLiteralSpanStyle = SpanStyle(
-	color = Color(0xFF3265C4),
-)
-
-val builtInFunctions = listOf(
-	"len", "append", "println", "print", "Error",
-)
-
-val excludeFromFunctionsCalls = listOf(
-	"func", "import", "var"
-)
-
-enum class Lock {
-	None,
-	String,
-	Char,
-	Comment,
-	MultilineString,
-	MultilineComment
-}
 
 @Composable
 fun CodeElement(
@@ -251,154 +202,6 @@ fun CodeElement(
 	var codeSpanStylesList by remember { mutableStateOf(listOf<AnnotatedString.Range<SpanStyle>>()) }
 	LaunchedEffect(key1 = MaterialTheme.colors.isLight, block = {
 		val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
-		
-		var lastKeywordIndex = 0
-		while (true) {
-			val pair = code.findAnyOf(keywordsList, lastKeywordIndex)
-			
-			if (pair == null) break
-			val indexOfLastChar = pair.first + pair.second.length
-			if (pair.first > 0 && (code[pair.first - 1].isLetterOrDigit() || code[indexOfLastChar].isLetterOrDigit())) {
-				lastKeywordIndex = indexOfLastChar
-				continue
-			}
-			spanStylesList.add(
-				AnnotatedString.Range(keywordSpanStyle, pair.first, indexOfLastChar)
-			)
-			lastKeywordIndex = indexOfLastChar
-		}
-		
-		var lock = Lock.None
-		var lineCommentStartIndex = -1
-		var firstStringQuoteIndex = -1
-		var firstCharApostropheIndex = -1
-		var multilineCommentStartIndex = -1
-		var multilineStringStartIndex = -1
-		code.forEachIndexed { index, it ->
-			
-			if (it == '"' && !(index > 0 && code[index - 1] == '\\') && (lock == Lock.None || lock == Lock.String)) {
-				if (firstStringQuoteIndex < 0) {
-					firstStringQuoteIndex = index
-					lock = Lock.String
-				} else {
-					spanStylesList.add(
-						AnnotatedString.Range<SpanStyle>(
-							stringLiteralSpanStyle,
-							firstStringQuoteIndex,
-							index + 1
-						)
-					)
-					firstStringQuoteIndex = -1
-					lock = Lock.None
-				}
-			}
-			
-			if (it == '\'' && !(index > 0 && code[index - 1] == '\\') && (lock == Lock.None || lock == Lock.Char)) {
-				if (firstCharApostropheIndex < 0) {
-					firstCharApostropheIndex = index
-					lock = Lock.Char
-				} else {
-					spanStylesList.add(
-						AnnotatedString.Range(
-							stringLiteralSpanStyle,
-							firstCharApostropheIndex,
-							index + 1
-						)
-					)
-					lock = Lock.None
-				}
-			}
-			
-			if (it == '/' && (index > 0 && code[index - 1] == '/') && lock == Lock.None) {
-				lineCommentStartIndex = index - 1
-				lock = Lock.Comment
-			}
-			if (it == '\n' && lineCommentStartIndex > -1) {
-				spanStylesList.add(
-					AnnotatedString.Range(commentsSpanStyle, lineCommentStartIndex, index)
-				)
-				lineCommentStartIndex = -1
-				lock = Lock.None
-			}
-			
-			if (it == '/') {
-				if (code.length - 1 > index && code[index + 1] == '*' && lock == Lock.None) {
-					multilineCommentStartIndex = index
-					lock = Lock.MultilineComment
-				}
-				
-				if (index > 0 && code[index - 1] == '*' && lock == Lock.MultilineComment) {
-					spanStylesList.add(
-						AnnotatedString.Range(
-							commentsSpanStyle,
-							multilineCommentStartIndex,
-							index + 1
-						)
-					)
-					multilineCommentStartIndex = -1
-					lock = Lock.None
-				}
-			}
-			
-			if (it == '`') {
-				if (lock == Lock.None) {
-					multilineStringStartIndex = index
-					lock = Lock.MultilineString
-				} else if (lock == Lock.MultilineString) {
-					spanStylesList.add(
-						AnnotatedString.Range(
-							stringLiteralSpanStyle,
-							multilineStringStartIndex,
-							index + 1
-						)
-					)
-					lock = Lock.None
-					multilineStringStartIndex = -1
-				}
-			}
-			
-			if (it.isDigit() && lock == Lock.None) {
-				if (index > 0 && !code[index - 1].isLetter()){
-				
-						spanStylesList.add(
-							AnnotatedString.Range(
-								numberLiteralSpanStyle,
-								index,
-								index + 1
-							)
-						)
-					}
-				else if (index > 2 && listOf('x', 'o', 'b', '_').contains(code[index - 1]) && code[index - 2].isDigit() && !code[index - 3].isLetterOrDigit()) {
-					spanStylesList.add(
-						AnnotatedString.Range(
-							numberLiteralSpanStyle,
-							index-1,
-							index + 1
-						)
-					)
-				}
-			}
-			
-			if (it == '(' && lock == Lock.None) {
-				if (index > 0 && code[index - 1].isLetterOrDigit() || code[index - 1] == '_'){
-					val functionName = code.slice(0..index - 1).trimEnd().takeLastWhile {
-						it.isLetterOrDigit() || it == '_'
-					}
-					if (!excludeFromFunctionsCalls.contains(functionName)) {
-						spanStylesList.add(
-							AnnotatedString.Range(
-								functionCallSpanStyle,
-								index - functionName.length,
-								index
-							)
-						)
-					}
-				}
-			}
-		}
-		
-		
-		
 		
 		codeSpanStylesList = spanStylesList
 	})
@@ -435,6 +238,7 @@ fun CodeElement(
 				Surface(
 					color = MaterialTheme.colors.onBackground.copy(0f),
 				) {
+					val dividerColor = MaterialTheme.colors.onBackground
 					Column(Modifier
 						.drawBehind {
 							val showDividerThreshold = 8.dp.toPx()
@@ -442,7 +246,7 @@ fun CodeElement(
 								alpha = (codeScrollState.value / showDividerThreshold).coerceAtMost(
 									1f
 								) * 0.1f,
-								color = Color.Black,
+								color = dividerColor,
 								topLeft = Offset(size.width - 3f, 0f),
 								size = Size(3f, size.height)
 							)

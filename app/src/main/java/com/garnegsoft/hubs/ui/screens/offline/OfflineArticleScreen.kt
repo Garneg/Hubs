@@ -269,6 +269,7 @@ fun OfflineArticleScreen(
 							text = hubsText, style = TextStyle(
 								color = Color.Gray,
 								fontWeight = FontWeight.W500,
+								lineHeight = (fontSize?.let { it - 4f }?.sp ?: 16.sp) * 1.25f,
 								fontSize = fontSize?.let { it - 4f }?.sp ?: 16.sp
 							)
 						)

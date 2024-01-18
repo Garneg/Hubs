@@ -3,9 +3,13 @@ package com.garnegsoft.hubs.ui.screens.article
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.*
+import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.FlingBehavior
+import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -48,6 +52,7 @@ import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.*
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -99,25 +104,29 @@ fun ArticleContent(
 		) {
 			if (article.editorVersion == EditorVersion.FirstVersion) {
 				item {
-					Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.clip(RoundedCornerShape(8.dp))
-							.background(MaterialTheme.colors.error.copy(alpha = 0.75f))
-							.padding(8.dp), verticalAlignment = Alignment.CenterVertically
-					) {
-						Icon(
-							imageVector = Icons.Outlined.Warning,
-							contentDescription = "",
-							tint = MaterialTheme.colors.onError
-						)
-						Spacer(modifier = Modifier.width(8.dp))
-						Text(
-							"Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
-							color = MaterialTheme.colors.onError
-						)
+					DisableSelection {
+						
+						
+						Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.clip(RoundedCornerShape(8.dp))
+								.background(MaterialTheme.colors.error.copy(alpha = 0.75f))
+								.padding(8.dp), verticalAlignment = Alignment.CenterVertically
+						) {
+							Icon(
+								imageVector = Icons.Outlined.Warning,
+								contentDescription = "",
+								tint = MaterialTheme.colors.onError
+							)
+							Spacer(modifier = Modifier.width(8.dp))
+							Text(
+								"Эта статья написана с помощью первой версии редактора, некоторые элементы могут отображаться некорректно",
+								color = MaterialTheme.colors.onError
+							)
+						}
+						Spacer(modifier = Modifier.height(16.dp))
 					}
-					Spacer(modifier = Modifier.height(16.dp))
 				}
 			}
 			
@@ -136,86 +145,92 @@ fun ArticleContent(
 			
 			if (article.isCorporative) {
 				item {
-					val companyAlias = article.hubs.find { it.isCorporative }!!.alias
-					
-					var companyTitle: String? by rememberSaveable {
-						mutableStateOf(null)
-					}
-					var companyAvatarUrl: String? by rememberSaveable {
-						mutableStateOf(null)
-					}
-					LaunchedEffect(key1 = Unit, block = {
-						if (companyTitle == null) {
-							launch(Dispatchers.IO) {
-								CompanyController.get(companyAlias)?.let {
-									companyAvatarUrl = it.avatarUrl
-									companyTitle = it.title
+					DisableSelection {
+						
+						
+						val companyAlias = article.hubs.find { it.isCorporative }!!.alias
+						
+						var companyTitle: String? by rememberSaveable {
+							mutableStateOf(null)
+						}
+						var companyAvatarUrl: String? by rememberSaveable {
+							mutableStateOf(null)
+						}
+						LaunchedEffect(key1 = Unit, block = {
+							if (companyTitle == null) {
+								launch(Dispatchers.IO) {
+									CompanyController.get(companyAlias)?.let {
+										companyAvatarUrl = it.avatarUrl
+										companyTitle = it.title
+									}
 								}
 							}
-						}
-					})
-					
-					Row(
-						modifier = Modifier
-							.clip(RoundedCornerShape(8.dp))
-							.clickable(onClick = { onCompanyClick(companyAlias) }),
-						verticalAlignment = Alignment.CenterVertically,
-					) {
-						if (companyTitle != null) {
-							AsyncImage(
-								modifier = Modifier
-									.size(34.dp)
-									.clip(RoundedCornerShape(8.dp))
-									.background(Color.White),
-								model = companyAvatarUrl,
-								contentDescription = ""
-							)
-							Spacer(modifier = Modifier.width(4.dp))
-							Text(
-								modifier = Modifier.fillMaxWidth(),
-								text = companyTitle!!, fontWeight = FontWeight.W600,
-								fontSize = 14.sp,
-								color = MaterialTheme.colors.onBackground
-							)
-						} else {
-							Box(modifier = Modifier.size(34.dp))
-						}
+						})
 						
-						
+						Row(
+							modifier = Modifier
+								.clip(RoundedCornerShape(8.dp))
+								.clickable(onClick = { onCompanyClick(companyAlias) }),
+							verticalAlignment = Alignment.CenterVertically,
+						) {
+							if (companyTitle != null) {
+								AsyncImage(
+									modifier = Modifier
+										.size(34.dp)
+										.clip(RoundedCornerShape(8.dp))
+										.background(Color.White),
+									model = companyAvatarUrl,
+									contentDescription = ""
+								)
+								Spacer(modifier = Modifier.width(4.dp))
+								Text(
+									modifier = Modifier.fillMaxWidth(),
+									text = companyTitle!!, fontWeight = FontWeight.W600,
+									fontSize = 14.sp,
+									color = MaterialTheme.colors.onBackground
+								)
+							} else {
+								Box(modifier = Modifier.size(34.dp))
+							}
+							
+							
+						}
+						Spacer(modifier = Modifier.height(8.dp))
 					}
-					Spacer(modifier = Modifier.height(8.dp))
-					
 				}
 			}
 			
 			if (article.author != null && article.postType != PostType.Megaproject) {
 				item {
-					Row(
-						modifier = Modifier
-							.clip(RoundedCornerShape(8.dp))
-							.clickable(onClick = { onAuthorClicked() }),
-						verticalAlignment = Alignment.CenterVertically,
-					) {
-						if (article.author.avatarUrl != null) {
-							AsyncImage(
-								modifier = Modifier
-									.size(38.dp)
-									.clip(RoundedCornerShape(8.dp))
-									.background(Color.White),
-								model = article.author.avatarUrl,
-								contentDescription = ""
-							)
-						}
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							text = article.author.alias, fontWeight = FontWeight.W600,
-							fontSize = 14.sp,
-							color = MaterialTheme.colors.onBackground
-						)
-						Spacer(modifier = Modifier.weight(1f))
+					DisableSelection {
 						
+						Row(
+							modifier = Modifier
+								.clip(RoundedCornerShape(8.dp))
+								.clickable(onClick = { onAuthorClicked() }),
+							verticalAlignment = Alignment.CenterVertically,
+						) {
+							if (article.author.avatarUrl != null) {
+								AsyncImage(
+									modifier = Modifier
+										.size(38.dp)
+										.clip(RoundedCornerShape(8.dp))
+										.background(Color.White),
+									model = article.author.avatarUrl,
+									contentDescription = ""
+								)
+							}
+							Spacer(modifier = Modifier.width(4.dp))
+							Text(
+								text = article.author.alias, fontWeight = FontWeight.W600,
+								fontSize = 14.sp,
+								color = MaterialTheme.colors.onBackground
+							)
+							Spacer(modifier = Modifier.weight(1f))
+							
+						}
+						Spacer(modifier = Modifier.height(8.dp))
 					}
-					Spacer(modifier = Modifier.height(8.dp))
 				}
 			}
 			
@@ -228,109 +243,111 @@ fun ArticleContent(
 						color = MaterialTheme.colors.onBackground
 					)
 				}
-				
-				Spacer(modifier = Modifier.height(4.dp))
-				Row(
-					modifier = Modifier.fillMaxWidth(),
-					horizontalArrangement = Arrangement.Start
-				) {
-					Text(
-						text = article.timePublished,
-						color = MaterialTheme.colors.onBackground.copy(0.6f),
-						fontSize = 14.sp,
-						fontWeight = FontWeight.W500
-					)
-				}
-				
-				Spacer(Modifier.height(4.dp))
-				
-				Row(
-					verticalAlignment = Alignment.CenterVertically,
-				) {
-					if (article.complexity != PublicationComplexity.None) {
-						Icon(
-							modifier = Modifier.size(height = 10.dp, width = 20.dp),
-							painter = painterResource(id = R.drawable.speedmeter_hard),
-							contentDescription = "",
-							tint = when (article.complexity) {
-								PublicationComplexity.Low -> Color(0xFF4CBE51)
-								PublicationComplexity.Medium -> Color(0xFFEEBC25)
-								PublicationComplexity.High -> Color(0xFFEB3B2E)
-								else -> Color.Red
-							}
-						)
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							text = when (article.complexity) {
-								PublicationComplexity.Low -> "Простой"
-								PublicationComplexity.Medium -> "Средний"
-								PublicationComplexity.High -> "Сложный"
-								else -> ""
-							},
-							color = when (article.complexity) {
-								PublicationComplexity.Low -> Color(0xFF4CBE51)
-								PublicationComplexity.Medium -> Color(0xFFEEBC25)
-								PublicationComplexity.High -> Color(0xFFEB3B2E)
-								else -> Color.Red
-							},
-							fontWeight = FontWeight.W500,
-							fontSize = 14.sp
+				DisableSelection {
+					Spacer(modifier = Modifier.height(4.dp))
+					Row(
+						modifier = Modifier.fillMaxWidth(),
+						horizontalArrangement = Arrangement.Start
+					) {
 						
+						Text(
+							text = article.timePublished,
+							color = MaterialTheme.colors.onBackground.copy(0.6f),
+							fontSize = 14.sp,
+							fontWeight = FontWeight.W500
 						)
 						
-						Spacer(modifier = Modifier.width(12.dp))
-					}
-					Icon(
-						painter = painterResource(id = R.drawable.clock_icon),
-						modifier = Modifier.size(14.dp),
-						contentDescription = "",
-						tint = statisticsColor
-					)
-					Spacer(modifier = Modifier.width(4.dp))
-					Text(
-						text = "${article.readingTime} мин",
-						color = statisticsColor,
-						fontWeight = FontWeight.W500,
-						fontSize = 14.sp
-					)
-					Spacer(modifier = Modifier.width(12.dp))
-					if (article.translationData.isTranslation) {
-						Icon(
-							painter = painterResource(id = R.drawable.translation),
-							modifier = Modifier.size(14.dp),
-							contentDescription = "",
-							tint = TranslationLabelColor
-						)
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							text = "Перевод",
-							color = TranslationLabelColor,
-							fontWeight = FontWeight.W500,
-							fontSize = 14.sp
-						)
 					}
 					
-				}
-				Spacer(Modifier.height(4.dp))
-				
-				HubsRow(
-					hubs = article.hubs,
-					onHubClicked = onHubClicked,
-					onCompanyClicked = onCompanyClick
-				)
-				
-				TranslationMessage(
-					modifier = Modifier.padding(vertical = 8.dp),
-					translationInfo = article.translationData
-				) {
-					val intent = Intent(
-						Intent.ACTION_VIEW,
-						Uri.parse(article.translationData.originUrl)
+					Spacer(Modifier.height(4.dp))
+					
+					Row(
+						verticalAlignment = Alignment.CenterVertically,
+					) {
+						if (article.complexity != PublicationComplexity.None) {
+							Icon(
+								modifier = Modifier.size(height = 10.dp, width = 20.dp),
+								painter = painterResource(id = R.drawable.speedmeter_hard),
+								contentDescription = "",
+								tint = when (article.complexity) {
+									PublicationComplexity.Low -> Color(0xFF4CBE51)
+									PublicationComplexity.Medium -> Color(0xFFEEBC25)
+									PublicationComplexity.High -> Color(0xFFEB3B2E)
+									else -> Color.Red
+								}
+							)
+							Spacer(modifier = Modifier.width(4.dp))
+							Text(
+								text = when (article.complexity) {
+									PublicationComplexity.Low -> "Простой"
+									PublicationComplexity.Medium -> "Средний"
+									PublicationComplexity.High -> "Сложный"
+									else -> ""
+								},
+								color = when (article.complexity) {
+									PublicationComplexity.Low -> Color(0xFF4CBE51)
+									PublicationComplexity.Medium -> Color(0xFFEEBC25)
+									PublicationComplexity.High -> Color(0xFFEB3B2E)
+									else -> Color.Red
+								},
+								fontWeight = FontWeight.W500,
+								fontSize = 14.sp
+							
+							)
+							
+							Spacer(modifier = Modifier.width(12.dp))
+						}
+						Icon(
+							painter = painterResource(id = R.drawable.clock_icon),
+							modifier = Modifier.size(14.dp),
+							contentDescription = "",
+							tint = statisticsColor
+						)
+						Spacer(modifier = Modifier.width(4.dp))
+						Text(
+							text = "${article.readingTime} мин",
+							color = statisticsColor,
+							fontWeight = FontWeight.W500,
+							fontSize = 14.sp
+						)
+						Spacer(modifier = Modifier.width(12.dp))
+						if (article.translationData.isTranslation) {
+							Icon(
+								painter = painterResource(id = R.drawable.translation),
+								modifier = Modifier.size(14.dp),
+								contentDescription = "",
+								tint = TranslationLabelColor
+							)
+							Spacer(modifier = Modifier.width(4.dp))
+							Text(
+								text = "Перевод",
+								color = TranslationLabelColor,
+								fontWeight = FontWeight.W500,
+								fontSize = 14.sp
+							)
+						}
+						
+					}
+					Spacer(Modifier.height(4.dp))
+					
+					HubsRow(
+						hubs = article.hubs,
+						onHubClicked = onHubClicked,
+						onCompanyClicked = onCompanyClick
 					)
-					context.startActivity(intent)
+					
+					TranslationMessage(
+						modifier = Modifier.padding(vertical = 8.dp),
+						translationInfo = article.translationData
+					) {
+						val intent = Intent(
+							Intent.ACTION_VIEW,
+							Uri.parse(article.translationData.originUrl)
+						)
+						context.startActivity(intent)
+					}
+					Spacer(modifier = Modifier.height(8.dp))
 				}
-				Spacer(modifier = Modifier.height(8.dp))
-				
 			}
 			contentNodes?.let {
 				items(items = it) {
@@ -353,25 +370,27 @@ fun ArticleContent(
 					onPass = {})
 			}
 			item {
-				Divider(modifier = Modifier.padding(vertical = 24.dp))
-				// Hubs
-				TitledColumn(
-					title = "Хабы",
-					titleStyle = MaterialTheme.typography.subtitle2.copy(
-						color = MaterialTheme.colors.onBackground.copy(
-							0.5f
+				DisableSelection {
+					Divider(modifier = Modifier.padding(vertical = 24.dp))
+					// Hubs
+					TitledColumn(
+						title = "Хабы",
+						titleStyle = MaterialTheme.typography.subtitle2.copy(
+							color = MaterialTheme.colors.onBackground.copy(
+								0.5f
+							)
 						)
-					)
-				) {
-					FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-						article.hubs.forEach {
-							HubChip(
-								title = if (it.isProfiled) it.title + "*" else it.title
-							) {
-								if (it.isCorporative)
-									onCompanyClick(it.alias)
-								else
-									onHubClicked(it.alias)
+					) {
+						FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+							article.hubs.forEach {
+								HubChip(
+									title = if (it.isProfiled) it.title + "*" else it.title
+								) {
+									if (it.isCorporative)
+										onCompanyClick(it.alias)
+									else
+										onHubClicked(it.alias)
+								}
 							}
 						}
 					}
@@ -505,7 +524,7 @@ fun ScrollBar(
 //        AnimationState(
 //            initialValue = 0f,
 //            initialVelocity = performedInitialVelocity
-//        ).animateDecay(flingSpec) {
+//        ).animateDecay(splineBasedDecay(Density(3f))) {
 //            val delta = value - lastValue
 //            val consumed = scrollBy(delta)
 //            lastValue = value

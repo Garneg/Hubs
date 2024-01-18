@@ -2,7 +2,13 @@ package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.DecayAnimationSpec
+import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.defaultDecayAnimationSpec
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +38,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,9 +48,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,6 +71,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCardItem
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 
 class FeedSettingsScreenViewModel : ViewModel() {
@@ -127,26 +141,83 @@ fun FeedSettingsScreen(
 				})
 		},
 		sheetContent = {
-			Column(modifier = Modifier.fillMaxHeight(0.5f)) {
+			Column(modifier = Modifier.fillMaxHeight(0.65f)) {
+				val scrollState = rememberScrollState()
+				val lockBottomSheet = remember(scrollState.isScrollInProgress) { scrollState.canScrollBackward }
 				Box(
 					modifier = Modifier
 						.fillMaxWidth()
-						.height(16.dp)
+						.height(48.dp)
 				) {
 					Spacer(
 						modifier = Modifier
-							.align(Alignment.BottomCenter)
+							.align(Alignment.Center)
 							.height(4.dp)
 							.width(32.dp)
 							.clip(RoundedCornerShape(50))
 							.background(MaterialTheme.colors.onBackground.copy(0.15f))
 					)
+					//todo: Remove this experiment or finish it
+					Text(text = lockBottomSheet.toString())
+					Text(modifier = Modifier.padding(top = 20.dp), text = scrollState.canScrollBackward.toString())
+					Text(modifier = Modifier.padding(start = 80.dp), text = scrollState.isScrollInProgress.toString())
 				}
-				Spacer(modifier = Modifier.height(16.dp))
+				val decaySpec = rememberSplineBasedDecay<Float>()
 				Column(
 					modifier = Modifier
 						.fillMaxWidth()
-						.verticalScroll(rememberScrollState())
+						.nestedScroll(object : NestedScrollConnection {
+							
+							override fun onPostScroll(
+								consumed: Offset,
+								available: Offset,
+								source: NestedScrollSource
+							): Offset {
+								if (lockBottomSheet)
+									return available
+								return Offset.Zero
+								
+							}
+							
+							override suspend fun onPreFling(available: Velocity): Velocity {
+								var lastValue = 0f
+								var flingShit = false
+								var velocityLeft = 0f
+								scrollState.scroll {
+									AnimationState(
+										initialValue = 0f,
+										initialVelocity = available.y
+									).animateDecay(decaySpec) {
+										val delta = value - lastValue
+										lastValue = value
+										velocityLeft = velocity
+										if (delta > 0 && scrollState.value == 0) {
+											flingShit = true
+											return@animateDecay
+										} else {
+											val consumed = scrollBy(delta)
+											if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
+										}
+									}
+								}
+								
+								
+								
+								return if (flingShit) {
+									available
+								} else Velocity(0f, velocityLeft)
+							}
+							
+							override suspend fun onPostFling(
+								consumed: Velocity,
+								available: Velocity
+							): Velocity {
+								if (available.y < 0 && scrollState.value == 0)
+									return available
+								return super.onPostFling(consumed, available)
+							}
+						})
+						.verticalScroll(scrollState)
 						.padding(horizontal = 16.dp)
 						.padding(bottom = 20.dp),
 					verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -266,7 +337,7 @@ fun FeedSettingsScreen(
 							)
 						}
 					}
-					
+					Spacer(modifier = Modifier.height(500.dp))
 				}
 				
 			}
