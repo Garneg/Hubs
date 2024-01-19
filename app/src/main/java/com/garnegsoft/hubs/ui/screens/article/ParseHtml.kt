@@ -280,11 +280,9 @@ fun parseElement(
 					buildAnnotatedString {
 						withStyle(ChildrenSpanStyle) {
 							append(
-								if (thisNode.previousSibling() == null ||
-									thisNode.previousSibling() is Element &&
-									(thisNode.previousSibling() as Element)?.tagName() == "br"
+								if (thisNode.outerHtml().startsWith("\n ")
 								)
-									thisNode.text().trimStart()
+									thisNode.text().drop(1)
 								else
 									thisNode.text()
 							)
