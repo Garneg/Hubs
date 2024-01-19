@@ -47,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.ui.screens.article.CODE_ALPHA_VALUE
+import com.garnegsoft.hubs.ui.screens.article.html.code.GolangHighlighting
+import com.garnegsoft.hubs.ui.screens.article.html.code.PythonHighlighting
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -117,20 +119,30 @@ func main() {
 		}()
 	}
 
-	mainFileHandler := http.FileServer(http.Dir(serverConfig.MainAppDirectory))
-	adminFileHandler := http.FileServer(http.Dir(serverConfig.AdminAppDirectory))
+model_name = 'clip-ViT-B-16'
+st_model = SentenceTransformer(model_name)
 
-	http.HandleFunc("/", func(responseWriter http.ResponseWriter, request *http.Request) {
+def vectorize_img(img_path: str, model: SentenceTransformer=st_model) -> np.array:
+    img = Image.open(img_path)
+    return st_model.encode(img)
 
-		if request.Host == serverConfig.AdminHostAddress {
-			adminFileHandler.ServeHTTP(responseWriter, request)
-		} else {
-			mainFileHandler.ServeHTTP(responseWriter, request)
-		}
+def create_images_db(images_folder: str, model: SentenceTransformer=st_model) -> pd.DataFrame:
+    data_dict = dict()
+    for file_name in os.listdir(images_folder):
+        if os.path.isfile(images_folder + file_name):
+            image_path = images_folder + file_name
+            emb = vectorize_img(image_path)
+            data_dict[file_name] = emb
+    return pd.DataFrame(data_dict.items(), columns=['Image', 'Embedding'])
 
-	})
+def get_df(df_path: str) -> pd.DataFrame:
+    data_df = pd.read_json(df_path)
+    data_df['Embedding'] = data_df['Embedding'].apply(lambda x: np.array(x))
+    return data_df
 
-	http.Handle("/api/", router)
+def calculate_cos_dist(emb_a: np.array, emb_b: np.array) -> float:
+    result_distance = spatial.distance.cosine(emb_a, emb_b)
+    return result_distance
 
 	tlsConfig := tls.Config{}
 	tlsConfig.Certificates = make([]tls.Certificate, len(serverConfig.TLSCertificates))
@@ -203,7 +215,7 @@ fun CodeElement(
 	LaunchedEffect(key1 = MaterialTheme.colors.isLight, block = {
 		val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
 		
-		codeSpanStylesList = spanStylesList
+		codeSpanStylesList = GolangHighlighting().highlight(code)
 	})
 	val annotatedStringCode = remember(codeSpanStylesList) {
 		AnnotatedString(

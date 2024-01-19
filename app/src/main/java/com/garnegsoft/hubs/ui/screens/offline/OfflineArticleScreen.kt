@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,17 +73,27 @@ fun OfflineArticleScreen(
 	onDelete: () -> Unit
 ) {
 	val viewModel = viewModel<OfflineArticleScreenViewModel>()
+	val lazyListState = rememberLazyListState()
+	
+	var counter by rememberSaveable { mutableStateOf(1) }
+	LaunchedEffect(key1 = Unit, block = {
+		Log.e("offline_counter", counter.toString())
+		counter++
+	})
+	
 	val context = LocalContext.current
 	val article by viewModel.offlineArticle.observeAsState()
 	val fontSize by HubsDataStore.Settings
 		.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
 		.collectAsState(initial = null)
 	
-	val spanStyle = SpanStyle(
-		color = MaterialTheme.colors.onSurface,
+	val textColor = MaterialTheme.colors.onSurface
+	val spanStyle = remember(fontSize, textColor) {
+		SpanStyle(
+		color = textColor,
 		fontSize = fontSize?.sp
-			?: MaterialTheme.typography.body1.fontSize,
-	)
+			?: 16.sp,
+	) }
 	
 	LaunchedEffect(key1 = Unit, block = {
 		if (!viewModel.offlineArticle.isInitialized) {
@@ -90,13 +102,13 @@ fun OfflineArticleScreen(
 		}
 	})
 	
-	
-	
 	val parsedContent by viewModel.parsedArticleContent.observeAsState()
 	
 	var showTopBarMenu by remember {
 		mutableStateOf(false)
 	}
+	
+	
 	
 	Scaffold(
 		topBar = {
@@ -117,35 +129,44 @@ fun OfflineArticleScreen(
 							show = showTopBarMenu,
 							onDismiss = { showTopBarMenu = false },
 							onDelete = onDelete,
-							onSwitchToNormalMode = onSwitchToNormalMode
+							onSwitchToNormalMode = { onSwitchToNormalMode(); showTopBarMenu = false  }
 						)
 					}
 					
 				}
-				)
+			)
 		}
 	) {
-		val lazyListState = rememberLazyListState()
-		Box(modifier = Modifier
-			.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background)
-			.fillMaxSize()
-			.padding(it), contentAlignment = Alignment.Center) {
-			if (viewModel.offlineArticle.isInitialized && article != null) {
-				LaunchedEffect(key1 = Unit, block = {
-					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
-						val element =
-							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()?.child(0)
-								?: Element("")
-						
-						viewModel.parsedArticleContent.postValue(
-							parseChildElements(
-								element,
-								spanStyle,
-								onViewImageRequest
-							).second
-						)
-					}
-				})
+		
+		if (viewModel.offlineArticle.isInitialized && article != null) {
+			LaunchedEffect(key1 = Unit, block = {
+				if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
+					val element =
+						Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()
+							?.child(0)
+							?: Element("")
+					
+					viewModel.parsedArticleContent.postValue(
+						parseChildElements(
+							element,
+							spanStyle,
+							onViewImageRequest
+						).second
+					)
+				}
+			})
+		}
+		val elementSettings = remember() {
+			ElementSettings(20.sp, 30.sp, true)
+		}
+		Box(
+			modifier = Modifier
+				.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background)
+				.fillMaxSize()
+				.padding(it), contentAlignment = Alignment.Center
+		) {
+			if (parsedContent != null) {
+				
 				
 				LazyColumn(
 					state = lazyListState,
@@ -182,7 +203,7 @@ fun OfflineArticleScreen(
 						}
 					}
 					item {
-						Spacer(modifier = Modifier.size(8.dp))
+						Spacer(modifier = Modifier.height(8.dp))
 					}
 					item {
 						Text(
@@ -218,7 +239,7 @@ fun OfflineArticleScreen(
 								)
 							}
 							if (article!!.isTranslation) {
-								Row {
+								Row(verticalAlignment = Alignment.CenterVertically) {
 									Icon(
 										painter = painterResource(id = R.drawable.translation),
 										modifier = Modifier.size(15.dp),
@@ -245,7 +266,7 @@ fun OfflineArticleScreen(
 								)
 								Spacer(modifier = Modifier.width(4.dp))
 								Text(
-									text = "оффлайн режим",
+									text = "Оффлайн режим",
 									color = statisticsColor,
 									fontWeight = FontWeight.W500,
 									fontSize = 14.sp
@@ -258,7 +279,8 @@ fun OfflineArticleScreen(
 						
 						LaunchedEffect(key1 = Unit, block = {
 							if (hubsText == "") {
-								hubsText = article!!.hubs.hubsList.joinToString(separator = ", ") {
+								hubsText =
+									article!!.hubs.hubsList.joinToString(separator = ", ") {
 										it.replace(" ", "\u00A0")
 									}
 							}
@@ -276,15 +298,13 @@ fun OfflineArticleScreen(
 						Spacer(modifier = Modifier.height(8.dp))
 					}
 					
-					parsedContent?.let {
-						items(
-							items = it
-						) {
-							if (it != null && fontSize != null) {
-								it.invoke(spanStyle, ElementSettings(fontSize!!.sp, fontSize!!.sp, true))
-							}
-						}
+					// html
+					items(
+						items = parsedContent!!
+					) {
+						it?.invoke(spanStyle, elementSettings)
 					}
+					
 					
 					item {
 						Divider(modifier = Modifier.padding(vertical = 24.dp))
@@ -306,10 +326,11 @@ fun OfflineArticleScreen(
 					
 					
 				}
+				ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = lazyListState)
+				
 			} else {
 				CircularProgressIndicator()
 			}
-			ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = lazyListState)
 		}
 	}
 	

@@ -144,7 +144,7 @@ class CycleBasedComponents {
 		var firstCharApostropheIndex = -1
 		override fun cycle(index: Int, code: String, lock: KMutableProperty0<Lock>) {
 			if (code[index] == '\'' && !(index > 0 && code[index - 1] == '\\') && (lock.get() == Lock.None || lock.get() == Lock.Char)) {
-				if (firstCharApostropheIndex < 0) {
+				if (lock.get() == Lock.None) {
 					firstCharApostropheIndex = index
 					lock.set(Lock.Char)
 				} else {

@@ -45,7 +45,6 @@ import com.garnegsoft.hubs.ui.common.MenuItem
 @Composable
 fun AuthorizedMenu(
 	userAlias: String,
-	//avatarUrl: String?,
 	onProfileClick: () -> Unit,
 	onArticlesClick: () -> Unit,
 	onCommentsClick: () -> Unit,

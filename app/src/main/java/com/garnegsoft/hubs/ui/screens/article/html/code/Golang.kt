@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import kotlin.reflect.KMutableProperty0
 
 
@@ -66,7 +67,7 @@ class GolangHighlighting : LanguageHighlighting() {
 		pipeline.iterateThroughCode()
 		
 		
-		return pipeline.getAnnotatedRanges()
+		return spanStylesList + pipeline.getAnnotatedRanges()
 	}
 	
 	private class GolangMultilineStringComponent(
