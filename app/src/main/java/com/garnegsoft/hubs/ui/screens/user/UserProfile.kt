@@ -20,8 +20,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -252,7 +255,7 @@ internal fun UserProfile(
 										text = "Заметка", style = MaterialTheme.typography.subtitle1
 									)
 								},
-								divider = {  }
+								divider = { }
 							) {
 								Column(
 									modifier = Modifier
@@ -280,7 +283,7 @@ internal fun UserProfile(
 					val hubs by viewModel.subscribedHubs.observeAsState()
 					
 					if ((whoIs != null && (!whoIs?.aboutHtml.isNullOrBlank() || whoIs!!.badges.isNotEmpty()
-						|| whoIs!!.invite != null || whoIs!!.contacts.isNotEmpty()))
+							|| whoIs!!.invite != null || whoIs!!.contacts.isNotEmpty()))
 						|| !hubs?.list.isNullOrEmpty()
 					) {
 						Column(
@@ -344,13 +347,41 @@ internal fun UserProfile(
 											TitledColumn(title = "Приглашен") {
 												val context = LocalContext.current
 												ClickableText(
-													text = remember { AnnotatedString("${it.inviteDate} по приглашению от ${it.inviterAlias ?: "НЛО"}") },
+													text = remember {
+														buildAnnotatedString {
+															append("${it.inviteDate} по приглашению от ")
+															if (it.inviterAlias != null) {
+																withStyle(
+																	SpanStyle(
+																		color = Color(
+																			88,
+																			132,
+																			185
+																		)
+																	)
+																) {
+																	append("@${it.inviterAlias}")
+																}
+															} else {
+																append("НЛО")
+															}
+														}
+													},
+													style = MaterialTheme.typography.body1,
 													onClick = { letterIndex ->
 														it.inviterAlias?.let {
-															val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://habr.com/ru/users/$it")).apply {
+															val intent = Intent(
+																Intent.ACTION_VIEW,
+																Uri.parse("https://habr.com/ru/users/$it")
+															).apply {
 																setPackage(BuildConfig.APPLICATION_ID)
 															}
-															context.startActivity(Intent.createChooser(intent, null))
+															context.startActivity(
+																Intent.createChooser(
+																	intent,
+																	null
+																)
+															)
 															
 														}
 													})
@@ -422,7 +453,7 @@ internal fun UserProfile(
 										
 									}
 									hubs?.let {
-										if (it.list.size > 0) {
+										if (it.list.isNotEmpty()) {
 											Column() {
 												TitledColumn(title = "Состоит в хабах") {
 													FlowRow(
