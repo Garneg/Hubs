@@ -3,13 +3,9 @@ package com.garnegsoft.hubs.ui.screens.article
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.*
-import androidx.compose.animation.core.AnimationState
-import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.FlingBehavior
-import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -32,7 +28,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
@@ -52,7 +47,6 @@ import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.nodes.*
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 
@@ -392,6 +386,30 @@ fun ArticleContent(
 										onHubClicked(it.alias)
 								}
 							}
+						}
+					}
+				}
+			}
+			
+			article.author?.let { author ->
+				item {
+					Divider(modifier = Modifier.padding(vertical = 24.dp))
+					DisableSelection {
+						TitledColumn(
+							title = "Автор",
+							titleStyle = MaterialTheme.typography.subtitle2.copy(
+								color = MaterialTheme.colors.onBackground.copy(
+									0.5f
+								)
+							)
+						) {
+							
+							ArticleAuthorElement(
+								onClick = { onAuthorClicked() },
+								userAvatarUrl = author.avatarUrl!!,
+								fullName = author.fullname,
+								alias = author.alias
+							)
 						}
 					}
 				}
