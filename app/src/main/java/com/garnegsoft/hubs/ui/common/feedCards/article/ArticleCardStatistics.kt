@@ -82,7 +82,7 @@ fun ArticleStats(
 				modifier = Modifier.size(18.dp),
 				tint = style.statisticsColor
 			)
-			Spacer(modifier = Modifier.width(4.dp))
+			Spacer(modifier = Modifier.width(2.dp))
 			if (statistics.score > 0) {
 				Text(
 					text = '+' + statistics.score.toString(),
@@ -119,7 +119,7 @@ fun ArticleStats(
 				modifier = Modifier.size(18.dp),
 				tint = style.statisticsColor
 			)
-			Spacer(modifier = Modifier.width(4.dp))
+			Spacer(modifier = Modifier.width(5.dp))
 			Text(
 				text = formatLongNumbers(statistics.readingCount),
 				style = style.statisticsTextStyle

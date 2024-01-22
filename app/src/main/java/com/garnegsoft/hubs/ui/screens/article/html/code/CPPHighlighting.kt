@@ -121,6 +121,7 @@ class CPPHighlighting : LanguageHighlighting() {
 			CycleBasedHighlightingPipeline(code,
 				arrayOf(
 					CycleBasedComponents.StringComponent(stringLiteralSpanStyle),
+					CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
 					CycleBasedComponents.SinglelineCommentComponent(commentsSpanStyle),
 					CycleBasedComponents.MultilineComment(commentsSpanStyle)
 				)
