@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.ui.screens.article.CODE_ALPHA_VALUE
+import com.garnegsoft.hubs.ui.screens.article.html.code.CPPHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.GolangHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.PythonHighlighting
 import com.garnegsoft.hubs.ui.theme.HubsTheme
@@ -68,139 +69,90 @@ fun CodeElementPreview() {
 		) {
 			CodeElement(
 				code = """
-package main
+abstract
+as
+base
+bool
+break
+byte
+case
+catch
+char
+checked
+class
+const
+continue
+decimal
+default
+delegate
+do
+double
+else
+enum
 
-import (
-	"context"
-	"crypto/tls"
-	"fmt"
-	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-	"net/http"
-	"os"
-	"serbianDictionary/configuration"
-	"serbianDictionary/handlers"
-	"serbianDictionary/routes"
-)
+event
+explicit
+extern
+false
+finally
+fixed
+float
+for
+foreach
+goto
+if
+implicit
+in
+int
+interface
+internal
+is
+lock
+long
 
-func main() {
-	configFilePath, err := configuration.CheckConfigFileArgument()
-	if err != nil {
-		println("Error occured with the server config:\n\t" + err.Error())
-		return
-	}
+namespace
+new
+null
+object
+operator
+out
+override
+params
+private
+protected
+public
+readonly
+ref
+return
+sbyte
+sealed
+short
+sizeof
+stackalloc
 
-	println("Server Started!")
-
-	configBytes, _ := os.ReadFile(configFilePath)
-	serverConfig, err := configuration.ParseConfig(configBytes)
-
-	if err != nil {
-		println("Error occured with the server config:\n\t" + err.Error())
-		return
-	}
-
-	client, _ := InitializeMongoClient(serverConfig)
-	db := client.Database("dictionary")
-	wordsCollection := db.Collection("words")
-
-	router := mux.NewRouter()
-	router.HandleFunc("/api/ping", func(response http.ResponseWriter, request *http.Request) {
-		fmt.Fprint(response, "Ping!")
-	})
-	routes.InitMainApiRoutes(router, serverConfig, wordsCollection)
-	routes.InitAdminApiRoutes(router, serverConfig, db)
-	var a = 0xFF_ea1_sports
-	var b = 0b110101_101f()
-	if len(serverConfig.TLSCertificates1) > 0 {
-		go func() {
-			println(http.ListenAndServe(serverConfig.BindAddress+":80", handlers.HttpToHttpsHandler{}).Error())
-		}()
-	}
-
-model_name = 'clip-ViT-B-16'
-st_model = SentenceTransformer(model_name)
-
-def vectorize_img(img_path: str, model: SentenceTransformer=st_model) -> np.array:
-    img = Image.open(img_path)
-    return st_model.encode(img)
-
-def create_images_db(images_folder: str, model: SentenceTransformer=st_model) -> pd.DataFrame:
-    data_dict = dict()
-    for file_name in os.listdir(images_folder):
-        if os.path.isfile(images_folder + file_name):
-            image_path = images_folder + file_name
-            emb = vectorize_img(image_path)
-            data_dict[file_name] = emb
-    return pd.DataFrame(data_dict.items(), columns=['Image', 'Embedding'])
-
-def get_df(df_path: str) -> pd.DataFrame:
-    data_df = pd.read_json(df_path)
-    data_df['Embedding'] = data_df['Embedding'].apply(lambda x: np.array(x))
-    return data_df
-
-def calculate_cos_dist(emb_a: np.array, emb_b: np.array) -> float:
-    result_distance = spatial.distance.cosine(emb_a, emb_b)
-    return result_distance
-
-	tlsConfig := tls.Config{}
-	tlsConfig.Certificates = make([]tls.Certificate, len(serverConfig.TLSCertificates))
-
-	for i, certificate := range serverConfig.TLSCertificates {
-		tlsConfig.Certificates[i], _ = tls.LoadX509KeyPair(certificate.CertFile, certificate.KeyFile)
-	}
-
-	if len(tlsConfig.Certificates) > 0 {
-		listener, listenerError := tls.Listen("tcp", serverConfig.BindAddress+":443", &tlsConfig)
-		if listenerError != nil {
-			println(listenerError.Error())
-
-			return
-		}
-
-		server := http.Server{
-			TLSConfig: &tlsConfig,
-		}
-		err = server.Serve(listener)
-		if err != nil {
-			println(err.Error())
-		}
-	} else {
-		server := http.Server{}
-		err := server.ListenAndServe()
-		if err != nil {
-			println(err.Error())
-			return
-		}
-	}
-}
-
-func InitializeMongoClient(config configuration.ServerConfig) (*mongo.Client, error) {
-	serverAPIVersion := options.ServerAPI(options.ServerAPIVersion1)
-	options.Client()
-	var opts *options.ClientOptions
-	if config.DoMongoDBAuth {
-		opts = options.Client().ApplyURI(config.MongoDBConnectionString).SetAuth(config.MongoDBCredentials).SetServerAPIOptions(serverAPIVersion)
-	} else {
-		opts = options.Client().ApplyURI(config.MongoDBConnectionString).SetServerAPIOptions(serverAPIVersion)
-	}
-	
-	return mongo.Connect(context.Background(), opts)
-}
-
-type interceptedHandler struct {
-	interceptionFunction func(response http.ResponseWriter, request *http.Request, handler http.Handler)
-	interceptedHandler   http.Handler
-}
-
-func (handler interceptedHandler) ServeHTTP0x111(response http.ResponseWriter, request *http.Request) {
-	responseRef := &response
-	handler.interceptionFunction(*responseRef, request, handler.interceptedHandler)
-}
-		""".trimIndent().replace("\t", "   "), language = "go", spanStyle = SpanStyle()
+static
+string
+struct
+switch
+this
+throw
+true
+try
+typeof
+uint
+ulong
+unchecked
+unsafe
+ushort
+using
+virtual
+void
+volatile
+while
+// abboa
+		""".trimIndent().replace("\t", "   "), language = "C++", spanStyle = SpanStyle()
 			)
-		}
+		}// aboba
 	}
 }
 
@@ -214,8 +166,16 @@ fun CodeElement(
 	var codeSpanStylesList by remember { mutableStateOf(listOf<AnnotatedString.Range<SpanStyle>>()) }
 	LaunchedEffect(key1 = MaterialTheme.colors.isLight, block = {
 		val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
-		
-		codeSpanStylesList = GolangHighlighting().highlight(code)
+		val highlighting = when (language) {
+			"Go" -> GolangHighlighting()
+			"Python" -> PythonHighlighting()
+			"C++" -> CPPHighlighting()
+			"C#" -> CPPHighlighting()
+			else -> null
+		}
+		highlighting?.let {
+			codeSpanStylesList = it.highlight(code)
+		}
 	})
 	val annotatedStringCode = remember(codeSpanStylesList) {
 		AnnotatedString(

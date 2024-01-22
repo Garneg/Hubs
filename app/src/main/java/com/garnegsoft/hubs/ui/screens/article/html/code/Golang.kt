@@ -12,16 +12,17 @@ class GolangHighlighting : LanguageHighlighting() {
 	val keywordSpanStyle = SpanStyle(color = Color(0xFF2F6BA7))
 	
 	val keywordsList = listOf(
-		"any", "break", "default", "error", "func",
-		"interface", "select", "case", "defer", "go",
-		"map", "struct", "chan", "else", "goto",
+		"any", "break", "default", "func",
+		"interface", "select", "case", "defer",
+		"map", "struct", "chan", "else", "goto", "go",
 		"package", "switch", "const", "fallthrough", "if",
 		"range", "type", "continue", "for", "import",
 		"return", "var", "nil",
 		
 		//base types
-		"int", "int8", "int16", "int32", "int64",
-		"uint", "uint8", "uint16", "uint32", "uint64", "uintptr",
+		"uint8", "uint16", "uint32", "uint64",
+		"int8", "int16", "int32", "int64",
+		"uintptr", "uint", "int",
 		"float32", "float64",
 		"complex64", "complex128",
 		"string", "byte", "rune", "bool", "error"
@@ -123,24 +124,6 @@ class GolangHighlighting : LanguageHighlighting() {
 	}
 }
 
-class CycleBasedHighlightingPipeline(
-	val code: String,
-	val components: Array<CycleBasedComponent>
-) {
-	var lock: Lock = Lock.None
-	
-	fun iterateThroughCode() {
-		for (i in 0..code.lastIndex) {
-			components.forEach { it.cycle(i, code, ::lock) }
-		}
-	}
-	
-	fun getAnnotatedRanges(): List<AnnotatedString.Range<SpanStyle>> {
-		return components.map { it.ranges.toList() }.reduce { acc, ranges ->
-			acc + ranges
-		}
-	}
-}
 
 
 

@@ -47,3 +47,22 @@ abstract class LanguageHighlighting {
 	}
 	
 }
+
+class CycleBasedHighlightingPipeline(
+	val code: String,
+	val components: Array<CycleBasedComponent>
+) {
+	var lock: Lock = Lock.None
+	
+	fun iterateThroughCode() {
+		for (i in 0..code.lastIndex) {
+			components.forEach { it.cycle(i, code, ::lock) }
+		}
+	}
+	
+	fun getAnnotatedRanges(): List<AnnotatedString.Range<SpanStyle>> {
+		return components.map { it.ranges.toList() }.reduce { acc, ranges ->
+			acc + ranges
+		}
+	}
+}

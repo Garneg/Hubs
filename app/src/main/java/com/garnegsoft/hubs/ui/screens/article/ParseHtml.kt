@@ -50,6 +50,7 @@ import coil.compose.AsyncImagePainter
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
+import com.garnegsoft.hubs.ui.screens.article.html.CodeElement
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -538,13 +539,12 @@ fun parseElement(
 		) { localSpanStyle, settings ->
 			Box(Modifier.padding(bottom = 4.dp)) {
 				DisableSelection {
-					Code(
+					CodeElement(
 						code = element.text(),
 						language = LanguagesMap.getOrElse(
 							element.attr("class"),
 							{ element.attr("class") }),
 						spanStyle = localSpanStyle,
-						elementSettings = settings
 					)
 				}
 			}

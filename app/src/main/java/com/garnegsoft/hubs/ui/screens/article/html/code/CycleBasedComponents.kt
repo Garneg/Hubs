@@ -54,6 +54,11 @@ class CycleBasedComponents {
 				lineCommentStartIndex = -1
 				lock.set(Lock.None)
 			}
+			if (index == code.lastIndex && lock.get() == Lock.SingleLineComment){
+				ranges.add(AnnotatedString.Range(spanStyle, lineCommentStartIndex, index + 1))
+				lineCommentStartIndex = -1
+				lock.set(Lock.None)
+			}
 		}
 		
 	}

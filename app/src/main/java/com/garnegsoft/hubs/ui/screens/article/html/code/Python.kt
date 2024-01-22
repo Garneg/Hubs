@@ -8,22 +8,34 @@ import androidx.compose.ui.text.SpanStyle
 class PythonHighlighting : LanguageHighlighting() {
 	
 	val keywords = listOf(
-		"False", "await", "else", "import", "pass",
+		"async", "False", "await", "else", "import", "pass",
 		"None", "break", "except", "in", "raise",
 		"True", "class", "finally", "is", "return",
 		"and", "continue", "for", "lambda", "try",
-		"as", "def", "from", "nonlocal", "while",
-		"assert", "del", "global", "not", "with",
-		"async", "elif", "if", "or", "yield",
+		"assert", "as", "def", "from", "nonlocal", "while",
+		"del", "global", "not", "with",
+		"elif", "if", "or", "yield",
 	)
 	
 	val keywordSpanStyle = SpanStyle(color = Color(0xFF2F6BA7))
 	
 	val stringLiteralSpanStyle = SpanStyle(
-		color = Color(0xFF579737))
+		color = Color(0xFF579737)
+	)
 	
 	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
-		return Defaults.highlightKeywords(code, keywords, keywordSpanStyle) + CycleBasedHighlightingPipeline(code, arrayOf(CycleBasedComponents.CharComponent(stringLiteralSpanStyle))).apply { iterateThroughCode()
+		return Defaults.highlightKeywords(
+			code,
+			keywords,
+			keywordSpanStyle
+		) + CycleBasedHighlightingPipeline(
+			code,
+			arrayOf(
+				CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
+				CycleBasedComponents.StringComponent(stringLiteralSpanStyle)
+			)
+		).apply {
+			iterateThroughCode()
 		}.getAnnotatedRanges()
 	}
 	
