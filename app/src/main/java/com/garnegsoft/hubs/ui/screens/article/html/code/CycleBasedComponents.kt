@@ -66,8 +66,9 @@ class CycleBasedComponents {
 	class IntegerComponent(
 		override val spanStyle: SpanStyle
 	) : CycleBasedComponent() {
+		var lastNumberIndex = -1
 		override fun cycle(index: Int, code: String, lock: KMutableProperty0<Lock>) {
-			if (code[index].isDigit() && lock.get() == Lock.None) {
+			if (code[index].isDigit() && lock.get() == Lock.None && !(lastNumberIndex != index - 1 && code.elementAtOrNull(index - 1)?.isDigit() == true)) {
 				if (index > 0 && !code[index - 1].isLetter()){
 					ranges.add(
 						AnnotatedString.Range(
@@ -76,6 +77,7 @@ class CycleBasedComponents {
 							index + 1
 						)
 					)
+					lastNumberIndex = index
 				}
 				else if (index > 2 && listOf('o', 'b', '_').contains(code[index - 1]) && code[index - 2].isDigit() && !code[index - 3].isLetterOrDigit()) {
 					ranges.add(
@@ -85,6 +87,7 @@ class CycleBasedComponents {
 							index + 1
 						)
 					)
+					lastNumberIndex = index
 				}
 			}
 			
@@ -108,6 +111,13 @@ class CycleBasedComponents {
 				}
 				
 				
+			}
+			
+			// floating point values
+			if (code[index] == '.' && lock.get() == Lock.None && code.elementAtOrNull(index -1)?.isDigit() == true && code.elementAtOrNull(index + 1)?.isDigit() == true) {
+				ranges.add(
+					AnnotatedString.Range(spanStyle, index, index + 1)
+				)
 			}
 		}
 	}
