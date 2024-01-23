@@ -71,6 +71,7 @@ fun CodeElementPreview() {
 				code = """
 a := 4i
 float64()
+
 22.7
 0xff_ab0ba_11
 		""".trimIndent().replace("\t", "   "), language = "Go", spanStyle = SpanStyle()

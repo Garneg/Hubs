@@ -108,7 +108,18 @@ class CycleBasedComponents {
 					}
 					if (hexCharIndex < code.lastIndex)
 						hexCharIndex++
+					else {
+						ranges.add(
+							AnnotatedString.Range(
+								spanStyle,
+								index, hexCharIndex
+							)
+						)
+						break
+					}
+					
 				}
+				
 				
 				
 			}
