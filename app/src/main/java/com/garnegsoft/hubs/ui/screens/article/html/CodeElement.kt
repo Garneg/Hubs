@@ -51,6 +51,7 @@ import com.garnegsoft.hubs.ui.screens.article.html.code.CPPHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.GolangHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.JavaScriptHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.PythonHighlighting
+import com.garnegsoft.hubs.ui.screens.article.html.code.SqlHighlighting
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -76,8 +77,8 @@ fun CodeElementPreview() {
 //22.7
 //0xff_ab0ba_11
 //		""".trimIndent().replace("\t", "   "),
-				code = JavaScriptHighlighting().keywords.joinToString("\n"),
-				language = "JavaScript", spanStyle = SpanStyle()
+				code = SqlHighlighting().keywords.sorted().joinToString("\n"),
+				language = "SQL", spanStyle = SpanStyle()
 			)
 		}// aboba
 	}
@@ -99,6 +100,8 @@ fun CodeElement(
 			"C++" -> CPPHighlighting()
 			"C#" -> CPPHighlighting()
 			"JavaScript" -> JavaScriptHighlighting()
+			"SQL" -> SqlHighlighting()
+			"PostgreSQL" -> SqlHighlighting()
 			else -> null
 		}
 		highlighting?.let {

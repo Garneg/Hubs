@@ -813,7 +813,7 @@ val LanguagesMap = mapOf(
 	"objectivec" to "Objective C",
 	
 	"perl" to "Perl",
-	"pgsql" to "pgSQL",
+	"pgsql" to "PostgreSQL",
 	"php" to "PHP",
 	"powershell" to "PowerShell",
 	"python" to "Python",
