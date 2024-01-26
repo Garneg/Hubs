@@ -49,6 +49,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.ui.screens.article.CODE_ALPHA_VALUE
 import com.garnegsoft.hubs.ui.screens.article.html.code.CPPHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.GolangHighlighting
+import com.garnegsoft.hubs.ui.screens.article.html.code.JavaScriptHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.PythonHighlighting
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.delay
@@ -68,13 +69,15 @@ fun CodeElementPreview() {
 				.padding(16.dp)
 		) {
 			CodeElement(
-				code = """
-a := 4i
-float64()
-
-22.7
-0xff_ab0ba_11
-		""".trimIndent().replace("\t", "   "), language = "Go", spanStyle = SpanStyle()
+//				code = """
+//a := 4i
+//float64()
+//
+//22.7
+//0xff_ab0ba_11
+//		""".trimIndent().replace("\t", "   "),
+				code = JavaScriptHighlighting().keywords.joinToString("\n"),
+				language = "JavaScript", spanStyle = SpanStyle()
 			)
 		}// aboba
 	}
@@ -95,6 +98,7 @@ fun CodeElement(
 			"Python" -> PythonHighlighting()
 			"C++" -> CPPHighlighting()
 			"C#" -> CPPHighlighting()
+			"JavaScript" -> JavaScriptHighlighting()
 			else -> null
 		}
 		highlighting?.let {

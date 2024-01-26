@@ -107,6 +107,7 @@ class CPPHighlighting : LanguageHighlighting() {
 		"and",
 		"int",
 	)
+	
 	val keywordSpanStyle = SpanStyle(color = Color(0xFF2F6BA7))
 	val stringLiteralSpanStyle = SpanStyle(
 		color = Color(0xFF579737)
@@ -116,6 +117,7 @@ class CPPHighlighting : LanguageHighlighting() {
 		fontStyle = FontStyle.Italic,
 		fontWeight = FontWeight.W400
 	)
+	
 	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
 		return Defaults.highlightKeywords(code, keywords, keywordSpanStyle) +
 			CycleBasedHighlightingPipeline(code,
