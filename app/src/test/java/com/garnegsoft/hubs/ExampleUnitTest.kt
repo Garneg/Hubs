@@ -8,6 +8,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import org.jsoup.Jsoup
 import org.junit.Test
 
 import org.junit.Assert.*
@@ -89,9 +90,8 @@ class ExampleUnitTest {
     
     @Test
     fun test_serializer() {
-        val data = HistoryArticle(0, "aboba", "amongus", null)
+        val data = HistoryArticle(0, "aboba", "amongus", "", "")
         println(data.toHistoryEntity().data)
     }
     
-
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
+import com.garnegsoft.hubs.api.utils.htmlBlocksToText
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
@@ -100,7 +101,7 @@ fun CommentItem(
                             fontWeight = FontWeight.W500
                         )
                         Text(
-                            text = Jsoup.parse(it.message).text() ?: "",
+                            text = remember { htmlBlocksToText(it.message) },
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
