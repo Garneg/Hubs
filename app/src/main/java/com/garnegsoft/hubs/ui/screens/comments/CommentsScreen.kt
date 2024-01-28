@@ -120,7 +120,7 @@ fun CommentsScreen(
 	var returnToCommentIndex by remember { mutableStateOf<Int?>(null) }
 	
 	commentsDisplayMode?.let {
-		val mode = HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.values()[it]
+		val mode = HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.entries[it]
 		LaunchedEffect(key1 = Unit) {
 			if (
 				(mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads &&
@@ -174,7 +174,13 @@ fun CommentsScreen(
 		val commentTextFieldFocusRequester = remember { FocusRequester() }
 		var articleHeaderOffset by remember { mutableStateOf(0f) }
 		
-		var itemOffsetCount by remember { mutableStateOf(1) }
+		/**
+		 * lazy list items count that should be skipped when navigating between comments
+		 * (like article snippet, pinned comments)
+		 */
+		var itemOffsetCount by remember(commentsData) { mutableStateOf(1 + (commentsData?.pinnedComments?.size ?: 0)) }
+		
+		
 		
 		Scaffold(
 			modifier = Modifier.imePadding(),
@@ -424,6 +430,62 @@ fun CommentsScreen(
 							}
 						} else if (commentsData != null) {
 							itemsIndexed(
+								items = commentsData!!.pinnedComments,
+							) { index, commentId ->
+								val comment = commentsData!!.comments.find { it.id == commentId }!!
+								
+								CommentItem(
+									comment = comment,
+									onAuthorClick = { onUserClicked(comment.author.alias) },
+									highlight = false,
+									showReplyButton = commentsData!!.commentAccess.canComment,
+									onShare = {
+										val intent = Intent(Intent.ACTION_SEND)
+										intent.putExtra(
+											Intent.EXTRA_TEXT,
+											"https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
+										)
+										intent.setType("text/plain")
+										context.startActivity(
+											Intent.createChooser(
+												intent,
+												null
+											)
+										)
+									},
+									onReplyClick = {},
+									isPinned = true,
+									onGoToPinnedComment = {
+										coroutineScope.launch {
+											lazyListState.animateScrollToItem(commentsData!!.comments.indexOf(comment) + itemOffsetCount, (-articleHeaderOffset).toInt())
+										}
+									}
+								) {
+									Column {
+										it.let {
+											SelectionContainer {
+												((parseElement(
+													comment.message, SpanStyle(
+														fontSize = 16.sp,
+														color = MaterialTheme.colors.onSurface
+													),
+													onViewImageRequest = onImageClick
+												).second)?.let { it1 ->
+													it1(
+														SpanStyle(
+															fontSize = 16.sp,
+															color = MaterialTheme.colors.onSurface
+														),
+														elementsSettings
+													)
+												})
+											}
+										}
+									}
+								}
+								
+							}
+							itemsIndexed(
 								items = commentsData!!.comments,
 								key = { index, it -> it.id }
 							) { index, it ->
@@ -475,7 +537,7 @@ fun CommentsScreen(
 												coroutineScope.launch(Dispatchers.Main) {
 													returnToCommentIndex = index
 													lazyListState.animateScrollToItem(
-														parentCommentIndex + 1,
+														parentCommentIndex + itemOffsetCount,
 														-articleHeaderOffset.roundToInt()
 													)
 												}

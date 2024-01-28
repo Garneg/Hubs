@@ -21,7 +21,8 @@ class Comment (
 
 class CommentsCollection(
     val comments: ArrayList<Comment>,
-    val commentAccess: CommentAccess
+    val commentAccess: CommentAccess,
+    val pinnedComments: List<Int>
 ) {
     class CommentAccess(
         val canComment: Boolean,

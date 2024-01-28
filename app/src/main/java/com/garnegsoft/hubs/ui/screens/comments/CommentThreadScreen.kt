@@ -79,7 +79,8 @@ class CommentThreadScreenViewModel : ViewModel() {
 				comments.postValue(newAccess?.let { it1 ->
 					CommentsCollection(
 						it.comments,
-						it1
+						it1,
+						pinnedComments = it.pinnedComments
 					)
 				}
 					?: it)
