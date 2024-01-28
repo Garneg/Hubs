@@ -113,7 +113,7 @@ fun OfflineArticleScreen(
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = { Text(text = "Статья") },
+				title = { Text(text = "Публикация") },
 				navigationIcon = {
 					IconButton(onClick = onBack) {
 						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)

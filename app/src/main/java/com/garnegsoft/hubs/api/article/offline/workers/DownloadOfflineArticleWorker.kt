@@ -44,7 +44,7 @@ class DownloadOfflineArticleWorker(
 			val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 			
 			if (notificationManager.notificationChannels.find { it.id == downloadArticleNotificationChannelId } == null) {
-				val channel = NotificationChannel(downloadArticleNotificationChannelId, "Article Download", NotificationManager.IMPORTANCE_DEFAULT)
+				val channel = NotificationChannel(downloadArticleNotificationChannelId, "Article Download", NotificationManager.IMPORTANCE_LOW)
 				notificationManager.createNotificationChannel(channel)
 			}
 		}

@@ -72,7 +72,7 @@ fun OfflineArticlesListScreen(
 	Scaffold(
 		topBar = {
 			TopAppBar(
-				title = { Text("Сохранённые") },
+				title = { Text("Скачанные") },
 				elevation = 0.dp,
 				navigationIcon = {
 					IconButton(onClick = onBack) {
