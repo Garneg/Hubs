@@ -82,8 +82,8 @@ fun CommentItem(
 				)
 				Spacer(modifier = Modifier.width(4.dp))
 				Icon(
-					modifier = Modifier.size(14.dp),
-					imageVector = Icons.Outlined.Star, contentDescription = null,
+					modifier = Modifier.size(15.dp),
+					painter = painterResource(id = R.drawable.pin), contentDescription = null,
 					tint = MaterialTheme.colors.onSurface.copy(0.5f))
 				
 			}
@@ -134,13 +134,10 @@ fun CommentItem(
 						)
 					}
 				}
-				
 			}
 			
 			Spacer(modifier = Modifier.height(8.dp))
-			
 		}
-		
 		
 		Row(
 			modifier = Modifier
@@ -310,7 +307,7 @@ fun CommentItem(
 					
 					IconButton(onClick = onShare) {
 						Icon(
-							modifier = Modifier.size(18.dp),
+							modifier = Modifier.size(20.dp),
 							imageVector = Icons.Outlined.Share,
 							contentDescription = "",
 							tint = statisticsColor
@@ -331,6 +328,7 @@ fun CommentItem(
 				if (isPinned) {
 					IconButton(onClick = onGoToPinnedComment!!) {
 						Icon(
+							modifier = Modifier.size(22.dp),
 							imageVector = Icons.Default.ArrowForward,
 							contentDescription = "",
 							tint = statisticsColor

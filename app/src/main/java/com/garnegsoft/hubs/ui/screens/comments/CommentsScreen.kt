@@ -66,7 +66,6 @@ import kotlin.math.roundToInt
 
 class CommentsScreenViewModel : ViewModel() {
 	var parentPostSnippet = MutableLiveData<ArticleSnippet>()
-	var threadsData = MutableLiveData<Threads?>()
 	val commentsData = MutableLiveData<CommentsCollection>()
 	
 	fun comment(text: String, postId: Int, parentCommentId: Int? = null) {
@@ -77,14 +76,10 @@ class CommentsScreenViewModel : ViewModel() {
 				parentCommentId = parentCommentId
 			)
 			
-			CommentsListController.getThreads(postId)?.let {
-				threadsData.postValue(newAccess?.let { it1 ->
-					Threads(
-						it.threads,
-						it1
-					)
-				}
-					?: it)
+			CommentsListController.getComments(postId)?.let {
+				commentsData.postValue(newAccess?.let { it1 ->
+					CommentsCollection(it.comments, it.commentAccess, it.pinnedComments)
+				} ?: it)
 			}
 		}
 	}
@@ -105,7 +100,6 @@ fun CommentsScreen(
 ) {
 	var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 	
-	val threadsData = viewModel.threadsData.observeAsState().value
 	val commentsData by viewModel.commentsData.observeAsState()
 	val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
 	
@@ -123,25 +117,17 @@ fun CommentsScreen(
 		val mode = HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.entries[it]
 		LaunchedEffect(key1 = Unit) {
 			if (
-				(mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads &&
-					!viewModel.threadsData.isInitialized)
-				||
 				(mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default
 					&&
 					!viewModel.commentsData.isInitialized)
 			) {
 				launch(Dispatchers.IO) {
 					viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
-					if (mode == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default) {
+					
 						CommentsListController.getComments(parentPostId)?.let {
 							viewModel.commentsData.postValue(it)
 						}
-					} else {
-						CommentsListController.getThreads(parentPostId)?.let {
-							viewModel.threadsData.postValue(it)
-						}
-						
-					}
+					
 				}
 			}
 		}
@@ -224,7 +210,7 @@ fun CommentsScreen(
 			},
 			bottomBar = {
 				Column {
-					if (threadsData?.commentAccess?.canComment == true || commentsData?.commentAccess?.canComment == true) {
+					if (commentsData?.commentAccess?.canComment == true) {
 						AnimatedVisibility(
 							visible = answeringComment != null,
 							enter = expandVertically(expandFrom = Alignment.Bottom),
@@ -352,83 +338,7 @@ fun CommentsScreen(
 								
 							}
 						}
-						
-						if (threadsData != null) {
-							itemsIndexed(
-								items = threadsData.threads,
-								key = { index, it -> it.root.id }
-							) { index, it ->
-								Column(horizontalAlignment = Alignment.End) {
-									
-									CommentItem(
-										comment = it.root,
-										onAuthorClick = {
-											onUserClicked(it.root.author.alias)
-										},
-										highlight = it.root.id == commentId,
-										showReplyButton = false,
-										onShare = {
-											val intent = Intent(Intent.ACTION_SEND)
-											intent.putExtra(
-												Intent.EXTRA_TEXT,
-												"https://habr.com/p/${parentPostId}/comments/#comment_${it.root.id}"
-											)
-											intent.setType("text/plain")
-											context.startActivity(
-												Intent.createChooser(
-													intent,
-													null
-												)
-											)
-										},
-										onReplyClick = {}
-									) {
-										Column {
-											it.root.let {
-												SelectionContainer {
-													((parseElement(
-														it.message, SpanStyle(
-															fontSize = 16.sp,
-															color = MaterialTheme.colors.onSurface
-														),
-														onViewImageRequest = onImageClick
-													).second)?.let { it1 ->
-														it1(
-															SpanStyle(
-																fontSize = 16.sp,
-																color = MaterialTheme.colors.onSurface
-															),
-															elementsSettings
-														)
-													})
-												}
-											}
-										}
-									}
-									if (it.threadChildrenCommentsCount > 0) {
-										Spacer(modifier = Modifier.height(2.dp))
-										OutlinedButton(
-											onClick = { onThreadClick(it.root.id) },
-											shape = RoundedCornerShape(26.dp),
-											contentPadding = PaddingValues(
-												vertical = 12.dp,
-												horizontal = 16.dp
-											)
-										) {
-											Text(text = "Ответы (${it.threadChildrenCommentsCount})")
-											Spacer(modifier = Modifier.width(4.dp))
-											Icon(
-												modifier = Modifier.size(18.dp),
-												imageVector = Icons.Default.ArrowForward,
-												contentDescription = null
-											)
-										}
-									}
-								}
-								
-								
-							}
-						} else if (commentsData != null) {
+						if (commentsData != null) {
 							itemsIndexed(
 								items = commentsData!!.pinnedComments,
 							) { index, commentId ->
