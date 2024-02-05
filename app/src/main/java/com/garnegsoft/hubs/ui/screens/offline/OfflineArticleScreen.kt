@@ -113,6 +113,7 @@ fun OfflineArticleScreen(
 	Scaffold(
 		topBar = {
 			TopAppBar(
+				elevation = 0.dp,
 				title = { Text(text = "Публикация") },
 				navigationIcon = {
 					IconButton(onClick = onBack) {

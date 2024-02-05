@@ -23,8 +23,8 @@ class CommentsScreenState(
 	private val _collapsedCommentsParents: MutableState<List<Int>> = mutableStateOf(emptyList())
 	val collapsedCommentsParents: State<List<Int>> = _collapsedCommentsParents
 	
-	suspend fun scrollToComment(commentId: Int) {
-		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId))
+	suspend fun scrollToComment(commentId: Int, offset: Int) {
+		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset)
 	}
 	
 	fun collapseThread(commentId: Int) {

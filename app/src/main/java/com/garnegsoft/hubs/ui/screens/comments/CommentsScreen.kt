@@ -30,6 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -154,7 +156,7 @@ fun CommentsScreen(
 		mutableStateOf(null)
 	}
 	val commentTextFieldFocusRequester = remember { FocusRequester() }
-	var articleHeaderOffset by remember { mutableStateOf(0f) }
+	var articleHeaderOffset by remember { mutableStateOf(0) }
 	
 	/**
 	 * lazy list items count that should be skipped when navigating between comments
@@ -287,7 +289,6 @@ fun CommentsScreen(
 	) {
 		
 		val showArticleHeader by remember { derivedStateOf { lazyListState.firstVisibleItemIndex > 0 } }
-		val randomCoroutineScope = rememberCoroutineScope()
 		val elementsSettings = remember {
 			ElementSettings(
 				fontSize = 16.sp,
@@ -403,7 +404,7 @@ fun CommentsScreen(
 									}
 								}
 							}
-							
+							Spacer(modifier = Modifier.height(8.dp))
 						}
 						
 						itemsIndexed(
@@ -463,7 +464,7 @@ fun CommentsScreen(
 											onParentCommentSnippetClick = {
 												coroutineScope.launch(Dispatchers.Main) {
 													it.parentCommentId?.let {
-														screenState.scrollToComment(it)
+														screenState.scrollToComment(it, -articleHeaderOffset)
 													}
 												}
 											}
@@ -491,7 +492,7 @@ fun CommentsScreen(
 											}
 										}
 									}
-									Spacer(modifier = Modifier.height(8.dp))
+									Spacer(modifier = Modifier.height(if (index != commentsData!!.comments.lastIndex) 8.dp else 0.dp))
 								}
 							}
 						}
@@ -509,18 +510,16 @@ fun CommentsScreen(
 				
 				
 			}
-			if (showArticleHeader) {
-				articleSnippet?.let {
-					Box {
+			
+			articleSnippet?.let {
+				Layout(
+					content = { Box {
 						Row(
 							modifier = Modifier
 								.clickable {
-									randomCoroutineScope.launch {
+									coroutineScope.launch {
 										lazyListState.animateScrollToItem(0)
 									}
-								}
-								.onGloballyPositioned {
-									articleHeaderOffset = it.boundsInRoot().height
 								}
 								.background(MaterialTheme.colors.surface)
 								.fillMaxWidth()
@@ -552,9 +551,19 @@ fun CommentsScreen(
 							
 						}
 						Divider(modifier = Modifier.align(Alignment.BottomCenter))
+					} }
+				) { measurables, constraints ->
+					val placeables = measurables.map { it.measure(constraints) }
+					articleHeaderOffset = placeables.first().height
+					layout(constraints.maxWidth, constraints.maxHeight) {
+					if (showArticleHeader) {
+						placeables.first().placeRelative(0, 0)
+					}
 					}
 				}
+				
 			}
+			
 		}
 	}
 	
