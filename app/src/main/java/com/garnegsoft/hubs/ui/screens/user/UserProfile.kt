@@ -367,7 +367,7 @@ internal fun UserProfile(
 															}
 														}
 													},
-													style = MaterialTheme.typography.body1,
+													style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
 													onClick = { letterIndex ->
 														it.inviterAlias?.let {
 															val intent = Intent(

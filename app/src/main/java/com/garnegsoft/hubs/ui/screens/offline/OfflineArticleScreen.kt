@@ -167,8 +167,6 @@ fun OfflineArticleScreen(
 				.padding(it), contentAlignment = Alignment.Center
 		) {
 			if (parsedContent != null) {
-				
-				
 				LazyColumn(
 					state = lazyListState,
 					modifier = Modifier.fillMaxSize(),
