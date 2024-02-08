@@ -10,15 +10,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.DisableSelection
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +26,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -37,10 +33,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.font.SystemFontFamily
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,11 +46,6 @@ import com.garnegsoft.hubs.ui.screens.article.html.code.JavaScriptHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.PythonHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.SqlHighlighting
 import com.garnegsoft.hubs.ui.theme.HubsTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.jvm.internal.MutablePropertyReference
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.KMutableProperty0
 
 
 @Preview
@@ -194,6 +182,11 @@ fun CodeElement(
 							Font(
 								R.font.jetbrains_mono_medium_nl_italic,
 								FontWeight.Medium,
+								FontStyle.Italic
+							),
+							Font(
+								R.font.jetbrains_mono_regular_nl_italic,
+								FontWeight.Normal,
 								FontStyle.Italic
 							)
 						)

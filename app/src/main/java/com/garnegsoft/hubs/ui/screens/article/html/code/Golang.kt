@@ -30,7 +30,8 @@ class GolangHighlighting : LanguageHighlighting() {
 	
 	val commentsSpanStyle = SpanStyle(
 		color = Color.Gray,
-		fontStyle = FontStyle.Italic
+		fontStyle = FontStyle.Italic,
+		fontWeight = FontWeight.W400
 	)
 	
 	val functionCallSpanStyle = SpanStyle(
