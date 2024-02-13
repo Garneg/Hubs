@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.comments
 import android.graphics.Paint.Align
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.Star
@@ -55,6 +57,8 @@ fun CommentItem(
 	onParentCommentSnippetClick: (() -> Unit)? = null,
 	isPinned: Boolean = false,
 	onGoToPinnedComment: (() -> Unit)? = null,
+	onMenuButtonClick: (() -> Unit)? = null,
+	menu: (@Composable () -> Unit)? = null,
 	content: @Composable () -> Unit
 ) {
 	val onSurfaceColor = MaterialTheme.colors.onSurface
@@ -140,39 +144,59 @@ fun CommentItem(
 			
 			Spacer(modifier = Modifier.height(8.dp))
 		}
-		
-		Row(
-			modifier = Modifier
-				.fillMaxWidth()
-				.clip(RoundedCornerShape(10.dp))
-				.clickable(onClick = onAuthorClick)
-				.background(commentFlagColor)
-				.border(
-					width = 1.5.dp,
-					color = if (highlight) commentFlagColor.copy(0.5f) else Color.Unspecified,
-					shape = RoundedCornerShape(10.dp)
-				)
-		) {
-			
-			AsyncImage(
+		Row(verticalAlignment = Alignment.CenterVertically) {
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
 				modifier = Modifier
-					.size(34.dp)
-					.clip(RoundedCornerShape(10.dp)),
-				model = comment.author.avatarUrl, contentDescription = "authorAvatar"
-			)
-			
-			Spacer(modifier = Modifier.width(4.dp))
-			Column {
+					.weight(1f)
+					
+					.clip(RoundedCornerShape(10.dp))
+					.clickable(onClick = onAuthorClick)
+					.background(commentFlagColor)
+					.border(
+						width = 1.5.dp,
+						color = if (highlight) commentFlagColor.copy(0.5f) else Color.Unspecified,
+						shape = RoundedCornerShape(10.dp)
+					)
+			) {
+				AsyncImage(
+					modifier = Modifier
+						.size(34.dp)
+						.clip(RoundedCornerShape(10.dp)),
+					model = comment.author.avatarUrl, contentDescription = "authorAvatar"
+				)
+				
+				Spacer(modifier = Modifier.width(4.dp))
+				Column {
 					Text(text = comment.author.alias)
-				Row(
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
-					if (comment.edited)
-						Text(text = " (изм.)", fontSize = 12.sp, color = Color.Gray)
+					Row(
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						Text(text = comment.publishedTime, fontSize = 12.sp, color = Color.Gray)
+						if (comment.edited)
+							Text(text = " (изм.)", fontSize = 12.sp, color = Color.Gray)
+					}
+				}
+				
+			}
+			if (menu != null && onMenuButtonClick != null) {
+				Spacer(modifier = Modifier.width(4.dp))
+				Box {
+					Box(
+						modifier = Modifier
+							.size(34.dp)
+							.clip(CircleShape)
+							.clickable(onClick = onMenuButtonClick),
+						contentAlignment = Alignment.Center
+					) {
+						Icon(
+							imageVector = Icons.Default.MoreVert,
+							contentDescription = "Меню комментария"
+						)
+					}
+					menu()
 				}
 			}
-			
 		}
 		Spacer(modifier = Modifier.height(4.dp))
 		

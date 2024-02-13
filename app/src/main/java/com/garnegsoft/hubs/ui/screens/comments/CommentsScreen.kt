@@ -14,12 +14,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.sharp.KeyboardArrowDown
 import androidx.compose.runtime.*
@@ -29,17 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
@@ -47,25 +39,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.CommentsCollection
-import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
-import com.garnegsoft.hubs.ui.screens.article.parseElement
+import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
-import kotlin.math.roundToInt
 
 
 class CommentsScreenViewModel : ViewModel() {
@@ -385,20 +369,23 @@ fun CommentsScreen(
 								Column {
 									it.let {
 										SelectionContainer {
-											((parseElement(
-												comment.message, SpanStyle(
+											((parseChildElements(
+												Jsoup.parse(comment.message).body(), SpanStyle(
 													fontSize = 16.sp,
 													color = MaterialTheme.colors.onSurface
 												),
 												onViewImageRequest = onImageClick
 											).second)?.let { it1 ->
-												it1(
-													SpanStyle(
-														fontSize = 16.sp,
-														color = MaterialTheme.colors.onSurface
-													),
-													elementsSettings
-												)
+												it1.forEach {
+													it?.invoke(
+														SpanStyle(
+															fontSize = 16.sp,
+															color = MaterialTheme.colors.onSurface
+														),
+														elementsSettings
+													)
+												}
+												
 											})
 										}
 									}
@@ -430,11 +417,12 @@ fun CommentsScreen(
 											)
 										)
 									} else {
+										var showMenu by remember { mutableStateOf(false) }
 										CommentItem(
 											modifier = Modifier
 												.padding(start = 20.dp * it.level.coerceAtMost(5))
 												.combinedClickable(onLongClick = {
-													screenState.collapseThread(
+													screenState.collapseComment(
 														it.id
 													)
 												}, onClick = {}),
@@ -443,6 +431,23 @@ fun CommentsScreen(
 											parentComment = parentComment,
 											highlight = it.id == commentId,
 											showReplyButton = commentsData!!.commentAccess.canComment,
+											menu = {
+												if (showMenu) {
+													CommentItemMenu(
+														onCollapseCommentClick = {
+															screenState.collapseComment(it.id)
+															showMenu = false
+														},
+														onCollapseThreadClick = {
+															screenState.collapseThread(
+																it.id
+															)
+															showMenu = false
+														},
+														onDismiss = { showMenu = false })
+												}
+											},
+											onMenuButtonClick = { showMenu = true },
 											onShare = {
 												val intent = Intent(Intent.ACTION_SEND)
 												intent.putExtra(
@@ -464,7 +469,10 @@ fun CommentsScreen(
 											onParentCommentSnippetClick = {
 												coroutineScope.launch(Dispatchers.Main) {
 													it.parentCommentId?.let {
-														screenState.scrollToComment(it, -articleHeaderOffset)
+														screenState.scrollToComment(
+															it,
+															-articleHeaderOffset
+														)
 													}
 												}
 											}
@@ -472,20 +480,24 @@ fun CommentsScreen(
 											Column {
 												it.let {
 													SelectionContainer {
-														((parseElement(
-															it.message, SpanStyle(
+														((parseChildElements(
+															Jsoup.parse(it.message).body(),
+															SpanStyle(
 																fontSize = 16.sp,
 																color = MaterialTheme.colors.onSurface
 															),
 															onViewImageRequest = onImageClick
 														).second)?.let { it1 ->
-															it1(
-																SpanStyle(
-																	fontSize = 16.sp,
-																	color = MaterialTheme.colors.onSurface
-																),
-																elementsSettings
-															)
+															it1.forEach {
+																it?.invoke(
+																	SpanStyle(
+																		fontSize = 16.sp,
+																		color = MaterialTheme.colors.onSurface
+																	),
+																	elementsSettings
+																)
+															}
+															
 														})
 													}
 												}
@@ -513,52 +525,54 @@ fun CommentsScreen(
 			
 			articleSnippet?.let {
 				Layout(
-					content = { Box {
-						Row(
-							modifier = Modifier
-								.clickable {
-									coroutineScope.launch {
-										lazyListState.animateScrollToItem(0)
+					content = {
+						Box {
+							Row(
+								modifier = Modifier
+									.clickable {
+										coroutineScope.launch {
+											lazyListState.animateScrollToItem(0)
+										}
 									}
-								}
-								.background(MaterialTheme.colors.surface)
-								.fillMaxWidth()
+									.background(MaterialTheme.colors.surface)
+									.fillMaxWidth()
 //                    .height(50.dp)
-								.height(IntrinsicSize.Min)
-								.padding(8.dp),
-							verticalAlignment = Alignment.CenterVertically
-						) {
-							
-							
-							Column(
-								modifier = Modifier.weight(1f)
+									.height(IntrinsicSize.Min)
+									.padding(8.dp),
+								verticalAlignment = Alignment.CenterVertically
 							) {
-								Text(
-									text = articleSnippet.author?.alias ?: "",
-									style = MaterialTheme.typography.body2,
-									fontWeight = FontWeight.W500,
-									maxLines = 1,
-									overflow = TextOverflow.Ellipsis
-								)
 								
-								Text(
-									text = articleSnippet?.title!!,
-									style = MaterialTheme.typography.body2,
-									maxLines = 1,
-									overflow = TextOverflow.Ellipsis
-								)
+								
+								Column(
+									modifier = Modifier.weight(1f)
+								) {
+									Text(
+										text = articleSnippet.author?.alias ?: "",
+										style = MaterialTheme.typography.body2,
+										fontWeight = FontWeight.W500,
+										maxLines = 1,
+										overflow = TextOverflow.Ellipsis
+									)
+									
+									Text(
+										text = articleSnippet?.title!!,
+										style = MaterialTheme.typography.body2,
+										maxLines = 1,
+										overflow = TextOverflow.Ellipsis
+									)
+								}
+								
 							}
-							
+							Divider(modifier = Modifier.align(Alignment.BottomCenter))
 						}
-						Divider(modifier = Modifier.align(Alignment.BottomCenter))
-					} }
+					}
 				) { measurables, constraints ->
 					val placeables = measurables.map { it.measure(constraints) }
 					articleHeaderOffset = placeables.first().height
 					layout(constraints.maxWidth, constraints.maxHeight) {
-					if (showArticleHeader) {
-						placeables.first().placeRelative(0, 0)
-					}
+						if (showArticleHeader) {
+							placeables.first().placeRelative(0, 0)
+						}
 					}
 				}
 				

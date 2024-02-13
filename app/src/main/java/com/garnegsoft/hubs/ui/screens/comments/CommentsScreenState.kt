@@ -27,9 +27,26 @@ class CommentsScreenState(
 		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset)
 	}
 	
-	fun collapseThread(commentId: Int) {
+	fun collapseComment(commentId: Int) {
 		_collapsedCommentsParents.value = _collapsedCommentsParents.value + commentId
 		addCommentsToSkipList(getChildrenOfComment(commentId))
+	}
+	
+	fun collapseThread(childCommentId: Int) {
+		collapseComment(getRootCommentId(childCommentId))
+	}
+	
+	fun getRootCommentId(childCommentId: Int): Int {
+		val comment = commentsCollection!!.comments.find { it.id == childCommentId }
+		var parentId = comment!!.parentCommentId ?: return childCommentId
+		while (true) {
+			val comm = commentsCollection.comments.find { it.id == parentId }
+			comm!!.parentCommentId?.let {
+				parentId = it
+			} ?: return comm.id
+			
+		}
+		
 	}
 	
 	fun expandThread(commentId: Int) {
