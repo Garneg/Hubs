@@ -149,7 +149,6 @@ fun CommentItem(
 				verticalAlignment = Alignment.CenterVertically,
 				modifier = Modifier
 					.weight(1f)
-					
 					.clip(RoundedCornerShape(10.dp))
 					.clickable(onClick = onAuthorClick)
 					.background(commentFlagColor)

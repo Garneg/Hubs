@@ -87,20 +87,22 @@ fun RenderHtml(
 	val context = LocalContext.current
 	Column {
 		result.first?.let { text ->
-			ClickableText(
-				text = text,
-				style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
-				onClick = {
-					text.getStringAnnotations(it, it)
-						.find { it.tag == "url" }
-						?.let {
-							if (it.item.startsWith("http")) {
-								handleUrl(context, it.item)
-								
+			if (text.isNotBlank()) {
+				ClickableText(
+					text = text,
+					style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
+					onClick = {
+						text.getStringAnnotations(it, it)
+							.find { it.tag == "url" }
+							?.let {
+								if (it.item.startsWith("http")) {
+									handleUrl(context, it.item)
+									
+								}
 							}
-						}
-				}
+					}
 				)
+			}
 		}
 		result.second?.invoke(spanStyle, elementSettings)
 	}
@@ -509,10 +511,10 @@ fun parseElement(
 			{ localSpanStyle, settings ->
 				
 				AndroidView(modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+					.fillMaxWidth()
+					.aspectRatio(16f / 9f)
+					.padding(vertical = 4.dp)
+					.clip(RoundedCornerShape(4.dp)),
 					factory = {
 						WebView(it).apply {
 							
@@ -603,24 +605,24 @@ fun parseElement(
 			Surface(
 				color = Color.Transparent,
 				modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth()
+					.padding(vertical = 8.dp)
+					.fillMaxWidth()
 			) {
 				val blockQuoteColor =
 					if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
 						0.75f
 					)
 				Column(modifier = Modifier
-                    .drawWithContent {
-                        drawContent()
-                        drawRoundRect(
-                            color = blockQuoteColor,
-                            size = Size(quoteWidth, size.height),
-                            cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
-                        )
-                        
-                    }
-                    .padding(start = 12.dp)) {
+					.drawWithContent {
+						drawContent()
+						drawRoundRect(
+							color = blockQuoteColor,
+							size = Size(quoteWidth, size.height),
+							cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
+						)
+						
+					}
+					.padding(start = 12.dp)) {
 					childrenComposables.forEach {
 						it(
 							localSpanStyle.copy(fontStyle = FontStyle.Italic),
@@ -646,9 +648,9 @@ fun parseElement(
 			Surface(
 				color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x803C3C3C),
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp))
+					.fillMaxWidth()
+					.padding(vertical = 4.dp)
+					.clip(RoundedCornerShape(4.dp))
 			) {
 				Column(
 					modifier = Modifier
@@ -657,9 +659,9 @@ fun parseElement(
 				) {
 					Row(
 						modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showDetails = !showDetails }
-                            .padding(12.dp),
+							.fillMaxWidth()
+							.clickable { showDetails = !showDetails }
+							.padding(12.dp),
 						verticalAlignment = Alignment.CenterVertically
 					) {
 						Icon(

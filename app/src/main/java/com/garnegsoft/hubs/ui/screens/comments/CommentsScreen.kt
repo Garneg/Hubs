@@ -305,7 +305,7 @@ fun CommentsScreen(
 					)
 				
 				val collapsedCommentsList by screenState.collapsedComments
-				
+				val collapsedCommentsHeadersList by screenState.collapsedCommentsParents
 				LazyColumn(
 					state = lazyListState,
 					modifier = Modifier.weight(1f),
@@ -399,112 +399,115 @@ fun CommentsScreen(
 							key = { index, it -> it.id }
 						) { index, it ->
 							if (!collapsedCommentsList.contains(it.id)) {
-								Column(horizontalAlignment = Alignment.End) {
-									val parentComment = remember {
-										commentsData!!.comments.firstOrNull { com -> com.id == it.parentCommentId }
-									}
-									val parentCommentIndex = remember {
-										parentComment?.let {
-											return@remember commentsData!!.comments.indexOf(it)
-										} ?: 0
-									}
-									if (it.deleted) {
-										DeletedCommentItem(
-											modifier = Modifier.padding(
-												start = 20.dp * it.level.coerceAtMost(
-													5
+								if (collapsedCommentsHeadersList.contains(it.id)){
+									CollapsedThreadHeaderComment(
+										modifier = Modifier.padding(start = 20.dp * it.level.coerceAtMost(5)).padding(bottom = 8.dp),
+										onExpandClick = { screenState.expandThread(it.id) },
+										comment = it
+									)
+								} else {
+									Column(horizontalAlignment = Alignment.End) {
+										val parentComment = remember {
+											commentsData!!.comments.firstOrNull { com -> com.id == it.parentCommentId }
+										}
+										val parentCommentIndex = remember {
+											parentComment?.let {
+												return@remember commentsData!!.comments.indexOf(it)
+											} ?: 0
+										}
+										if (it.deleted) {
+											DeletedCommentItem(
+												modifier = Modifier.padding(
+													start = 20.dp * it.level.coerceAtMost(
+														5
+													)
 												)
 											)
-										)
-									} else {
-										var showMenu by remember { mutableStateOf(false) }
-										CommentItem(
-											modifier = Modifier
-												.padding(start = 20.dp * it.level.coerceAtMost(5))
-												.combinedClickable(onLongClick = {
-													screenState.collapseComment(
-														it.id
+										} else {
+											var showMenu by remember { mutableStateOf(false) }
+											CommentItem(
+												modifier = Modifier
+													.padding(start = 20.dp * it.level.coerceAtMost(5)),
+												comment = it,
+												onAuthorClick = { onUserClicked(it.author.alias) },
+												parentComment = parentComment,
+												highlight = it.id == commentId,
+												showReplyButton = commentsData!!.commentAccess.canComment,
+												menu = {
+													if (showMenu) {
+														CommentItemMenu(
+															onCollapseCommentClick = {
+																screenState.collapseComment(it.id)
+																showMenu = false
+															},
+															onCollapseThreadClick = {
+																screenState.collapseThread(
+																	it.id
+																)
+																showMenu = false
+															},
+															onDismiss = { showMenu = false })
+													}
+												},
+												onMenuButtonClick = { showMenu = true },
+												onShare = {
+													val intent = Intent(Intent.ACTION_SEND)
+													intent.putExtra(
+														Intent.EXTRA_TEXT,
+														"https://habr.com/p/${parentPostId}/comments/#comment_${it.id}"
 													)
-												}, onClick = {}),
-											comment = it,
-											onAuthorClick = { onUserClicked(it.author.alias) },
-											parentComment = parentComment,
-											highlight = it.id == commentId,
-											showReplyButton = commentsData!!.commentAccess.canComment,
-											menu = {
-												if (showMenu) {
-													CommentItemMenu(
-														onCollapseCommentClick = {
-															screenState.collapseComment(it.id)
-															showMenu = false
-														},
-														onCollapseThreadClick = {
-															screenState.collapseThread(
-																it.id
-															)
-															showMenu = false
-														},
-														onDismiss = { showMenu = false })
-												}
-											},
-											onMenuButtonClick = { showMenu = true },
-											onShare = {
-												val intent = Intent(Intent.ACTION_SEND)
-												intent.putExtra(
-													Intent.EXTRA_TEXT,
-													"https://habr.com/p/${parentPostId}/comments/#comment_${it.id}"
-												)
-												intent.setType("text/plain")
-												context.startActivity(
-													Intent.createChooser(
-														intent,
-														null
-													)
-												)
-											},
-											onReplyClick = {
-												answeringComment = it
-												commentTextFieldFocusRequester.requestFocus()
-											},
-											onParentCommentSnippetClick = {
-												coroutineScope.launch(Dispatchers.Main) {
-													it.parentCommentId?.let {
-														screenState.scrollToComment(
-															it,
-															-articleHeaderOffset
+													intent.setType("text/plain")
+													context.startActivity(
+														Intent.createChooser(
+															intent,
+															null
 														)
+													)
+												},
+												onReplyClick = {
+													answeringComment = it
+													commentTextFieldFocusRequester.requestFocus()
+												},
+												onParentCommentSnippetClick = {
+													coroutineScope.launch(Dispatchers.Main) {
+														it.parentCommentId?.let {
+															screenState.scrollToComment(
+																it,
+																-articleHeaderOffset
+															)
+														}
 													}
 												}
-											}
-										) {
-											Column {
-												it.let {
-													SelectionContainer {
-														((parseChildElements(
-															Jsoup.parse(it.message).body(),
-															SpanStyle(
-																fontSize = 16.sp,
-																color = MaterialTheme.colors.onSurface
-															),
-															onViewImageRequest = onImageClick
-														).second)?.let { it1 ->
-															it1.forEach {
-																it?.invoke(
-																	SpanStyle(
-																		fontSize = 16.sp,
-																		color = MaterialTheme.colors.onSurface
-																	),
-																	elementsSettings
-																)
-															}
-															
-														})
+											) {
+												Column {
+													it.let {
+														SelectionContainer {
+															((parseChildElements(
+																Jsoup.parse(it.message).body(),
+																SpanStyle(
+																	fontSize = 16.sp,
+																	color = MaterialTheme.colors.onSurface
+																),
+																onViewImageRequest = onImageClick
+															).second)?.let { it1 ->
+																it1.forEach {
+																	it?.invoke(
+																		SpanStyle(
+																			fontSize = 16.sp,
+																			color = MaterialTheme.colors.onSurface
+																		),
+																		elementsSettings
+																	)
+																}
+																
+															})
+														}
 													}
 												}
 											}
 										}
+										Spacer(modifier = Modifier.height(if (index != commentsData!!.comments.lastIndex) 8.dp else 0.dp))
 									}
-									Spacer(modifier = Modifier.height(if (index != commentsData!!.comments.lastIndex) 8.dp else 0.dp))
 								}
 							}
 						}
