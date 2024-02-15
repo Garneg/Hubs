@@ -108,10 +108,11 @@ fun CollapsedThreadHeaderComment(
 //			}
 		}
 		Spacer(modifier = Modifier.height(4.dp))
+		val gradientColor = MaterialTheme.colors.surface
 		Box(
 			modifier = Modifier.drawWithContent {
 				drawContent()
-				drawRect(Brush.linearGradient(0f to Color.Transparent, 1f to Color.White, start = Offset.Zero, end = Offset(0f, size.height)))
+				drawRect(Brush.linearGradient(0f to Color.Transparent, 1f to gradientColor, start = Offset.Zero, end = Offset(0f, size.height)))
 			}
 		) {
 			Box(
