@@ -45,62 +45,10 @@ fun ExperimentalFeaturesSettingsCard(
 		SettingsCard(
 			title = "Экспериментальные функции"
 		) {
-			val commentsModeSwitchInteractionSource =
-				remember { MutableInteractionSource() }
-			var useThreadsComments by remember { mutableStateOf(it == HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads.ordinal) }
 			Column(
 				verticalArrangement = Arrangement.spacedBy(4.dp)
 			) {
-				
-				Row(modifier = Modifier
-					.fillMaxWidth()
-					.clip(RoundedCornerShape(10.dp))
-					.clickable(
-						interactionSource = commentsModeSwitchInteractionSource,
-						indication = rememberRipple()
-					) {
-						useThreadsComments = !useThreadsComments
-						viewModel.viewModelScope.launch {
-							HubsDataStore.Settings
-								.edit(
-									context,
-									HubsDataStore.Settings.CommentsDisplayMode,
-									if (useThreadsComments) HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads.ordinal
-									else HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default.ordinal
-								)
-						}
-					}
-					.padding(start = 4.dp)
-					.height(48.dp),
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Text(
-						modifier = Modifier.weight(1f),
-						text = "Скрывать ветки комментариев"
-					)
-					
-					CompositionLocalProvider(LocalRippleTheme provides noRipple) {
-						Checkbox(
-							checked = useThreadsComments,
-							onCheckedChange = {
-								useThreadsComments = it
-								viewModel.viewModelScope.launch {
-									HubsDataStore.Settings
-										.edit(
-											context,
-											HubsDataStore.Settings.CommentsDisplayMode,
-											if (useThreadsComments) HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Threads.ordinal
-											else HubsDataStore.Settings.CommentsDisplayMode.CommentsDisplayModes.Default.ordinal
-										)
-								}
-								
-							},
-							interactionSource = commentsModeSwitchInteractionSource
-						)
-					}
-				}
-				
-				
+			
 			}
 		}
 		

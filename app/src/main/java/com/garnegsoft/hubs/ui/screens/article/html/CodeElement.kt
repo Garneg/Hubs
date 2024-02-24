@@ -58,15 +58,20 @@ fun CodeElementPreview() {
 				.padding(16.dp)
 		) {
 			CodeElement(
-//				code = """
-//a := 4i
-//float64()
-//
-//22.7
-//0xff_ab0ba_11
-//		""".trimIndent().replace("\t", "   "),
-				code = SqlHighlighting().keywords.sorted().joinToString("\n"),
-				language = "SQL", spanStyle = SpanStyle()
+				code = """
+import os
+
+
+# Получаем все переменные среды. Переменные среды — это пары ключ-значение,
+# которые определяют аспекты окружения, в котором работает программа.
+spis = os.environ
+
+# Итерируем по каждой паре ключ-значение
+for key, value in spis.items():
+    print(f"{key} = {value}")
+		""".trimIndent().replace("\t", "   "),
+				//code = SqlHighlighting().keywords.sorted().joinToString("\n"),
+				language = "Python", spanStyle = SpanStyle()
 			)
 		}// aboba
 	}

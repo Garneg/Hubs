@@ -19,8 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
-import com.garnegsoft.hubs.ui.screens.settings.cards.ExperimentalFeaturesSettingsCard
-import com.garnegsoft.hubs.ui.screens.settings.cards.OtherCard
+import com.garnegsoft.hubs.ui.screens.settings.cards.OtherSettingsCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -129,8 +128,8 @@ fun SettingsScreen(
 				onArticleScreenSettings = onArticleScreenSettings,
 				onFeedSettings = onFeedSettings
 			)
-			ExperimentalFeaturesSettingsCard(viewModel = viewModel)
-			OtherCard(viewModel = viewModel)
+			
+			OtherSettingsCard(viewModel = viewModel)
 		}
 	}
 	

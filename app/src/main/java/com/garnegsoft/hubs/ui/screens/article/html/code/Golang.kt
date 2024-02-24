@@ -33,7 +33,6 @@ class GolangHighlighting : LanguageHighlighting() {
 		fontStyle = FontStyle.Italic,
 		fontWeight = FontWeight.W400
 	)
-	
 	val functionCallSpanStyle = SpanStyle(
 		color = Color(0xFF418071)
 	)
@@ -45,8 +44,6 @@ class GolangHighlighting : LanguageHighlighting() {
 	val builtInFunctions = listOf(
 		"len", "append", "println", "print", "Error",
 	)
-	
-	
 	
 	val stringLiteralSpanStyle = SpanStyle(
 		color = Color(0xFF579737))

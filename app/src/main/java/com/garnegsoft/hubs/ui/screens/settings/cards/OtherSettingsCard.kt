@@ -33,7 +33,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreenViewModel
 
 @Composable
-fun OtherCard(
+fun OtherSettingsCard(
 	viewModel: SettingsScreenViewModel
 ) {
 	val context = LocalContext.current
