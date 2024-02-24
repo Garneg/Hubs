@@ -93,6 +93,7 @@ fun CodeElement(
 			"C++" -> CPPHighlighting()
 			"C#" -> CPPHighlighting()
 			"JavaScript" -> JavaScriptHighlighting()
+			"JSON" -> JavaScriptHighlighting()
 			"SQL" -> SqlHighlighting()
 			"PostgreSQL" -> SqlHighlighting()
 			else -> null

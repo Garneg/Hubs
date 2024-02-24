@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.article.html.code
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.input.PlatformTextInputPlugin
 
 
 class JavaScriptHighlighting : LanguageHighlighting() {
@@ -46,9 +47,20 @@ class JavaScriptHighlighting : LanguageHighlighting() {
 		"in",
 		"do",
 	)
+	val stringLiteralSpanStyle = SpanStyle(
+		color = Color(0xFF579737)
+	)
 	val keywordSpanStyle = SpanStyle(color = Color(0xFF2F6BA7))
+	val commentSpanStyle: SpanStyle = SpanStyle(
+		color = Color(0xFF888888)
+	)
 	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
-		return Defaults.highlightKeywords(code, keywords, keywordSpanStyle)
+		val pipeline = CycleBasedHighlightingPipeline(code, arrayOf(
+			CycleBasedComponents.StringComponent(stringLiteralSpanStyle),
+			CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
+			CycleBasedComponents.SinglelineCommentComponent(commentSpanStyle)))
+		pipeline.iterateThroughCode()
+		return Defaults.highlightKeywords(code, keywords, keywordSpanStyle) + pipeline.getAnnotatedRanges()
 	}
 	
 }
