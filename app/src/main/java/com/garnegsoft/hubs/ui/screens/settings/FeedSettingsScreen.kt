@@ -45,6 +45,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -147,76 +148,22 @@ fun FeedSettingsScreen(
 				Box(
 					modifier = Modifier
 						.fillMaxWidth()
-						.height(48.dp)
+						.height(16.dp)
 				) {
 					Spacer(
 						modifier = Modifier
-							.align(Alignment.Center)
+							.align(Alignment.BottomCenter)
 							.height(4.dp)
 							.width(32.dp)
 							.clip(RoundedCornerShape(50))
 							.background(MaterialTheme.colors.onBackground.copy(0.15f))
 					)
-					//todo: Remove this experiment or finish it
-					Text(text = lockBottomSheet.toString())
-					Text(modifier = Modifier.padding(top = 20.dp), text = scrollState.canScrollBackward.toString())
-					Text(modifier = Modifier.padding(start = 80.dp), text = scrollState.isScrollInProgress.toString())
+
 				}
-				val decaySpec = rememberSplineBasedDecay<Float>()
+				Spacer(modifier = Modifier.height(16.dp))
 				Column(
 					modifier = Modifier
 						.fillMaxWidth()
-						.nestedScroll(object : NestedScrollConnection {
-							
-							override fun onPostScroll(
-								consumed: Offset,
-								available: Offset,
-								source: NestedScrollSource
-							): Offset {
-								if (lockBottomSheet)
-									return available
-								return Offset.Zero
-								
-							}
-							
-							override suspend fun onPreFling(available: Velocity): Velocity {
-								var lastValue = 0f
-								var flingShit = false
-								var velocityLeft = 0f
-								scrollState.scroll {
-									AnimationState(
-										initialValue = 0f,
-										initialVelocity = available.y
-									).animateDecay(decaySpec) {
-										val delta = value - lastValue
-										lastValue = value
-										velocityLeft = velocity
-										if (delta > 0 && scrollState.value == 0) {
-											flingShit = true
-											return@animateDecay
-										} else {
-											val consumed = scrollBy(delta)
-											if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
-										}
-									}
-								}
-								
-								
-								
-								return if (flingShit) {
-									available
-								} else Velocity(0f, velocityLeft)
-							}
-							
-							override suspend fun onPostFling(
-								consumed: Velocity,
-								available: Velocity
-							): Velocity {
-								if (available.y < 0 && scrollState.value == 0)
-									return available
-								return super.onPostFling(consumed, available)
-							}
-						})
 						.verticalScroll(scrollState)
 						.padding(horizontal = 16.dp)
 						.padding(bottom = 20.dp),
@@ -337,7 +284,7 @@ fun FeedSettingsScreen(
 							)
 						}
 					}
-					Spacer(modifier = Modifier.height(500.dp))
+					
 				}
 				
 			}
