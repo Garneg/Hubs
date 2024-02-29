@@ -91,7 +91,7 @@ fun CodeElement(
 			"Go" -> GolangHighlighting()
 			"Python" -> PythonHighlighting()
 			"C++" -> CPPHighlighting()
-			"C#" -> CPPHighlighting()
+//			"C#" -> CPPHighlighting()
 			"JavaScript" -> JavaScriptHighlighting()
 			"JSON" -> JavaScriptHighlighting()
 			"SQL" -> SqlHighlighting()

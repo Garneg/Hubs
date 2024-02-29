@@ -639,7 +639,10 @@ fun MainNavigationGraph(
 			}
 			
 			composable("imageViewer?imageUrl={imageUrl}") {
-				val url = it.arguments?.getString("imageUrl")
+				var url = it.arguments?.getString("imageUrl")
+				if (url?.startsWith("offline-article:") == true) {
+					url = parentActivity.filesDir.absolutePath + "/offline_resources/" + url.drop(16)
+				}
 				ImageViewScreen(
 					model = url!!,
 					onBack = { navController.popBackStack() })
