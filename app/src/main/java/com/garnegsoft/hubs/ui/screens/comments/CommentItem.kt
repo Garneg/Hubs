@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
@@ -24,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.platform.LocalDensity
@@ -59,6 +61,8 @@ fun CommentItem(
 	onGoToPinnedComment: (() -> Unit)? = null,
 	onMenuButtonClick: (() -> Unit)? = null,
 	menu: (@Composable () -> Unit)? = null,
+	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
+	replyIconPainter: Painter = painterResource(id = R.drawable.reply),
 	content: @Composable () -> Unit
 ) {
 	val onSurfaceColor = MaterialTheme.colors.onSurface
@@ -302,7 +306,7 @@ fun CommentItem(
 							Row(verticalAlignment = Alignment.CenterVertically) {
 								Icon(
 									modifier = Modifier.size(18.dp),
-									painter = painterResource(id = R.drawable.rating),
+									painter = ratingIconPainter,
 									contentDescription = "",
 									tint = statisticsColor
 								)
@@ -344,7 +348,7 @@ fun CommentItem(
 				if (showReplyButton && !isPinned) {
 					IconButton(onClick = onReplyClick) {
 						Icon(
-							painter = painterResource(id = R.drawable.reply),
+							painter = replyIconPainter,
 							contentDescription = "",
 							tint = statisticsColor
 						)
@@ -354,7 +358,7 @@ fun CommentItem(
 					IconButton(onClick = onGoToPinnedComment!!) {
 						Icon(
 							modifier = Modifier.size(22.dp),
-							imageVector = Icons.Default.ArrowForward,
+							imageVector = Icons.AutoMirrored.Filled.ArrowForward,
 							contentDescription = "",
 							tint = statisticsColor
 						)

@@ -29,6 +29,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -39,6 +40,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.CommentsCollection
@@ -306,6 +308,10 @@ fun CommentsScreen(
 				
 				val collapsedCommentsList by screenState.collapsedComments
 				val collapsedCommentsHeadersList by screenState.collapsedCommentsParents
+				
+				val ratingIconPainter = painterResource(id = R.drawable.rating)
+				val replyIconPainter = painterResource(id = R.drawable.reply)
+				
 				LazyColumn(
 					state = lazyListState,
 					modifier = Modifier.weight(1f),
@@ -364,7 +370,8 @@ fun CommentsScreen(
 											) + itemOffsetCount, (-articleHeaderOffset).toInt()
 										)
 									}
-								}
+								},
+								
 							) {
 								Column {
 									it.let {
@@ -401,7 +408,9 @@ fun CommentsScreen(
 							if (!collapsedCommentsList.contains(it.id)) {
 								if (collapsedCommentsHeadersList.contains(it.id)){
 									CollapsedThreadHeaderComment(
-										modifier = Modifier.padding(start = 20.dp * it.level.coerceAtMost(5)).padding(bottom = 8.dp),
+										modifier = Modifier
+											.padding(start = 20.dp * it.level.coerceAtMost(5))
+											.padding(bottom = 8.dp),
 										onExpandClick = { screenState.expandThread(it.id) },
 										comment = it
 									)
@@ -477,7 +486,9 @@ fun CommentsScreen(
 															)
 														}
 													}
-												}
+												},
+												ratingIconPainter = ratingIconPainter,
+												replyIconPainter = replyIconPainter
 											) {
 												Column {
 													it.let {
