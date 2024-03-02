@@ -52,7 +52,7 @@ fun MainScreen(
 	menu: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
-	var isAuthorized by rememberSaveable() { mutableStateOf(false) }
+	var isAuthorized by rememberSaveable { mutableStateOf(false) }
 	val authorizedState by AuthDataController.isAuthorizedFlow(context)
 		.collectAsState(initial = null)
 	

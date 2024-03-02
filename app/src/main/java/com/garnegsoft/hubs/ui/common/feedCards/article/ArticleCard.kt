@@ -179,7 +179,7 @@ fun ArticleCard(
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = remember { "${article.readingTime} мин" },
+				text = "${article.readingTime} мин",
 				color = style.statisticsColor,
 				fontWeight = FontWeight.W500,
 				fontSize = 14.sp
