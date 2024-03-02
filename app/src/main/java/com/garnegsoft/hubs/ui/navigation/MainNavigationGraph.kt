@@ -102,8 +102,8 @@ fun MainNavigationGraph(
 			
 			composable(
 				"articles",
-				
-				popEnterTransition = { EnterTransition.None }
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.EmptyTransitions.enterTransition
 			) {
 				
 				MainScreen(
@@ -387,7 +387,13 @@ fun MainNavigationGraph(
 				)
 			}
 			
-			composable(route = "search") {
+			composable(
+				route = "search",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				SearchScreen(
 					viewModelStoreOwner = it,
 					onArticleClicked = { navController.navigate("article/$it") },
@@ -399,7 +405,13 @@ fun MainNavigationGraph(
 				)
 			}
 			
-			composable(route = "settings") {
+			composable(
+				route = "settings",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				SettingsScreen(
 					onBack = {
 						navController.popBackStack()
@@ -413,13 +425,25 @@ fun MainNavigationGraph(
 				)
 			}
 			
-			composable(route = "article_settings") {
+			composable(
+				route = "article_settings",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				ArticleScreenSettingsScreen(
 					onBack = { navController.popBackStack() }
 				)
 			}
 			
-			composable(route = "feed_settings") {
+			composable(
+				route = "feed_settings",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				FeedSettingsScreen(
 					onBack = { navController.popBackStack() }
 				)
@@ -427,7 +451,11 @@ fun MainNavigationGraph(
 			
 			composable(
 				route = "comments/{postId}?commentId={commentId}",
-				deepLinks = CommentsScreenNavDeepLinks
+				deepLinks = CommentsScreenNavDeepLinks,
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
 			) {
 				val postId = it.arguments!!.getString("postId")!!
 				val commentId = it.arguments?.getString("commentId")
@@ -450,26 +478,15 @@ fun MainNavigationGraph(
 				
 			}
 			
-			composable("thread/{articleId}/{threadId}") {
-				val articleId =
-					it.arguments!!.getString("articleId")?.toInt()
-				val threadId = it.arguments!!.getString("threadId")?.toInt()
-				
-				CommentsThreadScreen(
-					articleId = articleId!!,
-					threadId = threadId!!,
-					onAuthor = { navController.navigate("user/$it") },
-					onImageClick = { navController.navigate("image/$it") },
-					onBack = { navController.popBackStack() }
-				)
-			}
+			
 			
 			composable(
 				route = "user/{alias}?page={page}",
-				arguments = listOf<NamedNavArgument>(),
 				deepLinks = UserScreenNavDeepLinks,
-				popExitTransition = { fadeOut(tween(50)) },
-				
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
 				) {
 				
 				val page =
@@ -570,7 +587,10 @@ fun MainNavigationGraph(
 			composable(
 				"hub/{alias}",
 				deepLinks = HubScreenNavDeepLinks,
-				popExitTransition = { fadeOut(tween(50)) }
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
 			) {
 				val alias = it.arguments?.getString("alias")
 				HubScreen(alias = alias!!, viewModelStoreOwner = it,
@@ -597,7 +617,10 @@ fun MainNavigationGraph(
 			composable(
 				"company/{alias}",
 				deepLinks = CompanyScreenNavDeepLinks,
-				popExitTransition = { fadeOut(tween(50)) }
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
 			) {
 				val alias = it.arguments?.getString("alias")!!
 				CompanyScreen(
@@ -623,7 +646,13 @@ fun MainNavigationGraph(
 				}
 			}
 			
-			composable("about") {
+			composable(
+				"about",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				AboutScreen {
 					navController.popBackStack()
 				}
@@ -631,7 +660,11 @@ fun MainNavigationGraph(
 			
 			composable(
 				route = "savedArticles",
-				deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" })
+				deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" }),
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
 			) {
 				OfflineArticlesListScreen(
 					onBack = { navController.popBackStack() },
@@ -639,7 +672,13 @@ fun MainNavigationGraph(
 				)
 			}
 			
-			composable("imageViewer?imageUrl={imageUrl}") {
+			composable(
+				"imageViewer?imageUrl={imageUrl}",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				var url = it.arguments?.getString("imageUrl")
 				if (url?.startsWith("offline-article:") == true) {
 					url = parentActivity.filesDir.absolutePath + "/offline_resources/" + url.drop(16)
@@ -649,7 +688,13 @@ fun MainNavigationGraph(
 					onBack = { navController.popBackStack() })
 			}
 			
-			composable("history") {
+			composable(
+				"history",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition
+			) {
 				HistoryScreen(
 					onBack = { navController.popBackStack() },
 					onArticleClick = { navController.navigate("article/$it") },
