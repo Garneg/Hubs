@@ -16,6 +16,11 @@ class AuthDataController {
 				pref = HubsDataStore.Auth.Cookies,
 				value = ""
 			)
+			HubsDataStore.Auth.edit(
+				context = context,
+				pref = HubsDataStore.Auth.Alias,
+				value = ""
+			)
 		}
 		
 		fun isAuthorizedFlow(context: Context): Flow<Boolean> {

@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -37,12 +38,13 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.common.MenuItem
 
 @Composable
 fun AuthorizedMenu(
 	userAlias: String,
-	avatarUrl: String?,
 	onProfileClick: () -> Unit,
 	onArticlesClick: () -> Unit,
 	onCommentsClick: () -> Unit,
@@ -53,33 +55,22 @@ fun AuthorizedMenu(
 	onAboutClick: () -> Unit,
 ) {
 	var expanded by remember { mutableStateOf(false) }
+	val avatarFilename by HubsDataStore.Auth.getValueFlow(
+		LocalContext.current,
+		HubsDataStore.Auth.AvatarFileName
+	).collectAsState(initial = "")
 	IconButton(onClick = { expanded = true }) {
-		if (avatarUrl != null) {
-			AsyncImage(
-				modifier = Modifier
-					.size(32.dp)
-					.clip(RoundedCornerShape(8.dp))
-					.background(if (MaterialTheme.colors.isLight) Color.Transparent else Color.White),
-				contentScale = ContentScale.FillBounds,
-				model = avatarUrl, contentDescription = ""
-			)
-		} else {
-			Icon(
-				modifier = Modifier
-					.size(32.dp)
-					.clip(RoundedCornerShape(8.dp))
-					.border(
-						width = 2.dp, color = placeholderColorLegacy(userAlias),
-						shape = RoundedCornerShape(8.dp)
-					)
-					.padding(1.dp)
-					.background(Color.White)
-					.padding(1.5.dp),
-				painter = painterResource(id = R.drawable.user_avatar_placeholder),
-				contentDescription = "",
-				tint = placeholderColorLegacy(userAlias)
-			)
-		}
+		
+		AsyncImage(
+			modifier = Modifier
+				.size(32.dp)
+				.clip(RoundedCornerShape(8.dp))
+				.background(if (MaterialTheme.colors.isLight) Color.Transparent else Color.White),
+			contentScale = ContentScale.FillBounds,
+			model = LocalContext.current.filesDir.toString() + "/$avatarFilename",
+			contentDescription = ""
+		)
+		
 		
 	}
 	val menuTransition = updateTransition(targetState = expanded)
@@ -152,34 +143,17 @@ fun AuthorizedMenu(
 								this.alpha = itemsAnimation + 0.6f
 							},
 							title = userAlias, icon = {
-								if (avatarUrl != null) {
-									AsyncImage(
-										modifier = Modifier
-											.size(32.dp)
-											.clip(RoundedCornerShape(8.dp))
-											.background(Color.White),
-										contentScale = ContentScale.FillBounds,
-										model = avatarUrl, contentDescription = ""
-									)
-								} else {
-									Icon(
-										modifier = Modifier
-											.size(32.dp)
-											.border(
-												width = 2.dp,
-												color = placeholderColorLegacy(userAlias),
-												shape = RoundedCornerShape(8.dp)
-											)
-											.background(
-												Color.White,
-												shape = RoundedCornerShape(8.dp)
-											)
-											.padding(2.5.dp),
-										painter = painterResource(id = R.drawable.user_avatar_placeholder),
-										contentDescription = "",
-										tint = placeholderColorLegacy(userAlias)
-									)
-								}
+								
+								AsyncImage(
+									modifier = Modifier
+										.size(32.dp)
+										.clip(RoundedCornerShape(8.dp))
+										.background(Color.White),
+									contentScale = ContentScale.FillBounds,
+									model = LocalContext.current.filesDir.toString() + "/$avatarFilename",
+									contentDescription = ""
+								)
+								
 							}, onClick = {
 								onProfileClick()
 								expanded = false
@@ -206,8 +180,7 @@ fun AuthorizedMenu(
 							title = "Статьи", icon = {
 								Icon(
 									painter = painterResource(id = R.drawable.article),
-									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
+									contentDescription = ""
 								)
 							}, onClick = {
 								onArticlesClick()
@@ -224,7 +197,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.comments_icon),
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onCommentsClick()
@@ -241,7 +213,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.bookmark),
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onBookmarksClick()
@@ -258,7 +229,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.download),
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onSavedArticlesClick()
@@ -276,7 +246,6 @@ fun AuthorizedMenu(
 								Icon(
 									painter = painterResource(id = R.drawable.history),
 									contentDescription = null,
-									tint = MaterialTheme.colors.onBackground
 								)
 							},
 							onClick = {
@@ -294,7 +263,6 @@ fun AuthorizedMenu(
 								Icon(
 									imageVector = Icons.Outlined.Settings,
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onSettingsClick()
@@ -324,7 +292,6 @@ fun AuthorizedMenu(
 								Icon(
 									imageVector = Icons.Outlined.Info,
 									contentDescription = "",
-									tint = MaterialTheme.colors.onBackground
 								)
 							}, onClick = {
 								onAboutClick()
@@ -361,7 +328,6 @@ fun UnauthorizedMenu(
 			Icon(
 				imageVector = Icons.Outlined.ExitToApp,
 				contentDescription = "",
-				tint = MaterialTheme.colors.onBackground
 			)
 		}, onClick = {
 			onLoginClick()
@@ -372,7 +338,6 @@ fun UnauthorizedMenu(
 			Icon(
 				painter = painterResource(id = R.drawable.download),
 				contentDescription = "",
-				tint = MaterialTheme.colors.onBackground
 			)
 		}, onClick = {
 			onSavedArticlesClick()
@@ -385,7 +350,6 @@ fun UnauthorizedMenu(
 				Icon(
 					painter = painterResource(id = R.drawable.history),
 					contentDescription = null,
-					tint = MaterialTheme.colors.onBackground
 				)
 			},
 			onClick = {
@@ -398,7 +362,6 @@ fun UnauthorizedMenu(
 			Icon(
 				imageVector = Icons.Outlined.Settings,
 				contentDescription = "",
-				tint = MaterialTheme.colors.onBackground
 			)
 		}, onClick = {
 			onSettingsClick()
@@ -407,40 +370,19 @@ fun UnauthorizedMenu(
 		
 		Divider(modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp))
 		
-		MenuItem(title = "О приложении", icon = {
-			Icon(
-				imageVector = Icons.Outlined.Info,
-				contentDescription = "",
-				modifier = Modifier.size(24.dp),
-				tint = MaterialTheme.colors.onBackground
-			)
-		}, onClick = {
-			onAboutClick()
-			expanded = false
-		})
+		MenuItem(
+			title = "О приложении",
+			icon = {
+				Icon(
+					imageVector = Icons.Outlined.Info,
+					contentDescription = "",
+					modifier = Modifier.size(24.dp),
+				)
+			},
+			onClick = {
+				onAboutClick()
+				expanded = false
+			})
 	}
 }
 
-@Composable
-fun MenuItem(
-	title: String,
-	modifier: Modifier = Modifier,
-	icon: @Composable () -> Unit,
-	onClick: () -> Unit
-) {
-	Row(
-		modifier = modifier
-			.clickable(onClick = onClick)
-			.padding(14.dp),
-		verticalAlignment = Alignment.CenterVertically
-	) {
-		icon()
-		Spacer(modifier = Modifier.width(14.dp))
-		Text(
-			title,
-			color = MaterialTheme.colors.onBackground
-		)
-		Spacer(modifier = Modifier.width(14.dp))
-		Spacer(modifier = Modifier.weight(1f))
-	}
-}

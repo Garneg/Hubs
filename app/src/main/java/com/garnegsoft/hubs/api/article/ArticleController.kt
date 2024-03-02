@@ -37,12 +37,12 @@ class ArticleController {
                 OfflineArticle(
                     articleId = it.id.toInt(),
                     authorName = it.author?.alias,
-                    authorAvatarUrl = if (article.author?.avatarUrl == null) {
+                    authorAvatarUrl = it.author?.let { if (article.author?.avatarUrl == null) {
                         placeholderAvatarUrl(article.author!!.alias)
                     }
                     else {
                         "https:" + article.author!!.avatarUrl
-                    },
+                    }},
                     timePublished = it.timePublished,
                     title = Jsoup.parse(it.titleHtml).text(),
                     contentHtml = it.textHtml,
@@ -64,12 +64,12 @@ class ArticleController {
                 OfflineArticleSnippet(
                     articleId = it.id.toInt(),
                     authorName = it.author?.alias,
-                    authorAvatarUrl = if (article.author?.avatarUrl == null) {
+                    authorAvatarUrl = article.author?.let { if (article.author?.avatarUrl == null) {
                         placeholderAvatarUrl(article.author!!.alias)
                     }
                     else {
                         "https:" + article.author!!.avatarUrl
-                    },
+                    }},
                     timePublished = it.timePublished,
                     title = Jsoup.parse(it.titleHtml).text(),
                     hubs = HubsList(it.hubs.map { it.title }),

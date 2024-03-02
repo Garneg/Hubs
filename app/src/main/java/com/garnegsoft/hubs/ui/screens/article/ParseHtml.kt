@@ -50,6 +50,7 @@ import coil.compose.AsyncImagePainter
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
+import com.garnegsoft.hubs.ui.screens.article.html.CodeElement
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -86,20 +87,22 @@ fun RenderHtml(
 	val context = LocalContext.current
 	Column {
 		result.first?.let { text ->
-			ClickableText(
-				text = text,
-				style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
-				onClick = {
-					text.getStringAnnotations(it, it)
-						.find { it.tag == "url" }
-						?.let {
-							if (it.item.startsWith("http")) {
-								handleUrl(context, it.item)
-								
+			if (text.isNotBlank()) {
+				ClickableText(
+					text = text,
+					style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
+					onClick = {
+						text.getStringAnnotations(it, it)
+							.find { it.tag == "url" }
+							?.let {
+								if (it.item.startsWith("http")) {
+									handleUrl(context, it.item)
+									
+								}
 							}
-						}
-				}
+					}
 				)
+			}
 		}
 		result.second?.invoke(spanStyle, elementSettings)
 	}
@@ -280,11 +283,9 @@ fun parseElement(
 					buildAnnotatedString {
 						withStyle(ChildrenSpanStyle) {
 							append(
-								if (thisNode.previousSibling() == null ||
-									thisNode.previousSibling() is Element &&
-									(thisNode.previousSibling() as Element)?.tagName() == "br"
+								if (thisNode.outerHtml().startsWith("\n ")
 								)
-									thisNode.text().trimStart()
+									thisNode.text().drop(1)
 								else
 									thisNode.text()
 							)
@@ -510,10 +511,10 @@ fun parseElement(
 			{ localSpanStyle, settings ->
 				
 				AndroidView(modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp)),
+					.fillMaxWidth()
+					.aspectRatio(16f / 9f)
+					.padding(vertical = 4.dp)
+					.clip(RoundedCornerShape(4.dp)),
 					factory = {
 						WebView(it).apply {
 							
@@ -540,13 +541,12 @@ fun parseElement(
 		) { localSpanStyle, settings ->
 			Box(Modifier.padding(bottom = 4.dp)) {
 				DisableSelection {
-					Code(
+					CodeElement(
 						code = element.text(),
 						language = LanguagesMap.getOrElse(
 							element.attr("class"),
 							{ element.attr("class") }),
 						spanStyle = localSpanStyle,
-						elementSettings = settings
 					)
 				}
 			}
@@ -605,24 +605,24 @@ fun parseElement(
 			Surface(
 				color = Color.Transparent,
 				modifier = Modifier
-                    .padding(vertical = 8.dp)
-                    .fillMaxWidth()
+					.padding(vertical = 8.dp)
+					.fillMaxWidth()
 			) {
 				val blockQuoteColor =
 					if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
 						0.75f
 					)
 				Column(modifier = Modifier
-                    .drawWithContent {
-                        drawContent()
-                        drawRoundRect(
-                            color = blockQuoteColor,
-                            size = Size(quoteWidth, size.height),
-                            cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
-                        )
-                        
-                    }
-                    .padding(start = 12.dp)) {
+					.drawWithContent {
+						drawContent()
+						drawRoundRect(
+							color = blockQuoteColor,
+							size = Size(quoteWidth, size.height),
+							cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
+						)
+						
+					}
+					.padding(start = 12.dp)) {
 					childrenComposables.forEach {
 						it(
 							localSpanStyle.copy(fontStyle = FontStyle.Italic),
@@ -648,9 +648,9 @@ fun parseElement(
 			Surface(
 				color = if (MaterialTheme.colors.isLight) Color(0x65EBEBEB) else Color(0x803C3C3C),
 				modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
-                    .clip(RoundedCornerShape(4.dp))
+					.fillMaxWidth()
+					.padding(vertical = 4.dp)
+					.clip(RoundedCornerShape(4.dp))
 			) {
 				Column(
 					modifier = Modifier
@@ -659,9 +659,9 @@ fun parseElement(
 				) {
 					Row(
 						modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { showDetails = !showDetails }
-                            .padding(12.dp),
+							.fillMaxWidth()
+							.clickable { showDetails = !showDetails }
+							.padding(12.dp),
 						verticalAlignment = Alignment.CenterVertically
 					) {
 						Icon(
@@ -815,7 +815,7 @@ val LanguagesMap = mapOf(
 	"objectivec" to "Objective C",
 	
 	"perl" to "Perl",
-	"pgsql" to "pgSQL",
+	"pgsql" to "PostgreSQL",
 	"php" to "PHP",
 	"powershell" to "PowerShell",
 	"python" to "Python",
@@ -970,6 +970,9 @@ fun Code(
 	}
 }
 
+/**
+ * Handles url. If url refers to habr, opens this link via app
+ */
 fun handleUrl(context: Context, url: String) {
 	Log.e(
 		"URL Clicked",

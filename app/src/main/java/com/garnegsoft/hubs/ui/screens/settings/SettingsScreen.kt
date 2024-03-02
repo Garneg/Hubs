@@ -18,13 +18,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.authorized
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
-import com.garnegsoft.hubs.ui.screens.settings.cards.ExperimentalFeaturesSettingsCard
-import com.garnegsoft.hubs.ui.screens.settings.cards.OtherCard
+import com.garnegsoft.hubs.ui.screens.settings.cards.OtherSettingsCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -55,7 +55,11 @@ class SettingsScreenViewModel : ViewModel() {
 		val dateFormat = SimpleDateFormat("ddMMyyHHmm", Locale.US)
 		val date = dateFormat.format(Calendar.getInstance().time)
 		val name = "Отчет об ошибке $date.txt"
-		
+		var authorized: Boolean = false
+		runBlocking {
+			val flow = HubsDataStore.Auth.getValueFlow(context, HubsDataStore.Auth.Authorized)
+			authorized = flow.firstOrNull() ?: false
+		}
 		val info = """
 				Версия приложения: ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})
 				Был авторизован: ${authorized}
@@ -124,8 +128,8 @@ fun SettingsScreen(
 				onArticleScreenSettings = onArticleScreenSettings,
 				onFeedSettings = onFeedSettings
 			)
-			ExperimentalFeaturesSettingsCard(viewModel = viewModel)
-			OtherCard(viewModel = viewModel)
+			
+			OtherSettingsCard(viewModel = viewModel)
 		}
 	}
 	

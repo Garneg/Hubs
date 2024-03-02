@@ -66,7 +66,7 @@ class HistoryEntityListModel(
 				while (doRetry) {
 					_load()?.let { nextPage ->
 						_data.value?.let {
-							delay(1000)
+							delay(1000) // throttle
 							_data.postValue(it + nextPage)
 							doRetry = false
 							_lastLoadedPage.postValue(pageNumber)

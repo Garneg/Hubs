@@ -4,7 +4,6 @@ import ArticleController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -12,9 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -23,7 +22,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -33,10 +31,8 @@ import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
-import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
-import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
+import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -48,7 +44,15 @@ fun ArticleCard(
 	onClick: () -> Unit,
 	onAuthorClick: () -> Unit,
 	onCommentsClick: () -> Unit,
-	style: ArticleCardStyle
+	style: ArticleCardStyle,
+	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
+	viewsIconPainter: Painter = painterResource(id = R.drawable.views_icon),
+	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
+	filledBookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark_filled),
+	commentIconPainter: Painter = painterResource(id = R.drawable.comments_icon),
+	complexityIconPainter: Painter = painterResource(id = R.drawable.speedmeter_hard),
+	readingTimeIconPainter: Painter = painterResource(id = R.drawable.clock_icon),
+	translationIconPainter: Painter = painterResource(id = R.drawable.translation)
 ) {
 	
 	Column(
@@ -94,7 +98,9 @@ fun ArticleCard(
 							modifier = Modifier
 								.size(style.authorAvatarSize)
 								.clip(style.innerElementsShape)
-								.background(Color.White),
+								// I set shape here because it works better and white rounded corners are
+								// less visible. Although, it's still noticeable :(
+								.background(color = Color.White, shape = style.innerElementsShape),
 							model = it.avatarUrl,
 							contentDescription = "avatar",
 							onState = { })
@@ -145,7 +151,7 @@ fun ArticleCard(
 				}
 				Icon(
 					modifier = Modifier.size(height = 10.dp, width = 20.dp),
-					painter = painterResource(id = R.drawable.speedmeter_hard),
+					painter = complexityIconPainter,
 					contentDescription = "",
 					tint = publicationComplexityColor
 				)
@@ -167,13 +173,13 @@ fun ArticleCard(
 			}
 			Icon(
 				modifier = Modifier.size(14.dp),
-				painter = painterResource(id = R.drawable.clock_icon),
+				painter = readingTimeIconPainter,
 				contentDescription = "",
 				tint = style.statisticsColor
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = remember { "${article.readingTime} мин" },
+				text = "${article.readingTime} мин",
 				color = style.statisticsColor,
 				fontWeight = FontWeight.W500,
 				fontSize = 14.sp
@@ -182,14 +188,14 @@ fun ArticleCard(
 				Spacer(modifier = Modifier.width(12.dp))
 				Icon(
 					modifier = Modifier.size(14.dp),
-					painter = painterResource(id = R.drawable.translate),
+					painter = translationIconPainter,
 					contentDescription = "",
-					tint = style.statisticsColor
+					tint = TranslationLabelColor
 				)
 				Spacer(modifier = Modifier.width(2.dp))
 				Text(
 					text = "Перевод",
-					color = style.statisticsColor,
+					color = TranslationLabelColor,
 					fontSize = 14.sp,
 					fontWeight = FontWeight.W500
 				)
@@ -198,6 +204,7 @@ fun ArticleCard(
 		
 		var hubsText by remember { mutableStateOf(buildAnnotatedString { }) }
 		
+		// TODO: This concatenation takes some time and leads to laggy scroll of feeds. Needs to be refactored
 		LaunchedEffect(key1 = Unit, block = {
 			if (hubsText.text == "") {
 				hubsText = buildAnnotatedString {
@@ -225,7 +232,8 @@ fun ArticleCard(
 		if (style.showHubsList)
 			Text(
 				modifier = Modifier.padding(horizontal = style.innerPadding),
-				text = hubsText, style = style.hubsTextStyle
+				text = hubsText, style = style.hubsTextStyle,
+				minLines = if (hubsText.text == "") 2 else 1 // todo: remove this hack after fixing hubs string formatting on fly
 			)
 		
 		
@@ -258,176 +266,69 @@ fun ArticleCard(
 			)
 			
 		}
-		
-		//Stats
-		Row(
-			modifier = Modifier
-				.padding(horizontal = style.innerPadding)
-				.height(38.dp + style.innerPadding * 2)
-				.fillMaxWidth()
-				.clip(style.innerElementsShape),
-			verticalAlignment = Alignment.CenterVertically,
-			horizontalArrangement = Arrangement.Center
-		) {
-			
-			//Rating
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.weight(1f)
-					.padding(vertical = style.innerPadding),
-				horizontalArrangement = Arrangement.Center
-			) {
-				Icon(
-					painter = painterResource(id = R.drawable.rating),
-					contentDescription = null,
-					modifier = Modifier.size(18.dp),
-					tint = style.statisticsColor
-				)
-				
-				Spacer(modifier = Modifier.width(4.dp))
-				if (article.statistics.score > 0) {
-					Text(
-						text = '+' + article.statistics.score.toString(),
-						style = style.statisticsTextStyle,
-						color = RatingPositiveColor
-					)
-				} else
-					if (article.statistics.score < 0) {
-						Text(
-							text = article.statistics.score.toString(),
-							style = style.statisticsTextStyle,
-							color = RatingNegativeColor
-						)
-					} else {
-						Text(
-							text = article.statistics.score.toString(),
-							style = style.statisticsTextStyle
-						)
-					}
-			}
-			
-			//Views
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.weight(1f)
-					.padding(vertical = style.innerPadding),
-				horizontalArrangement = Arrangement.Center
-			
-			) {
-				Icon(
-					painter = painterResource(id = R.drawable.views_icon),
-					contentDescription = null,
-					modifier = Modifier.size(18.dp),
-					tint = style.statisticsColor
-				)
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(
-					text = formatLongNumbers(article.statistics.readingCount),
-					style = style.statisticsTextStyle
-				)
-			}
-			val addToBookmarksInteractionSource = remember { MutableInteractionSource() }
-			val bookmarksCoroutineScope = rememberCoroutineScope()
-			
-			var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
-				mutableStateOf(article.relatedData?.bookmarked ?: false)
-			}
-			var addedToBookmarksCount by rememberSaveable(article.relatedData?.bookmarked) {
-				mutableStateOf(article.statistics.bookmarksCount)
-			}
-			
-			val bookmarkButtonClickLambda: () -> Unit = remember {
-				{
-					article.relatedData?.let {
-						bookmarksCoroutineScope.launch(Dispatchers.IO) {
-							if (addedToBookmarks) {
+		var addedToBookmarks by remember {
+			mutableStateOf(article.relatedData?.bookmarked ?: false)
+		}
+		var addedToBookmarksCount by remember {
+			mutableIntStateOf(article.statistics.bookmarksCount)
+		}
+		val bookmarksCoroutineScope = rememberCoroutineScope()
+		val bookmarkButtonClickLambda: () -> Unit = remember {
+			{
+				article.relatedData?.let {
+					bookmarksCoroutineScope.launch(Dispatchers.IO) {
+						if (addedToBookmarks) {
+							addedToBookmarks = false
+							addedToBookmarksCount--
+							addedToBookmarksCount =
+								addedToBookmarksCount.coerceAtLeast(0)
+							if (!ArticleController.removeFromBookmarks(
+									article.id,
+									article.type == PostType.News
+								)
+							) {
+								addedToBookmarks = true
+								addedToBookmarksCount++
+								addedToBookmarksCount =
+									addedToBookmarksCount.coerceAtLeast(0)
+							}
+							
+						} else {
+							addedToBookmarks = true
+							addedToBookmarksCount++
+							if (!ArticleController.addToBookmarks(
+									article.id,
+									article.type == PostType.News
+								)
+							) {
 								addedToBookmarks = false
 								addedToBookmarksCount--
 								addedToBookmarksCount =
 									addedToBookmarksCount.coerceAtLeast(0)
-								if (!ArticleController.removeFromBookmarks(
-										article.id,
-										article.type == PostType.News
-									)
-								) {
-									addedToBookmarks = true
-									addedToBookmarksCount++
-									addedToBookmarksCount =
-										addedToBookmarksCount.coerceAtLeast(0)
-								}
-								
-							} else {
-								addedToBookmarks = true
-								addedToBookmarksCount++
-								if (!ArticleController.addToBookmarks(
-										article.id,
-										article.type == PostType.News
-									)
-								) {
-									addedToBookmarks = false
-									addedToBookmarksCount--
-									addedToBookmarksCount =
-										addedToBookmarksCount.coerceAtLeast(0)
-								}
 							}
 						}
 					}
-					
 				}
+				
 			}
-			var showPopup by rememberSaveable {
-				mutableStateOf(false)
-			}
-			var bounds by remember {
-				mutableStateOf(IntSize.Zero)
-			}
-			
-			val hapticFeedback = LocalHapticFeedback.current
-			val addToBookmarksButtonEnabled =
-				remember { style.bookmarksButtonAllowedBeEnabled && article.relatedData != null }
-			//Added to bookmarks
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				modifier = Modifier
-					.padding(vertical = style.innerPadding)
-					.weight(1f)
-					.fillMaxHeight()
-					.clip(style.innerElementsShape)
-					.combinedClickable(
-						onClick = bookmarkButtonClickLambda,
-						onLongClick = {
-							showPopup = true
-							hapticFeedback.performHapticFeedback(
-								HapticFeedbackType.LongPress
-							)
-						},
-						enabled = addToBookmarksButtonEnabled,
-					)
-					.onGloballyPositioned {
-						bounds = it.size
-					},
-				horizontalArrangement = Arrangement.Center
-			) {
-				Icon(
-					painter = article.relatedData?.let {
-						if (addedToBookmarks)
-							painterResource(id = R.drawable.bookmark_filled)
-						else
-							null
-					} ?: painterResource(id = R.drawable.bookmark),
-					contentDescription = null,
-					modifier = Modifier.size(18.dp),
-					tint = style.statisticsColor
-				)
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(
-					text = addedToBookmarksCount.toString(),
-					style = style.statisticsTextStyle
-				)
-				val context = LocalContext.current
-				val coroutineScope = rememberCoroutineScope()
+		}
+		
+		
+		val context = LocalContext.current
+		var showPopup by rememberSaveable {
+			mutableStateOf(false)
+		}
+		
+		val hapticFeedback = LocalHapticFeedback.current
+		
+		ArticleStats(
+			statistics = article.statistics,
+			addedToBookmarks = addedToBookmarks,
+			bookmarksCount = addedToBookmarksCount,
+			onAddToBookmarksClicked = bookmarkButtonClickLambda,
+			onCommentsClick = onCommentsClick,
+			unreadCommentsCount = article.relatedData?.let { if (it.unreadComments < article.statistics.commentsCount) it.unreadComments else 0 } ?: 0,
+			saveArticlePopup = { bounds ->
 				SaveArticlePopup(
 					show = showPopup,
 					bounds = bounds,
@@ -443,70 +344,20 @@ fun ArticleCard(
 					onDismissRequest = { showPopup = false },
 					articleId = article.id
 				)
-				
-			}
-			
-			val commentsInteractionSource = remember { MutableInteractionSource() }
-			//Comments
-			Row(
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.Center,
-				modifier = Modifier
-					.weight(1f)
-					.clickable(
-						interactionSource = commentsInteractionSource,
-						indication = null,
-						enabled = style.commentsButtonEnabled,
-						onClick = onCommentsClick
-					)
-					.padding(vertical = style.innerPadding)
-					.fillMaxHeight()
-					.absolutePadding(4.dp)
-					.clip(style.innerElementsShape)
-					.clickable(
-						enabled = style.commentsButtonEnabled,
-						onClick = onCommentsClick
-					)
-			) {
-				
-				BadgedBox(
-					badge = {
-						article.relatedData?.let {
-							if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
-								Box(
-									modifier = Modifier
-										.size(8.dp)
-										.clip(CircleShape)
-										.background(RatingPositiveColor)
-								)
-							}
-						}
-						
-					}
-				) {
-					Row(
-						modifier = Modifier.padding(horizontal = 8.dp),
-						verticalAlignment = Alignment.CenterVertically
-					) {
-						Icon(
-							painter = painterResource(id = R.drawable.comments_icon),
-							contentDescription = null,
-							modifier = Modifier.size(18.dp),
-							tint = style.statisticsColor
-						)
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							text = formatLongNumbers(article.statistics.commentsCount),
-							style = style.statisticsTextStyle,
-							overflow = TextOverflow.Clip,
-							maxLines = 1
-						)
-					}
-					
-				}
-				
-				
-			}
-		}
+			},
+			onShowSavingPopup = {
+				showPopup = true
+				hapticFeedback.performHapticFeedback(
+					HapticFeedbackType.LongPress
+				)
+			},
+			bookmarksButtonEnabled = article.relatedData != null,
+			style = style,
+			ratingIconPainter = ratingIconPainter,
+			viewsIconPainter = viewsIconPainter,
+			bookmarkIconPainter = bookmarkIconPainter,
+			filledBookmarkIconPainter = filledBookmarkIconPainter,
+			commentIconPainter = commentIconPainter,
+		)
 	}
 }

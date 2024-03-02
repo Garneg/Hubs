@@ -41,6 +41,13 @@ object HubsDataStore {
 			
 		}
 		
+		object Html {
+			object CodeElement {
+				val ShowLineNumbers = DataStorePreference.BooleanPreference("html_code_show_line_numbers", true)
+				val ShowLanguage = DataStorePreference.BooleanPreference("html_code_show_language", true)
+			}
+		}
+		
 		object ArticleScreen {
 			val FontSize = DataStorePreference.FloatPreference("article_font_size", 16f)
 //			val LineHeightFactor = floatPreferencesKey("line_height_factor")
@@ -72,6 +79,9 @@ object HubsDataStore {
 	object Auth : SingleDataStore(name = "auth") {
 		val Authorized = DataStorePreference.BooleanPreference("authorized", false)
 		val Cookies = DataStorePreference.StringPreference("cookies", "")
+		val Alias = DataStorePreference.StringPreference("alias", "")
+		val LastAvatarUrlDownloaded = DataStorePreference.StringPreference("last_avatar_url", "")
+		val AvatarFileName = DataStorePreference.StringPreference("avatar_filename", "")
 	}
 	
 	object LastRead : SingleDataStore(name = "last_read") {

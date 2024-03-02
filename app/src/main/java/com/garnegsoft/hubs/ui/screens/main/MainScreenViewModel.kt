@@ -9,7 +9,7 @@ import com.garnegsoft.hubs.api.company.CompaniesListModel
 import com.garnegsoft.hubs.api.hub.HubsListModel
 import com.garnegsoft.hubs.api.user.UsersListModel
 
-class ArticlesScreenViewModel : ViewModel() {
+class MainScreenViewModel : ViewModel() {
 	
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",

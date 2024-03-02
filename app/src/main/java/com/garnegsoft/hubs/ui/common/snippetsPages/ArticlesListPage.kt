@@ -6,7 +6,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.article.ArticlesListModel
@@ -28,6 +30,14 @@ fun ArticlesListPage(
 	doInitialLoading: Boolean = true,
 ) {
 	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
+	val ratingIconPainter = painterResource(id = R.drawable.rating)
+	val viewsIconPainter = painterResource(id = R.drawable.views_icon)
+	val bookmarkIconPainter = painterResource(id = R.drawable.bookmark)
+	val filledBookmarkIconPainter = painterResource(id = R.drawable.bookmark_filled)
+	val commentIconPainter = painterResource(id = R.drawable.comments_icon)
+	val complexityIconPainter = painterResource(id = R.drawable.speedmeter_hard)
+	val readingTimeIconPainter = painterResource(id = R.drawable.clock_icon)
+	val translationIconPainter = painterResource(id = R.drawable.translation)
 	
 	cardsStyle?.let { articleCardStyle ->
 		CommonPage(
@@ -41,7 +51,15 @@ fun ArticlesListPage(
 				onClick = { onArticleSnippetClick(it.id) },
 				onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
 				onCommentsClick = { onArticleCommentsClick(it.id) },
-				style = articleCardStyle
+				style = articleCardStyle,
+				ratingIconPainter,
+				viewsIconPainter,
+				bookmarkIconPainter,
+				filledBookmarkIconPainter,
+				commentIconPainter,
+				complexityIconPainter,
+				readingTimeIconPainter,
+				translationIconPainter
 			)
 		}
 	}
@@ -70,7 +88,14 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
 ) {
 	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
-	
+	val ratingIconPainter = painterResource(id = R.drawable.rating)
+	val viewsIconPainter = painterResource(id = R.drawable.views_icon)
+	val bookmarkIconPainter = painterResource(id = R.drawable.bookmark)
+	val filledBookmarkIconPainter = painterResource(id = R.drawable.bookmark_filled)
+	val commentIconPainter = painterResource(id = R.drawable.comments_icon)
+	val complexityIconPainter = painterResource(id = R.drawable.speedmeter_hard)
+	val readingTimeIconPainter = painterResource(id = R.drawable.clock_icon)
+	val translationIconPainter = painterResource(id = R.drawable.translation)
 	cardsStyle?.let { style ->
 		CommonPageWithFilter(
 			listModel = listModel, filterDialog = filterDialog,
@@ -84,7 +109,15 @@ fun <F : Filter> ArticlesListPageWithFilter(
 				onClick = { onArticleSnippetClick(it.id) },
 				onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
 				onCommentsClick = { onArticleCommentsClick(it.id) },
-				style = style
+				style = style,
+				ratingIconPainter,
+				viewsIconPainter,
+				bookmarkIconPainter,
+				filledBookmarkIconPainter,
+				commentIconPainter,
+				complexityIconPainter,
+				readingTimeIconPainter,
+				translationIconPainter
 			)
 		}
 	}

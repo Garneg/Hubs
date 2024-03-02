@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -18,11 +19,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
@@ -249,7 +255,7 @@ internal fun UserProfile(
 										text = "Заметка", style = MaterialTheme.typography.subtitle1
 									)
 								},
-								divider = {  }
+								divider = { }
 							) {
 								Column(
 									modifier = Modifier
@@ -277,7 +283,7 @@ internal fun UserProfile(
 					val hubs by viewModel.subscribedHubs.observeAsState()
 					
 					if ((whoIs != null && (!whoIs?.aboutHtml.isNullOrBlank() || whoIs!!.badges.isNotEmpty()
-						|| whoIs!!.invite != null || whoIs!!.contacts.isNotEmpty()))
+							|| whoIs!!.invite != null || whoIs!!.contacts.isNotEmpty()))
 						|| !hubs?.list.isNullOrEmpty()
 					) {
 						Column(
@@ -294,7 +300,7 @@ internal fun UserProfile(
 									style = MaterialTheme.typography.subtitle1
 								)
 							}, divider = {
-//                    Divider()
+//                              Divider()
 							}) {
 								Column(
 									modifier = Modifier.padding(
@@ -307,13 +313,16 @@ internal fun UserProfile(
 								) {
 									whoIs?.let { whoIs ->
 										whoIs.badges.let {
-											
-											TitledColumn(title = "Значки") {
-												FlowRow(
-													horizontalArrangement = Arrangement.spacedBy(8.dp),
-													verticalArrangement = Arrangement.spacedBy(8.dp)
-												) {
-													it.forEach { Badge(title = it.title) }
+											if (it.isNotEmpty()) {
+												TitledColumn(title = "Значки") {
+													FlowRow(
+														horizontalArrangement = Arrangement.spacedBy(
+															8.dp
+														),
+														verticalArrangement = Arrangement.spacedBy(8.dp)
+													) {
+														it.forEach { Badge(title = it.title) }
+													}
 												}
 											}
 										}
@@ -336,7 +345,46 @@ internal fun UserProfile(
 										
 										whoIs.invite?.let {
 											TitledColumn(title = "Приглашен") {
-												Text(text = "${it.inviteDate} по приглашению от ${it.inviterAlias ?: "НЛО"}")
+												val context = LocalContext.current
+												ClickableText(
+													text = remember {
+														buildAnnotatedString {
+															append("${it.inviteDate} по приглашению от ")
+															if (it.inviterAlias != null) {
+																withStyle(
+																	SpanStyle(
+																		color = Color(
+																			88,
+																			132,
+																			185
+																		)
+																	)
+																) {
+																	append("@${it.inviterAlias}")
+																}
+															} else {
+																append("НЛО")
+															}
+														}
+													},
+													style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+													onClick = { letterIndex ->
+														it.inviterAlias?.let {
+															val intent = Intent(
+																Intent.ACTION_VIEW,
+																Uri.parse("https://habr.com/ru/users/$it")
+															).apply {
+																setPackage(BuildConfig.APPLICATION_ID)
+															}
+															context.startActivity(
+																Intent.createChooser(
+																	intent,
+																	null
+																)
+															)
+															
+														}
+													})
 											}
 										}
 										
@@ -405,7 +453,7 @@ internal fun UserProfile(
 										
 									}
 									hubs?.let {
-										if (it.list.size > 0) {
+										if (it.list.isNotEmpty()) {
 											Column() {
 												TitledColumn(title = "Состоит в хабах") {
 													FlowRow(

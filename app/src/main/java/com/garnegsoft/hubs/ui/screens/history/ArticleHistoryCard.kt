@@ -39,7 +39,7 @@ fun ArticleHistoryCard(
 	onClick: () -> Unit,
 	style: ArticleCardStyle
 ) {
-	HubsTheme {
+	
 		Column() {
 //			Row(
 //				modifier = Modifier
@@ -99,5 +99,5 @@ fun ArticleHistoryCard(
 				
 			}
 		}
-	}
+	
 }

@@ -2,7 +2,13 @@ package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.DecayAnimationSpec
+import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.defaultDecayAnimationSpec
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,17 +38,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameMillis
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,6 +72,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCardItem
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 
 class FeedSettingsScreenViewModel : ViewModel() {
@@ -127,7 +142,9 @@ fun FeedSettingsScreen(
 				})
 		},
 		sheetContent = {
-			Column(modifier = Modifier.fillMaxHeight(0.5f)) {
+			Column(modifier = Modifier.fillMaxHeight(0.65f)) {
+				val scrollState = rememberScrollState()
+				val lockBottomSheet = remember(scrollState.isScrollInProgress) { scrollState.canScrollBackward }
 				Box(
 					modifier = Modifier
 						.fillMaxWidth()
@@ -141,12 +158,13 @@ fun FeedSettingsScreen(
 							.clip(RoundedCornerShape(50))
 							.background(MaterialTheme.colors.onBackground.copy(0.15f))
 					)
+
 				}
 				Spacer(modifier = Modifier.height(16.dp))
 				Column(
 					modifier = Modifier
 						.fillMaxWidth()
-						.verticalScroll(rememberScrollState())
+						.verticalScroll(scrollState)
 						.padding(horizontal = 16.dp)
 						.padding(bottom = 20.dp),
 					verticalArrangement = Arrangement.spacedBy(4.dp)
