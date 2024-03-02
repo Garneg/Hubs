@@ -200,7 +200,8 @@ fun MainScreen(
 							CompaniesListPage(
 								listModel = viewModel.companiesListModel,
 								lazyListState = companiesLazyListState,
-								onCompanyClick = onCompanyClicked)
+								onCompanyClick = onCompanyClicked
+							)
 						}
 					)
 					if (isAuthorized) map =
@@ -256,8 +257,8 @@ fun MainScreen(
 						checkInternetConnection = false
 					}
 				})
-				
-				if (showNoInternetConnectionElement){
+				val coroutineScope = rememberCoroutineScope()
+				if (showNoInternetConnectionElement) {
 					
 					NoInternetElement(
 						onTryAgain = { checkInternetConnection = true },

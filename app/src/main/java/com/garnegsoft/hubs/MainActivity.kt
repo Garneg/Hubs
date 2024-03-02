@@ -3,13 +3,16 @@ package com.garnegsoft.hubs
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.webkit.CookieManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -101,12 +104,18 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.isActive
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.net.InetSocketAddress
+import java.net.Socket
 
 
 class MainActivity : ComponentActivity() {
@@ -170,4 +179,34 @@ class MainActivity : ComponentActivity() {
 		Log.e("ExternalLink", intent.data.toString())
 		
 	}
+	
+//	override fun onResume() {
+//		super.onResume()
+//		GlobalScope.launch{
+//			Looper.prepare()
+//			val connectivityManager =
+//				this@MainActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+//			if (connectivityManager.activeNetwork == null) {
+//				Toast.makeText(this@MainActivity, "Connection failed!", Toast.LENGTH_SHORT).show()
+//			} else {
+//				withContext(Dispatchers.IO) {
+//					try {
+//						Socket().use { socket ->
+//							socket.connect(InetSocketAddress("habr.com", 80), 2000)
+//						}
+//						Toast.makeText(this@MainActivity, "Connected!", Toast.LENGTH_SHORT).show()
+//					} catch (e: IOException) {
+//						Toast.makeText(this@MainActivity, "Connection failed!", Toast.LENGTH_SHORT).show()
+//
+//
+//					}
+//				}
+//
+//			}
+//
+//
+//		}
+//	}
+	
+
 }

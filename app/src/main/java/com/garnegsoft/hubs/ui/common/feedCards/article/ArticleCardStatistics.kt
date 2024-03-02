@@ -29,6 +29,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -55,7 +56,12 @@ fun ArticleStats(
 	bookmarksButtonEnabled: Boolean,
 	onShowSavingPopup: () -> Unit,
 	saveArticlePopup: @Composable (bounds: IntSize) -> Unit,
-	style: ArticleCardStyle
+	style: ArticleCardStyle,
+	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
+	viewsIconPainter: Painter = painterResource(id = R.drawable.views_icon),
+	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
+	filledBookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark_filled),
+	commentIconPainter: Painter = painterResource(id = R.drawable.comments_icon),
 ) {
 	//Stats
 	Row(
@@ -77,7 +83,7 @@ fun ArticleStats(
 			horizontalArrangement = Arrangement.Center
 		) {
 			Icon(
-				painter = painterResource(id = R.drawable.rating),
+				painter = ratingIconPainter,
 				contentDescription = null,
 				modifier = Modifier.size(18.dp),
 				tint = style.statisticsColor
@@ -114,7 +120,7 @@ fun ArticleStats(
 		
 		) {
 			Icon(
-				painter = painterResource(id = R.drawable.views_icon),
+				painter = viewsIconPainter,
 				contentDescription = null,
 				modifier = Modifier.size(18.dp),
 				tint = style.statisticsColor
@@ -157,9 +163,9 @@ fun ArticleStats(
 				
 				painter =
 					if (addedToBookmarks)
-						painterResource(id = R.drawable.bookmark_filled)
+						filledBookmarkIconPainter
 					else
-						painterResource(id = R.drawable.bookmark),
+						bookmarkIconPainter,
 				contentDescription = null,
 				modifier = Modifier.size(18.dp),
 				tint = style.statisticsColor
@@ -205,8 +211,6 @@ fun ArticleStats(
 								.background(RatingPositiveColor)
 						)
 					}
-					
-					
 				}
 			) {
 				Row(
@@ -214,7 +218,7 @@ fun ArticleStats(
 					verticalAlignment = Alignment.CenterVertically
 				) {
 					Icon(
-						painter = painterResource(id = R.drawable.comments_icon),
+						painter = commentIconPainter,
 						contentDescription = null,
 						modifier = Modifier.size(18.dp),
 						tint = style.statisticsColor

@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -43,7 +44,15 @@ fun ArticleCard(
 	onClick: () -> Unit,
 	onAuthorClick: () -> Unit,
 	onCommentsClick: () -> Unit,
-	style: ArticleCardStyle
+	style: ArticleCardStyle,
+	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
+	viewsIconPainter: Painter = painterResource(id = R.drawable.views_icon),
+	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
+	filledBookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark_filled),
+	commentIconPainter: Painter = painterResource(id = R.drawable.comments_icon),
+	complexityIconPainter: Painter = painterResource(id = R.drawable.speedmeter_hard),
+	readingTimeIconPainter: Painter = painterResource(id = R.drawable.clock_icon),
+	translationIconPainter: Painter = painterResource(id = R.drawable.translation)
 ) {
 	
 	Column(
@@ -142,7 +151,7 @@ fun ArticleCard(
 				}
 				Icon(
 					modifier = Modifier.size(height = 10.dp, width = 20.dp),
-					painter = painterResource(id = R.drawable.speedmeter_hard),
+					painter = complexityIconPainter,
 					contentDescription = "",
 					tint = publicationComplexityColor
 				)
@@ -164,7 +173,7 @@ fun ArticleCard(
 			}
 			Icon(
 				modifier = Modifier.size(14.dp),
-				painter = painterResource(id = R.drawable.clock_icon),
+				painter = readingTimeIconPainter,
 				contentDescription = "",
 				tint = style.statisticsColor
 			)
@@ -179,7 +188,7 @@ fun ArticleCard(
 				Spacer(modifier = Modifier.width(12.dp))
 				Icon(
 					modifier = Modifier.size(14.dp),
-					painter = painterResource(id = R.drawable.translation),
+					painter = translationIconPainter,
 					contentDescription = "",
 					tint = TranslationLabelColor
 				)
@@ -343,7 +352,12 @@ fun ArticleCard(
 				)
 			},
 			bookmarksButtonEnabled = article.relatedData != null,
-			style = style
+			style = style,
+			ratingIconPainter = ratingIconPainter,
+			viewsIconPainter = viewsIconPainter,
+			bookmarkIconPainter = bookmarkIconPainter,
+			filledBookmarkIconPainter = filledBookmarkIconPainter,
+			commentIconPainter = commentIconPainter,
 		)
 	}
 }

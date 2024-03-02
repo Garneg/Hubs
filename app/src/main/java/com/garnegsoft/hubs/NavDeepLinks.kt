@@ -5,11 +5,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavDeepLink
+import androidx.navigation.navDeepLink
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 
+val domain = "https://habr.com"
 
 val UserScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/{lang}/users/{alias}"),
@@ -20,7 +22,8 @@ val UserScreenNavDeepLinks = listOf(
     NavDeepLink("https://habr.com/users/{alias}"),
     NavDeepLink("https://habr.com/users/{alias}/"),
     NavDeepLink("https://habr.com/users/{alias}/{deepLinkPage}"),
-        NavDeepLink("https://habr.com/users/{alias}/{deepLinkPage}/")
+        NavDeepLink("https://habr.com/users/{alias}/{deepLinkPage}/"),
+    
     
 )
 

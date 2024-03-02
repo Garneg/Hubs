@@ -140,8 +140,6 @@ fun ArticleContent(
 			if (article.isCorporative) {
 				item {
 					DisableSelection {
-						
-						
 						val companyAlias = article.hubs.find { it.isCorporative }!!.alias
 						
 						var companyTitle: String? by rememberSaveable {
@@ -229,14 +227,14 @@ fun ArticleContent(
 			}
 			
 			item {
-				fontSize?.let {
+				
 					Text(
 						text = article.title,
-						fontSize = (it + 4f).sp,
+						fontSize = ((fontSize ?: 16f) + 4f).sp,
 						fontWeight = FontWeight.W700,
 						color = MaterialTheme.colors.onBackground
 					)
-				}
+				
 				DisableSelection {
 					Spacer(modifier = Modifier.height(4.dp))
 					Row(
@@ -347,88 +345,88 @@ fun ArticleContent(
 				items(items = it) {
 					it?.invoke(spanStyle, elementsSettings)
 				}
-			}
-			if (article.polls.size > 0) {
-				item {
-					Divider(modifier = Modifier.padding(vertical = 24.dp))
-				}
-			}
-			items(items = article.polls) { originalPoll ->
-				val poll =
-					updatedPolls?.find { originalPoll.id == it.id } ?: originalPoll
-				Poll(
-					poll = poll,
-					onVote = { variants ->
-						viewModel.vote(poll.id, variants)
-					},
-					onPass = {})
-			}
-			item {
-				DisableSelection {
-					Divider(modifier = Modifier.padding(vertical = 24.dp))
-					// Hubs
-					TitledColumn(
-						title = "Хабы",
-						titleStyle = MaterialTheme.typography.subtitle2.copy(
-							color = MaterialTheme.colors.onBackground.copy(
-								0.5f
-							)
-						)
-					) {
-						FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-							article.hubs.forEach {
-								HubChip(
-									title = if (it.isProfiled) it.title + "*" else it.title
-								) {
-									if (it.isCorporative)
-										onCompanyClick(it.alias)
-									else
-										onHubClicked(it.alias)
-								}
-							}
-						}
+				
+				if (article.polls.size > 0) {
+					item {
+						Divider(modifier = Modifier.padding(vertical = 24.dp))
 					}
 				}
-			}
-			
-			article.author?.let { author ->
+				items(items = article.polls) { originalPoll ->
+					val poll =
+						updatedPolls?.find { originalPoll.id == it.id } ?: originalPoll
+					Poll(
+						poll = poll,
+						onVote = { variants ->
+							viewModel.vote(poll.id, variants)
+						},
+						onPass = {})
+				}
 				item {
-					Divider(modifier = Modifier.padding(vertical = 24.dp))
 					DisableSelection {
+						Divider(modifier = Modifier.padding(vertical = 24.dp))
+						// Hubs
 						TitledColumn(
-							title = "Автор",
+							title = "Хабы",
 							titleStyle = MaterialTheme.typography.subtitle2.copy(
 								color = MaterialTheme.colors.onBackground.copy(
 									0.5f
 								)
 							)
 						) {
-							
-							ArticleAuthorElement(
-								onClick = { onAuthorClicked() },
-								userAvatarUrl = author.avatarUrl!!,
-								fullName = author.fullname,
-								alias = author.alias
-							)
+							FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+								article.hubs.forEach {
+									HubChip(
+										title = if (it.isProfiled) it.title + "*" else it.title
+									) {
+										if (it.isCorporative)
+											onCompanyClick(it.alias)
+										else
+											onHubClicked(it.alias)
+									}
+								}
+							}
 						}
 					}
 				}
-			}
-			
-			
-			item {
-				if (viewModel.mostReadingArticles.isInitialized) {
-					Divider(modifier = Modifier.padding(vertical = 24.dp))
-					TitledColumn(
-						title = "Читают сейчас",
-						titleStyle = MaterialTheme.typography.subtitle2.copy(
-							color = MaterialTheme.colors.onBackground.copy(
-								0.5f
-							)
-						),
-						verticalArrangement = Arrangement.spacedBy(8.dp)
-					) {
-						var readMoreMode by remember { mutableStateOf(ReadMoreMode.MostReading) }
+				
+				article.author?.let { author ->
+					item {
+						Divider(modifier = Modifier.padding(vertical = 24.dp))
+						DisableSelection {
+							TitledColumn(
+								title = "Автор",
+								titleStyle = MaterialTheme.typography.subtitle2.copy(
+									color = MaterialTheme.colors.onBackground.copy(
+										0.5f
+									)
+								)
+							) {
+								
+								ArticleAuthorElement(
+									onClick = { onAuthorClicked() },
+									userAvatarUrl = author.avatarUrl!!,
+									fullName = author.fullname,
+									alias = author.alias
+								)
+							}
+						}
+					}
+				}
+				
+				
+				item {
+					if (viewModel.mostReadingArticles.isInitialized) {
+						Divider(modifier = Modifier.padding(vertical = 24.dp))
+						TitledColumn(
+							title = "Читают сейчас",
+							titleStyle = MaterialTheme.typography.subtitle2.copy(
+								color = MaterialTheme.colors.onBackground.copy(
+									0.5f
+								)
+							),
+							verticalArrangement = Arrangement.spacedBy(8.dp)
+						) {
+							var readMoreMode by remember { mutableStateOf(ReadMoreMode.MostReading) }
 
 //                        Row(
 //                            modifier = Modifier.horizontalScroll(rememberScrollState()),
@@ -458,30 +456,30 @@ fun ArticleContent(
 //                            }
 //
 //                        }
-					
-					
+						
+						
+						}
 					}
 				}
-			}
-			mostReadingArticles?.let { list ->
-				
-				itemsIndexed(list) { index, it ->
-					DisableSelection {
-						Column {
-							ArticleShort(
-								article = it,
-								onClick = {
-									onArticleClick(it.id)
+				mostReadingArticles?.let { list ->
+					
+					itemsIndexed(list) { index, it ->
+						DisableSelection {
+							Column {
+								ArticleShort(
+									article = it,
+									onClick = {
+										onArticleClick(it.id)
+									}
+								)
+								if (index != list.lastIndex) {
+									Spacer(modifier = Modifier.height(8.dp))
 								}
-							)
-							if (index != list.lastIndex) {
-								Spacer(modifier = Modifier.height(8.dp))
 							}
 						}
 					}
 				}
 			}
-			
 		}
 		
 		ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = state)

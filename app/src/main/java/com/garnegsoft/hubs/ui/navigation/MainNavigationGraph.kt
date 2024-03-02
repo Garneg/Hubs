@@ -41,6 +41,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -630,7 +631,7 @@ fun MainNavigationGraph(
 			
 			composable(
 				route = "savedArticles",
-				deepLinks = listOf(NavDeepLink("hubs://saved-articles"))
+				deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" })
 			) {
 				OfflineArticlesListScreen(
 					onBack = { navController.popBackStack() },
