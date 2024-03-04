@@ -14,7 +14,9 @@ data class CompanySnippet(
 
     val description: String?,
 
-    val statistics: Statistics
+    val statistics: Statistics,
+    
+    val relatedData: RelatedData?
 
 ) : HabrSnippet {
     data class Statistics(
@@ -23,5 +25,9 @@ data class CompanySnippet(
         val investment: Float?,
 
         val subscribersCount: Int
+    )
+    
+    data class RelatedData(
+        val isSubscribed: Boolean
     )
 }

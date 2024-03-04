@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
+import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
 
 @Composable
@@ -78,6 +79,7 @@ fun HubCard(
                 Text(
                     text =
                     remember { buildAnnotatedString {
+                        
                         append(hub.title)
                         if (hub.isProfiled) {
                             withStyle(
@@ -87,7 +89,9 @@ fun HubCard(
                             }
                         }
                     }},
-                    style = style.titleTextStyle,
+                    style = if (hub.relatedData?.isSubscribed == true) {
+                        style.titleTextStyle.copy(color = HubSubscribedColor)
+                    } else { style.titleTextStyle },
                     modifier = Modifier.wrapContentHeight(
                         Alignment.Top
                     )
