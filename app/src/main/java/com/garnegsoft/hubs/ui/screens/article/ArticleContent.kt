@@ -168,7 +168,7 @@ fun ArticleContent(
 							if (companyTitle != null) {
 								AsyncImage(
 									modifier = Modifier
-										.size(34.dp)
+										.size(38.dp)
 										.clip(RoundedCornerShape(8.dp))
 										.background(Color.White),
 									model = companyAvatarUrl,
