@@ -113,8 +113,7 @@ fun MainScreen(
 					}) {
 						Icon(
 							modifier = Modifier
-								.size(20.dp)
-								.clip(RoundedCornerShape(20)),
+								.size(20.dp),
 							painter = painterResource(id = R.drawable.search_icon),
 							contentDescription = "search",
 							tint = Color.White
@@ -241,14 +240,19 @@ fun MainScreen(
 							showNoInternetConnectionElement = true
 						} else {
 							launch(Dispatchers.IO) {
-								try {
-									Socket().use { socket ->
-										socket.connect(InetSocketAddress("habr.com", 80), 2000)
+								for (i in 1..3) {
+									try {
+										Socket().use { socket ->
+											socket.connect(InetSocketAddress("habr.com", 80), 2000)
+										}
+										showNoInternetConnectionElement = false
+										break
+									} catch (e: IOException) {
+										if(i == 3) {
+											showNoInternetConnectionElement = true
+										}
+										
 									}
-									showNoInternetConnectionElement = false
-								} catch (e: IOException) {
-									showNoInternetConnectionElement = true
-									
 								}
 							}
 							

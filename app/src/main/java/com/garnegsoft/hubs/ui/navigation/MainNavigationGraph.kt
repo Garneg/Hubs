@@ -101,7 +101,7 @@ fun MainNavigationGraph(
 		builder = {
 			
 			composable(
-				"articles",
+				route = "articles",
 				exitTransition = Transitions.GenericTransitions.exitTransition,
 				popEnterTransition = Transitions.EmptyTransitions.enterTransition
 			) {

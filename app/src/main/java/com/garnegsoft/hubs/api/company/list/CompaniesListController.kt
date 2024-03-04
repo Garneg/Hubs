@@ -51,7 +51,8 @@ class CompaniesListController {
                                 rating = it.statistics.rating,
                                 investment = it.statistics.invest,
                                 subscribersCount = it.statistics.subscribersCount
-                            )
+                            ),
+                            relatedData = it.relatedData?.let { CompanySnippet.RelatedData(it.isSubscribed) }
                         )
                     )
                 }
@@ -80,10 +81,15 @@ data class CompanyRef (
     var titleHtml: String,
     var descriptionHtml: String? = null,
     var imageUrl: String?,
-//    val relatedData: Any? = null,
+    val relatedData: RelatedData? = null,
     var statistics: CompaniesStatistics,
     var commonHubs: List<CommonHub>
-)
+) {
+    @Serializable
+    data class RelatedData(
+        val isSubscribed: Boolean
+    )
+}
 
 @Serializable
 data class CommonHub (

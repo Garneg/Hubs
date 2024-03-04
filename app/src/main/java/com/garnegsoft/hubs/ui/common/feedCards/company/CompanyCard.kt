@@ -28,6 +28,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
+import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
 
 @Composable
@@ -53,7 +54,7 @@ fun CompanyCard(
         modifier = Modifier
             .clip(style.shape)
             .background(style.backgroundColor)
-            .clickable { onClick() }
+            .clickable(onClick = onClick)
             .padding(style.innerPadding),
         verticalAlignment = remember {
             if (style.showDescription && company.description != null)
@@ -92,7 +93,9 @@ fun CompanyCard(
         Column(
             modifier = Modifier.weight(1f),
             ) {
-            Text(text = company.title, style = style.titleTextStyle)
+            Text(text = company.title, style = if (company.relatedData?.isSubscribed == true) {
+                style.titleTextStyle.copy(color = HubSubscribedColor)
+            } else { style.titleTextStyle })
             if (style.showDescription)
                 company.description?.let {
                     Text(

@@ -86,6 +86,9 @@ class DownloadOfflineArticleWorker(
 			}
 			return Result.failure()
 		}
+		withContext(Dispatchers.Main) {
+			Toast.makeText(applicationContext, "Статья скачивается.", Toast.LENGTH_SHORT).show()
+		}
 		withContext(Dispatchers.IO) {
 			downloadArticle(articleId, applicationContext)
 			withContext(Dispatchers.Main) {
