@@ -129,9 +129,9 @@ fun ArticleCard(
 		
 		Spacer(modifier = Modifier.height(style.innerPadding / 2))
 		// Title
-		Row {
+		Row(modifier = Modifier.padding(horizontal = style.innerPadding)) {
 			Text(
-				modifier = Modifier.padding(start = style.innerPadding).weight(1f),
+				modifier = Modifier.weight(1f),
 				text = article.title,
 				style = style.titleTextStyle
 			)
@@ -139,7 +139,7 @@ fun ArticleCard(
 		if (style.showImage && !article.imageUrl.isNullOrBlank()) {
 			AsyncImage(
 				modifier = Modifier
-					.padding(horizontal = style.innerPadding)
+					.padding(start = style.innerPadding/2f)
 					.width(90.dp)
 					.clip(RoundedCornerShape(4.dp))
 					.aspectRatio(13f/9f)

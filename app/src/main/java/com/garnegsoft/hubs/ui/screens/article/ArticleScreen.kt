@@ -39,6 +39,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.AsyncGifImage
+import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
@@ -103,10 +104,10 @@ fun ArticleScreen(
 	val articleSaved by viewModel.articleExists(LocalContext.current, articleId)
 		.collectAsState(false)
 	
-	Scaffold(
-		topBar = {
+	CollapsingContent(collapsingContent = {
+		Box {
 			TopAppBar(
-				title = { Text(text = "Публикация") },
+				title = { },
 				elevation = 0.dp,
 				navigationIcon = {
 					IconButton(onClick = { onBackButtonClicked() }) {
@@ -142,258 +143,264 @@ fun ArticleScreen(
 						Icon(Icons.Outlined.Share, contentDescription = "")
 					}
 				})
-		},
-		backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
-		bottomBar = {
-			article?.let { article ->
-				
-				BottomAppBar(
-					elevation = 0.dp,
-					backgroundColor = MaterialTheme.colors.surface,
-					modifier = Modifier
-						.height(60.dp)
-				) {
-					var showVotesCounter by remember {
-						mutableStateOf(false)
-					}
-					Row(
-						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.Center,
+			Divider(modifier = Modifier.align(Alignment.BottomCenter))
+		}
+	}) {
+		
+		
+		Scaffold(
+			backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
+			bottomBar = {
+				article?.let { article ->
+					
+					BottomAppBar(
+						elevation = 0.dp,
+						backgroundColor = MaterialTheme.colors.surface,
 						modifier = Modifier
-							.weight(1f)
-							.fillMaxHeight()
-							.clickable {
-								showVotesCounter = !showVotesCounter
-							}
+							.height(60.dp)
 					) {
-						
-						VotesCountIndicator(
-							show = showVotesCounter,
-							stats = article.statistics,
-							color = statisticsColor
-						) {
-							showVotesCounter = false
+						var showVotesCounter by remember {
+							mutableStateOf(false)
 						}
-						Icon(
-							modifier = Modifier.size(18.dp),
-							painter = painterResource(id = R.drawable.rating),
-							contentDescription = "",
-							tint = statisticsColor
-						)
-						Spacer(modifier = Modifier.width(1.dp))
-						Text(
-							if (article.statistics.score > 0)
-								"+" + article.statistics.score.toString()
-							else
-								article.statistics.score.toString(),
-							color = if (article.statistics.score > 0)
-								RatingPositiveColor
-							else if (article.statistics.score < 0)
-								RatingNegativeColor
-							else
-								statisticsColor,
-							fontWeight = FontWeight.W500
-						)
-					}
-					
-					Row(
-						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.Center,
-						modifier = Modifier
-							.weight(1f)
-							.fillMaxHeight()
-					
-					) {
-						Icon(
-							modifier = Modifier.size(18.dp),
-							painter = painterResource(id = R.drawable.views_icon),
-							contentDescription = "",
-							tint = statisticsColor
-						)
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							formatLongNumbers(article.statistics.readingCount.toInt()),
-							color = statisticsColor,
-							fontWeight = FontWeight.W500
-						)
-					}
-					var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
-						mutableStateOf(article.relatedData?.bookmarked ?: false)
-					}
-					var addedToBookmarksCount by rememberSaveable(article.statistics.bookmarksCount) {
-						mutableStateOf(article.statistics.bookmarksCount)
-					}
-					val favoriteCoroutineScope = rememberCoroutineScope()
-					
-					Row(
-						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.Center,
-						modifier = Modifier
-							.weight(1f)
-							.fillMaxHeight()
-							.clickable(
-								enabled = article.relatedData != null
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+							horizontalArrangement = Arrangement.Center,
+							modifier = Modifier
+								.weight(1f)
+								.fillMaxHeight()
+								.clickable {
+									showVotesCounter = !showVotesCounter
+								}
+						) {
+							
+							VotesCountIndicator(
+								show = showVotesCounter,
+								stats = article.statistics,
+								color = statisticsColor
 							) {
-								article.relatedData?.let {
-									favoriteCoroutineScope.launch(Dispatchers.IO) {
-										if (addedToBookmarks) {
-											addedToBookmarks = false
-											addedToBookmarksCount--
-											addedToBookmarksCount =
-												addedToBookmarksCount.coerceAtLeast(0)
-											if (!ArticleController.removeFromBookmarks(
-													article.id,
-													article.postType == PostType.News
-												)
-											) {
-												addedToBookmarks = true
-												addedToBookmarksCount++
-												addedToBookmarksCount =
-													addedToBookmarksCount.coerceAtLeast(0)
-											}
-											
-										} else {
-											addedToBookmarks = true
-											addedToBookmarksCount++
-											if (!ArticleController.addToBookmarks(
-													article.id,
-													article.postType == PostType.News
-												)
-											) {
+								showVotesCounter = false
+							}
+							Icon(
+								modifier = Modifier.size(18.dp),
+								painter = painterResource(id = R.drawable.rating),
+								contentDescription = "",
+								tint = statisticsColor
+							)
+							Spacer(modifier = Modifier.width(1.dp))
+							Text(
+								if (article.statistics.score > 0)
+									"+" + article.statistics.score.toString()
+								else
+									article.statistics.score.toString(),
+								color = if (article.statistics.score > 0)
+									RatingPositiveColor
+								else if (article.statistics.score < 0)
+									RatingNegativeColor
+								else
+									statisticsColor,
+								fontWeight = FontWeight.W500
+							)
+						}
+						
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+							horizontalArrangement = Arrangement.Center,
+							modifier = Modifier
+								.weight(1f)
+								.fillMaxHeight()
+						
+						) {
+							Icon(
+								modifier = Modifier.size(18.dp),
+								painter = painterResource(id = R.drawable.views_icon),
+								contentDescription = "",
+								tint = statisticsColor
+							)
+							Spacer(modifier = Modifier.width(4.dp))
+							Text(
+								formatLongNumbers(article.statistics.readingCount.toInt()),
+								color = statisticsColor,
+								fontWeight = FontWeight.W500
+							)
+						}
+						var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
+							mutableStateOf(article.relatedData?.bookmarked ?: false)
+						}
+						var addedToBookmarksCount by rememberSaveable(article.statistics.bookmarksCount) {
+							mutableStateOf(article.statistics.bookmarksCount)
+						}
+						val favoriteCoroutineScope = rememberCoroutineScope()
+						
+						Row(
+							verticalAlignment = Alignment.CenterVertically,
+							horizontalArrangement = Arrangement.Center,
+							modifier = Modifier
+								.weight(1f)
+								.fillMaxHeight()
+								.clickable(
+									enabled = article.relatedData != null
+								) {
+									article.relatedData?.let {
+										favoriteCoroutineScope.launch(Dispatchers.IO) {
+											if (addedToBookmarks) {
 												addedToBookmarks = false
 												addedToBookmarksCount--
 												addedToBookmarksCount =
 													addedToBookmarksCount.coerceAtLeast(0)
+												if (!ArticleController.removeFromBookmarks(
+														article.id,
+														article.postType == PostType.News
+													)
+												) {
+													addedToBookmarks = true
+													addedToBookmarksCount++
+													addedToBookmarksCount =
+														addedToBookmarksCount.coerceAtLeast(0)
+												}
+												
+											} else {
+												addedToBookmarks = true
+												addedToBookmarksCount++
+												if (!ArticleController.addToBookmarks(
+														article.id,
+														article.postType == PostType.News
+													)
+												) {
+													addedToBookmarks = false
+													addedToBookmarksCount--
+													addedToBookmarksCount =
+														addedToBookmarksCount.coerceAtLeast(0)
+												}
 											}
 										}
 									}
 								}
-							}
-					) {
-						Icon(
-							modifier = Modifier.size(18.dp),
-							painter =
-							article.relatedData?.let {
-								if (addedToBookmarks)
-									painterResource(id = R.drawable.bookmark_filled)
-								else
-									null
-							} ?: painterResource(id = R.drawable.bookmark),
-							contentDescription = "",
-							tint = statisticsColor
-						)
-						Spacer(modifier = Modifier.width(4.dp))
-						Text(
-							text = addedToBookmarksCount.toString(),
-							color = statisticsColor,
-							fontWeight = FontWeight.W500
-						)
-					}
-					Spacer(Modifier.width(4.dp))
-					Box(
-						modifier = Modifier
-							.weight(1f)
-							.fillMaxHeight()
-							.clickable(onClick = onCommentsClicked)
-					) {
-						BadgedBox(
-							modifier = Modifier.align(Alignment.Center),
-							badge = {
+						) {
+							Icon(
+								modifier = Modifier.size(18.dp),
+								painter =
 								article.relatedData?.let {
-									if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
-										Box(
-											modifier = Modifier
-												.size(8.dp)
-												.clip(CircleShape)
-												.background(RatingPositiveColor)
-										)
+									if (addedToBookmarks)
+										painterResource(id = R.drawable.bookmark_filled)
+									else
+										null
+								} ?: painterResource(id = R.drawable.bookmark),
+								contentDescription = "",
+								tint = statisticsColor
+							)
+							Spacer(modifier = Modifier.width(4.dp))
+							Text(
+								text = addedToBookmarksCount.toString(),
+								color = statisticsColor,
+								fontWeight = FontWeight.W500
+							)
+						}
+						Spacer(Modifier.width(4.dp))
+						Box(
+							modifier = Modifier
+								.weight(1f)
+								.fillMaxHeight()
+								.clickable(onClick = onCommentsClicked)
+						) {
+							BadgedBox(
+								modifier = Modifier.align(Alignment.Center),
+								badge = {
+									article.relatedData?.let {
+										if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
+											Box(
+												modifier = Modifier
+													.size(8.dp)
+													.clip(CircleShape)
+													.background(RatingPositiveColor)
+											)
+										}
 									}
+								}) {
+								Row(
+									modifier = Modifier.padding(horizontal = 8.dp),
+									verticalAlignment = Alignment.CenterVertically,
+									horizontalArrangement = Arrangement.Center,
+								) {
+									Icon(
+										modifier = Modifier.size(18.dp),
+										painter = painterResource(id = R.drawable.comments_icon),
+										contentDescription = "",
+										tint = statisticsColor
+									
+									)
+									Spacer(Modifier.width(4.dp))
+									Text(
+										text = formatLongNumbers(article.statistics.commentsCount),
+										color = statisticsColor,
+										fontWeight = FontWeight.W500
+									)
 								}
-							}) {
-							Row(
-								modifier = Modifier.padding(horizontal = 8.dp),
-								verticalAlignment = Alignment.CenterVertically,
-								horizontalArrangement = Arrangement.Center,
-							) {
-								Icon(
-									modifier = Modifier.size(18.dp),
-									painter = painterResource(id = R.drawable.comments_icon),
-									contentDescription = "",
-									tint = statisticsColor
-								
-								)
-								Spacer(Modifier.width(4.dp))
-								Text(
-									text = formatLongNumbers(article.statistics.commentsCount),
-									color = statisticsColor,
-									fontWeight = FontWeight.W500
-								)
 							}
 						}
 					}
+					Divider()
 				}
-				Divider()
 			}
-		}
-	) {
-		article?.let { article ->
-			val color = MaterialTheme.colors.onSurface
-			val spanStyle = remember(fontSize, color) {
-				SpanStyle(
-					color = color,
-					fontSize = fontSize?.sp ?: 16.sp
-				)
-			}
-			val elementsSettings = remember {
-				ElementSettings(
-					fontSize = fontSize?.sp ?: 16.sp,
-					lineHeight = 16.sp,
-					fitScreenWidth = false
-				)
-			}
-			var nodeParsed by rememberSaveable {
-				mutableStateOf(false)
-			}
-			LaunchedEffect(key1 = Unit, block = {
-				LastReadArticleController.setLastArticle(context, articleId)
-				withContext(Dispatchers.IO) {
-					HistoryController.insertArticle(articleId, context)
-				}
-				if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
-					val element =
-						Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
-							.child(0)
-							?: Element("")
-					
-					viewModel.parsedArticleContent.postValue(
-						parseChildElements(
-							element,
-							spanStyle,
-							onViewImageRequest
-						).second
+		) {
+			article?.let { article ->
+				val color = MaterialTheme.colors.onSurface
+				val spanStyle = remember(fontSize, color) {
+					SpanStyle(
+						color = color,
+						fontSize = fontSize?.sp ?: 16.sp
 					)
-					nodeParsed = true
 				}
-			})
-			
-			Box(modifier = Modifier.padding(it)) {
-				if (nodeParsed && fontSize != null) {
-					SelectionContainer {
-						ArticleContent(
-							article = article,
-							onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
-							onHubClicked = onHubClicked,
-							onCompanyClick = onCompanyClick,
-							onViewImageRequest = onViewImageRequest,
-							onArticleClick = onArticleClick
+				val elementsSettings = remember {
+					ElementSettings(
+						fontSize = fontSize?.sp ?: 16.sp,
+						lineHeight = 16.sp,
+						fitScreenWidth = false
+					)
+				}
+				var nodeParsed by rememberSaveable {
+					mutableStateOf(false)
+				}
+				LaunchedEffect(key1 = Unit, block = {
+					LastReadArticleController.setLastArticle(context, articleId)
+					withContext(Dispatchers.IO) {
+						HistoryController.insertArticle(articleId, context)
+					}
+					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
+						val element =
+							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
+								.child(0)
+								?: Element("")
+						
+						viewModel.parsedArticleContent.postValue(
+							parseChildElements(
+								element,
+								spanStyle,
+								onViewImageRequest
+							).second
 						)
+						nodeParsed = true
+					}
+				})
+				
+				Box(modifier = Modifier.padding(it)) {
+					if (nodeParsed && fontSize != null) {
+						SelectionContainer {
+							ArticleContent(
+								article = article,
+								onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
+								onHubClicked = onHubClicked,
+								onCompanyClick = onCompanyClick,
+								onViewImageRequest = onViewImageRequest,
+								onArticleClick = onArticleClick
+							)
+						}
 					}
 				}
-			}
-		} ?: Box(
-			modifier = Modifier
-				.fillMaxSize()
-				.padding(it)
-		) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+			} ?: Box(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(it)
+			) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+		}
 	}
 }

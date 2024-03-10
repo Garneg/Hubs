@@ -15,8 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,8 +43,7 @@ class OfflineArticlesListScreenViewModel(context: Context) : ViewModel() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun OfflineArticlesListScreen(
-	onBack: () -> Unit,
+fun OfflineArticlesList(
 	onArticleClick: (articleId: Int) -> Unit
 ) {
 	val context = LocalContext.current
@@ -67,22 +64,6 @@ fun OfflineArticlesListScreen(
 		}
 	})
 	
-	
-	var showMenu by remember { mutableStateOf(false) }
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				title = { Text("Скачанные") },
-				elevation = 0.dp,
-				navigationIcon = {
-					IconButton(onClick = onBack) {
-						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "назад")
-					}
-				}
-			)
-			
-		}
-	) {
 		val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
 		cardsStyle?.let { style ->
 			articles?.let { articlesList ->
@@ -90,7 +71,6 @@ fun OfflineArticlesListScreen(
 					Box(
 						modifier = Modifier
 							.fillMaxSize()
-							.padding(it)
 							.padding(32.dp)
 					){
 						Column(modifier = Modifier.align(Alignment.Center),) {
@@ -113,11 +93,8 @@ fun OfflineArticlesListScreen(
 				else {
 					LazyColumn(
 						modifier = Modifier
-							.fillMaxSize()
-							.padding(it),
+							.fillMaxSize(),
 						state = lazyListState,
-						verticalArrangement = Arrangement.spacedBy(8.dp),
-						contentPadding = PaddingValues(8.dp)
 					) {
 						items(
 							items = articlesList,
@@ -141,6 +118,4 @@ fun OfflineArticlesListScreen(
 				}
 			}
 		}
-		
-	}
 }

@@ -123,7 +123,9 @@ class MainActivity : ComponentActivity() {
 											onClick = {
 													  navController.navigate("search") {
 														  this.launchSingleTop = true
+														  
 													  }
+												
 											},
 											icon = {
 												Icon(
@@ -132,8 +134,14 @@ class MainActivity : ComponentActivity() {
 												)
 											})
 										BottomNavigationItem(
-											selected = false,
-											onClick = { /*TODO*/ },
+											selected = navController.currentDestination?.route?.startsWith(
+												"bookmarks"
+											) == true,
+											onClick = {
+												navController.navigate("bookmarks") {
+													this.launchSingleTop = true
+												}
+											},
 											icon = {
 												Icon(
 													painter = painterResource(id = R.drawable.bookmark),

@@ -9,6 +9,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -164,6 +165,8 @@ fun OfflineArticleCard(
 			
 		}
 		
+		
+		
 		AnimatedVisibility(
 			visible = showDeleteButton,
 			enter = fadeIn() + scaleIn()
@@ -201,5 +204,7 @@ fun OfflineArticleCard(
 				}
 			}
 		}
+		
+		
 	}
 }

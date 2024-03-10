@@ -6,7 +6,6 @@ import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
@@ -35,8 +34,6 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavDeepLink
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -64,8 +61,8 @@ import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
+import com.garnegsoft.hubs.ui.screens.bookmarks.BookmarksScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
-import com.garnegsoft.hubs.ui.screens.comments.CommentsThreadScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
 import com.garnegsoft.hubs.ui.screens.history.HistoryScreen
 import com.garnegsoft.hubs.ui.screens.hub.HubScreen
@@ -73,7 +70,7 @@ import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.MainScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticleScreen
-import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesListScreen
+import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesList
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.FeedSettingsScreen
@@ -406,6 +403,23 @@ fun MainNavigationGraph(
 			}
 			
 			composable(
+				route = "bookmarks",
+				enterTransition = Transitions.GenericTransitions.enterTransition,
+				exitTransition = Transitions.GenericTransitions.exitTransition,
+				popExitTransition = Transitions.GenericTransitions.popExitTransition,
+				popEnterTransition = Transitions.GenericTransitions.popEnterTransition
+			) {
+				BookmarksScreen(
+					onArticleClick = {
+						navController.navigate("article/$it")
+					},
+					onOfflineArticleClick = {
+						navController.navigate("offlineArticle/$it")
+					}
+				)
+			}
+			
+			composable(
 				route = "settings",
 				enterTransition = Transitions.GenericTransitions.enterTransition,
 				exitTransition = Transitions.GenericTransitions.exitTransition,
@@ -658,19 +672,19 @@ fun MainNavigationGraph(
 				}
 			}
 			
-			composable(
-				route = "savedArticles",
-				deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" }),
-				enterTransition = Transitions.GenericTransitions.enterTransition,
-				exitTransition = Transitions.GenericTransitions.exitTransition,
-				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-				popExitTransition = Transitions.GenericTransitions.popExitTransition
-			) {
-				OfflineArticlesListScreen(
-					onBack = { navController.popBackStack() },
-					onArticleClick = { navController.navigate("offlineArticle/$it") }
-				)
-			}
+//			composable(
+//				route = "savedArticles",
+//				deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" }),
+//				enterTransition = Transitions.GenericTransitions.enterTransition,
+//				exitTransition = Transitions.GenericTransitions.exitTransition,
+//				popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+//				popExitTransition = Transitions.GenericTransitions.popExitTransition
+//			) {
+//				OfflineArticlesList(
+//					onBack = { navController.popBackStack() },
+//					onArticleClick = { navController.navigate("offlineArticle/$it") }
+//				)
+//			}
 			
 			composable(
 				"imageViewer?imageUrl={imageUrl}",
