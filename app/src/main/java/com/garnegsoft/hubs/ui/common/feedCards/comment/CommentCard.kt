@@ -223,9 +223,9 @@ data class CommentCardStyle(
         fontWeight = FontWeight.W700,
         fontSize = 18.sp
     ),
-    val shape: Shape = RoundedCornerShape(26.dp),
+    val shape: Shape = RoundedCornerShape(0.dp),
     val avatarShape: Shape = RoundedCornerShape(8.dp),
-    val padding: PaddingValues = PaddingValues(18.dp),
+    val padding: PaddingValues = PaddingValues(16.dp),
     val avatarSize: Dp = 34.dp,
     val authorAliasTextStyle: TextStyle = TextStyle(
         color = textColor,

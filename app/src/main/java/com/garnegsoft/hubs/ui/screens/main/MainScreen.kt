@@ -12,6 +12,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
@@ -108,17 +110,6 @@ fun MainScreen(
 					)
 				},
 				actions = {
-					IconButton(onClick = {
-						onSearchClicked()
-					}) {
-						Icon(
-							modifier = Modifier
-								.size(20.dp),
-							painter = painterResource(id = R.drawable.search_icon),
-							contentDescription = "search",
-							tint = Color.White
-						)
-					}
 					menu()
 				})
 		},

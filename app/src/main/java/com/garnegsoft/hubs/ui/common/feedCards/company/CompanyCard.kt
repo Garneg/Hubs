@@ -114,10 +114,10 @@ fun CompanyCard(
 
 data class CompanyCardStyle(
     val backgroundColor: Color = Color.White,
-    val shape: Shape = RoundedCornerShape(26.dp),
+    val shape: Shape = RoundedCornerShape(0.dp),
     val innerPadding: Dp = 16.dp,
     val avatarSize: Dp = 40.dp,
-    val avatarShape: Shape = RoundedCornerShape(10.dp),
+    val avatarShape: Shape = RoundedCornerShape(4.dp),
     val titleTextStyle: TextStyle = TextStyle.Default.copy(
         fontWeight = FontWeight.W700,
         fontSize = 20.sp

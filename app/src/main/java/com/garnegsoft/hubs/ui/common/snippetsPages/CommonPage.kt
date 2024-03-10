@@ -86,6 +86,8 @@ fun <T : HabrSnippet> CommonPage(
 				LazyHabrSnippetsColumn(
 					modifier = Modifier.fillMaxSize(),
 					lazyListState = lazyListState,
+					contentPadding = PaddingValues(0.dp),
+					verticalArrangement = Arrangement.spacedBy(0.dp),
 					data = data!!,
 					onScrollEnd = listModel::loadNextPage,
 					snippet = snippetCard,

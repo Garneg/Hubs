@@ -34,8 +34,8 @@ data class UserCardStyle(
     val backgroundColor: Color = Color.White,
     val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W700),
     val avatarSize: Dp = 40.dp,
-    val avatarShape: Shape = RoundedCornerShape(10.dp),
-    val cardShape: Shape = RoundedCornerShape(26.dp),
+    val avatarShape: Shape = RoundedCornerShape(4.dp),
+    val cardShape: Shape = RoundedCornerShape(0.dp),
     val padding: PaddingValues = PaddingValues(16.dp),
     val showSpeciality: Boolean = false,
     val specialityTextStyle: TextStyle = TextStyle(color = Color.Gray)

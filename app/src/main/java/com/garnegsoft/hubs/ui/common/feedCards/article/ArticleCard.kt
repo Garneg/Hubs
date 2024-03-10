@@ -4,6 +4,7 @@ import ArticleController
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -58,9 +59,7 @@ fun ArticleCard(
 	Column(
 		modifier = Modifier
 			.clip(style.cardShape)
-			.clickable(
-				onClick = onClick
-			)
+			.clickable(onClick = onClick)
 			.background(style.backgroundColor)
 	) {
 		val authorInteractionSource = remember { MutableInteractionSource() }
@@ -130,11 +129,31 @@ fun ArticleCard(
 		
 		Spacer(modifier = Modifier.height(style.innerPadding / 2))
 		// Title
-		Text(
-			modifier = Modifier.padding(horizontal = style.innerPadding),
-			text = article.title,
-			style = style.titleTextStyle
-		)
+		Row {
+			Text(
+				modifier = Modifier.padding(start = style.innerPadding).weight(1f),
+				text = article.title,
+				style = style.titleTextStyle
+			)
+			// Image to draw attention (a.k.a. KDPV)
+		if (style.showImage && !article.imageUrl.isNullOrBlank()) {
+			AsyncImage(
+				modifier = Modifier
+					.padding(horizontal = style.innerPadding)
+					.width(90.dp)
+					.clip(RoundedCornerShape(4.dp))
+					.aspectRatio(13f/9f)
+					.background(MaterialTheme.colors.onSurface.copy(0.1f)),
+				model = ImageRequest.Builder(LocalContext.current)
+					.crossfade(true)
+					.data(article.imageUrl).build(),
+				contentScale = ContentScale.Crop,
+				contentDescription = "",
+			)
+
+		}
+		}
+		
 		Spacer(modifier = Modifier.height(0.dp))
 		Row(
 			modifier = Modifier.padding(horizontal = style.innerPadding, vertical = 2.dp),
@@ -237,35 +256,7 @@ fun ArticleCard(
 			)
 		
 		
-		// Snippet
-		if (style.showTextSnippet) {
-			Spacer(modifier = Modifier.height(2.dp))
-			Text(
-				modifier = Modifier.padding(horizontal = style.innerPadding),
-				text = article.textSnippet,
-				maxLines = style.snippetMaxLines,
-				overflow = TextOverflow.Ellipsis,
-				style = style.snippetTextStyle
-			)
-		}
-		// Image to draw attention (a.k.a. KDPV)
-		if (style.showImage && !article.imageUrl.isNullOrBlank()) {
-			Spacer(modifier = Modifier.height(6.dp))
-			AsyncImage(
-				modifier = Modifier
-					.padding(horizontal = style.innerPadding)
-					.fillMaxWidth()
-					.clip(style.innerElementsShape)
-					.aspectRatio(1.8f)
-					.background(MaterialTheme.colors.onSurface.copy(0.1f)),
-				model = ImageRequest.Builder(LocalContext.current)
-					.crossfade(true)
-					.data(article.imageUrl).build(),
-				contentScale = ContentScale.Crop,
-				contentDescription = "",
-			)
-			
-		}
+		
 		var addedToBookmarks by remember {
 			mutableStateOf(article.relatedData?.bookmarked ?: false)
 		}
@@ -359,5 +350,6 @@ fun ArticleCard(
 			filledBookmarkIconPainter = filledBookmarkIconPainter,
 			commentIconPainter = commentIconPainter,
 		)
+		Divider(modifier = Modifier.padding(start = style.innerPadding))
 	}
 }

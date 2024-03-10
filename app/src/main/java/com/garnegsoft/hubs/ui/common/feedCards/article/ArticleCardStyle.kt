@@ -26,8 +26,8 @@ import com.garnegsoft.hubs.ui.theme.SecondaryColor
 @Immutable
 data class ArticleCardStyle(
 	val innerPadding: Dp = 16.dp,
-	val innerElementsShape: Shape = RoundedCornerShape(10.dp),
-	val cardShape: Shape = RoundedCornerShape(26.dp),
+	val innerElementsShape: Shape = RoundedCornerShape(4.dp),
+	val cardShape: Shape = RoundedCornerShape(0.dp),
 	
 	val showImage: Boolean = true,
 	
@@ -50,7 +50,7 @@ data class ArticleCardStyle(
 	
 	val textColor: Color = Color.Black,
 	
-	val authorAvatarSize: Dp = 34.dp,
+	val authorAvatarSize: Dp = 24.dp,
 	
 	val snippetMaxLines: Int = 4,
 	
@@ -90,7 +90,7 @@ data class ArticleCardStyle(
 	
 	val statisticsTextStyle: TextStyle = TextStyle(
 		color = statisticsColor,
-		fontSize = 15.sp,
+		fontSize = 14.sp,
 		fontWeight = FontWeight.W400
 	),
 	
@@ -140,7 +140,7 @@ data class ArticleCardStyle(
 				ArticleCardStyle(textColor = colors.onSurface,
 					statisticsColor = colors.onSurface.copy(
 					alpha = if (colors.isLight) {
-						0.75f
+						0.6f
 					} else {
 						0.5f
 					}
@@ -154,7 +154,7 @@ data class ArticleCardStyle(
 				statisticsColor = MaterialTheme.colors.onSurface
 					.copy(
 						alpha = if (MaterialTheme.colors.isLight) {
-							0.75f
+							0.6f
 						} else {
 							0.5f
 						}
@@ -172,8 +172,4 @@ data class ArticleCardStyle(
 	}
 }
 
-class lol {
-	var aboba: Int = 0
-	
-}
 

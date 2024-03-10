@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 
@@ -67,19 +68,14 @@ fun ArticleStats(
 	Row(
 		modifier = Modifier
 			.padding(horizontal = style.innerPadding)
-			.height(38.dp + style.innerPadding * 2)
-			.fillMaxWidth()
-			.clip(style.innerElementsShape),
+			.padding(top = style.innerPadding / 2f, bottom = style.innerPadding),
 		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.Center
+		horizontalArrangement = Arrangement.spacedBy(14.dp)
 	) {
 		
 		//Rating
 		Row(
 			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.weight(1f)
-				.padding(vertical = style.innerPadding),
 			horizontalArrangement = Arrangement.Center
 		) {
 			Icon(
@@ -113,9 +109,6 @@ fun ArticleStats(
 		//Views
 		Row(
 			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.weight(1f)
-				.padding(vertical = style.innerPadding),
 			horizontalArrangement = Arrangement.Center
 		
 		) {
@@ -125,7 +118,7 @@ fun ArticleStats(
 				modifier = Modifier.size(18.dp),
 				tint = style.statisticsColor
 			)
-			Spacer(modifier = Modifier.width(5.dp))
+			Spacer(modifier = Modifier.width(2.dp))
 			Text(
 				text = formatLongNumbers(statistics.readingCount),
 				style = style.statisticsTextStyle
@@ -139,44 +132,42 @@ fun ArticleStats(
 		
 		
 		//Added to bookmarks
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
-			modifier = Modifier
-				.padding(vertical = style.innerPadding)
-				.weight(1f)
-				.fillMaxHeight()
-				.clip(style.innerElementsShape)
-				.combinedClickable(
-					onClick = onAddToBookmarksClicked,
-					onLongClick = {
-						onShowSavingPopup()
-						
-					},
-					enabled = style.bookmarksButtonAllowedBeEnabled && bookmarksButtonEnabled,
-				)
-				.onGloballyPositioned {
-					bounds = it.size
-				},
-			horizontalArrangement = Arrangement.Center
-		) {
-			Icon(
-				
-				painter =
-					if (addedToBookmarks)
-						filledBookmarkIconPainter
-					else
-						bookmarkIconPainter,
-				contentDescription = null,
-				modifier = Modifier.size(18.dp),
-				tint = style.statisticsColor
-			)
-			Spacer(modifier = Modifier.width(4.dp))
-			Text(
-				text = bookmarksCount.toString(),
-				style = style.statisticsTextStyle
-			)
-			saveArticlePopup(bounds)
-		}
+//		Row(
+//			verticalAlignment = Alignment.CenterVertically,
+//			modifier = Modifier
+//				.padding(vertical = style.innerPadding)
+//				.fillMaxHeight()
+//				.combinedClickable(
+//					onClick = onAddToBookmarksClicked,
+//					onLongClick = {
+//						onShowSavingPopup()
+//
+//					},
+//					enabled = style.bookmarksButtonAllowedBeEnabled && bookmarksButtonEnabled,
+//				)
+//				.onGloballyPositioned {
+//					bounds = it.size
+//				},
+//			horizontalArrangement = Arrangement.Center
+//		) {
+//			Icon(
+//
+//				painter =
+//					if (addedToBookmarks)
+//						filledBookmarkIconPainter
+//					else
+//						bookmarkIconPainter,
+//				contentDescription = null,
+//				modifier = Modifier.size(18.dp),
+//				tint = style.statisticsColor
+//			)
+//			Spacer(modifier = Modifier.width(4.dp))
+//			Text(
+//				text = bookmarksCount.toString(),
+//				style = style.statisticsTextStyle
+//			)
+//			saveArticlePopup(bounds)
+//		}
 		
 		val commentsInteractionSource = remember { MutableInteractionSource() }
 		//Comments
@@ -184,43 +175,26 @@ fun ArticleStats(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.Center,
 			modifier = Modifier
-				.weight(1f)
 				.clickable(
 					interactionSource = commentsInteractionSource,
 					indication = null,
 					enabled = style.commentsButtonEnabled,
 					onClick = onCommentsClick
 				)
-				.padding(vertical = style.innerPadding)
 				.fillMaxHeight()
-				.absolutePadding(4.dp)
-				.clip(style.innerElementsShape)
 				.clickable(
 					enabled = style.commentsButtonEnabled,
 					onClick = onCommentsClick
 				)
 		) {
-			
-			BadgedBox(
-				badge = {
-					if (unreadCommentsCount > 0) {
-						Box(
-							modifier = Modifier
-								.size(8.dp)
-								.clip(CircleShape)
-								.background(RatingPositiveColor)
-						)
-					}
-				}
-			) {
 				Row(
-					modifier = Modifier.padding(horizontal = 8.dp),
+					modifier = Modifier.padding(horizontal = 0.dp),
 					verticalAlignment = Alignment.CenterVertically
 				) {
 					Icon(
 						painter = commentIconPainter,
 						contentDescription = null,
-						modifier = Modifier.size(18.dp),
+						modifier = Modifier.size(17.dp),
 						tint = style.statisticsColor
 					)
 					Spacer(modifier = Modifier.width(4.dp))
@@ -230,11 +204,16 @@ fun ArticleStats(
 						overflow = TextOverflow.Clip,
 						maxLines = 1
 					)
+					if (unreadCommentsCount > 0) {
+						Spacer(modifier = Modifier.width(2.dp))
+						Text(
+							text = "+" + formatLongNumbers(unreadCommentsCount),
+							style = style.statisticsTextStyle.copy(color = HubSubscribedColor),
+							overflow = TextOverflow.Clip,
+							maxLines = 1
+						)
+					}
 				}
-				
-			}
-			
-			
 		}
 	}
 }

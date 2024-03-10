@@ -78,12 +78,7 @@ fun SearchScreen(
 		topBar = {
 			TopAppBar(
 				title = { Text(text = "Поиск") },
-				elevation = 0.dp,
-				navigationIcon = {
-					IconButton(onClick = onBackClicked) {
-						Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "")
-					}
-				})
+				elevation = 0.dp)
 		}
 	) {
 		Column(modifier = Modifier.padding(it)) {
@@ -108,7 +103,7 @@ fun SearchScreen(
 			}
 			LaunchedEffect(key1 = Unit) {
 				if (doRequestFocus) {
-					focusRequester.requestFocus()
+					//focusRequester.requestFocus()
 					doRequestFocus = false
 				}
 			}
@@ -117,14 +112,10 @@ fun SearchScreen(
 					.background(if (currentQuery.isNotEmpty()) MaterialTheme.colors.surface else MaterialTheme.colors.background)
 					.padding(8.dp)
 					.padding(horizontal = 4.dp)
-					.clip(shape = RoundedCornerShape(8.dp))
-					.border(
-						width = 1.5.dp,
-						color = MaterialTheme.colors.secondary,
-						shape = RoundedCornerShape(8.dp)
-					)
+					.clip(shape = RoundedCornerShape(4.dp))
+					.background(MaterialTheme.colors.onBackground.copy(0.1f))
 					.padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
-					.height(20.dp),
+					.height(25.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
 				BasicTextField(

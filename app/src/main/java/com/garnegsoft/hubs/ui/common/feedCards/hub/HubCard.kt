@@ -132,8 +132,8 @@ data class HubCardStyle(
         fontSize = 14.sp
     ),
     val avatarSize: Dp = 40.dp,
-    val avatarShape: Shape = RoundedCornerShape(10.dp),
-    val shape: Shape = RoundedCornerShape(26.dp),
+    val avatarShape: Shape = RoundedCornerShape(4.dp),
+    val shape: Shape = RoundedCornerShape(0.dp),
     val innerPadding: Dp = 16.dp,
     val descriptionMaxLines: Int = 1,
     val showDescription: Boolean = false
