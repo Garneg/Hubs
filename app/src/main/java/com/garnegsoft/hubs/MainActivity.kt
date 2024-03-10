@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
@@ -118,7 +120,11 @@ class MainActivity : ComponentActivity() {
 											selected = navController.currentDestination?.route?.startsWith(
 												"search"
 											) == true,
-											onClick = { navController.navigate("search") },
+											onClick = {
+													  navController.navigate("search") {
+														  this.launchSingleTop = true
+													  }
+											},
 											icon = {
 												Icon(
 													imageVector = Icons.Default.Search,
@@ -130,7 +136,7 @@ class MainActivity : ComponentActivity() {
 											onClick = { /*TODO*/ },
 											icon = {
 												Icon(
-													imageVector = Icons.Default.Star,
+													painter = painterResource(id = R.drawable.bookmark),
 													contentDescription = null
 												)
 											})

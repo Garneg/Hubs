@@ -113,7 +113,7 @@ fun SearchScreen(
 					.padding(8.dp)
 					.padding(horizontal = 4.dp)
 					.clip(shape = RoundedCornerShape(4.dp))
-					.background(MaterialTheme.colors.onBackground.copy(0.1f))
+					.background(MaterialTheme.colors.onBackground.copy(0.05f))
 					.padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
 					.height(25.dp),
 				verticalAlignment = Alignment.CenterVertically

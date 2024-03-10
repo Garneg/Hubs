@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
@@ -75,7 +76,6 @@ fun MainScreen(
 	}
 	
 	LaunchedEffect(key1 = lastArticleRead, block = {
-		
 		if (showSnackBar && lastArticleRead != null && lastArticleRead!! > 0) {
 			
 			launch(Dispatchers.IO) {
@@ -100,208 +100,217 @@ fun MainScreen(
 			showSnackBar = false
 		}
 	})
-	
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				elevation = 0.dp,
-				title = {
-					Text(
-						text = "Хабы"
-					)
-				},
-				actions = {
-					menu()
-				})
-		},
-		scaffoldState = scaffoldState,
-		snackbarHost = {
-			SnackbarHost(hostState = it) {
-				ContinueReadSnackBar(data = it)
-			}
-		},
-		floatingActionButtonPosition = FabPosition.Start,
-		floatingActionButton = {
+	CollapsingContent(collapsingContent = {
+		TopAppBar(
+			elevation = 0.dp,
+			title = {
+				Text(
+					text = "Хабы"
+				)
+			},
+			actions = {
+				menu()
+			})
+	}) {
+		
+		
+		Scaffold(
+			topBar = {
 			
-			ExtendedFloatingActionButton(
-				text = { Text("Фильтры") }, onClick = { /*TODO*/ })
-		}
-	) {
-		if (authorizedState != null)
-			Column(
-				Modifier.padding(it)
-			) {
+			},
+			scaffoldState = scaffoldState,
+			snackbarHost = {
+				SnackbarHost(hostState = it) {
+					ContinueReadSnackBar(data = it)
+				}
+			},
+			floatingActionButtonPosition = FabPosition.Start,
+			floatingActionButton = {
 				
-				
-				val myFeedLazyListState = rememberLazyListState()
-				val myFeedFilterContentState = rememberCollapsingContentState()
-				
-				val articlesLazyListState = rememberLazyListState()
-				val articlesListFilterContentState = rememberCollapsingContentState()
-				
-				val newsLazyListState = rememberLazyListState()
-				val newsListFilterContentState = rememberCollapsingContentState()
-				
-				val hubsLazyListState = rememberLazyListState()
-				val authorsLazyListState = rememberLazyListState()
-				val companiesLazyListState = rememberLazyListState()
-				
-				
-				val pages = remember(key1 = isAuthorized) {
-					var map = mapOf<String, @Composable () -> Unit>(
-						"Статьи" to {
-							ArticlesListPageWithFilter(
-								listModel = viewModel.articlesListModel,
-								lazyListState = articlesLazyListState,
-								collapsingContentState = articlesListFilterContentState,
-								onArticleSnippetClick = onArticleClicked,
-								onArticleAuthorClick = onUserClicked,
-								onArticleCommentsClick = onCommentsClicked,
-								filterDialog = { defVals, onDissmis, onDone ->
-									ArticlesFilterDialog(defVals, onDissmis, onDone)
-								}
-							)
-						},
-						"Новости" to {
-							ArticlesListPageWithFilter(
-								listModel = viewModel.newsListModel,
-								lazyListState = newsLazyListState,
-								collapsingContentState = newsListFilterContentState,
-								onArticleSnippetClick = onArticleClicked,
-								onArticleAuthorClick = onUserClicked,
-								onArticleCommentsClick = onCommentsClicked,
-								filterDialog = { defVals, onDismiss, onDone ->
-									NewsFilterDialog(
-										defaultValues = defVals,
-										onDismiss = onDismiss,
-										onDone = onDone
-									)
-								}
-							)
-						},
-						"Хабы" to {
-							HubsListPage(
-								listModel = viewModel.hubsListModel,
-								lazyListState = hubsLazyListState,
-								onHubClick = onHubClicked
-							)
-						},
-						"Авторы" to {
-							UsersListPage(
-								listModel = viewModel.authorsListModel,
-								lazyListState = authorsLazyListState,
-								onUserClick = onUserClicked
-							)
-						},
-						"Компании" to {
-							CompaniesListPage(
-								listModel = viewModel.companiesListModel,
-								lazyListState = companiesLazyListState,
-								onCompanyClick = onCompanyClicked
-							)
-						}
-					)
-					if (isAuthorized) map =
-						mapOf<String, @Composable () -> Unit>(
-							"Моя лента" to {
+				ExtendedFloatingActionButton(
+					text = { Text("Фильтры") }, onClick = { /*TODO*/ })
+			}
+		) {
+			if (authorizedState != null)
+				Column(
+					Modifier.padding(it)
+				) {
+					
+					val myFeedLazyListState = rememberLazyListState()
+					val myFeedFilterContentState = rememberCollapsingContentState()
+					
+					val articlesLazyListState = rememberLazyListState()
+					val articlesListFilterContentState = rememberCollapsingContentState()
+					
+					val newsLazyListState = rememberLazyListState()
+					val newsListFilterContentState = rememberCollapsingContentState()
+					
+					val hubsLazyListState = rememberLazyListState()
+					val authorsLazyListState = rememberLazyListState()
+					val companiesLazyListState = rememberLazyListState()
+					
+					
+					val pages = remember(key1 = isAuthorized) {
+						var map = mapOf<String, @Composable () -> Unit>(
+							"Статьи" to {
 								ArticlesListPageWithFilter(
-									listModel = viewModel.myFeedArticlesListModel,
-									collapsingContentState = myFeedFilterContentState,
-									lazyListState = myFeedLazyListState,
+									listModel = viewModel.articlesListModel,
+									lazyListState = articlesLazyListState,
+									collapsingContentState = articlesListFilterContentState,
 									onArticleSnippetClick = onArticleClicked,
 									onArticleAuthorClick = onUserClicked,
-									onArticleCommentsClick = onCommentsClicked
-								) { defaultValues, onDismiss, onDone ->
-									MyFeedFilter(
-										defaultValues = defaultValues,
-										onDismiss = onDismiss,
-										onDone = onDone
-									)
-								}
-							}) + map
-					map
-				}
-				val pagerState = rememberPagerState { pages.size }
-				
-				var showNoInternetConnectionElement by rememberSaveable {
-					mutableStateOf(false)
-				}
-				var checkInternetConnection by rememberSaveable {
-					mutableStateOf(true)
-				}
-				
-				LaunchedEffect(key1 = checkInternetConnection, block = {
-					if (checkInternetConnection) {
-						val connectivityManager =
-							context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-						if (connectivityManager.activeNetwork == null) {
-							showNoInternetConnectionElement = true
-						} else {
-							launch(Dispatchers.IO) {
-								for (i in 1..3) {
-									try {
-										Socket().use { socket ->
-											socket.connect(InetSocketAddress("habr.com", 80), 2000)
+									onArticleCommentsClick = onCommentsClicked,
+									filterDialog = { defVals, onDissmis, onDone ->
+										ArticlesFilterDialog(defVals, onDissmis, onDone)
+									}
+								)
+							},
+							"Новости" to {
+								ArticlesListPageWithFilter(
+									listModel = viewModel.newsListModel,
+									lazyListState = newsLazyListState,
+									collapsingContentState = newsListFilterContentState,
+									onArticleSnippetClick = onArticleClicked,
+									onArticleAuthorClick = onUserClicked,
+									onArticleCommentsClick = onCommentsClicked,
+									filterDialog = { defVals, onDismiss, onDone ->
+										NewsFilterDialog(
+											defaultValues = defVals,
+											onDismiss = onDismiss,
+											onDone = onDone
+										)
+									}
+								)
+							},
+							"Хабы" to {
+								HubsListPage(
+									listModel = viewModel.hubsListModel,
+									lazyListState = hubsLazyListState,
+									onHubClick = onHubClicked
+								)
+							},
+							"Авторы" to {
+								UsersListPage(
+									listModel = viewModel.authorsListModel,
+									lazyListState = authorsLazyListState,
+									onUserClick = onUserClicked
+								)
+							},
+							"Компании" to {
+								CompaniesListPage(
+									listModel = viewModel.companiesListModel,
+									lazyListState = companiesLazyListState,
+									onCompanyClick = onCompanyClicked
+								)
+							}
+						)
+						if (isAuthorized) map =
+							mapOf<String, @Composable () -> Unit>(
+								"Моя лента" to {
+									ArticlesListPageWithFilter(
+										listModel = viewModel.myFeedArticlesListModel,
+										collapsingContentState = myFeedFilterContentState,
+										lazyListState = myFeedLazyListState,
+										onArticleSnippetClick = onArticleClicked,
+										onArticleAuthorClick = onUserClicked,
+										onArticleCommentsClick = onCommentsClicked
+									) { defaultValues, onDismiss, onDone ->
+										MyFeedFilter(
+											defaultValues = defaultValues,
+											onDismiss = onDismiss,
+											onDone = onDone
+										)
+									}
+								}) + map
+						map
+					}
+					val pagerState = rememberPagerState { pages.size }
+					
+					var showNoInternetConnectionElement by rememberSaveable {
+						mutableStateOf(false)
+					}
+					var checkInternetConnection by rememberSaveable {
+						mutableStateOf(true)
+					}
+					
+					LaunchedEffect(key1 = checkInternetConnection, block = {
+						if (checkInternetConnection) {
+							val connectivityManager =
+								context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+							if (connectivityManager.activeNetwork == null) {
+								showNoInternetConnectionElement = true
+							} else {
+								launch(Dispatchers.IO) {
+									for (i in 1..3) {
+										try {
+											Socket().use { socket ->
+												socket.connect(
+													InetSocketAddress("habr.com", 80),
+													2000
+												)
+											}
+											showNoInternetConnectionElement = false
+											break
+										} catch (e: IOException) {
+											if (i == 3) {
+												showNoInternetConnectionElement = true
+											}
+											
 										}
-										showNoInternetConnectionElement = false
-										break
-									} catch (e: IOException) {
-										if(i == 3) {
-											showNoInternetConnectionElement = true
-										}
-										
 									}
 								}
+								
 							}
 							
+							checkInternetConnection = false
 						}
+					})
+					val coroutineScope = rememberCoroutineScope()
+					if (showNoInternetConnectionElement) {
 						
-						checkInternetConnection = false
-					}
-				})
-				val coroutineScope = rememberCoroutineScope()
-				if (showNoInternetConnectionElement) {
-					
-					NoInternetElement(
-						onTryAgain = { checkInternetConnection = true },
-						onSavedArticles = onSavedArticles
-					)
-					
-				} else {
-					
-					HabrScrollableTabRow(
-						pagerState = pagerState,
-						tabs = pages.keys.toList(),
-						onCurrentPositionTabClick = { index, title ->
-							when (title) {
-								"Моя лента" -> {
-									myFeedFilterContentState.show()
-									ScrollUpMethods.scrollLazyList(myFeedLazyListState)
-								}
-								
-								"Статьи" -> {
-									articlesListFilterContentState.show()
-									ScrollUpMethods.scrollLazyList(articlesLazyListState)
-								}
-								
-								"Новости" -> {
-									newsListFilterContentState.show()
-									ScrollUpMethods.scrollLazyList(newsLazyListState)
-								}
-								
-								"Хабы" -> ScrollUpMethods.scrollLazyList(hubsLazyListState)
-								"Авторы" -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
-								"Компании" -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
-							}
-						})
-					HorizontalPager(
-						state = pagerState,
-					) {
-						pages.values.elementAt(it)()
+						NoInternetElement(
+							onTryAgain = { checkInternetConnection = true },
+							onSavedArticles = onSavedArticles
+						)
 						
+					} else {
+						
+						HabrScrollableTabRow(
+							pagerState = pagerState,
+							tabs = pages.keys.toList(),
+							onCurrentPositionTabClick = { index, title ->
+								when (title) {
+									"Моя лента" -> {
+										myFeedFilterContentState.show()
+										ScrollUpMethods.scrollLazyList(myFeedLazyListState)
+									}
+									
+									"Статьи" -> {
+										articlesListFilterContentState.show()
+										ScrollUpMethods.scrollLazyList(articlesLazyListState)
+									}
+									
+									"Новости" -> {
+										newsListFilterContentState.show()
+										ScrollUpMethods.scrollLazyList(newsLazyListState)
+									}
+									
+									"Хабы" -> ScrollUpMethods.scrollLazyList(hubsLazyListState)
+									"Авторы" -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
+									"Компании" -> ScrollUpMethods.scrollLazyList(
+										companiesLazyListState
+									)
+								}
+							})
+						HorizontalPager(
+							state = pagerState,
+						) {
+							pages.values.elementAt(it)()
+							
+						}
 					}
 				}
-			}
+		}
 	}
 }
 
