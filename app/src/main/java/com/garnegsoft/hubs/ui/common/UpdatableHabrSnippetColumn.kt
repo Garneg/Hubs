@@ -76,7 +76,7 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
             refreshing = refreshing,
             state = state,
             modifier = Modifier.align(Alignment.TopCenter),
-            contentColor = MaterialTheme.colors.primary
+            contentColor = MaterialTheme.colors.secondary
         )
     }
 
@@ -104,7 +104,7 @@ fun RefreshableContainer(
             refreshing = refreshing,
             state = state,
             modifier = Modifier.align(Alignment.TopCenter),
-            contentColor = MaterialTheme.colors.primary
+            contentColor = MaterialTheme.colors.secondary
         )
     }
 }

@@ -350,6 +350,6 @@ fun ArticleCard(
 			filledBookmarkIconPainter = filledBookmarkIconPainter,
 			commentIconPainter = commentIconPainter,
 		)
-		Divider(modifier = Modifier.padding(start = style.innerPadding))
+		Divider(modifier = Modifier.padding(horizontal = style.innerPadding))
 	}
 }

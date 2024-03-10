@@ -25,7 +25,7 @@ import com.garnegsoft.hubs.ui.theme.SecondaryColor
  */
 @Immutable
 data class ArticleCardStyle(
-	val innerPadding: Dp = 16.dp,
+	val innerPadding: Dp = 20.dp,
 	val innerElementsShape: Shape = RoundedCornerShape(4.dp),
 	val cardShape: Shape = RoundedCornerShape(0.dp),
 	

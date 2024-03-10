@@ -12,6 +12,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.*
@@ -118,6 +119,12 @@ fun MainScreen(
 			SnackbarHost(hostState = it) {
 				ContinueReadSnackBar(data = it)
 			}
+		},
+		floatingActionButtonPosition = FabPosition.Start,
+		floatingActionButton = {
+			
+			ExtendedFloatingActionButton(
+				text = { Text("Фильтры") }, onClick = { /*TODO*/ })
 		}
 	) {
 		if (authorizedState != null)

@@ -39,10 +39,10 @@ private val LightColorPalette = lightColors(
     secondary = SecondaryColor,
     
     secondaryVariant = SecondaryVariantColor,
-    onSecondary = Color(0xFF303B44),
+    onSecondary = Color(0xFFFFFFFF),
     background = Color(243, 243, 243, 255),
-    onBackground = Color(0xFF303B44),
-    onSurface = Color(0xFF303B44),
+    onBackground = Color(0xFF151616),
+    onSurface = Color(0xFF191A1B),
     surface = Color.White,
     error = Color(0xFFEB4242),
 
