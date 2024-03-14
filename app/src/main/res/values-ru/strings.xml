@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Хабы</string>
+    <string name="app_name">Хабы old ui</string>
     <string name="about_app_text">"Неофициальный клиент для Хабра - сайта TechMedia, посвященного айти тематике.\n\nВнесите свой вклад в развитие проекта, написав свою идею или отчёт об ошибках на почту "</string>
     <string name="version">версия</string>
     <string name="hub_screen_title">Хаб</string>
