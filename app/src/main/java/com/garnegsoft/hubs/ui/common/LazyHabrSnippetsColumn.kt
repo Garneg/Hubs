@@ -32,7 +32,7 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     onScrollEnd: () -> Unit = { },
     nextPageLoadingIndicator: (@Composable () -> Unit)? = {
         Box(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     },
     snippet: @Composable (T) -> Unit,
@@ -130,7 +130,7 @@ fun <T : HabrSnippet> PagedHabrSnippetsColumn(
     onNextPageLoad: (pageNumber: Int) -> Unit,
     nextPageLoadingIndicator: @Composable () -> Unit = {
         Box(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     },
     page: MutableState<Int> = rememberSaveable {

@@ -22,6 +22,7 @@ import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.article.HabrSnippetListModel
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.FilterElement
+import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.common.LazyHabrSnippetsColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import kotlinx.coroutines.launch
@@ -94,7 +95,7 @@ fun <T : HabrSnippet> CommonPage(
 					nextPageLoadingIndicator = if (lastLoadedPageNumber < data!!.pagesCount) {
 						{
 							Box(modifier = Modifier.fillMaxWidth()) {
-								CircularProgressIndicator(
+								HubsCircularProgressIndicator(
 									modifier = Modifier.align(
 										Alignment.Center
 									)
@@ -107,7 +108,7 @@ fun <T : HabrSnippet> CommonPage(
 			}
 		} else if (isLoading) {
 			Box(modifier = Modifier.fillMaxSize()) {
-				CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+				HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 			}
 		} else {
 			Box(modifier = Modifier.fillMaxSize())

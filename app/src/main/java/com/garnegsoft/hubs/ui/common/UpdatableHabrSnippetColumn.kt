@@ -29,7 +29,7 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
     onNextPageLoad: (pageNumber: Int) -> Unit,
     nextPageLoadingIndicator: @Composable () -> Unit = {
         Box(modifier = Modifier.fillMaxWidth()) {
-            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     },
     page: MutableState<Int> = rememberSaveable {
