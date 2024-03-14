@@ -58,7 +58,7 @@
 
         <provider
             android:name=".ui.screens.settings.LogFileProvider"
-            android:authorities="com.garnegsoft.hubs.fileprovider"
+            android:authorities="com.garnegsoft.oldhubs.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
