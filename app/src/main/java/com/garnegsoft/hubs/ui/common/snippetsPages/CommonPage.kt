@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.common.snippetsPages
 
+import android.opengl.Matrix
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,6 +33,8 @@ fun <T : HabrSnippet> CommonPage(
 	lazyListState: LazyListState = rememberLazyListState(),
 	collapsingBar: (@Composable () -> Unit)? = null,
 	doInitialLoading: Boolean = true,
+	contentPadding: PaddingValues = PaddingValues(0.dp),
+	verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	snippetCard: @Composable (T) -> Unit,
 ) {
@@ -86,6 +89,8 @@ fun <T : HabrSnippet> CommonPage(
 				LazyHabrSnippetsColumn(
 					modifier = Modifier.fillMaxSize(),
 					lazyListState = lazyListState,
+					contentPadding = contentPadding,
+					verticalArrangement = verticalArrangement,
 					data = data!!,
 					onScrollEnd = listModel::loadNextPage,
 					snippet = snippetCard,
@@ -117,6 +122,8 @@ fun <T : HabrSnippet> CommonPage(
 fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	listModel: AbstractSnippetListModel<T>,
 	lazyListState: LazyListState = rememberLazyListState(),
+	contentPadding: PaddingValues = PaddingValues(0.dp),
+	verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp),
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	filter: (@Composable (onClick: () -> Unit) -> Unit) = { onClick ->
 		listModel.filter.observeAsState().value?.let {
@@ -141,9 +148,9 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	
 	if (showDialog) {
 		filterDialog(
-			defaultValues = filterValues!! as F,
-			onDismiss = { showDialog = false },
-			onDone = {
+			filterValues!! as F, // То, что написано здесь, свидетельствует о моем тотальном непонимании что такое дженерики и зачем они нужны.
+			{ showDialog = false },
+			{
 				listModel.editFilter(it)
 				showDialog = false
 			}
@@ -152,6 +159,8 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	
 	CommonPage(
 		listModel = listModel,
+		contentPadding = contentPadding,
+		verticalArrangement = verticalArrangement,
 		lazyListState = lazyListState,
 		collapsingBar = {
 			filter {

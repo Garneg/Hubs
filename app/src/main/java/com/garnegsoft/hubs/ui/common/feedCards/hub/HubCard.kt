@@ -4,9 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Divider
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
+import androidx.compose.material.icons.Icons
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
@@ -15,6 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -28,6 +33,7 @@ import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
+import com.garnegsoft.hubs.R
 
 
 @Composable
@@ -43,24 +49,17 @@ fun HubCard(
 	hub: HubSnippet,
 	style: HubCardStyle = defaultHubCardStyle(),
 	onClick: () -> Unit,
-	indicator: @Composable (hub: HubSnippet) -> Unit = {
-        Text(
-            text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
-            fontWeight = FontWeight.W400,
-            color = DefaultRatingIndicatorColor
-        )
-    }
+	indicator: @Composable (hub: HubSnippet) -> Unit = { HubCardDefaultIndicator(hub = hub) }
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            //.height(IntrinsicSize.Max)
-            .clip(style.shape)
-            .background(style.backgroundColor)
-            .clickable(onClick = onClick)
-            .padding(style.innerPadding)
-    ) {
+    Box {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                //.height(IntrinsicSize.Max)
+                .clip(style.shape)
+                .background(style.backgroundColor)
+                .clickable(onClick = onClick)
+                .padding(style.innerPadding),
             verticalAlignment = if (style.showDescription) Alignment.Top else Alignment.CenterVertically
         ) {
             AsyncImage(
@@ -114,6 +113,34 @@ fun HubCard(
             }
 
         }
+        Divider(modifier = Modifier.align(Alignment.BottomStart).padding(start = style.innerPadding * 2f + style.avatarSize))
+    }
+}
+
+/**
+ * Default indicator of hub card that shows score (popularity) of hub.
+ * @param iconPainter painter of icon. You can either just change the icon or
+ * hoist painter to function scope of list, which this card will be used in
+ * (optimization opportunity note)
+ */
+@Composable
+fun HubCardDefaultIndicator(
+    hub: HubSnippet,
+    iconPainter: Painter = painterResource(id = R.drawable.profile_rating)
+) {
+    Row {
+        Icon(
+            modifier = Modifier.size(18.dp),
+            painter = iconPainter,
+            contentDescription = null,
+            tint = MaterialTheme.colors.onSurface.copy(0.5f)
+        )
+        Spacer(modifier = Modifier.width(0.dp))
+        Text(
+            text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
+            fontWeight = FontWeight.W400,
+            color = MaterialTheme.colors.onSurface.copy(0.5f)
+        )
     }
 }
 
@@ -124,8 +151,8 @@ data class HubCardStyle(
     val textColor: Color = Color.Black,
     val titleTextStyle: TextStyle = TextStyle(
         color = textColor,
-        fontWeight = FontWeight.W700,
-        fontSize = 20.sp
+        fontWeight = FontWeight.W500,
+        fontSize = 18.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle(
         color = textColor.copy(alpha = 0.5f),
@@ -133,7 +160,7 @@ data class HubCardStyle(
     ),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
-    val shape: Shape = RoundedCornerShape(26.dp),
+    val shape: Shape = RoundedCornerShape(0.dp),
     val innerPadding: Dp = 16.dp,
     val descriptionMaxLines: Int = 1,
     val showDescription: Boolean = false

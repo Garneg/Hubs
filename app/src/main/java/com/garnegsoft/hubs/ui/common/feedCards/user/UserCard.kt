@@ -32,12 +32,12 @@ import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
 data class UserCardStyle(
     val backgroundColor: Color = Color.White,
-    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W700),
+    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W500),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
-    val cardShape: Shape = RoundedCornerShape(26.dp),
+    val cardShape: Shape = RoundedCornerShape(0.dp),
     val padding: PaddingValues = PaddingValues(16.dp),
-    val showSpeciality: Boolean = false,
+    val showSpeciality: Boolean = true,
     val specialityTextStyle: TextStyle = TextStyle(color = Color.Gray)
 )
 
@@ -50,14 +50,32 @@ private fun defaultUserCardStyle(): UserCardStyle {
 }
 
 @Composable
+fun UserCardDefaultIndicator(
+    user: UserSnippet,
+) {
+    Row {
+        Icon(
+            modifier = Modifier.size(18.dp),
+            painter = painterResource(id = R.drawable.arrow_up),
+            contentDescription = null,
+            tint = MaterialTheme.colors.onSurface.copy(0.5f)
+        )
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(text = user.rating.toString(),
+            fontWeight = FontWeight.W400,
+            color = MaterialTheme.colors.onSurface.copy(0.5f)
+        )
+    }
+}
+
+@Composable
 fun UserCard(
 	user: UserSnippet,
 	style: UserCardStyle = defaultUserCardStyle(),
-	indicator: @Composable () -> Unit = {
-        Text(text = user.rating.toString(), fontWeight = FontWeight.W400, color = DefaultRatingIndicatorColor)
-    },
+	indicator: @Composable () -> Unit = { UserCardDefaultIndicator(user = user) },
 	onClick: () -> Unit
 ) {
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -82,7 +100,11 @@ fun UserCard(
                 modifier = Modifier
                     .size(style.avatarSize)
                     .background(Color.White, shape = style.avatarShape)
-                    .border(2.3.dp, color = placeholderColorLegacy(user.alias), shape = style.avatarShape)
+                    .border(
+                        2.3.dp,
+                        color = placeholderColorLegacy(user.alias),
+                        shape = style.avatarShape
+                    )
                     .padding(3.dp),
                 painter = painterResource(id = R.drawable.user_avatar_placeholder),
                 contentDescription = "",
@@ -95,13 +117,11 @@ fun UserCard(
 
             if (style.showSpeciality && user.speciality != null) {
                 Text(
-                    modifier = Modifier.offset(0.dp, -4.dp),
                     text = user.alias,
                     style = style.aliasTextStyle
                 )
                 user.speciality.let {
                     Text(
-                        modifier = Modifier.offset(0.dp, -4.dp),
                         text = it,
                         style = style.specialityTextStyle,
                         maxLines = 1,
@@ -117,7 +137,9 @@ fun UserCard(
                 )
             }
         }
-        Box(modifier = Modifier.padding(start = 4.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier
+            .padding(start = 4.dp)
+            .fillMaxHeight(), contentAlignment = Alignment.Center) {
             indicator()
 
         }
