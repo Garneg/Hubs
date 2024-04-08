@@ -488,16 +488,16 @@ class ArticleController {
         @Serializable
         data class ArticleRelatedData(
             var unreadCommentsCount: Int,
-            var vote: RelatedDataVote,
+//            var vote: RelatedDataVote,
             var bookmarked: Boolean,
             var canComment: Boolean,
-            var canEdit: Boolean,
-            var canViewVotes: Boolean,
-            var canVotePlus: Boolean,
-            var canVoteMinus: Boolean,
-            var canModerateComments: Boolean,
-            var trackerSubscribed: Boolean,
-            var emailSubscribed: Boolean
+//            var canEdit: Boolean,
+//            var canViewVotes: Boolean,
+//            var canVotePlus: Boolean,
+//            var canVoteMinus: Boolean,
+//            var canModerateComments: Boolean,
+//            var trackerSubscribed: Boolean,
+//            var emailSubscribed: Boolean
         )
 
         @Serializable
