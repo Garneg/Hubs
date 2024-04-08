@@ -158,8 +158,6 @@ class ArticleController {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
                             bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
                         )
                     },
                     contentHtml = it.textHtml,
@@ -260,9 +258,7 @@ class ArticleController {
                     relatedData = formatted.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
-                            bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
+                            bookmarked = it.bookmarked
                         )
                     },
                     isTranslation = formatted.postLabels?.find { it.type == "translation" } != null,
