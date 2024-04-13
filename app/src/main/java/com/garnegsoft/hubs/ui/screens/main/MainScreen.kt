@@ -42,7 +42,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
 	viewModelStoreOwner: ViewModelStoreOwner,

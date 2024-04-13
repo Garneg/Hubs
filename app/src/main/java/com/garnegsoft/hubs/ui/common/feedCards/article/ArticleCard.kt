@@ -136,22 +136,22 @@ fun ArticleCard(
 				style = style.titleTextStyle
 			)
 			// Image to draw attention (a.k.a. KDPV)
-		if (style.showImage && !article.imageUrl.isNullOrBlank()) {
-			AsyncImage(
-				modifier = Modifier
-					.padding(start = style.innerPadding/2f)
-					.width(90.dp)
-					.clip(RoundedCornerShape(4.dp))
-					.aspectRatio(13f/9f)
-					.background(MaterialTheme.colors.onSurface.copy(0.1f)),
-				model = ImageRequest.Builder(LocalContext.current)
-					.crossfade(true)
-					.data(article.imageUrl).build(),
-				contentScale = ContentScale.Crop,
-				contentDescription = "",
-			)
-
-		}
+			if (style.showImage && !article.imageUrl.isNullOrBlank()) {
+				AsyncImage(
+					modifier = Modifier
+						.padding(start = style.innerPadding / 2f)
+						.width(90.dp)
+						.clip(RoundedCornerShape(4.dp))
+						.aspectRatio(13f / 9f)
+						.background(MaterialTheme.colors.onSurface.copy(0.1f)),
+					model = ImageRequest.Builder(LocalContext.current)
+						.crossfade(true)
+						.data(article.imageUrl).build(),
+					contentScale = ContentScale.Crop,
+					contentDescription = "",
+				)
+				
+			}
 		}
 		
 		Spacer(modifier = Modifier.height(0.dp))
@@ -256,7 +256,6 @@ fun ArticleCard(
 			)
 		
 		
-		
 		var addedToBookmarks by remember {
 			mutableStateOf(article.relatedData?.bookmarked ?: false)
 		}
@@ -318,7 +317,8 @@ fun ArticleCard(
 			bookmarksCount = addedToBookmarksCount,
 			onAddToBookmarksClicked = bookmarkButtonClickLambda,
 			onCommentsClick = onCommentsClick,
-			unreadCommentsCount = article.relatedData?.let { if (it.unreadComments < article.statistics.commentsCount) it.unreadComments else 0 } ?: 0,
+			unreadCommentsCount = article.relatedData?.let { if (it.unreadComments < article.statistics.commentsCount) it.unreadComments else 0 }
+				?: 0,
 			saveArticlePopup = { bounds ->
 				SaveArticlePopup(
 					show = showPopup,

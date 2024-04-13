@@ -332,7 +332,7 @@ fun UserScreen(
 				.fillMaxSize()
 				.padding(it)
 		) {
-			CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+			HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 		}
 	}
 	
