@@ -158,8 +158,6 @@ class ArticleController {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
                             bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
                         )
                     },
                     contentHtml = it.textHtml,
@@ -260,9 +258,7 @@ class ArticleController {
                     relatedData = formatted.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
-                            bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
+                            bookmarked = it.bookmarked
                         )
                     },
                     isTranslation = formatted.postLabels?.find { it.type == "translation" } != null,
@@ -492,16 +488,16 @@ class ArticleController {
         @Serializable
         data class ArticleRelatedData(
             var unreadCommentsCount: Int,
-            var vote: RelatedDataVote,
+//            var vote: RelatedDataVote,
             var bookmarked: Boolean,
             var canComment: Boolean,
-            var canEdit: Boolean,
-            var canViewVotes: Boolean,
-            var canVotePlus: Boolean,
-            var canVoteMinus: Boolean,
-            var canModerateComments: Boolean,
-            var trackerSubscribed: Boolean,
-            var emailSubscribed: Boolean
+//            var canEdit: Boolean,
+//            var canViewVotes: Boolean,
+//            var canVotePlus: Boolean,
+//            var canVoteMinus: Boolean,
+//            var canModerateComments: Boolean,
+//            var trackerSubscribed: Boolean,
+//            var emailSubscribed: Boolean
         )
 
         @Serializable

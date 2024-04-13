@@ -143,9 +143,7 @@ class ArticlesListController {
 								relatedData = it.relatedData?.let {
 									com.garnegsoft.hubs.api.article.Article.RelatedData(
 										unreadComments = it.unreadCommentsCount,
-										bookmarked = it.bookmarked,
-										canVoteMinus = it.canVoteMinus,
-										canVotePlus = it.canVotePlus
+										bookmarked = it.bookmarked
 									)
 								},
 								isTranslation = it.postLabels?.contains(ArticlesListLabel("translation"))
@@ -222,19 +220,19 @@ class ArticlesListController {
 	@Serializable
 	data class RelatedData(
 		var unreadCommentsCount: Int,
-		var vote: RelatedDataVote,
+//		var vote: RelatedDataVote,
 		var bookmarked: Boolean,
-		var canComment: Boolean,
-		var canEdit: Boolean,
-		var canViewVotes: Boolean,
-		var canVotePlus: Boolean,
-		var canVoteMinus: Boolean
+//		var canComment: Boolean,
+//		var canEdit: Boolean,
+//		var canViewVotes: Boolean,
+//		var canVotePlus: Boolean,
+//		var canVoteMinus: Boolean
 	) {
-		@Serializable
-		data class RelatedDataVote(
-			var value: String? = null,
-			var voteTimeExpired: String
-		)
+//		@Serializable
+//		data class RelatedDataVote(
+//			var value: String? = null,
+//			var voteTimeExpired: String
+//		)
 	}
 	
 	@Serializable
