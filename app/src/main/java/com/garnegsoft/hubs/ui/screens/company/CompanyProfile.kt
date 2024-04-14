@@ -25,9 +25,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.company.Company
-import com.garnegsoft.hubs.api.company.CompanyController
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.data.company.Company
+import com.garnegsoft.hubs.data.company.CompanyController
+import com.garnegsoft.hubs.data.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn

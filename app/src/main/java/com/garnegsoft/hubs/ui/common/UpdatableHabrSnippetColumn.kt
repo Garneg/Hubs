@@ -1,9 +1,9 @@
 package com.garnegsoft.hubs.ui.common
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -14,8 +14,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.data.HabrList
+import com.garnegsoft.hubs.data.HabrSnippet
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -41,7 +41,7 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
     onRefresh: () -> Unit,
     refreshing: Boolean,
     readyToScrollUpAfterRefresh: MutableState<Boolean>,
-    snippet: @Composable (T) -> Unit,
+    snippet: @Composable LazyItemScope.(T) -> Unit,
 ) {
 
     LaunchedEffect(key1 = readyToScrollUpAfterRefresh.value, block = {

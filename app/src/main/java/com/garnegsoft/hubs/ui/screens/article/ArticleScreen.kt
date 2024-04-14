@@ -3,7 +3,6 @@ package com.garnegsoft.hubs.ui.screens.article
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
@@ -14,7 +13,6 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.*
@@ -23,6 +21,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
@@ -31,16 +31,16 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.CollapsingContent
-import com.garnegsoft.hubs.api.PostType
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
-import com.garnegsoft.hubs.api.history.HistoryController
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.data.CollapsingContent
+import com.garnegsoft.hubs.data.PostType
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.data.history.HistoryController
+import com.garnegsoft.hubs.data.rememberCollapsingContentState
+import com.garnegsoft.hubs.data.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -95,98 +95,120 @@ fun ArticleScreen(
 		mutableStateOf(false)
 	}
 	LaunchedEffect(key1 = actionsVisible, block = {
-		if (!actionsVisible){
+		if (!actionsVisible) {
 			actionsVisible = true
 		}
 	})
-	val navIconAnimatedValue by animateFloatAsState(targetValue = if (actionsVisible) 1f else 0f,
+	val navIconAnimatedValue by animateFloatAsState(
+		targetValue = if (actionsVisible) 1f else 0f,
 		animationSpec = tween()
 	)
-	val firstActionButtonAnimatedValue by animateFloatAsState(targetValue = if (actionsVisible) 1f else 0f,
-		animationSpec = tween(delayMillis = 150)
+	val firstActionButtonAnimatedValue by animateFloatAsState(
+		targetValue = if (actionsVisible) 1f else 0f,
+		animationSpec = tween(delayMillis = 0)
 	)
-	val secondActionButtonAnimatedValue by animateFloatAsState(targetValue = if (actionsVisible) 1f else 0f,
-		animationSpec = tween(delayMillis = 250)
+	val secondActionButtonAnimatedValue by animateFloatAsState(
+		targetValue = if (actionsVisible) 1f else 0f,
+		animationSpec = tween(delayMillis = 0)
 	)
-	CollapsingContent(collapsingContent = {
-		Box {
-			TopAppBar(
-				title = { },
-				elevation = 0.dp,
-				navigationIcon = {
-					IconButton(
-						modifier = Modifier.offset {
-							IntOffset((-48 * density + (48 * density * navIconAnimatedValue)).toInt(), 0)
-						},
-						onClick = { onBackButtonClicked() }) {
-						Icon(
-							imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-							contentDescription = "",
-							tint = MaterialTheme.colors.onPrimary)
-					}
-				},
-				actions = {
-					Box(
-						modifier = Modifier
-							.offset {
-								IntOffset((48 * density - (48 * density * firstActionButtonAnimatedValue)).toInt(), 0)
-							}
-							.alpha(firstActionButtonAnimatedValue)
-					) {
-						if (articleSaved) {
-							IconButton(
-								onClick = {
-									viewModel.deleteSavedArticle(
-										id = articleId,
-										context = context
+	val collapsingContentState = rememberCollapsingContentState()
+	CollapsingContent(
+		state = collapsingContentState,
+		collapsingContent = {
+			Box {
+				TopAppBar(
+					title = { },
+					elevation = 0.dp,
+					navigationIcon = {
+						IconButton(
+							modifier = Modifier
+								.alpha(navIconAnimatedValue)
+								.offset {
+									IntOffset(
+										(-48 * density + (48 * density * navIconAnimatedValue)).toInt(),
+										0
 									)
 								},
-								enabled = true
-							) {
-								Icon(
-									imageVector = Icons.Outlined.Delete,
-									contentDescription = "",
-									tint = MaterialTheme.colors.onPrimary
-								)
-							}
-						} else {
-							IconButton(
-								onClick = {
-									viewModel.saveArticle(
-										id = articleId,
-										context = context
-									)
-								},
-								enabled = true
-							) {
-								Icon(
-									painterResource(id = R.drawable.download),
-									contentDescription = "",
-									tint = MaterialTheme.colors.onPrimary
-								)
-							}
+							onClick = { onBackButtonClicked() }
+						) {
+							Icon(
+								imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+								contentDescription = "",
+								tint = MaterialTheme.colors.onPrimary
+							)
 						}
-						
-						
-					}
-					val shareIconColorAlpha by animateFloatAsState(targetValue = if (article != null) 1f else 0.5f)
-					IconButton(
-						modifier = Modifier
-							.offset {
-								IntOffset((48 * density - (48 * density * secondActionButtonAnimatedValue)).toInt(), 0)
+					},
+					actions = {
+						Box(
+							modifier = Modifier
+								.offset {
+									IntOffset(
+										(48 * density - (48 * density * firstActionButtonAnimatedValue)).toInt(),
+										0
+									)
+								}
+								.alpha(firstActionButtonAnimatedValue)
+						) {
+							if (articleSaved) {
+								IconButton(
+									onClick = {
+										viewModel.deleteSavedArticle(
+											id = articleId,
+											context = context
+										)
+									},
+									enabled = true
+								) {
+									Icon(
+										imageVector = Icons.Outlined.Delete,
+										contentDescription = "",
+										tint = MaterialTheme.colors.onPrimary
+									)
+								}
+							} else {
+								IconButton(
+									onClick = {
+										viewModel.saveArticle(
+											id = articleId,
+											context = context
+										)
+									},
+									enabled = true
+								) {
+									Icon(
+										painterResource(id = R.drawable.download),
+										contentDescription = "",
+										tint = MaterialTheme.colors.onPrimary
+									)
+								}
 							}
-							.alpha(secondActionButtonAnimatedValue),
-						onClick = { context.startActivity(shareIntent) },
-						enabled = article != null
-					) {
-						Icon(Icons.Outlined.Share, contentDescription = "", tint = MaterialTheme.colors.onPrimary.copy(shareIconColorAlpha))
-					}
-				})
-			Divider(modifier = Modifier.align(Alignment.BottomCenter))
+							
+							
+						}
+						val shareIconColorAlpha by animateFloatAsState(targetValue = if (article != null) 1f else 0.5f)
+						IconButton(
+							modifier = Modifier
+								.offset {
+									IntOffset(
+										(48 * density - (48 * density * secondActionButtonAnimatedValue)).toInt(),
+										0
+									)
+								}
+								.alpha(secondActionButtonAnimatedValue),
+							onClick = { context.startActivity(shareIntent) },
+							enabled = article != null
+						) {
+							Icon(
+								Icons.Outlined.Share,
+								contentDescription = "",
+								tint = MaterialTheme.colors.onPrimary.copy(shareIconColorAlpha)
+							)
+						}
+					})
+				Divider(modifier = Modifier.align(Alignment.BottomCenter))
+			}
 		}
-	}) {
-		
-		
+	) {
 		Scaffold(
 			backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
 			bottomBar = {
@@ -386,6 +408,7 @@ fun ArticleScreen(
 				}
 			}
 		) {
+			
 			article?.let { article ->
 				val color = MaterialTheme.colors.onSurface
 				val spanStyle = remember(fontSize, color) {
@@ -445,6 +468,15 @@ fun ArticleScreen(
 					.fillMaxSize()
 					.padding(it)
 			) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+			
+			if (collapsingContentState.isContentHidden.value) {
+				Box(modifier = Modifier
+					.fillMaxWidth()
+					.height(35.dp)
+					.drawBehind {
+						drawRect(Brush.verticalGradient(listOf(Color.White, Color.Transparent)))
+					})
+			}
 		}
 	}
 }

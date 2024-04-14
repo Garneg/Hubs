@@ -51,9 +51,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.AsyncGifImage
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.utils.formatTime
+import com.garnegsoft.hubs.data.AsyncGifImage
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.utils.formatTime
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings

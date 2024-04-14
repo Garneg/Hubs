@@ -1,5 +1,7 @@
 package com.garnegsoft.hubs.ui.theme
 
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 
@@ -16,3 +18,12 @@ val RatingNegativeColor = Color(0xFFC43333)
 
 val HubSubscribedColor = Color(0xE351A843)
 val TranslationLabelColor = Color(0xFF229CE6)
+
+val DeleteButtonColor
+	@Composable
+	get() = themedColor(lightVariant = Color(0xFFC43333), darkVariant = Color(0xFFC43333))
+
+@Composable
+fun themedColor(lightVariant: Color, darkVariant: Color): Color =
+	if (MaterialTheme.colors.isLight) lightVariant else darkVariant
+

@@ -7,6 +7,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
@@ -31,7 +32,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
+import com.garnegsoft.hubs.data.article.offline.OfflineArticlesDatabase
 
 
 @Composable
@@ -80,13 +81,13 @@ fun SaveArticlePopup(
 						alpha = animatedSize
 					)
 					.size((bounds.width / density).dp, (bounds.height / density).dp)
-					.shadow(1.dp, shape = cardStyle.innerElementsShape)
-					.clip(cardStyle.innerElementsShape)
+					.shadow(2.dp, shape = CircleShape)
+					.clip(CircleShape)
 					.background(cardStyle.backgroundColor)
 					.border(
 						width = 0.5.dp,
 						color = MaterialTheme.colors.onSurface.copy(0.1f),
-						shape = cardStyle.innerElementsShape
+						shape = CircleShape
 					)
 					.clickable(onClick = if (isDownloaded == false) onSaveClick else onDeleteClick),
 				contentAlignment = Alignment.Center

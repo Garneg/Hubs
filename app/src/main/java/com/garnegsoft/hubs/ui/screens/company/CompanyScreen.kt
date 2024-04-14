@@ -3,7 +3,6 @@ package com.garnegsoft.hubs.ui.screens.company
 import android.content.Intent
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -18,8 +17,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.company.CompanyController
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.data.company.CompanyController
+import com.garnegsoft.hubs.data.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage

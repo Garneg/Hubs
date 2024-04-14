@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.animation.*
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -35,18 +34,17 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.EditorVersion
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.PublicationComplexity
-import com.garnegsoft.hubs.api.PostType
-import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.company.CompanyController
+import com.garnegsoft.hubs.data.EditorVersion
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.PublicationComplexity
+import com.garnegsoft.hubs.data.PostType
+import com.garnegsoft.hubs.data.article.Article
+import com.garnegsoft.hubs.data.company.CompanyController
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jsoup.nodes.*
 import kotlin.math.roundToInt
 
 

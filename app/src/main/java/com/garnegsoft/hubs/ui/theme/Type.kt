@@ -15,7 +15,7 @@ val Typography = Typography(
     ),
     body2 = TextStyle(
         fontFamily = FontFamily.Default,
-        fontWeight = FontWeight.W400,
+        fontWeight = FontWeight.W500,
         fontSize = 14.sp
     ),
     subtitle1 = TextStyle(

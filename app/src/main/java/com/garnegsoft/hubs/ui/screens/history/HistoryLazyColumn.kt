@@ -18,7 +18,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,10 +26,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.history.HistoryActionType
-import com.garnegsoft.hubs.api.history.HistoryEntityListModel
-import com.garnegsoft.hubs.api.history.getArticle
-import com.garnegsoft.hubs.api.utils.formatFoundationDate
+import com.garnegsoft.hubs.data.history.HistoryActionType
+import com.garnegsoft.hubs.data.history.HistoryEntityListModel
+import com.garnegsoft.hubs.data.history.getArticle
+import com.garnegsoft.hubs.data.utils.formatFoundationDate
 import com.garnegsoft.hubs.ui.common.BaseHubsLazyColumn
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import java.util.Calendar

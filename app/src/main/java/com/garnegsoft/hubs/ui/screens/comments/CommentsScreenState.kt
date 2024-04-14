@@ -7,7 +7,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import com.garnegsoft.hubs.api.comment.CommentsCollection
+import com.garnegsoft.hubs.data.comment.CommentsCollection
 
 
 class CommentsScreenState(

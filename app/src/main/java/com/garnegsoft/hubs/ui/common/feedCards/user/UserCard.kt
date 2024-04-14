@@ -24,8 +24,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.garnegsoft.hubs.api.user.list.UserSnippet
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.data.user.list.UserSnippet
+import com.garnegsoft.hubs.data.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
@@ -52,6 +52,7 @@ private fun defaultUserCardStyle(): UserCardStyle {
 @Composable
 fun UserCard(
 	user: UserSnippet,
+    modifier: Modifier = Modifier,
 	style: UserCardStyle = defaultUserCardStyle(),
 	indicator: @Composable () -> Unit = {
         Text(text = user.rating.toString(), fontWeight = FontWeight.W400, color = DefaultRatingIndicatorColor)
@@ -59,7 +60,7 @@ fun UserCard(
 	onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
             .clip(shape = style.cardShape)

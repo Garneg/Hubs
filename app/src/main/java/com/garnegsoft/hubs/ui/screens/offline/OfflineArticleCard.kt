@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -9,14 +10,10 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -31,10 +28,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.AsyncGifImage
-import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
-import com.garnegsoft.hubs.api.utils.formatTime
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.data.AsyncGifImage
+import com.garnegsoft.hubs.data.article.offline.OfflineArticleSnippet
+import com.garnegsoft.hubs.data.utils.formatTime
+import com.garnegsoft.hubs.data.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
@@ -43,6 +40,7 @@ import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 @Composable
 fun OfflineArticleCard(
 	article: OfflineArticleSnippet,
+	modifier: Modifier = Modifier,
 	onClick: () -> Unit,
 	onDelete: () -> Unit,
 	style: ArticleCardStyle
@@ -50,8 +48,9 @@ fun OfflineArticleCard(
 	var showDeleteButton by rememberSaveable { mutableStateOf(false) }
 	val haptic = LocalHapticFeedback.current
 	Column(
-		modifier = Modifier
+		modifier = modifier
 			.fillMaxWidth()
+			.animateContentSize()
 			.clip(style.cardShape)
 			.background(style.backgroundColor)
 			.combinedClickable(
@@ -173,20 +172,20 @@ fun OfflineArticleCard(
 		) {
 			Column {
 				Spacer(modifier = Modifier.height(style.innerPadding / 2))
-				CompositionLocalProvider(
-					LocalRippleTheme provides object : RippleTheme {
-						@Composable
-						override fun defaultColor(): Color {
-							return RatingNegativeColor
-						}
-						
-						@Composable
-						override fun rippleAlpha(): RippleAlpha {
-							return RippleAlpha(0.1f, 0.1f, 0.1f, 0.1f)
-						}
-						
-					}
-				) {
+//				CompositionLocalProvider(
+//					LocalRippleTheme provides object : RippleTheme {
+//						@Composable
+//						override fun defaultColor(): Color {
+//							return RatingNegativeColor
+//						}
+//
+//						@Composable
+//						override fun rippleAlpha(): RippleAlpha {
+//							return RippleAlpha(0.1f, 0.1f, 0.1f, 0.1f)
+//						}
+//
+//					}
+//				) {
 					TextButton(
 						modifier = Modifier
 							.fillMaxWidth()
@@ -195,13 +194,13 @@ fun OfflineArticleCard(
 						onClick = onDelete,
 						colors = ButtonDefaults.textButtonColors(
 							backgroundColor = RatingNegativeColor.copy(
-								0.08f
+								1f
 							)
 						)
 					) {
-						Text(text = "Удалить")
+						Text(text = "Удалить", color = Color.White)
 					}
-				}
+//				}
 			}
 		}
 		

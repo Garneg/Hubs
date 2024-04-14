@@ -28,9 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import com.garnegsoft.hubs.api.hub.Hub
-import com.garnegsoft.hubs.api.hub.HubController
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.data.hub.Hub
+import com.garnegsoft.hubs.data.hub.HubController
+import com.garnegsoft.hubs.data.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn

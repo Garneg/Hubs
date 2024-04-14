@@ -5,7 +5,6 @@ import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
-import android.widget.EditText
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -45,10 +44,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import com.garnegsoft.hubs.BuildConfig
-import com.garnegsoft.hubs.api.AsyncGifImage
+import com.garnegsoft.hubs.data.AsyncGifImage
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.screens.article.html.CodeElement
 import com.garnegsoft.hubs.ui.theme.SecondaryColor

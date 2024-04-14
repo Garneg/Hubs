@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.data.article.Article
 
 
 @Composable

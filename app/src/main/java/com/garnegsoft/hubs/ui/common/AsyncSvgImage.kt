@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.common
 
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -8,21 +7,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.graphics.drawable.toDrawable
-import androidx.work.WorkManager
 import coil.compose.AsyncImage
 import coil.decode.DataSource
 import coil.decode.ImageSource
 import coil.decode.SvgDecoder
-import coil.fetch.DrawableResult
 import coil.fetch.FetchResult
 import coil.fetch.Fetcher
 import coil.fetch.SourceResult
 import coil.request.ImageRequest
-import com.garnegsoft.hubs.api.CommonImageRequestFetcher
-import com.garnegsoft.hubs.api.offlineResourcesDir
-import okio.BufferedSource
-import okio.Path
+import com.garnegsoft.hubs.data.offlineResourcesDir
 import okio.Path.Companion.toPath
 import java.io.File
 

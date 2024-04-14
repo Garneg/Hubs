@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.common.feedCards.article
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -9,37 +8,32 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.BadgedBox
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.data.article.Article
+import com.garnegsoft.hubs.data.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
@@ -125,49 +119,6 @@ fun ArticleStats(
 			)
 		}
 		
-		var bounds by remember {
-			mutableStateOf(IntSize.Zero)
-		}
-		
-		
-		
-		//Added to bookmarks
-//		Row(
-//			verticalAlignment = Alignment.CenterVertically,
-//			modifier = Modifier
-//				.padding(vertical = style.innerPadding)
-//				.fillMaxHeight()
-//				.combinedClickable(
-//					onClick = onAddToBookmarksClicked,
-//					onLongClick = {
-//						onShowSavingPopup()
-//
-//					},
-//					enabled = style.bookmarksButtonAllowedBeEnabled && bookmarksButtonEnabled,
-//				)
-//				.onGloballyPositioned {
-//					bounds = it.size
-//				},
-//			horizontalArrangement = Arrangement.Center
-//		) {
-//			Icon(
-//
-//				painter =
-//					if (addedToBookmarks)
-//						filledBookmarkIconPainter
-//					else
-//						bookmarkIconPainter,
-//				contentDescription = null,
-//				modifier = Modifier.size(18.dp),
-//				tint = style.statisticsColor
-//			)
-//			Spacer(modifier = Modifier.width(4.dp))
-//			Text(
-//				text = bookmarksCount.toString(),
-//				style = style.statisticsTextStyle
-//			)
-//			saveArticlePopup(bounds)
-//		}
 		
 		val commentsInteractionSource = remember { MutableInteractionSource() }
 		//Comments
@@ -214,6 +165,53 @@ fun ArticleStats(
 						)
 					}
 				}
+		}
+		
+		Spacer(modifier = Modifier.weight(1f))
+		
+		var bounds by remember {
+			mutableStateOf(IntSize.Zero)
+		}
+		Box {
+			//Added to bookmarks
+			Row(
+				
+				modifier = Modifier
+					.onGloballyPositioned {
+						bounds = it.size
+					}
+					.height(32.dp)
+					.clip(CircleShape)
+					.combinedClickable(
+						onClick = onAddToBookmarksClicked,
+						onLongClick = {
+							onShowSavingPopup()
+						},
+						enabled = style.bookmarksButtonAllowedBeEnabled && bookmarksButtonEnabled,
+					)
+					.padding(horizontal = 12.dp),
+				verticalAlignment = Alignment.CenterVertically,
+				horizontalArrangement = Arrangement.Center
+			) {
+				Icon(
+					painter =
+					if (addedToBookmarks)
+						filledBookmarkIconPainter
+					else
+						bookmarkIconPainter,
+					contentDescription = null,
+					modifier = Modifier.size(18.dp),
+					tint = style.statisticsColor
+				)
+//			Spacer(modifier = Modifier.width(4.dp))
+//			Text(
+//				text = "В закладки",
+//				fontWeight = FontWeight.W500,
+//				style = style.statisticsTextStyle
+//			)
+			
+			}
+			saveArticlePopup(bounds)
 		}
 	}
 }

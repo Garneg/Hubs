@@ -6,19 +6,26 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeGestures
+import androidx.compose.foundation.layout.safeGesturesPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.primarySurface
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -27,6 +34,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -35,9 +45,9 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.garnegsoft.hubs.api.HabrApi
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
+import com.garnegsoft.hubs.data.HabrApi
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import kotlinx.coroutines.flow.firstOrNull
@@ -98,7 +108,13 @@ class MainActivity : ComponentActivity() {
 									initial = null
 								)
 								if (bsEntry?.destination?.route?.startsWith("article/") == false) {
+									
 									BottomNavigation(
+										modifier = Modifier.background(MaterialTheme.colors.background)
+											.padding(WindowInsets.Companion.safeGestures.asPaddingValues(LocalDensity.current).calculateBottomPadding())
+											.border(width = 0.5.dp, color = MaterialTheme.colors.onSurface.copy(0.1f), shape = RoundedCornerShape(25))
+											.shadow(2.dp, shape = RoundedCornerShape(25))
+											.clip(RoundedCornerShape(25)),
 										elevation = 0.dp
 									) {
 										
@@ -158,8 +174,9 @@ class MainActivity : ComponentActivity() {
 												)
 											})
 									}
+									Divider(modifier = Modifier.alpha(0.5f))
 								}
-								Divider(modifier = Modifier.alpha(0.5f))
+								
 							}
 						) {
 							Box(modifier = Modifier.padding(it)) {

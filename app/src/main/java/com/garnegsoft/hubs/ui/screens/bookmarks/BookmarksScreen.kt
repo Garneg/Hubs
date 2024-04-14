@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -27,12 +26,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.article.ArticlesListModel
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesList
-import com.garnegsoft.hubs.ui.screens.user.UserArticlesFilter
 import com.garnegsoft.hubs.ui.screens.user.UserBookmarksFilter
 import kotlinx.coroutines.launch
 

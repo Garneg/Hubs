@@ -8,18 +8,18 @@ import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.data.HabrList
+import com.garnegsoft.hubs.data.HabrSnippet
 
 @Composable
 fun <T : HabrSnippet> LazyHabrSnippetsColumn(
@@ -35,7 +35,7 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
             HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     },
-    snippet: @Composable (T) -> Unit,
+    snippet: @Composable LazyItemScope.(T) -> Unit,
 ) {
     BaseHubsLazyColumn(
         data = data,
@@ -136,7 +136,7 @@ fun <T : HabrSnippet> PagedHabrSnippetsColumn(
     page: MutableState<Int> = rememberSaveable {
         mutableStateOf(1)
     },
-    snippet: @Composable (T) -> Unit,
+    snippet: @Composable LazyItemScope.(T) -> Unit,
 ) {
     LazyHabrSnippetsColumn(
         data = data,

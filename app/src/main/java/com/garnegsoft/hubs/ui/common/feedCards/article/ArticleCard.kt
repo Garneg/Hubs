@@ -28,10 +28,10 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.PublicationComplexity
-import com.garnegsoft.hubs.api.PostType
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
+import com.garnegsoft.hubs.data.PublicationComplexity
+import com.garnegsoft.hubs.data.PostType
+import com.garnegsoft.hubs.data.article.list.ArticleSnippet
+import com.garnegsoft.hubs.data.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers

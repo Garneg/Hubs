@@ -1,7 +1,6 @@
-package com.garnegsoft.hubs.api
+package com.garnegsoft.hubs.data
 
 import android.os.Build
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable

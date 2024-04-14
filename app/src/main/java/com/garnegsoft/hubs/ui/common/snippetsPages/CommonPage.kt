@@ -5,22 +5,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.CollapsingContent
-import com.garnegsoft.hubs.api.CollapsingContentState
-import com.garnegsoft.hubs.api.Filter
-import com.garnegsoft.hubs.api.HabrSnippet
-import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
-import com.garnegsoft.hubs.api.article.HabrSnippetListModel
-import com.garnegsoft.hubs.api.rememberCollapsingContentState
+import com.garnegsoft.hubs.data.CollapsingContent
+import com.garnegsoft.hubs.data.CollapsingContentState
+import com.garnegsoft.hubs.data.Filter
+import com.garnegsoft.hubs.data.HabrSnippet
+import com.garnegsoft.hubs.data.article.AbstractSnippetListModel
+import com.garnegsoft.hubs.data.article.HabrSnippetListModel
+import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.common.LazyHabrSnippetsColumn
@@ -34,7 +34,7 @@ fun <T : HabrSnippet> CommonPage(
 	collapsingBar: (@Composable () -> Unit)? = null,
 	doInitialLoading: Boolean = true,
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
-	snippetCard: @Composable (T) -> Unit,
+	snippetCard: @Composable LazyItemScope.(T) -> Unit,
 ) {
 	val refreshing by listModel.isRefreshing.observeAsState(initial = false)
 	
@@ -134,7 +134,7 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	},
 	doInitialLoading: Boolean = true,
 	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
-	snippetCard: @Composable (T) -> Unit,
+	snippetCard: @Composable LazyItemScope.(T) -> Unit,
 ) {
 	var showDialog by rememberSaveable {
 		mutableStateOf(false)

@@ -54,9 +54,9 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.comment.Comment
-import com.garnegsoft.hubs.api.comment.CommentsCollection
-import com.garnegsoft.hubs.api.comment.list.CommentsListController
+import com.garnegsoft.hubs.data.comment.Comment
+import com.garnegsoft.hubs.data.comment.CommentsCollection
+import com.garnegsoft.hubs.data.comment.list.CommentsListController
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseElement
 import kotlinx.coroutines.Dispatchers

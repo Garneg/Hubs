@@ -38,7 +38,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navDeepLink
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -51,13 +50,13 @@ import com.garnegsoft.hubs.CompanyScreenNavDeepLinks
 import com.garnegsoft.hubs.HubScreenNavDeepLinks
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.UserScreenNavDeepLinks
-import com.garnegsoft.hubs.api.HabrApi
-import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
-import com.garnegsoft.hubs.api.dataStore.AuthDataController
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
-import com.garnegsoft.hubs.api.me.MeController
-import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
+import com.garnegsoft.hubs.data.HabrApi
+import com.garnegsoft.hubs.data.article.offline.OfflineArticlesController
+import com.garnegsoft.hubs.data.dataStore.AuthDataController
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.data.me.MeController
+import com.garnegsoft.hubs.data.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
@@ -70,7 +69,6 @@ import com.garnegsoft.hubs.ui.screens.main.AuthorizedMenu
 import com.garnegsoft.hubs.ui.screens.main.MainScreen
 import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticleScreen
-import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesList
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.FeedSettingsScreen

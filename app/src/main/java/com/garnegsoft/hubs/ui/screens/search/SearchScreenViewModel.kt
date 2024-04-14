@@ -3,16 +3,15 @@ package com.garnegsoft.hubs.ui.screens.search
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.comment.list.CommentSnippet
-import com.garnegsoft.hubs.api.company.list.CompaniesListController
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
-import com.garnegsoft.hubs.api.hub.list.HubsListController
-import com.garnegsoft.hubs.api.user.list.UserSnippet
-import com.garnegsoft.hubs.api.user.list.UsersListController
+import com.garnegsoft.hubs.data.HabrList
+import com.garnegsoft.hubs.data.article.ArticlesListModel
+import com.garnegsoft.hubs.data.comment.list.CommentSnippet
+import com.garnegsoft.hubs.data.company.list.CompaniesListController
+import com.garnegsoft.hubs.data.company.list.CompanySnippet
+import com.garnegsoft.hubs.data.hub.list.HubSnippet
+import com.garnegsoft.hubs.data.hub.list.HubsListController
+import com.garnegsoft.hubs.data.user.list.UserSnippet
+import com.garnegsoft.hubs.data.user.list.UsersListController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

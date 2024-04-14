@@ -15,12 +15,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.Filter
-import com.garnegsoft.hubs.api.FilterPeriod
+import com.garnegsoft.hubs.data.Filter
+import com.garnegsoft.hubs.data.FilterPeriod
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import java.lang.StringBuilder
 
 @Composable
 fun HubsNewsFilterDialog(

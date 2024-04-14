@@ -3,10 +3,10 @@ package com.garnegsoft.hubs.ui.screens.company
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.company.Company
-import com.garnegsoft.hubs.api.company.CompanyController
-import com.garnegsoft.hubs.api.user.UsersListModel
+import com.garnegsoft.hubs.data.article.ArticlesListModel
+import com.garnegsoft.hubs.data.company.Company
+import com.garnegsoft.hubs.data.company.CompanyController
+import com.garnegsoft.hubs.data.user.UsersListModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

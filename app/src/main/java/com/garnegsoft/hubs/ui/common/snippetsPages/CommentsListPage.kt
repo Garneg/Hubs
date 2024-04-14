@@ -3,7 +3,7 @@ package com.garnegsoft.hubs.ui.common.snippetsPages
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import com.garnegsoft.hubs.api.comment.CommentsListModel
+import com.garnegsoft.hubs.data.comment.CommentsListModel
 import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 
 

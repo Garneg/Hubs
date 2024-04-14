@@ -3,13 +3,13 @@ package com.garnegsoft.hubs.ui.screens.hub
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.PublicationComplexity
-import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.company.CompaniesListModel
-import com.garnegsoft.hubs.api.hub.Hub
-import com.garnegsoft.hubs.api.hub.HubController
-import com.garnegsoft.hubs.api.user.UsersListModel
+import com.garnegsoft.hubs.data.FilterPeriod
+import com.garnegsoft.hubs.data.PublicationComplexity
+import com.garnegsoft.hubs.data.article.ArticlesListModel
+import com.garnegsoft.hubs.data.company.CompaniesListModel
+import com.garnegsoft.hubs.data.hub.Hub
+import com.garnegsoft.hubs.data.hub.HubController
+import com.garnegsoft.hubs.data.user.UsersListModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

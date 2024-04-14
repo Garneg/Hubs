@@ -1,14 +1,10 @@
 package com.garnegsoft.hubs.ui.screens
 
-import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Build
-import android.util.Log
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.rememberSplineBasedDecay
-import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
@@ -30,18 +26,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toDrawable
-import coil.decode.DataSource
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
-import coil.decode.SvgDecoder
-import coil.fetch.DrawableResult
-import coil.fetch.FetchResult
-import coil.fetch.Fetcher
 import coil.request.ImageRequest
 import coil.size.Size
-import com.garnegsoft.hubs.api.CommonImageRequestFetcher
-import com.garnegsoft.hubs.api.offlineResourcesDir
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -49,7 +37,6 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
-import java.io.File
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 

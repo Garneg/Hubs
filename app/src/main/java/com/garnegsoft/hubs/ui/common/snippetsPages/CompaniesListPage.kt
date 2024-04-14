@@ -3,10 +3,10 @@ package com.garnegsoft.hubs.ui.common.snippetsPages
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
-import com.garnegsoft.hubs.api.CollapsingContentState
-import com.garnegsoft.hubs.api.company.CompaniesListModel
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
-import com.garnegsoft.hubs.api.rememberCollapsingContentState
+import com.garnegsoft.hubs.data.CollapsingContentState
+import com.garnegsoft.hubs.data.company.CompaniesListModel
+import com.garnegsoft.hubs.data.company.list.CompanySnippet
+import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
 import com.garnegsoft.hubs.ui.common.feedCards.company.DefaultCompanyIndicator
 

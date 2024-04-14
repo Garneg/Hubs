@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.data.hub.list.HubSnippet
 
 @Composable
 fun HubChip(

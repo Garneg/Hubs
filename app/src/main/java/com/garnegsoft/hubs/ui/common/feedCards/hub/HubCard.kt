@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.data.hub.list.HubSnippet
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
@@ -79,7 +79,6 @@ fun HubCard(
                 Text(
                     text =
                     remember { buildAnnotatedString {
-                        
                         append(hub.title)
                         if (hub.isProfiled) {
                             withStyle(
@@ -106,7 +105,7 @@ fun HubCard(
             }
             Box(
                 modifier = Modifier
-                    .padding(start = 4.dp)
+                    .padding(start = 12.dp)
                     .fillMaxHeight(),
                 contentAlignment = Alignment.Center
             ) {

@@ -4,14 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.comment.CommentsListModel
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
-import com.garnegsoft.hubs.api.hub.list.HubsListController
-import com.garnegsoft.hubs.api.user.User
-import com.garnegsoft.hubs.api.user.UserController
-import com.garnegsoft.hubs.api.user.UsersListModel
+import com.garnegsoft.hubs.data.HabrList
+import com.garnegsoft.hubs.data.article.ArticlesListModel
+import com.garnegsoft.hubs.data.comment.CommentsListModel
+import com.garnegsoft.hubs.data.hub.list.HubSnippet
+import com.garnegsoft.hubs.data.hub.list.HubsListController
+import com.garnegsoft.hubs.data.user.User
+import com.garnegsoft.hubs.data.user.UserController
+import com.garnegsoft.hubs.data.user.UsersListModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

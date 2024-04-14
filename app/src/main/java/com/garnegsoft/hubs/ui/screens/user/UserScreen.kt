@@ -16,14 +16,13 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.comment.list.CommentSnippet
-import com.garnegsoft.hubs.api.rememberCollapsingContentState
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.data.comment.list.CommentSnippet
+import com.garnegsoft.hubs.data.rememberCollapsingContentState
+import com.garnegsoft.hubs.data.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter

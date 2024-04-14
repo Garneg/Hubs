@@ -17,7 +17,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
 import com.garnegsoft.hubs.ui.screens.settings.cards.OtherSettingsCard
 import kotlinx.coroutines.Dispatchers
