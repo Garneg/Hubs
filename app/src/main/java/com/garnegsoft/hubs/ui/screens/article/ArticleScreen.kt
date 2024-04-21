@@ -38,6 +38,7 @@ import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.data.history.HistoryController
 import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.data.utils.formatLongNumbers
+import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
@@ -467,7 +468,7 @@ fun ArticleScreen(
 				modifier = Modifier
 					.fillMaxSize()
 					.padding(it)
-			) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
 			
 			if (collapsingContentState.isContentHidden.value) {
 				Box(modifier = Modifier

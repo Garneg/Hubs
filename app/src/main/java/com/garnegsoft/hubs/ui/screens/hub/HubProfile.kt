@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.hub
 
+import android.telephony.SubscriptionInfo
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -33,6 +34,7 @@ import com.garnegsoft.hubs.data.hub.HubController
 import com.garnegsoft.hubs.data.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
+import com.garnegsoft.hubs.ui.common.SubscriptionButton
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import kotlinx.coroutines.Dispatchers
@@ -131,30 +133,12 @@ fun HubProfile(
 						mutableStateOf(it.isSubscribed)
 					}
 					val subscriptionCoroutineScope = rememberCoroutineScope()
-					Box(modifier = Modifier
-						.padding(8.dp)
-						.height(45.dp)
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(10.dp))
-						.background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
-						.border(
-							width = 1.dp,
-							shape = RoundedCornerShape(10.dp),
-							color = if (subscribed) Color.Transparent else Color(0xFF4CB025)
-						)
-						.clickable {
-							subscriptionCoroutineScope.launch(Dispatchers.IO) {
-								subscribed = !subscribed
-								subscribed = HubController.subscription(hub.alias)
-							}
+					SubscriptionButton(onClick = {
+						subscriptionCoroutineScope.launch(Dispatchers.IO) {
+							subscribed = !subscribed
+							subscribed = HubController.subscription(hub.alias)
 						}
-					) {
-						Text(
-							modifier = Modifier.align(Alignment.Center),
-							text = if (subscribed) "Вы подписаны" else "Подписаться",
-							color = if (subscribed) Color.White else Color(0xFF4CB025)
-						)
-					}
+					}, subscribed = subscribed)
 				}
 				
 			}

@@ -31,6 +31,7 @@ import com.garnegsoft.hubs.data.history.HistoryEntityListModel
 import com.garnegsoft.hubs.data.history.getArticle
 import com.garnegsoft.hubs.data.utils.formatFoundationDate
 import com.garnegsoft.hubs.ui.common.BaseHubsLazyColumn
+import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import java.util.Calendar
 import java.util.Date
@@ -126,7 +127,7 @@ fun HistoryLazyColumn(
 						if (lastLoadedPage != null && data.pagesCount > lastLoadedPage!! + 1) {
 							item {
 								Box(modifier = Modifier.fillMaxWidth()) {
-									CircularProgressIndicator(
+									HubsCircularProgressIndicator(
 										modifier = Modifier.align(
 											Alignment.Center
 										)

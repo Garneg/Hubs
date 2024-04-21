@@ -55,6 +55,7 @@ import com.garnegsoft.hubs.data.AsyncGifImage
 import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.utils.formatTime
 import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.ScrollBar
@@ -328,7 +329,7 @@ fun OfflineArticleScreen(
 				ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = lazyListState)
 				
 			} else {
-				CircularProgressIndicator()
+				HubsCircularProgressIndicator()
 			}
 		}
 	}

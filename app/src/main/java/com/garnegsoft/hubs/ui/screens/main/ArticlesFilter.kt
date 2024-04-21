@@ -50,7 +50,7 @@ fun ArticlesFilterDialog(
 		Column(
 			modifier = Modifier
 				.verticalScroll(rememberScrollState()),
-			verticalArrangement = Arrangement.spacedBy(9.dp)
+			verticalArrangement = Arrangement.spacedBy(16.dp)
 		) {
 			
 			TitledColumn(title = "Сначала показывать") {

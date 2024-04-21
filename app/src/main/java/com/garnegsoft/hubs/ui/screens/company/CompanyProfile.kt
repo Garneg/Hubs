@@ -30,6 +30,7 @@ import com.garnegsoft.hubs.data.company.CompanyController
 import com.garnegsoft.hubs.data.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
+import com.garnegsoft.hubs.ui.common.SubscriptionButton
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
@@ -54,8 +55,8 @@ fun CompanyProfile(
 		) {
 			var delayedCompositionCounter by rememberSaveable { mutableIntStateOf(0) }
 			LaunchedEffect(key1 = Unit, block = {
-				while(delayedCompositionCounter < 1) {
-					withFrameNanos {  }
+				while (delayedCompositionCounter < 1) {
+					withFrameNanos { }
 					delayedCompositionCounter++
 				}
 			})
@@ -166,32 +167,15 @@ fun CompanyProfile(
 						mutableStateOf(it.isSubscribed)
 					}
 					val subscriptionScope = rememberCoroutineScope()
-					Box(modifier = Modifier
-						.padding(8.dp)
-						.height(45.dp)
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(10.dp))
-						.background(if (isSubscribed) Color(0xFF4CB025) else Color.Transparent)
-						.border(
-							width = 1.dp,
-							shape = RoundedCornerShape(10.dp),
-							color = if (isSubscribed) Color.Transparent else Color(
-								0xFF4CB025
-							)
-						)
-						.clickable {
+					SubscriptionButton(
+						onClick = {
 							subscriptionScope.launch(Dispatchers.IO) {
 								isSubscribed = !isSubscribed
 								isSubscribed = CompanyController.subscription(company.alias)
 							}
-						}
-					) {
-						Text(
-							modifier = Modifier.align(Alignment.Center),
-							text = if (isSubscribed) "Вы подписаны" else "Подписаться",
-							color = if (isSubscribed) Color.White else Color(0xFF4CB025)
-						)
-					}
+						},
+						subscribed = isSubscribed
+					)
 				}
 			}
 			if (delayedCompositionCounter > 0) {

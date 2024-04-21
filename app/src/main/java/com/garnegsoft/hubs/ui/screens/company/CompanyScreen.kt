@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -81,7 +82,6 @@ fun CompanyScreen(
 				}
 			}
 		})
-		
 		val profilePageScrollState = rememberScrollState()
 		val articlesLazyListState = rememberLazyListState()
 		val newsLazyListState = rememberLazyListState()

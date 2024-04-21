@@ -117,7 +117,7 @@ fun MyFeedFilter(
 			}
 		}
 	) {
-		Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+		Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
 			
 			
 			TitledColumn(title = "Тип публикации") {
