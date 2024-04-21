@@ -3,11 +3,13 @@ package com.garnegsoft.hubs.ui.screens.article
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
@@ -32,6 +34,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.data.CollapsingContent
+import com.garnegsoft.hubs.data.CollapsingContent2
 import com.garnegsoft.hubs.data.PostType
 import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
@@ -69,7 +72,7 @@ fun ArticleScreen(
 		)
 	val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
 	val article by viewModel.article.observeAsState()
-	
+	val scrollState = rememberLazyListState()
 	LaunchedEffect(key1 = Unit, block = {
 		if (!viewModel.article.isInitialized) {
 			viewModel.loadArticle(articleId)
@@ -113,7 +116,8 @@ fun ArticleScreen(
 		animationSpec = tween(delayMillis = 0)
 	)
 	val collapsingContentState = rememberCollapsingContentState()
-	CollapsingContent(
+	CollapsingContent2(
+		doCollapse = remember { derivedStateOf { !scrollState.canScrollBackward } }.value,
 		state = collapsingContentState,
 		collapsingContent = {
 			Box {
@@ -455,6 +459,7 @@ fun ArticleScreen(
 						SelectionContainer {
 							ArticleContent(
 								article = article,
+								scrollState = scrollState,
 								onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
 								onHubClicked = onHubClicked,
 								onCompanyClick = onCompanyClick,
@@ -469,15 +474,26 @@ fun ArticleScreen(
 					.fillMaxSize()
 					.padding(it)
 			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+			val topGradientColor by animateColorAsState(
+				targetValue =
+				if (collapsingContentState.isContentHidden.value) Color.White
+				else Color.White.copy(0f)
+			)
 			
-			if (collapsingContentState.isContentHidden.value) {
 				Box(modifier = Modifier
 					.fillMaxWidth()
-					.height(35.dp)
+					.height(50.dp)
 					.drawBehind {
-						drawRect(Brush.verticalGradient(listOf(Color.White, Color.Transparent)))
+						drawRect(
+							Brush.verticalGradient(
+								listOf(
+									topGradientColor,
+									Color.Transparent
+								)
+							)
+						)
 					})
-			}
+			
 		}
 	}
 }

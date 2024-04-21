@@ -52,6 +52,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ArticleContent(
 	article: Article,
+	scrollState: LazyListState = rememberLazyListState(),
 	onAuthorClicked: () -> Unit,
 	onHubClicked: (alias: String) -> Unit,
 	onCompanyClick: (alias: String) -> Unit,
@@ -86,12 +87,12 @@ fun ArticleContent(
 				fitScreenWidth = false
 			)
 		}
-		val state = rememberLazyListState()
+		
 		val updatedPolls by viewModel.updatedPolls.observeAsState()
 		
 		LazyColumn(
 			modifier = Modifier.fillMaxSize(),
-			state = state,
+			state = scrollState,
 			contentPadding = PaddingValues(16.dp)
 		) {
 			if (article.editorVersion == EditorVersion.FirstVersion) {
@@ -480,7 +481,7 @@ fun ArticleContent(
 			}
 		}
 		
-		ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = state)
+		ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = scrollState)
 		
 	}
 	
