@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
 import android.content.Intent
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -222,7 +223,6 @@ fun ArticleScreen(
 					enter = slideIn { fullSize -> IntOffset(0, fullSize.height) }
 				) {
 					article?.let { article ->
-						
 						BottomAppBar(
 							elevation = 0.dp,
 							backgroundColor = MaterialTheme.colors.surface,
@@ -413,7 +413,6 @@ fun ArticleScreen(
 				}
 			}
 		) {
-			
 			article?.let { article ->
 				val color = MaterialTheme.colors.onSurface
 				val spanStyle = remember(fontSize, color) {
@@ -476,23 +475,23 @@ fun ArticleScreen(
 			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
 			val topGradientColor by animateColorAsState(
 				targetValue =
-				if (collapsingContentState.isContentHidden.value) Color.White
+				if (collapsingContentState.isContentHidden) Color.White
 				else Color.White.copy(0f)
 			)
 			
-				Box(modifier = Modifier
-					.fillMaxWidth()
-					.height(50.dp)
-					.drawBehind {
-						drawRect(
-							Brush.verticalGradient(
-								listOf(
-									topGradientColor,
-									Color.Transparent
-								)
+			Box(modifier = Modifier
+				.fillMaxWidth()
+				.height(56.dp)
+				.drawBehind {
+					drawRect(
+						Brush.verticalGradient(
+							listOf(
+								topGradientColor,
+								Color.Transparent
 							)
 						)
-					})
+					)
+				})
 			
 		}
 	}

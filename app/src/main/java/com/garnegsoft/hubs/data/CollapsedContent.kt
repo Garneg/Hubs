@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,18 +24,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
-import org.jetbrains.annotations.ApiStatus
 import kotlin.math.roundToInt
 
 
-class CollapsingContentState {
+@Stable
+class CollapsingContentState(initialOffset: Float, initialContentHeight: Float) {
     
-    var offset by mutableFloatStateOf(0f)
+    var offset by mutableFloatStateOf(initialOffset)
     
-    var contentHeight by mutableFloatStateOf(0f)
+    var contentHeight by mutableFloatStateOf(initialContentHeight)
     
-    val isContentHidden: State<Boolean>
-        get() = derivedStateOf { offset == contentHeight }
+    val isContentHidden by derivedStateOf { offset == contentHeight }
     
     suspend fun animateHide() {
         animateOffsetTo(contentHeight)
@@ -63,14 +63,32 @@ class CollapsingContentState {
         
     }
     
+    companion object {
+        val Saver = listSaver(
+            save = { listOf(it.offset, it.contentHeight) },
+            restore = {
+                CollapsingContentState(
+                    initialOffset = it[0],
+                    initialContentHeight = it[1]
+                )
+            }
+        )
+    }
+    
 }
 
 @Composable
 fun rememberCollapsingContentState(): CollapsingContentState {
-    return remember {
-        CollapsingContentState()
+    return rememberSaveable(
+        saver = CollapsingContentState.Saver
+    ) {
+        CollapsingContentState(0f, 0f)
     }
 }
+
+
+
+
 
 /**
  * Collapsing content, that hides when user scrolls down and shows if user scrolls up.
@@ -88,11 +106,6 @@ fun CollapsingContent(
     
     var collapsingContentHeightDp by rememberSaveable { mutableStateOf(0f) }
     val density = LocalDensity.current
-    val collapsingContentHeightPx = rememberSaveable(collapsingContentHeightDp) {
-        with(density) {
-            collapsingContentHeightDp.dp.roundToPx().toFloat()
-        }
-    }
 
     var collapsingContentOffsetPx by rememberSaveable { mutableStateOf(0f) }
     
@@ -151,16 +164,9 @@ fun CollapsingContent2(
     state: CollapsingContentState = rememberCollapsingContentState(),
     content: @Composable () -> Unit
 ) {
-    
     var collapsingContentHeightDp by rememberSaveable { mutableStateOf(0f) }
     val density = LocalDensity.current
-    val collapsingContentHeightPx = rememberSaveable(collapsingContentHeightDp) {
-        with(density) {
-            collapsingContentHeightDp.dp.roundToPx().toFloat()
-        }
-    }
     
-    var collapsingContentOffsetPx by rememberSaveable { mutableStateOf(0f) }
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -192,14 +198,10 @@ fun CollapsingContent2(
             available: Offset,
             source: NestedScrollSource
         ): Offset {
-            Log.e("ops_consumed", consumed.toString())
-            Log.e("ops_available", available.toString())
             return super.onPostScroll(consumed, available, source)
         }
         
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-            Log.e("opf_consumed", consumed.toString())
-            Log.e("opf_available", available.toString())
             var lastValue = 0f
             var lastVelocity = 0f
             AnimationState(
@@ -214,7 +216,6 @@ fun CollapsingContent2(
                 if (state.offset == 0f) {
                     this.cancelAnimation()
                 }
-                
                 lastValue = this.value
             }
             return available - Velocity(0f, lastVelocity)
