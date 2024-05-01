@@ -29,24 +29,24 @@ import kotlin.math.roundToInt
 
 class CollapsingContentState {
     
-    val offset = mutableFloatStateOf(0f)
+    var offset by mutableFloatStateOf(0f)
     
-    val contentHeight = mutableFloatStateOf(0f)
+    var contentHeight by mutableFloatStateOf(0f)
     
     val isContentHidden: State<Boolean>
-        get() = derivedStateOf { offset.floatValue == contentHeight.floatValue }
+        get() = derivedStateOf { offset == contentHeight }
     
     suspend fun animateHide() {
-        animateOffsetTo(contentHeight.floatValue)
+        animateOffsetTo(contentHeight)
     }
     
     private suspend fun animateOffsetTo(targetValue: Float) {
         animate(
-            initialValue = offset.floatValue,
+            initialValue = offset,
             targetValue = targetValue,
             animationSpec = tween(500, easing = EaseOut)
         ) { currentValue, velocity ->
-            offset.floatValue = currentValue
+            offset = currentValue
         }
     }
     
@@ -55,11 +55,11 @@ class CollapsingContentState {
     }
     
     fun show(){
-        offset.floatValue = 0f
+        offset = 0f
     }
     
     fun hide() {
-        offset.floatValue = contentHeight.floatValue
+        offset = contentHeight
         
     }
     
@@ -99,17 +99,17 @@ fun CollapsingContent(
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             if (doCollapse) {
-                if (available.y > 0 && state.offset.floatValue > 0f) {
+                if (available.y > 0 && state.offset > 0f) {
                     
-                    state.offset.floatValue -= available.y
-                    state.offset.floatValue =
-                        state.offset.floatValue.coerceIn(0f, state.contentHeight.floatValue)
+                    state.offset -= available.y
+                    state.offset =
+                        state.offset.coerceIn(0f, state.contentHeight)
                     return available
                 }
-                if (available.y < 0 && state.offset.floatValue < state.contentHeight.floatValue) {
-                    state.offset.floatValue -= available.y
-                    state.offset.floatValue =
-                        state.offset.floatValue.coerceIn(0f, state.contentHeight.floatValue)
+                if (available.y < 0 && state.offset < state.contentHeight) {
+                    state.offset -= available.y
+                    state.offset =
+                        state.offset.coerceIn(0f, state.contentHeight)
                     return available
                 }
             }
@@ -124,17 +124,17 @@ fun CollapsingContent(
         modifier = Modifier.nestedScroll(nestedScrollConnection)
     ) {
         Box(Modifier
-            .padding(top = Dp(state.contentHeight.floatValue / density.density) - Dp(state.offset.floatValue / density.density))) {
+            .padding(top = Dp(state.contentHeight / density.density) - Dp(state.offset / density.density))) {
             content()
         }
         Box(
             modifier = Modifier
                 .clip(RectangleShape)
                 .offset {
-                    IntOffset(0, -state.offset.floatValue.roundToInt())
+                    IntOffset(0, -state.offset.roundToInt())
                 }
                 .onGloballyPositioned {
-                    state.contentHeight.floatValue = it.size.height.toFloat()
+                    state.contentHeight = it.size.height.toFloat()
                     collapsingContentHeightDp = (it.size.height.toFloat() / density.density)
                 }
 
@@ -165,22 +165,36 @@ fun CollapsingContent2(
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             if (doCollapse) {
-                if (available.y > 0 && state.offset.floatValue > 0f) {
+                if (available.y > 0 && state.offset > 0f) {
                     
-                    state.offset.floatValue -= available.y
-                    state.offset.floatValue =
-                        state.offset.floatValue.coerceIn(0f, state.contentHeight.floatValue)
+                    state.offset -= available.y
+                    state.offset =
+                        state.offset.coerceIn(0f, state.contentHeight)
                     return available
                 }
-                if (available.y < 0 && state.offset.floatValue < state.contentHeight.floatValue) {
-                    state.offset.floatValue -= available.y
-                    state.offset.floatValue =
-                        state.offset.floatValue.coerceIn(0f, state.contentHeight.floatValue)
+                if (available.y < 0 && state.offset < state.contentHeight) {
+                    state.offset -= available.y
+                    state.offset =
+                        state.offset.coerceIn(0f, state.contentHeight)
                     return available
                 }
             }
             
             return Offset.Zero
+        }
+        
+        override suspend fun onPreFling(available: Velocity): Velocity {
+            return super.onPreFling(available)
+        }
+        
+        override fun onPostScroll(
+            consumed: Offset,
+            available: Offset,
+            source: NestedScrollSource
+        ): Offset {
+            Log.e("ops_consumed", consumed.toString())
+            Log.e("ops_available", available.toString())
+            return super.onPostScroll(consumed, available, source)
         }
         
         override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
@@ -195,9 +209,9 @@ fun CollapsingContent2(
                 val delta = this.value - lastValue
                 lastVelocity = this.velocity
                 
-                state.offset.floatValue = (state.offset.floatValue - delta).coerceAtLeast(0f)
+                state.offset = (state.offset - delta).coerceIn(0f, state.contentHeight)
                 
-                if (state.offset.floatValue == 0f) {
+                if (state.offset == 0f) {
                     this.cancelAnimation()
                 }
                 
@@ -212,17 +226,17 @@ fun CollapsingContent2(
         modifier = Modifier.nestedScroll(nestedScrollConnection)
     ) {
         Box(Modifier
-            .padding(top = Dp(state.contentHeight.floatValue / density.density) - Dp(state.offset.floatValue / density.density))) {
+            .padding(top = Dp(state.contentHeight / density.density) - Dp(state.offset / density.density))) {
             content()
         }
         Box(
             modifier = Modifier
                 .clip(RectangleShape)
                 .offset {
-                    IntOffset(0, -state.offset.floatValue.roundToInt())
+                    IntOffset(0, -state.offset.roundToInt())
                 }
                 .onGloballyPositioned {
-                    state.contentHeight.floatValue = it.size.height.toFloat()
+                    state.contentHeight = it.size.height.toFloat()
                     collapsingContentHeightDp = (it.size.height.toFloat() / density.density)
                 }
         
