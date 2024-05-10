@@ -298,7 +298,7 @@ class CommentsListController {
                 "comments/posts/$articleId/add",
                 requestBody = serializedComment.toRequestBody(contentType = "application/json".toMediaType())
             )
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             response.body?.string()?.let {

@@ -181,7 +181,7 @@ class UserController {
 		fun subscription(alias: String): Boolean {
 			val response = HabrApi.post("users/$alias/following/toggle")
 			
-			response.body?.string()?.let {
+			response?.body?.string()?.let {
 				return Json.parseToJsonElement(it).jsonObject["isSubscribed"]?.jsonPrimitive!!.boolean
 			}
 			throw UnsupportedOperationException("User is not authorized")

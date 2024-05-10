@@ -62,12 +62,13 @@ class HabrApi {
             }
         }
 
+        
         fun post(
             path: String,
             args: Map<String, String>? = null,
             requestBody: RequestBody = String().toRequestBody(),
             version: Int = 2
-        ): Response {
+        ): Response? {
             val token = getCsrfToken()
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null) {
@@ -81,7 +82,11 @@ class HabrApi {
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
-            return HttpClient.newCall(request).execute()
+            try {
+                return HttpClient.newCall(request).execute()
+            } catch (ex: Exception) {
+                return null
+            }
         }
 
         fun delete(
@@ -89,7 +94,7 @@ class HabrApi {
             args: Map<String, String>? = null,
             requestBody: RequestBody = String().toRequestBody(),
             version: Int = 2
-        ): Response {
+        ): Response? {
             val token = getCsrfToken()
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null) {
@@ -103,7 +108,11 @@ class HabrApi {
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
-            return HttpClient.newCall(request).execute()
+            try {
+                return HttpClient.newCall(request).execute()
+            } catch (ex: Exception) {
+                return null
+            }
         }
 
         fun getCsrfToken(): String? {
