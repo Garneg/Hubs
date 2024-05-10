@@ -298,7 +298,7 @@ class ArticleController {
         fun addToBookmarks(id: Int, isNews: Boolean): Boolean {
             val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
             val response = HabrApi.post(path)
-            if (response.code != 200)
+            if (response?.code != 200)
                 return false
             return true
         }
@@ -307,7 +307,7 @@ class ArticleController {
             val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
             
             val response = HabrApi.delete(path)
-            if (response.code != 200)
+            if (response?.code != 200)
                 return false
             return true
         }
@@ -320,7 +320,7 @@ class ArticleController {
         fun vote(pollId: Int, variantsIds: List<Int>): com.garnegsoft.hubs.data.article.Article.Poll? {
             val requestBody = Json.encodeToString(PollVote(variantsIds.map { it.toString() }))
             val response = HabrApi.post("polls/$pollId/vote", requestBody = requestBody.toRequestBody())
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
             val raw = response.body?.string()?.let {
                 HabrDataParser.parseJson<Article.Poll>(it)
