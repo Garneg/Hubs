@@ -23,7 +23,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
-import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 
@@ -34,7 +33,7 @@ class CollapsingContentState(initialOffset: Float, initialContentHeight: Float) 
     
     var contentHeight by mutableFloatStateOf(initialContentHeight)
     
-    val isContentHidden by derivedStateOf { offset == contentHeight }
+    val isContentFullyHidden by derivedStateOf { offset == contentHeight }
     
     suspend fun animateHide() {
         animateOffsetTo(contentHeight)
@@ -44,7 +43,7 @@ class CollapsingContentState(initialOffset: Float, initialContentHeight: Float) 
         animate(
             initialValue = offset,
             targetValue = targetValue,
-            animationSpec = tween(500, easing = EaseOut)
+            animationSpec = tween(easing = EaseOut)
         ) { currentValue, velocity ->
             offset = currentValue
         }
@@ -113,7 +112,6 @@ fun CollapsingContent(
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             if (doCollapse) {
                 if (available.y > 0 && state.offset > 0f) {
-                    
                     state.offset -= available.y
                     state.offset =
                         state.offset.coerceIn(0f, state.contentHeight)
@@ -164,11 +162,15 @@ fun CollapsingContent2(
     state: CollapsingContentState = rememberCollapsingContentState(),
     content: @Composable () -> Unit
 ) {
-    var collapsingContentHeightDp by rememberSaveable { mutableStateOf(0f) }
+    var collapsingContentHeightDp by rememberSaveable { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
+    var lastScrollOffsetChanged by rememberSaveable {
+        mutableFloatStateOf(0f)
+    }
     
     val decayAnimationSpec = rememberSplineBasedDecay<Float>()
     val nestedScrollConnection = object : NestedScrollConnection {
+        
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             if (doCollapse) {
                 if (available.y > 0 && state.offset > 0f) {
@@ -176,14 +178,24 @@ fun CollapsingContent2(
                     state.offset -= available.y
                     state.offset =
                         state.offset.coerceIn(0f, state.contentHeight)
+                    lastScrollOffsetChanged += available.y
+                    if (state.offset == 0f) {
+                        lastScrollOffsetChanged = 0f
+                    }
                     return available
                 }
                 if (available.y < 0 && state.offset < state.contentHeight) {
                     state.offset -= available.y
                     state.offset =
                         state.offset.coerceIn(0f, state.contentHeight)
+                    lastScrollOffsetChanged += available.y
+                    if (state.offset == state.contentHeight) {
+                        lastScrollOffsetChanged = 0f
+                    }
                     return available
                 }
+                
+                
             }
             
             return Offset.Zero
@@ -198,6 +210,16 @@ fun CollapsingContent2(
             available: Offset,
             source: NestedScrollSource
         ): Offset {
+            if (state.contentHeight > state.offset) {
+                Log.e("consumed", (available).toString())
+//                if (available.y > 0) {
+//                    state.offset = 0f
+//                } else {
+//                    state.offset = 0f
+////                    state.offset = state.contentHeight
+//                }
+            
+            }
             return super.onPostScroll(consumed, available, source)
         }
         
@@ -218,6 +240,15 @@ fun CollapsingContent2(
                 }
                 lastValue = this.value
             }
+            Log.e("changed", lastScrollOffsetChanged.toString())
+            if (state.contentHeight > state.offset) {
+                if (lastScrollOffsetChanged > 0) {
+                    state.animateShow()
+                } else if (lastScrollOffsetChanged < 0) {
+                    state.animateHide()
+                }
+            }
+            lastScrollOffsetChanged = 0f
             return available - Velocity(0f, lastVelocity)
         }
         

@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
 import android.content.Intent
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
@@ -34,7 +33,6 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.data.CollapsingContent
 import com.garnegsoft.hubs.data.CollapsingContent2
 import com.garnegsoft.hubs.data.PostType
 import com.garnegsoft.hubs.data.dataStore.HubsDataStore
@@ -118,7 +116,7 @@ fun ArticleScreen(
 	)
 	val collapsingContentState = rememberCollapsingContentState()
 	CollapsingContent2(
-		doCollapse = remember { derivedStateOf { !scrollState.canScrollBackward } }.value,
+		//doCollapse = remember { derivedStateOf { !scrollState.canScrollBackward } }.value,
 		state = collapsingContentState,
 		collapsingContent = {
 			Box {
@@ -475,8 +473,9 @@ fun ArticleScreen(
 			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
 			val topGradientColor by animateColorAsState(
 				targetValue =
-				if (collapsingContentState.isContentHidden) Color.White
-				else Color.White.copy(0f)
+				if (collapsingContentState.isContentFullyHidden && collapsingContentState.contentHeight != 0f) Color.White
+				else Color.White.copy(0f),
+				animationSpec = tween(1000)
 			)
 			
 			Box(modifier = Modifier
