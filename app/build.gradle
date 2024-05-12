@@ -3,6 +3,7 @@ plugins {
     id "org.jetbrains.kotlin.android"
     id "kotlinx-serialization"
     id "kotlin-kapt"
+    id 'com.google.gms.google-services'
 }
 
 def getDate() {
@@ -73,6 +74,11 @@ kapt {
 dependencies {
     var m3version = "1.1.2"
     implementation "androidx.compose.material3:material3:$m3version"
+
+    // firebase
+    implementation platform('com.google.firebase:firebase-bom:33.0.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-messaging'
 
     implementation "androidx.work:work-runtime-ktx:2.9.0"
 

@@ -16,6 +16,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -61,7 +62,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -103,6 +106,7 @@ import com.garnegsoft.hubs.ui.screens.user.LogoutConfirmDialog
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -121,6 +125,7 @@ import java.net.Socket
 class MainActivity : ComponentActivity() {
 	
 	
+	
 	@OptIn(ExperimentalAnimationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -130,6 +135,29 @@ class MainActivity : ComponentActivity() {
 //			.clearApplicationUserData()
 		val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 		
+		FirebaseMessaging.getInstance().token.addOnCompleteListener {
+			Log.e("fcm_token", it.result)
+		}
+		
+		if (Build.VERSION.SDK_INT > 28) {
+			val channel = NotificationChannel("articleChannel", "Articles", NotificationManager.IMPORTANCE_HIGH)
+			
+			(getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
+			Log.e("fcm", "article notification channel registered!")
+		}
+		
+		intent.extras?.getString("articleId_to_open")?.let {
+			Toast.makeText(this, "Guess i have to open article!", Toast.LENGTH_LONG).show()
+			startActivity(Intent(Intent.ACTION_VIEW).apply {
+				this.`package` = BuildConfig.APPLICATION_ID
+				this.data = Uri.parse("https://habr.com/p/$it")
+			})
+			
+		}
+		
+		FirebaseMessaging.getInstance().subscribeToTopic("test").addOnCompleteListener {
+			if (it.isSuccessful) Log.e("fcm_test_subscription", "subscribed")
+		}
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
