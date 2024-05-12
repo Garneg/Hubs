@@ -117,11 +117,16 @@ class HabrApi {
 
         fun getCsrfToken(): String? {
             if (csrfToken == null) {
-                var request = Request
+                val request = Request
                     .Builder()
                     .url("$baseAddress/ru/beta")
                     .build()
-                val response = HttpClient.newCall(request).execute()
+                
+                val response = try {
+                    HttpClient.newCall(request).execute()
+                } catch (ex: Exception) {
+                    return null
+                }
 
                 response.body?.string()?.let {
                     Jsoup.parse(it).getElementsByTag("meta")
