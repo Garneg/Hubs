@@ -30,6 +30,7 @@ class ArticlesListController {
 				var articles = kotlin.run {
 					var articlesIds =
 						HabrDataParser.parseJson<List<Int>>((responseJson.jsonObject["publicationIds"] ?: responseJson.jsonObject["articleIds"])!!.jsonArray)
+							.toSet()
 					var pagesCount = responseJson.jsonObject["pagesCount"]?.jsonPrimitive?.intOrNull
 					
 					
@@ -52,6 +53,8 @@ class ArticlesListController {
 //                            }
 						}
 					}
+					
+					
 					
 					
 					ArticlesList(
