@@ -9,13 +9,15 @@ import com.garnegsoft.hubs.api.company.CompaniesListModel
 import com.garnegsoft.hubs.api.hub.HubsListModel
 import com.garnegsoft.hubs.api.user.UsersListModel
 
-class MainScreenViewModel : ViewModel() {
+class MainScreenViewModel(
+	myFeedFilterInitialValue: MyFeedFilter = MyFeedFilter.defaultValues
+) : ViewModel() {
 	
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
 		baseArgs = arrayOf("myFeed" to "true"),
-		initialFilter = MyFeedFilter(showNews = false, showArticles = true, minRating = -1, complexity = PublicationComplexity.None)
+		initialFilter = myFeedFilterInitialValue
 	)
 	
 	val articlesListModel = ArticlesListModel(

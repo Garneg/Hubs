@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
+import com.garnegsoft.hubs.api.dataStore.FilterSavingController
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.*
@@ -52,6 +53,7 @@ fun MainScreen(
 	menu: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
+	val coroutineScope = rememberCoroutineScope()
 	var isAuthorized by rememberSaveable { mutableStateOf(false) }
 	val authorizedState by AuthDataController.isAuthorizedFlow(context)
 		.collectAsState(initial = null)
@@ -60,7 +62,12 @@ fun MainScreen(
 		isAuthorized = authorizedState == true
 	})
 	
-	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
+	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
+		// todo: Replace runblocking with something better as it now slows down initialization of main screen
+		runBlocking {
+			MainScreenViewModel(FilterSavingController.getMyFeedFilter(context, MyFeedFilter.defaultValues))
+		}
+	}
 	
 	val scaffoldState = rememberScaffoldState()
 	
@@ -217,7 +224,12 @@ fun MainScreen(
 									MyFeedFilter(
 										defaultValues = defaultValues,
 										onDismiss = onDismiss,
-										onDone = onDone
+										onDone = {
+											coroutineScope.launch {
+												FilterSavingController.saveMyFeedFilter(context, it)
+											}
+											onDone(it)
+										}
 									)
 								}
 							}) + map

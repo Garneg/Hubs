@@ -19,6 +19,7 @@ import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import kotlinx.serialization.Serializable
 
 @Composable
 fun NewsFilterDialog(
@@ -145,6 +146,8 @@ fun NewsFilterDialog(
     }
 }
 
+
+@Serializable
 data class NewsFilter(
     val showLast: Boolean,
     val minRating: Int = -1,
@@ -195,5 +198,6 @@ data class NewsFilter(
             }
         }
     }
+    
     
 }

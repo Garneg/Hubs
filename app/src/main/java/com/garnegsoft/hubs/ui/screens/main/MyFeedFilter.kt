@@ -20,8 +20,11 @@ import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 
+@Serializable
 data class MyFeedFilter(
 	val showArticles: Boolean,
 	val showNews: Boolean,
@@ -75,6 +78,14 @@ data class MyFeedFilter(
 		
 	}
 	
+	companion object {
+		val defaultValues = com.garnegsoft.hubs.ui.screens.main.MyFeedFilter(
+			showNews = false,
+			showArticles = true,
+			minRating = -1,
+			complexity = com.garnegsoft.hubs.api.PublicationComplexity.None
+		)
+	}
 }
 
 @Composable

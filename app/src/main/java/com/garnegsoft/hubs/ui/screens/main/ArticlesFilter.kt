@@ -15,6 +15,7 @@ import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import kotlinx.serialization.Serializable
 
 
 @Composable
@@ -178,6 +179,7 @@ fun ArticlesFilterDialog(
 	}
 }
 
+@Serializable
 data class ArticlesFilterState(
 	val showLast: Boolean,
 	val minRating: Int = -1,
