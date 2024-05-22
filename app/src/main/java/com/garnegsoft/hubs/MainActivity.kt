@@ -124,8 +124,6 @@ import java.net.Socket
 
 class MainActivity : ComponentActivity() {
 	
-	
-	
 	@OptIn(ExperimentalAnimationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
@@ -153,6 +151,11 @@ class MainActivity : ComponentActivity() {
 				this.data = Uri.parse("https://habr.com/p/$it")
 			})
 			
+		} ?: intent.extras?.getString("url_to_open")?.let {
+			Toast.makeText(this, "Guess i have to open URL!", Toast.LENGTH_LONG).show()
+			startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
+				this.data = Uri.parse(it)
+			}, null))
 		}
 		
 		FirebaseMessaging.getInstance().subscribeToTopic("test").addOnCompleteListener {
