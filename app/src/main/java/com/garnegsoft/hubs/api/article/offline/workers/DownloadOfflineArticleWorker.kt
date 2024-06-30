@@ -133,13 +133,14 @@ class DownloadOfflineArticleWorker(
 			var imageCounter = 0
 			val result = Jsoup.parse(article.contentHtml).forEachNode {
 				if(it is Element && it.tagName() == "img"){
-					var url = if (it.hasAttr("data-src")){
+					var url = if (it.attr("data-blurred") == "true"){
 						it.attr("data-src")
 					} else {
 						it.attr("src")
 					}
 					
 					urls.add(url)
+					it.attr("src", "offline-article:${article.articleId}/img$imageCounter.${url.split(".").last()}")
 					it.attr("data-src", "offline-article:${article.articleId}/img$imageCounter.${url.split(".").last()}")
 					
 					imageCounter++

@@ -91,6 +91,12 @@ object HubsDataStore {
 		
 	}
 	
+	object FiltersPreferences : SingleDataStore(name = "filters") {
+		val MyFeed = DataStorePreference.StringPreference("my_feed", "")
+		val Articles = DataStorePreference.StringPreference("main_articles", "")
+		val News = DataStorePreference.StringPreference("main_news", "")
+	}
+	
 }
 
 interface DataStorePreference<T> {

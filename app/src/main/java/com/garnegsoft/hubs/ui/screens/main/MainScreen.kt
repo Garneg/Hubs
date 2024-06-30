@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
+import com.garnegsoft.hubs.api.dataStore.FilterSavingController
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.*
@@ -38,7 +39,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
 	viewModelStoreOwner: ViewModelStoreOwner,
@@ -52,6 +53,7 @@ fun MainScreen(
 	menu: @Composable () -> Unit,
 ) {
 	val context = LocalContext.current
+	val coroutineScope = rememberCoroutineScope()
 	var isAuthorized by rememberSaveable { mutableStateOf(false) }
 	val authorizedState by AuthDataController.isAuthorizedFlow(context)
 		.collectAsState(initial = null)
@@ -60,7 +62,16 @@ fun MainScreen(
 		isAuthorized = authorizedState == true
 	})
 	
-	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner)
+	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
+		// todo: Replace runblocking with something better as it probably slows down initialization of main screen
+		runBlocking {
+			MainScreenViewModel(
+				myFeedFilterInitialValue = FilterSavingController.getMyFeedFilter(context, MyFeedFilter.defaultValues),
+				articlesFilterInitialValue = FilterSavingController.getArticlesFilter(context, ArticlesFilter.defaultValues),
+				newsFilterInitialValue = FilterSavingController.getNewsFilter(context, NewsFilter.defaultValues)
+			)
+		}
+	}
 	
 	val scaffoldState = rememberScaffoldState()
 	
@@ -160,7 +171,13 @@ fun MainScreen(
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
 								filterDialog = { defVals, onDissmis, onDone ->
-									ArticlesFilterDialog(defVals, onDissmis, onDone)
+									ArticlesFilterDialog(defVals, onDissmis,
+										onDone = {
+											coroutineScope.launch(Dispatchers.IO) {
+												FilterSavingController.saveArticlesFilter(context, it)
+											}
+											onDone(it)
+										})
 								}
 							)
 						},
@@ -176,7 +193,12 @@ fun MainScreen(
 									NewsFilterDialog(
 										defaultValues = defVals,
 										onDismiss = onDismiss,
-										onDone = onDone
+										onDone = {
+											coroutineScope.launch(Dispatchers.IO) {
+												FilterSavingController.saveNewsFilter(context, it)
+											}
+											onDone(it)
+										}
 									)
 								}
 							)
@@ -217,7 +239,12 @@ fun MainScreen(
 									MyFeedFilter(
 										defaultValues = defaultValues,
 										onDismiss = onDismiss,
-										onDone = onDone
+										onDone = {
+											coroutineScope.launch(Dispatchers.IO) {
+												FilterSavingController.saveMyFeedFilter(context, it)
+											}
+											onDone(it)
+										}
 									)
 								}
 							}) + map
