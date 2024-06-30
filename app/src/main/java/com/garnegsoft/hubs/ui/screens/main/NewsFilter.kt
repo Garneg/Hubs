@@ -199,5 +199,8 @@ data class NewsFilter(
         }
     }
     
-    
+    companion object {
+        
+        val defaultValues = NewsFilter(showLast = true, period = FilterPeriod.Day)
+    }
 }

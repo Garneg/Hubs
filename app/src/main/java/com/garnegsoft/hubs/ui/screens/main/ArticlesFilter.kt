@@ -20,9 +20,9 @@ import kotlinx.serialization.Serializable
 
 @Composable
 fun ArticlesFilterDialog(
-	defaultValues: ArticlesFilterState,
+	defaultValues: ArticlesFilter,
 	onDismiss: () -> Unit,
-	onDone: (ArticlesFilterState) -> Unit
+	onDone: (ArticlesFilter) -> Unit
 ) {
 	
 	var showLast by rememberSaveable {
@@ -40,7 +40,7 @@ fun ArticlesFilterDialog(
 	
 	BaseFilterDialog(onDismiss = onDismiss, onDone = {
 		onDone(
-			ArticlesFilterState(
+			ArticlesFilter(
 				showLast,
 				minRating,
 				period,
@@ -180,7 +180,7 @@ fun ArticlesFilterDialog(
 }
 
 @Serializable
-data class ArticlesFilterState(
+data class ArticlesFilter(
 	val showLast: Boolean,
 	val minRating: Int = -1,
 	val period: FilterPeriod = FilterPeriod.Day,
@@ -247,6 +247,9 @@ data class ArticlesFilterState(
 		
 	}
 	
+	companion object {
+		val defaultValues: ArticlesFilter = ArticlesFilter(showLast = true, complexity = PublicationComplexity.None)
+	}
 }
 
 

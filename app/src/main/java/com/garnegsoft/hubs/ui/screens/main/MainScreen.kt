@@ -39,7 +39,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
 	viewModelStoreOwner: ViewModelStoreOwner,
@@ -63,9 +63,13 @@ fun MainScreen(
 	})
 	
 	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
-		// todo: Replace runblocking with something better as it now slows down initialization of main screen
+		// todo: Replace runblocking with something better as it probably slows down initialization of main screen
 		runBlocking {
-			MainScreenViewModel(FilterSavingController.getMyFeedFilter(context, MyFeedFilter.defaultValues))
+			MainScreenViewModel(
+				myFeedFilterInitialValue = FilterSavingController.getMyFeedFilter(context, MyFeedFilter.defaultValues),
+				articlesFilterInitialValue = FilterSavingController.getArticlesFilter(context, ArticlesFilter.defaultValues),
+				newsFilterInitialValue = FilterSavingController.getNewsFilter(context, NewsFilter.defaultValues)
+			)
 		}
 	}
 	
@@ -167,7 +171,13 @@ fun MainScreen(
 								onArticleAuthorClick = onUserClicked,
 								onArticleCommentsClick = onCommentsClicked,
 								filterDialog = { defVals, onDissmis, onDone ->
-									ArticlesFilterDialog(defVals, onDissmis, onDone)
+									ArticlesFilterDialog(defVals, onDissmis,
+										onDone = {
+											coroutineScope.launch(Dispatchers.IO) {
+												FilterSavingController.saveArticlesFilter(context, it)
+											}
+											onDone(it)
+										})
 								}
 							)
 						},
@@ -183,7 +193,12 @@ fun MainScreen(
 									NewsFilterDialog(
 										defaultValues = defVals,
 										onDismiss = onDismiss,
-										onDone = onDone
+										onDone = {
+											coroutineScope.launch(Dispatchers.IO) {
+												FilterSavingController.saveNewsFilter(context, it)
+											}
+											onDone(it)
+										}
 									)
 								}
 							)
@@ -225,7 +240,7 @@ fun MainScreen(
 										defaultValues = defaultValues,
 										onDismiss = onDismiss,
 										onDone = {
-											coroutineScope.launch {
+											coroutineScope.launch(Dispatchers.IO) {
 												FilterSavingController.saveMyFeedFilter(context, it)
 											}
 											onDone(it)

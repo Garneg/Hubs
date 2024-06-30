@@ -10,7 +10,9 @@ import com.garnegsoft.hubs.api.hub.HubsListModel
 import com.garnegsoft.hubs.api.user.UsersListModel
 
 class MainScreenViewModel(
-	myFeedFilterInitialValue: MyFeedFilter = MyFeedFilter.defaultValues
+	myFeedFilterInitialValue: MyFeedFilter = MyFeedFilter.defaultValues,
+	articlesFilterInitialValue: ArticlesFilter = ArticlesFilter.defaultValues,
+	newsFilterInitialValue: NewsFilter = NewsFilter.defaultValues
 ) : ViewModel() {
 	
 	val myFeedArticlesListModel = ArticlesListModel(
@@ -23,13 +25,13 @@ class MainScreenViewModel(
 	val articlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		initialFilter = ArticlesFilterState(showLast = true, complexity = PublicationComplexity.None)
+		initialFilter = articlesFilterInitialValue
 	)
 	
 	val newsListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		initialFilter = NewsFilter(showLast = true, period = FilterPeriod.Day),
+		initialFilter = newsFilterInitialValue,
 		baseArgs = arrayOf("news" to "true")
 	)
 	
