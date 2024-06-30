@@ -79,11 +79,11 @@ data class MyFeedFilter(
 	}
 	
 	companion object {
-		val defaultValues = com.garnegsoft.hubs.ui.screens.main.MyFeedFilter(
+		val defaultValues = MyFeedFilter(
 			showNews = false,
 			showArticles = true,
 			minRating = -1,
-			complexity = com.garnegsoft.hubs.api.PublicationComplexity.None
+			complexity = com.garnegsoft.hubs.data.PublicationComplexity.None
 		)
 	}
 }
