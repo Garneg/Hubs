@@ -10,10 +10,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -47,131 +51,139 @@ fun OfflineArticleCard(
 ) {
 	var showDeleteButton by rememberSaveable { mutableStateOf(false) }
 	val haptic = LocalHapticFeedback.current
-	Column(
-		modifier = modifier
-			.fillMaxWidth()
-			.animateContentSize()
-			.clip(style.cardShape)
-			.background(style.backgroundColor)
-			.combinedClickable(
-				onLongClick = {
-					if (!showDeleteButton) {
-						showDeleteButton = true
-						haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-					}
-				},
-				onClick = onClick
-			)
-			.padding(style.innerPadding)
-	) {
-		article.authorName?.let {
-			Row(verticalAlignment = Alignment.CenterVertically) {
-				if (article.authorAvatarUrl != null) {
-					AsyncGifImage(
-						modifier = Modifier
-							.size(style.authorAvatarSize)
-							.clip(style.innerElementsShape),
-						model = article.authorAvatarUrl, contentDescription = ""
-					)
-				} else {
-					Icon(
-						modifier = Modifier
-							.size(style.authorAvatarSize)
-							.border(
-								width = 2.dp,
-								color = placeholderColorLegacy(it),
-								shape = style.innerElementsShape
-							)
-							.background(Color.White, shape = style.innerElementsShape)
-							.padding(2.dp),
-						painter = painterResource(id = R.drawable.user_avatar_placeholder),
-						contentDescription = "",
-						tint = placeholderColorLegacy(it)
-					)
-				}
-				Spacer(modifier = Modifier.width(4.dp))
-				Text(text = it, style = style.authorTextStyle)
-				Spacer(modifier = Modifier.weight(1f))
-				Text(text = formatTime(article.timePublished), style = style.publishedTimeTextStyle)
-			}
-			Spacer(modifier = Modifier.height(8.dp))
-		}
-		Text(text = article.title, style = style.titleTextStyle)
+	Box {
 		
-		var hubsText by rememberSaveable { mutableStateOf("") }
 		
-		LaunchedEffect(key1 = Unit, block = {
-			if (hubsText == "") {
-				hubsText = article.hubs.hubsList.joinToString(separator = ", ") {
-					it.replace(" ", "\u00A0")
-				}
-			}
-		})
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
+		Column(
+			modifier = modifier
+				.fillMaxWidth()
+				.animateContentSize()
+				.clip(style.cardShape)
+				.background(style.backgroundColor)
+				.combinedClickable(
+					onLongClick = {
+						
+						
+						if (!showDeleteButton) {
+							haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+						}
+						showDeleteButton = !showDeleteButton
+					},
+					onClick = onClick
+				)
+				.padding(style.innerPadding)
 		) {
-			Icon(
-				modifier = Modifier.size(14.dp),
-				painter = painterResource(id = R.drawable.clock_icon),
-				contentDescription = "",
-				tint = style.statisticsColor
-			)
-			Spacer(modifier = Modifier.width(2.dp))
-			Text(
-				text = "${article.readingTime} мин",
-				color = style.statisticsColor,
-				fontWeight = FontWeight.W500,
-				fontSize = 14.sp
-			)
-			if (article.isTranslation) {
-				Spacer(modifier = Modifier.width(12.dp))
+			article.authorName?.let {
+				Row(verticalAlignment = Alignment.CenterVertically) {
+					if (article.authorAvatarUrl != null) {
+						AsyncGifImage(
+							modifier = Modifier
+								.size(style.authorAvatarSize)
+								.clip(style.innerElementsShape),
+							model = article.authorAvatarUrl, contentDescription = ""
+						)
+					} else {
+						Icon(
+							modifier = Modifier
+								.size(style.authorAvatarSize)
+								.border(
+									width = 2.dp,
+									color = placeholderColorLegacy(it),
+									shape = style.innerElementsShape
+								)
+								.background(Color.White, shape = style.innerElementsShape)
+								.padding(2.dp),
+							painter = painterResource(id = R.drawable.user_avatar_placeholder),
+							contentDescription = "",
+							tint = placeholderColorLegacy(it)
+						)
+					}
+					Spacer(modifier = Modifier.width(4.dp))
+					Text(text = it, style = style.authorTextStyle)
+					Spacer(modifier = Modifier.weight(1f))
+					Text(
+						text = formatTime(article.timePublished),
+						style = style.publishedTimeTextStyle
+					)
+				}
+				Spacer(modifier = Modifier.height(8.dp))
+			}
+			Text(text = article.title, style = style.titleTextStyle)
+			
+			var hubsText by rememberSaveable { mutableStateOf("") }
+			
+			LaunchedEffect(key1 = Unit, block = {
+				if (hubsText == "") {
+					hubsText = article.hubs.hubsList.joinToString(separator = ", ") {
+						it.replace(" ", "\u00A0")
+					}
+				}
+			})
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+			) {
 				Icon(
 					modifier = Modifier.size(14.dp),
-					painter = painterResource(id = R.drawable.translation),
+					painter = painterResource(id = R.drawable.clock_icon),
 					contentDescription = "",
-					tint = TranslationLabelColor
+					tint = style.statisticsColor
 				)
 				Spacer(modifier = Modifier.width(2.dp))
 				Text(
-					text = "Перевод",
-					color = TranslationLabelColor,
-					fontSize = 14.sp,
-					fontWeight = FontWeight.W500
+					text = "${article.readingTime} мин",
+					color = style.statisticsColor,
+					fontWeight = FontWeight.W500,
+					fontSize = 14.sp
 				)
+				if (article.isTranslation) {
+					Spacer(modifier = Modifier.width(12.dp))
+					Icon(
+						modifier = Modifier.size(14.dp),
+						painter = painterResource(id = R.drawable.translation),
+						contentDescription = "",
+						tint = TranslationLabelColor
+					)
+					Spacer(modifier = Modifier.width(2.dp))
+					Text(
+						text = "Перевод",
+						color = TranslationLabelColor,
+						fontSize = 14.sp,
+						fontWeight = FontWeight.W500
+					)
+				}
 			}
-		}
-		// Hubs
-		Text(
-			text = hubsText, style = style.hubsTextStyle
-		)
-		if (article.thumbnailUrl != null) {
-			Spacer(modifier = Modifier.height(4.dp))
-			AsyncGifImage(
-				modifier = Modifier
-					.fillMaxWidth()
-					.aspectRatio(16f / 9f)
-					.clip(style.innerElementsShape)
-					.background(
-						if (MaterialTheme.colors.isLight)
-							Color.Companion.Transparent
-						else
-							MaterialTheme.colors.onSurface.copy(0.2f)
-					),
-				model = article.thumbnailUrl,
-				contentScale = ContentScale.Crop,
-				contentDescription = ""
+			// Hubs
+			Text(
+				text = hubsText, style = style.hubsTextStyle
 			)
+			if (article.thumbnailUrl != null) {
+				Spacer(modifier = Modifier.height(4.dp))
+				AsyncGifImage(
+					modifier = Modifier
+						.fillMaxWidth()
+						.aspectRatio(16f / 9f)
+						.clip(style.innerElementsShape)
+						.background(
+							if (MaterialTheme.colors.isLight)
+								Color.Companion.Transparent
+							else
+								MaterialTheme.colors.onSurface.copy(0.2f)
+						),
+					model = article.thumbnailUrl,
+					contentScale = ContentScale.Crop,
+					contentDescription = ""
+				)
+				
+			}
 			
-		}
-		
-		
-		
-		AnimatedVisibility(
-			visible = showDeleteButton,
-			enter = fadeIn() + scaleIn()
-		) {
-			Column {
-				Spacer(modifier = Modifier.height(style.innerPadding / 2))
+			
+			
+			AnimatedVisibility(
+				visible = showDeleteButton,
+				enter = fadeIn() + scaleIn()
+			) {
+				Column {
+					Spacer(modifier = Modifier.height(style.innerPadding / 2))
 //				CompositionLocalProvider(
 //					LocalRippleTheme provides object : RippleTheme {
 //						@Composable
@@ -198,12 +210,19 @@ fun OfflineArticleCard(
 							)
 						)
 					) {
+						Icon(imageVector = Icons.Outlined.Delete, contentDescription = null, tint = Color.White)
+						Spacer(modifier = Modifier.width(4.dp))
 						Text(text = "Удалить", color = Color.White)
 					}
 //				}
+				}
 			}
+			
+			
 		}
-		
-		
+		Divider(
+			Modifier
+				.align(Alignment.BottomCenter)
+				.padding(horizontal = style.innerPadding))
 	}
 }

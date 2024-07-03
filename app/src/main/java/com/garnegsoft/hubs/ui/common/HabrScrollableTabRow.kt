@@ -5,11 +5,16 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.CoroutineScope
@@ -27,9 +32,9 @@ fun HabrScrollableTabRow(
 	onCurrentPositionTabClick: suspend CoroutineScope.(index: Int, title: String) -> Unit = { i, t -> }
 ) {
 	val pagerStateCoroutineScope = rememberCoroutineScope()
-	
+	val surfaceColor = MaterialTheme.colors.surface
 	ScrollableTabRow(
-		modifier = Modifier.fillMaxWidth(),
+		
 		selectedTabIndex = pagerState.currentPage,
 		edgePadding = 8.dp,
 		divider = {
@@ -58,6 +63,15 @@ fun HabrScrollableTabRow(
 	) {
 		tabs.forEachIndexed { index, title ->
 			Tab(
+				modifier = Modifier.clip(
+					if (index == 0) {
+						RoundedCornerShape(16.dp, 0.dp, 0.dp, 0.dp)
+					} else if (index == tabs.lastIndex) {
+						RoundedCornerShape(0.dp, 16.dp, 0.dp, 0.dp)
+					} else {
+						RectangleShape
+					}
+				),
 				selected = index == pagerState.currentPage,
 				onClick = {
 					pagerStateCoroutineScope.launch {
