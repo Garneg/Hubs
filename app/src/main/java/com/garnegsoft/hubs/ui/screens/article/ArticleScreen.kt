@@ -11,7 +11,9 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -44,6 +46,8 @@ import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
@@ -94,6 +98,7 @@ fun ArticleScreen(
 	}
 	val articleSaved by viewModel.articleExists(LocalContext.current, articleId)
 		.collectAsState(false)
+	
 	var actionsVisible by rememberSaveable {
 		mutableStateOf(false)
 	}
@@ -114,12 +119,20 @@ fun ArticleScreen(
 		targetValue = if (actionsVisible) 1f else 0f,
 		animationSpec = tween(delayMillis = 0)
 	)
+	val topBarAlpha by animateFloatAsState(
+		targetValue = if (scrollState.canScrollBackward) 0.75f else 1f
+	)
+	
 	val collapsingContentState = rememberCollapsingContentState()
+	
 	CollapsingContent2(
-		//doCollapse = remember { derivedStateOf { !scrollState.canScrollBackward } }.value,
+//		doCollapse = false,
 		state = collapsingContentState,
+		contentLazyListState = scrollState,
 		collapsingContent = {
-			Box {
+			Box(
+				modifier = Modifier.alpha(topBarAlpha)
+			) {
 				TopAppBar(
 					title = { },
 					elevation = 0.dp,
@@ -208,11 +221,12 @@ fun ArticleScreen(
 								tint = MaterialTheme.colors.onPrimary.copy(shareIconColorAlpha)
 							)
 						}
-					})
+					}
+				)
 				Divider(modifier = Modifier.align(Alignment.BottomCenter))
 			}
 		}
-	) {
+	) { offsetTop ->
 		Scaffold(
 			backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
 			bottomBar = {
@@ -453,16 +467,26 @@ fun ArticleScreen(
 				
 				Box(modifier = Modifier.padding(it)) {
 					if (nodeParsed && fontSize != null) {
-						SelectionContainer {
-							ArticleContent(
-								article = article,
-								scrollState = scrollState,
-								onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
-								onHubClicked = onHubClicked,
-								onCompanyClick = onCompanyClick,
-								onViewImageRequest = onViewImageRequest,
-								onArticleClick = onArticleClick
-							)
+						CompositionLocalProvider(
+							LocalTextSelectionColors provides TextSelectionColors(MaterialTheme.colors.secondary, MaterialTheme.colors.secondary.copy(0.2f))
+						) {
+							SelectionContainer {
+								ArticleContent(
+									article = article,
+									scrollState = scrollState,
+									onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
+									onHubClicked = onHubClicked,
+									onCompanyClick = onCompanyClick,
+									onViewImageRequest = onViewImageRequest,
+									onArticleClick = onArticleClick,
+									contentPadding = PaddingValues(
+										start = 16.dp,
+										top = 16.dp + offsetTop,
+										end = 16.dp,
+										bottom = 16.dp
+									)
+								)
+							}
 						}
 					}
 				}
@@ -471,12 +495,12 @@ fun ArticleScreen(
 					.fillMaxSize()
 					.padding(it)
 			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
-			val topGradientColor by animateColorAsState(
-				targetValue =
-				if (collapsingContentState.isContentFullyHidden && collapsingContentState.contentHeight != 0f) Color.White
-				else Color.White.copy(0f),
-				animationSpec = tween(1000)
-			)
+			val topGradientColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background //by animateColorAsState(
+//				targetValue =
+//				if (collapsingContentState.isContentFullyHidden && collapsingContentState.contentHeight != 0f) Color.White
+//				else Color.White.copy(0f),
+//				animationSpec = tween(1000)
+//			)
 			
 			Box(modifier = Modifier
 				.fillMaxWidth()
@@ -493,5 +517,8 @@ fun ArticleScreen(
 				})
 			
 		}
+	}
+	LaunchedEffect(key1 = Unit) {
+		collapsingContentState.animateShow()
 	}
 }

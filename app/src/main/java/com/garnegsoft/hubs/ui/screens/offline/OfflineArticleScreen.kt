@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
 import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -18,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -40,7 +41,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -52,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.data.AsyncGifImage
+import com.garnegsoft.hubs.data.CollapsingContent2
 import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.utils.formatTime
 import com.garnegsoft.hubs.ui.common.HubChip
@@ -74,7 +79,7 @@ fun OfflineArticleScreen(
 	onDelete: () -> Unit
 ) {
 	val viewModel = viewModel<OfflineArticleScreenViewModel>()
-	val lazyListState = rememberLazyListState()
+	val scrollState = rememberLazyListState()
 	
 	var counter by rememberSaveable { mutableStateOf(1) }
 	LaunchedEffect(key1 = Unit, block = {
@@ -91,10 +96,11 @@ fun OfflineArticleScreen(
 	val textColor = MaterialTheme.colors.onSurface
 	val spanStyle = remember(fontSize, textColor) {
 		SpanStyle(
-		color = textColor,
-		fontSize = fontSize?.sp
-			?: 16.sp,
-	) }
+			color = textColor,
+			fontSize = fontSize?.sp
+				?: 16.sp,
+		)
+	}
 	
 	LaunchedEffect(key1 = Unit, block = {
 		if (!viewModel.offlineArticle.isInitialized) {
@@ -108,37 +114,51 @@ fun OfflineArticleScreen(
 	var showTopBarMenu by remember {
 		mutableStateOf(false)
 	}
+	val topBarAlpha by animateFloatAsState(
+		targetValue = if (scrollState.canScrollBackward) 0.75f else 1f
+	)
 	
-	
-	
-	Scaffold(
-		topBar = {
-			TopAppBar(
-				elevation = 0.dp,
-				title = { Text(text = "Публикация") },
-				navigationIcon = {
-					IconButton(onClick = onBack) {
-						Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-					}
-				},
-				actions = {
-					Box {
-						IconButton(onClick = { showTopBarMenu = true }) {
-							Icon(imageVector = Icons.Default.MoreVert, contentDescription = null)
+	CollapsingContent2(
+		contentLazyListState = scrollState,
+		collapsingContent = {
+			Box(
+				modifier = Modifier.alpha(topBarAlpha)
+			) {
+				TopAppBar(
+					elevation = 0.dp,
+					title = { },
+					navigationIcon = {
+						IconButton(onClick = onBack) {
+							Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+						}
+					},
+					actions = {
+						Box {
+							IconButton(onClick = { showTopBarMenu = true }) {
+								Icon(
+									imageVector = Icons.Default.MoreVert,
+									tint = MaterialTheme.colors.onPrimary,
+									contentDescription = null
+								)
+							}
+							
+							OfflineArticleScreenMenu(
+								show = showTopBarMenu,
+								onDismiss = { showTopBarMenu = false },
+								onDelete = onDelete,
+								onSwitchToNormalMode = {
+									onSwitchToNormalMode(); showTopBarMenu = false
+								}
+							)
 						}
 						
-						OfflineArticleScreenMenu(
-							show = showTopBarMenu,
-							onDismiss = { showTopBarMenu = false },
-							onDelete = onDelete,
-							onSwitchToNormalMode = { onSwitchToNormalMode(); showTopBarMenu = false  }
-						)
 					}
-					
-				}
-			)
+				)
+				Divider(modifier = Modifier.align(Alignment.BottomCenter))
+			}
 		}
-	) {
+	) { offsetTop ->
+	Scaffold {
 		
 		if (viewModel.offlineArticle.isInitialized && article != null) {
 			LaunchedEffect(key1 = Unit, block = {
@@ -169,9 +189,11 @@ fun OfflineArticleScreen(
 		) {
 			if (parsedContent != null) {
 				LazyColumn(
-					state = lazyListState,
+					state = scrollState,
 					modifier = Modifier.fillMaxSize(),
-					contentPadding = PaddingValues(16.dp)
+					contentPadding = PaddingValues(
+						start = 16.dp, top = 16.dp + offsetTop, end = 16.dp, bottom = 16.dp
+					)
 				) {
 					item {
 						Row(
@@ -291,8 +313,8 @@ fun OfflineArticleScreen(
 							text = hubsText, style = TextStyle(
 								color = Color.Gray,
 								fontWeight = FontWeight.W500,
-								lineHeight = (fontSize?.let { it - 4f }?.sp ?: 16.sp) * 1.25f,
-								fontSize = fontSize?.let { it - 4f }?.sp ?: 16.sp
+								lineHeight = (fontSize?.let { it - 2f }?.sp ?: 16.sp) * 1.25f,
+								fontSize = fontSize?.let { it - 2f }?.sp ?: 16.sp
 							)
 						)
 						Spacer(modifier = Modifier.height(8.dp))
@@ -326,12 +348,31 @@ fun OfflineArticleScreen(
 					
 					
 				}
-				ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = lazyListState)
+				ScrollBar(
+					modifier = Modifier.align(Alignment.CenterEnd),
+					lazyListState = scrollState
+				)
 				
 			} else {
 				HubsCircularProgressIndicator()
 			}
 		}
+		val topGradientColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background //by animateColorAsState(
+		
+		Box(modifier = Modifier
+			.fillMaxWidth()
+			.height(56.dp)
+			.drawBehind {
+				drawRect(
+					Brush.verticalGradient(
+						listOf(
+							topGradientColor,
+							Color.Transparent
+						)
+					)
+				)
+			})
 	}
+}
 	
 }

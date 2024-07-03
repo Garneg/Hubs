@@ -8,10 +8,12 @@ import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.RectangleShape
@@ -43,7 +45,7 @@ class CollapsingContentState(initialOffset: Float, initialContentHeight: Float) 
         animate(
             initialValue = offset,
             targetValue = targetValue,
-            animationSpec = tween(easing = EaseOut)
+            animationSpec = tween(durationMillis = 200, easing = EaseOut)
         ) { currentValue, velocity ->
             offset = currentValue
         }
@@ -159,8 +161,9 @@ fun CollapsingContent(
 fun CollapsingContent2(
     collapsingContent: @Composable () -> Unit,
     doCollapse: Boolean = true,
+    contentLazyListState: LazyListState,
     state: CollapsingContentState = rememberCollapsingContentState(),
-    content: @Composable () -> Unit
+    content: @Composable (offsetTop: Dp) -> Unit
 ) {
     var collapsingContentHeightDp by rememberSaveable { mutableFloatStateOf(0f) }
     val density = LocalDensity.current
@@ -182,9 +185,8 @@ fun CollapsingContent2(
                     if (state.offset == 0f) {
                         lastScrollOffsetChanged = 0f
                     }
-                    return available
-                }
-                if (available.y < 0 && state.offset < state.contentHeight) {
+                    //return available
+                } else if (available.y < 0 && state.offset < state.contentHeight) {
                     state.offset -= available.y
                     state.offset =
                         state.offset.coerceIn(0f, state.contentHeight)
@@ -192,13 +194,13 @@ fun CollapsingContent2(
                     if (state.offset == state.contentHeight) {
                         lastScrollOffsetChanged = 0f
                     }
-                    return available
+                    //return available
                 }
                 
                 
             }
             
-            return Offset.Zero
+            return super.onPreScroll(available, source)
         }
         
         override suspend fun onPreFling(available: Velocity): Velocity {
@@ -232,34 +234,38 @@ fun CollapsingContent2(
             ).animateDecay(decayAnimationSpec) {
                 val delta = this.value - lastValue
                 lastVelocity = this.velocity
-                
+
                 state.offset = (state.offset - delta).coerceIn(0f, state.contentHeight)
-                
+
                 if (state.offset == 0f) {
                     this.cancelAnimation()
                 }
                 lastValue = this.value
             }
             Log.e("changed", lastScrollOffsetChanged.toString())
-            if (state.contentHeight > state.offset) {
-                if (lastScrollOffsetChanged > 0) {
-                    state.animateShow()
-                } else if (lastScrollOffsetChanged < 0) {
-                    state.animateHide()
-                }
+//            if (state.contentHeight > state.offset) {
+//                if (lastScrollOffsetChanged > 0) {
+//                    state.animateShow()
+//                } else if (lastScrollOffsetChanged < 0) {
+//                    state.animateHide()
+//                }
+//            }
+            if (state.contentHeight - state.offset > state.contentHeight / 2f && !contentLazyListState.isScrollInProgress) {
+                state.animateShow()
+            } else {
+                state.animateHide()
             }
             lastScrollOffsetChanged = 0f
             return available - Velocity(0f, lastVelocity)
         }
-        
+    
     }
     
     Box(
         modifier = Modifier.nestedScroll(nestedScrollConnection)
     ) {
-        Box(Modifier
-            .padding(top = Dp(state.contentHeight / density.density) - Dp(state.offset / density.density))) {
-            content()
+        Box() {
+            content(Dp(state.contentHeight / density.density))
         }
         Box(
             modifier = Modifier

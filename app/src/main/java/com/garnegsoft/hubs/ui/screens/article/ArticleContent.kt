@@ -53,6 +53,7 @@ import kotlin.math.roundToInt
 fun ArticleContent(
 	article: Article,
 	scrollState: LazyListState = rememberLazyListState(),
+	contentPadding: PaddingValues = PaddingValues(16.dp),
 	onAuthorClicked: () -> Unit,
 	onHubClicked: (alias: String) -> Unit,
 	onCompanyClick: (alias: String) -> Unit,
@@ -93,7 +94,7 @@ fun ArticleContent(
 		LazyColumn(
 			modifier = Modifier.fillMaxSize(),
 			state = scrollState,
-			contentPadding = PaddingValues(16.dp)
+			contentPadding = contentPadding
 		) {
 			if (article.editorVersion == EditorVersion.FirstVersion) {
 				item {
