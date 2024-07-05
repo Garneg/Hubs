@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -14,6 +15,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -35,7 +37,7 @@ fun Poll(
 	}
 	
 	Column(
-		verticalArrangement = Arrangement.spacedBy(16.dp),
+		verticalArrangement = Arrangement.spacedBy(12.dp),
 		modifier = Modifier.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background)
 	) {
 		Text(
@@ -212,10 +214,12 @@ fun PollItem(
 			val size =
 				Size(width = this.size.width * data.percent / 100f, height = this.size.height)
 			
-			drawRect(
+			drawRoundRect(
 				color = if (isMostVoted) colors.secondaryVariant else colors.secondaryVariant.copy(
 					0.5f
-				), size = size
+				),
+				size = size,
+				cornerRadius = CornerRadius(2f * density, 2f * density)
 			)
 		})
 	}

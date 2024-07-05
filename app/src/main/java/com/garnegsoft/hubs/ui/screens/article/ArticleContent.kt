@@ -351,7 +351,11 @@ fun ArticleContent(
 						Divider(modifier = Modifier.padding(vertical = 24.dp))
 					}
 				}
-				items(items = article.polls) { originalPoll ->
+				itemsIndexed(items = article.polls) { index, originalPoll ->
+					
+					if (index > 0) {
+						Spacer(modifier = Modifier.height(48.dp))
+					}
 					val poll =
 						updatedPolls?.find { originalPoll.id == it.id } ?: originalPoll
 					Poll(

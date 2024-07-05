@@ -3,7 +3,6 @@ package com.garnegsoft.hubs.ui.screens.article
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideIn
@@ -11,9 +10,7 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
@@ -46,13 +44,12 @@ import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 
+val BOTTOM_BAR_HEIGHT = 60.dp
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -124,6 +121,8 @@ fun ArticleScreen(
 	)
 	
 	val collapsingContentState = rememberCollapsingContentState()
+	val verticalEdgesGradientColor =
+		if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background //by animateColorAsState(
 	
 	CollapsingContent2(
 //		doCollapse = false,
@@ -131,7 +130,17 @@ fun ArticleScreen(
 		contentLazyListState = scrollState,
 		collapsingContent = {
 			Box(
-				modifier = Modifier.alpha(topBarAlpha)
+				modifier = Modifier
+					.drawBehind {
+						drawRect(
+							Brush.verticalGradient(
+								listOf(
+									verticalEdgesGradientColor,
+									verticalEdgesGradientColor.copy(0.75f)
+								)
+							)
+						)
+					}
 			) {
 				TopAppBar(
 					title = { },
@@ -155,6 +164,7 @@ fun ArticleScreen(
 							)
 						}
 					},
+					backgroundColor = Color.Transparent,
 					actions = {
 						Box(
 							modifier = Modifier
@@ -227,19 +237,118 @@ fun ArticleScreen(
 			}
 		}
 	) { offsetTop ->
-		Scaffold(
-			backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
-			bottomBar = {
-				AnimatedVisibility(
-					visible = article != null,
-					enter = slideIn { fullSize -> IntOffset(0, fullSize.height) }
-				) {
-					article?.let { article ->
+		Box(
+			modifier = Modifier
+				.fillMaxSize()
+				.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background),
+		) {
+			article?.let { article ->
+				val color = MaterialTheme.colors.onSurface
+				val spanStyle = remember(fontSize, color) {
+					SpanStyle(
+						color = color,
+						fontSize = fontSize?.sp ?: 16.sp
+					)
+				}
+				val elementsSettings = remember {
+					ElementSettings(
+						fontSize = fontSize?.sp ?: 16.sp,
+						lineHeight = 16.sp,
+						fitScreenWidth = false
+					)
+				}
+				var nodeParsed by rememberSaveable {
+					mutableStateOf(false)
+				}
+				LaunchedEffect(key1 = Unit, block = {
+					LastReadArticleController.setLastArticle(context, articleId)
+					withContext(Dispatchers.IO) {
+						HistoryController.insertArticle(articleId, context)
+					}
+					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
+						val element =
+							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
+								.child(0)
+								?: Element("")
+						
+						viewModel.parsedArticleContent.postValue(
+							parseChildElements(
+								element,
+								spanStyle,
+								onViewImageRequest
+							).second
+						)
+						nodeParsed = true
+					}
+				})
+				
+				Box() {
+					if (nodeParsed && fontSize != null) {
+						
+						SelectionContainer {
+							ArticleContent(
+								article = article,
+								scrollState = scrollState,
+								onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
+								onHubClicked = onHubClicked,
+								onCompanyClick = onCompanyClick,
+								onViewImageRequest = onViewImageRequest,
+								onArticleClick = onArticleClick,
+								contentPadding = PaddingValues(
+									start = 16.dp,
+									top = 16.dp + offsetTop,
+									end = 16.dp,
+									bottom = 16.dp + BOTTOM_BAR_HEIGHT
+								)
+							)
+						}
+						
+					}
+				}
+			} ?: Box(
+				modifier = Modifier
+					.fillMaxSize()
+				//.padding(it)
+			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
+			
+			
+			AnimatedVisibility(
+				modifier = Modifier.align(Alignment.BottomCenter),
+				visible = article != null,
+				enter = slideIn { fullSize -> IntOffset(0, fullSize.height) }
+			) {
+				article?.let { article ->
+					Box(
+						modifier = Modifier
+							.offset {
+								IntOffset(
+									0,
+									if (scrollState.canScrollForward)
+										(collapsingContentState.offset / collapsingContentState.contentHeight * BOTTOM_BAR_HEIGHT
+											.roundToPx()
+											.toFloat()).toInt()
+									else
+										0
+								)
+							}
+							.clip(RectangleShape)
+							.drawBehind {
+								drawRect(
+									Brush.verticalGradient(
+										listOf(
+											verticalEdgesGradientColor.copy(0.9f),
+											verticalEdgesGradientColor
+										)
+									)
+								)
+							}
+					) {
 						BottomAppBar(
 							elevation = 0.dp,
-							backgroundColor = MaterialTheme.colors.surface,
+							backgroundColor = Color.Transparent,
 							modifier = Modifier
-								.height(60.dp)
+								.height(BOTTOM_BAR_HEIGHT)
+						
 						) {
 							var showVotesCounter by remember {
 								mutableStateOf(false)
@@ -337,7 +446,9 @@ fun ArticleScreen(
 														addedToBookmarks = true
 														addedToBookmarksCount++
 														addedToBookmarksCount =
-															addedToBookmarksCount.coerceAtLeast(0)
+															addedToBookmarksCount.coerceAtLeast(
+																0
+															)
 													}
 													
 												} else {
@@ -351,7 +462,9 @@ fun ArticleScreen(
 														addedToBookmarks = false
 														addedToBookmarksCount--
 														addedToBookmarksCount =
-															addedToBookmarksCount.coerceAtLeast(0)
+															addedToBookmarksCount.coerceAtLeast(
+																0
+															)
 													}
 												}
 											}
@@ -424,97 +537,6 @@ fun ArticleScreen(
 					}
 				}
 			}
-		) {
-			article?.let { article ->
-				val color = MaterialTheme.colors.onSurface
-				val spanStyle = remember(fontSize, color) {
-					SpanStyle(
-						color = color,
-						fontSize = fontSize?.sp ?: 16.sp
-					)
-				}
-				val elementsSettings = remember {
-					ElementSettings(
-						fontSize = fontSize?.sp ?: 16.sp,
-						lineHeight = 16.sp,
-						fitScreenWidth = false
-					)
-				}
-				var nodeParsed by rememberSaveable {
-					mutableStateOf(false)
-				}
-				LaunchedEffect(key1 = Unit, block = {
-					LastReadArticleController.setLastArticle(context, articleId)
-					withContext(Dispatchers.IO) {
-						HistoryController.insertArticle(articleId, context)
-					}
-					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
-						val element =
-							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
-								.child(0)
-								?: Element("")
-						
-						viewModel.parsedArticleContent.postValue(
-							parseChildElements(
-								element,
-								spanStyle,
-								onViewImageRequest
-							).second
-						)
-						nodeParsed = true
-					}
-				})
-				
-				Box(modifier = Modifier.padding(it)) {
-					if (nodeParsed && fontSize != null) {
-						CompositionLocalProvider(
-							LocalTextSelectionColors provides TextSelectionColors(MaterialTheme.colors.secondary, MaterialTheme.colors.secondary.copy(0.2f))
-						) {
-							SelectionContainer {
-								ArticleContent(
-									article = article,
-									scrollState = scrollState,
-									onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
-									onHubClicked = onHubClicked,
-									onCompanyClick = onCompanyClick,
-									onViewImageRequest = onViewImageRequest,
-									onArticleClick = onArticleClick,
-									contentPadding = PaddingValues(
-										start = 16.dp,
-										top = 16.dp + offsetTop,
-										end = 16.dp,
-										bottom = 16.dp
-									)
-								)
-							}
-						}
-					}
-				}
-			} ?: Box(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(it)
-			) { HubsCircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
-			val topGradientColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background //by animateColorAsState(
-//				targetValue =
-//				if (collapsingContentState.isContentFullyHidden && collapsingContentState.contentHeight != 0f) Color.White
-//				else Color.White.copy(0f),
-//				animationSpec = tween(1000)
-//			)
-			
-			Box(modifier = Modifier
-				.fillMaxWidth()
-				.height(56.dp)
-				.drawBehind {
-					drawRect(
-						Brush.verticalGradient(
-							listOf(
-								topGradientColor,
-								Color.Transparent
-							)
-						)
-					)
-				})
 			
 		}
 	}

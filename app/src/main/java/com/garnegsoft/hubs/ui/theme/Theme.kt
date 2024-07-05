@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
@@ -68,15 +70,19 @@ fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
         systemUiController.setSystemBarsColor(LightColorPalette.primary)
         LightColorPalette
     }
-    
-    Box(modifier = Modifier.background(colors.background)) {
-        MaterialTheme(
-            colors = colors,
-            typography = Typography,
-            shapes = Shapes,
-            content = content
-        )
-    }
+        Box(modifier = Modifier.background(colors.background)) {
+            MaterialTheme(
+                colors = colors,
+                typography = Typography,
+                shapes = Shapes,
+            ) {
+                CompositionLocalProvider(
+                    LocalTextSelectionColors provides TextSelectionColors(colors.secondary, colors.secondary.copy(0.2f))
+                ) {
+                    content()
+                }
+            }
+        }
 }
 
 val m3LightColorScheme = lightColorScheme(
