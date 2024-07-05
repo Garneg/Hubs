@@ -284,7 +284,7 @@ fun ArticleScreen(
 				
 				Box() {
 					if (nodeParsed && fontSize != null) {
-						
+						val basePadding = 16.dp
 						SelectionContainer {
 							ArticleContent(
 								article = article,
@@ -295,10 +295,10 @@ fun ArticleScreen(
 								onViewImageRequest = onViewImageRequest,
 								onArticleClick = onArticleClick,
 								contentPadding = PaddingValues(
-									start = 16.dp,
-									top = 16.dp + offsetTop,
-									end = 16.dp,
-									bottom = 16.dp + BOTTOM_BAR_HEIGHT
+									start = basePadding,
+									top = basePadding + offsetTop,
+									end = basePadding,
+									bottom = basePadding + BOTTOM_BAR_HEIGHT
 								)
 							)
 						}
