@@ -44,6 +44,7 @@ import com.garnegsoft.hubs.data.article.list.ArticleSnippet
 import com.garnegsoft.hubs.data.comment.Comment
 import com.garnegsoft.hubs.data.comment.CommentsCollection
 import com.garnegsoft.hubs.data.comment.list.CommentsListController
+import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
@@ -453,6 +454,9 @@ fun CommentsScreen(
 																	it.id
 																)
 																showMenu = false
+																coroutineScope.launch {
+																	screenState.scrollToComment(screenState.getRootCommentId(it.id), -articleHeaderOffset)
+																}
 															},
 															onDismiss = { showMenu = false })
 													}
@@ -477,6 +481,7 @@ fun CommentsScreen(
 													commentTextFieldFocusRequester.requestFocus()
 												},
 												onParentCommentSnippetClick = {
+													returnToCommentIndex = index + itemOffsetCount
 													coroutineScope.launch(Dispatchers.Main) {
 														it.parentCommentId?.let {
 															screenState.scrollToComment(
@@ -527,7 +532,7 @@ fun CommentsScreen(
 								modifier = Modifier.fillMaxSize(),
 								contentAlignment = Alignment.Center
 							) {
-								CircularProgressIndicator()
+								HubsCircularProgressIndicator()
 							}
 						}
 					}
