@@ -71,6 +71,7 @@ kapt {
 }
 
 dependencies {
+    implementation 'androidx.compose.animation:animation-graphics-android:1.6.8'
     var m3version = "1.1.2"
     implementation "androidx.compose.material3:material3:$m3version"
 

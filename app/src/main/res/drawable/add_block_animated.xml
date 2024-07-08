@@ -1,0 +1,34 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="960dp"
+            android:height="960dp"
+            android:viewportWidth="960"
+            android:viewportHeight="960">
+            <path
+                android:name="path"
+                android:pathData="M 480 880 C 424.667 880 372.667 869.5 324 848.5 C 275.333 827.5 233 799 197 763 C 161 727 132.5 684.667 111.5 636 C 90.5 587.333 80 535.333 80 480 C 80 424.667 90.5 372.667 111.5 324 C 132.5 275.333 161 233 197 197 C 233 161 275.333 132.5 324 111.5 C 372.667 90.5 424.667 80 480 80 C 535.333 80 587.333 90.5 636 111.5 C 684.667 132.5 727 161 763 197 C 799 233 827.5 275.333 848.5 324 C 869.5 372.667 880 424.667 880 480 C 880 535.333 869.5 587.333 848.5 636 C 827.5 684.667 799 727 763 763 C 727 799 684.667 827.5 636 848.5 C 587.333 869.5 535.333 880 480 880 Z M 480 800 C 569.333 800 645 769 707 707 C 769 645 800 569.333 800 480 C 800 390.667 769 315 707 253 C 645 191 569.333 160 480 160 C 390.667 160 315 191 253 253 C 191 315 160 390.667 160 480 C 160 569.333 191 645 253 707 C 315 769 390.667 800 480 800 Z"
+                android:fillColor="#000"
+                android:strokeWidth="1"/>
+            <path
+                android:name="path_1"
+                android:pathData="M 440 680 L 520 680 L 520 520 L 680 520 L 680 440 L 520 440 L 520 280 L 440 280 L 440 440 L 280 440 L 280 520 L 440 520 Z"
+                android:fillColor="#000"
+                android:strokeWidth="1"/>
+        </vector>
+    </aapt:attr>
+    <target android:name="path_1">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="pathData"
+                android:duration="125"
+                android:valueFrom="M 440 680 L 520 680 L 520 520 L 680 520 L 680 440 L 520 440 L 520 280 L 440 280 L 440 440 L 280 440 L 280 520 L 440 520 Z"
+                android:valueTo="M 690.534 747.102 L 747.102 690.534 L 543.177 486.608 L 536.569 480 L 480 423.431 L 474.292 417.723 L 272.409 215.841 L 215.841 272.409 L 417.617 474.185 L 423.431 480 L 480 536.569 L 487.113 543.682 Z"
+                android:valueType="pathType"
+                android:interpolator="@android:anim/accelerate_decelerate_interpolator"/>
+        </aapt:attr>
+    </target>
+</animated-vector>
