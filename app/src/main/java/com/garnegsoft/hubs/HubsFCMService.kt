@@ -16,7 +16,8 @@ class HubsFCMService : FirebaseMessagingService() {
 		super.onMessageReceived(message)
 		
 		Looper.prepare()
-		Toast.makeText(this, "First key-value: ${message.data.keys.elementAt(0)}-${message.data.values.elementAt(0)}", Toast.LENGTH_SHORT).show()
+		
+		Toast.makeText(this, "title: ${message.notification?.title}", Toast.LENGTH_SHORT).show()
 		Log.e("fcm", "data received")
 	}
 }

@@ -133,15 +133,16 @@ class MainActivity : ComponentActivity() {
 //			.clearApplicationUserData()
 		val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 		
+		// todo: remove before release
 		FirebaseMessaging.getInstance().token.addOnCompleteListener {
 			Log.e("fcm_token", it.result)
 		}
 		
-		if (Build.VERSION.SDK_INT > 28) {
-			val channel = NotificationChannel("articleChannel", "Articles", NotificationManager.IMPORTANCE_HIGH)
+		if (Build.VERSION.SDK_INT >= 26) {
+			val channel = NotificationChannel("updateNotifications", "Обновления", NotificationManager.IMPORTANCE_HIGH)
 			
 			(getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
-			Log.e("fcm", "article notification channel registered!")
+			Log.e("fcm", "update notification channel registered!")
 		}
 		
 		intent.extras?.getString("articleId_to_open")?.let {
@@ -162,6 +163,7 @@ class MainActivity : ComponentActivity() {
 			if (it.isSuccessful) Log.e("fcm_test_subscription", "subscribed")
 		}
 		
+		//throw Exception("test")
 		var authStatus: Boolean? by mutableStateOf(null)
 		
 		val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
