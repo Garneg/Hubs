@@ -349,7 +349,8 @@ val TestArticle
 	15,
 	PublicationComplexity.Low,
 	null,
-	false
+	false,
+		false
 )
 
 
@@ -377,5 +378,6 @@ val SecondArticle
 	10,
 	PublicationComplexity.None,
 	null,
-	false
+	false,
+		false
 )

@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.screens.user
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -205,36 +205,50 @@ internal fun UserProfile(
 						}
 						if (!isAppUser && !user.isReadonly) {
 							user.relatedData?.let {
-								var subscribed by rememberSaveable {
+								var subscribed by rememberSaveable(userState?.relatedData?.isSubscribed) {
 									mutableStateOf(it.isSubscribed)
 								}
-								val subscriptionCoroutineScope = rememberCoroutineScope()
-								Box(modifier = Modifier
-									.padding(8.dp)
-									.height(45.dp)
-									.fillMaxWidth()
-									.clip(RoundedCornerShape(10.dp))
-									.background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
-									.border(
-										width = 1.dp,
-										shape = RoundedCornerShape(10.dp),
-										color = if (subscribed) Color.Transparent else Color(
-											0xFF4CB025
-										)
-									)
-									.clickable {
-										subscriptionCoroutineScope.launch(Dispatchers.IO) {
-											subscribed = !subscribed
-											subscribed = UserController.subscription(user.alias)
-										}
-									}
-								) {
-									Text(
-										modifier = Modifier.align(Alignment.Center),
-										text = if (subscribed) "Вы подписаны" else "Подписаться",
-										color = if (subscribed) Color.White else Color(0xFF4CB025)
-									)
+								var blocked by rememberSaveable(userState?.isInBlockList) {
+									mutableStateOf(user.isInBlockList)
 								}
+								
+								val coroutineScope = rememberCoroutineScope()
+								AnimatedVisibility(visible = !blocked) {
+									Box(modifier = Modifier
+										.padding(8.dp)
+										.height(45.dp)
+										.fillMaxWidth()
+										.clip(RoundedCornerShape(10.dp))
+										.background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
+										.border(
+											width = 1.dp,
+											shape = RoundedCornerShape(10.dp),
+											color = if (subscribed) Color.Transparent else Color(
+												0xFF4CB025
+											)
+										)
+										.clickable {
+											coroutineScope.launch(Dispatchers.IO) {
+												subscribed = !subscribed
+												subscribed = UserController.subscription(user.alias)
+											}
+										}
+									) {
+										Text(
+											modifier = Modifier.align(Alignment.Center),
+											text = if (subscribed) "Вы подписаны" else "Подписаться",
+											color = if (subscribed) Color.White else Color(
+												0xFF4CB025
+											)
+										)
+									}
+								}
+								BlockUserButton(blocked = blocked, onClick = {
+									coroutineScope.launch(Dispatchers.IO) {
+										blocked = !blocked
+										blocked = UserController.blockListToggle(user.alias) ?: !blocked // undo last change in case request failed
+									}
+								})
 							}
 						}
 						

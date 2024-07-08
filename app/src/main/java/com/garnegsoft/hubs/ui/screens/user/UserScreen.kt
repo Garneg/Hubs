@@ -151,7 +151,8 @@ fun UserScreen(
 							collapsingContentState = articlesFilterContentState,
 							onArticleSnippetClick = onArticleClicked,
 							onArticleAuthorClick = onUserClicked,
-							onArticleCommentsClick = onCommentsClicked
+							onArticleCommentsClick = onCommentsClicked,
+							ignoreBlackList = true
 						) { defaultValues, onDismiss, onDone ->
 							UserArticlesFilter(
 								defaultValues = defaultValues,
