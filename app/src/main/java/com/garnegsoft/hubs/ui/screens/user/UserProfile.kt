@@ -88,162 +88,172 @@ internal fun UserProfile(
 //						enter = scaleIn(initialScale = 0.8f)
 //					) {
 //
-						
-						Column(
+					
+					Column(
+						modifier = Modifier
+							.fillMaxWidth()
+							.clip(RoundedCornerShape(26.dp))
+							.background(MaterialTheme.colors.surface)
+							.padding(12.dp)
+					) {
+						Box(
 							modifier = Modifier
 								.fillMaxWidth()
-								.clip(RoundedCornerShape(26.dp))
-								.background(MaterialTheme.colors.surface)
 								.padding(12.dp)
 						) {
+							if (user.avatarUrl != null) {
+								AsyncImage(
+									model = user.avatarUrl,
+									modifier = Modifier
+										.size(65.dp)
+										.align(Alignment.Center)
+										.clip(
+											RoundedCornerShape(12.dp)
+										)
+										.background(Color.White),
+									contentDescription = ""
+								)
+							} else {
+								Icon(
+									modifier = Modifier
+										.size(65.dp)
+										.background(
+											Color.White,
+											shape = RoundedCornerShape(12.dp)
+										)
+										.border(
+											width = 4.dp,
+											color = placeholderColorLegacy(user.alias),
+											shape = RoundedCornerShape(12.dp)
+										)
+										.align(Alignment.Center)
+										.padding(5.dp),
+									painter = painterResource(id = R.drawable.user_avatar_placeholder),
+									contentDescription = "",
+									tint = placeholderColorLegacy(user.alias)
+								)
+							}
+						}
+						Box(modifier = Modifier.fillMaxWidth()) {
+							if (user.fullname != null)
+								Text(
+									modifier = Modifier.align(Alignment.Center),
+									text = "${user.fullname}\n@${user.alias}",
+									fontWeight = FontWeight.W700,
+									fontSize = 26.sp,
+									textAlign = TextAlign.Center
+								)
+							else
+								Text(
+									modifier = Modifier.align(Alignment.Center),
+									text = "@${user.alias}",
+									fontWeight = FontWeight.W700,
+									fontSize = 26.sp,
+									textAlign = TextAlign.Center
+								)
+						}
+						if (user.isReadonly)
 							Box(
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(12.dp)
+									.padding(0.dp)
 							) {
-								if (user.avatarUrl != null) {
-									AsyncImage(
-										model = user.avatarUrl,
-										modifier = Modifier
-											.size(65.dp)
-											.align(Alignment.Center)
-											.clip(
-												RoundedCornerShape(12.dp)
-											)
-											.background(Color.White),
-										contentDescription = ""
-									)
-								} else {
-									Icon(
-										modifier = Modifier
-											.size(65.dp)
-											.background(
-												Color.White,
-												shape = RoundedCornerShape(12.dp)
-											)
-											.border(
-												width = 4.dp,
-												color = placeholderColorLegacy(user.alias),
-												shape = RoundedCornerShape(12.dp)
-											)
-											.align(Alignment.Center)
-											.padding(5.dp),
-										painter = painterResource(id = R.drawable.user_avatar_placeholder),
-										contentDescription = "",
-										tint = placeholderColorLegacy(user.alias)
-									)
-								}
+								Text(
+									modifier = Modifier.align(Alignment.Center),
+									text = "Read Only",
+									fontWeight = FontWeight.W400,
+									color = MaterialTheme.colors.onSurface.copy(0.2f),
+									textAlign = TextAlign.Center
+								)
 							}
-							Box(modifier = Modifier.fillMaxWidth()) {
-								if (user.fullname != null)
-									Text(
-										modifier = Modifier.align(Alignment.Center),
-										text = "${user.fullname}\n@${user.alias}",
-										fontWeight = FontWeight.W700,
-										fontSize = 26.sp,
-										textAlign = TextAlign.Center
-									)
-								else
-									Text(
-										modifier = Modifier.align(Alignment.Center),
-										text = "@${user.alias}",
-										fontWeight = FontWeight.W700,
-										fontSize = 26.sp,
-										textAlign = TextAlign.Center
-									)
-							}
-							if (user.isReadonly)
-								Box(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(0.dp)
-								) {
-									Text(
-										modifier = Modifier.align(Alignment.Center),
-										text = "Read Only",
-										fontWeight = FontWeight.W400,
-										color = MaterialTheme.colors.onSurface.copy(0.2f),
-										textAlign = TextAlign.Center
-									)
-								}
-							if (user.speciality != null)
-								Box(
-									modifier = Modifier
-										.fillMaxWidth()
-										.padding(
-											bottom = 8.dp,
-											start = 8.dp,
-											end = 8.dp,
-											top = 8.dp
-										)
-								) {
-									Text(
-										modifier = Modifier.align(Alignment.Center),
-										text = user.speciality,
-										fontWeight = FontWeight.W500,
-										color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
-										textAlign = TextAlign.Center
-									)
-								}
-							Row(
+						if (user.speciality != null)
+							Box(
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(8.dp),
-								horizontalArrangement = Arrangement.SpaceEvenly
+									.padding(
+										bottom = 8.dp,
+										start = 8.dp,
+										end = 8.dp,
+										top = 8.dp
+									)
 							) {
-								Column(
-									horizontalAlignment = Alignment.CenterHorizontally
-								) {
-									Text(
-										text = user.score.toString(),
-										fontSize = 24.sp,
-										fontWeight = FontWeight.W600,
-										color =
-										if (user.score > 0)
-											RatingPositiveColor
+								Text(
+									modifier = Modifier.align(Alignment.Center),
+									text = user.speciality,
+									fontWeight = FontWeight.W500,
+									color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
+									textAlign = TextAlign.Center
+								)
+							}
+						Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(8.dp),
+							horizontalArrangement = Arrangement.SpaceEvenly
+						) {
+							Column(
+								horizontalAlignment = Alignment.CenterHorizontally
+							) {
+								Text(
+									text = user.score.toString(),
+									fontSize = 24.sp,
+									fontWeight = FontWeight.W600,
+									color =
+									if (user.score > 0)
+										RatingPositiveColor
+									else
+										if (user.score == 0)
+											MaterialTheme.colors.onSurface
 										else
-											if (user.score == 0)
-												MaterialTheme.colors.onSurface
-											else
-												RatingNegativeColor
-									)
-									Text(
-										text = "Карма",
-										color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled)
-									)
-								}
-								Column(
-									horizontalAlignment = Alignment.CenterHorizontally
-								) {
-									Text(
-										text = user.rating.toString(),
-										fontSize = 24.sp,
-										fontWeight = FontWeight.W600,
-										color = DefaultRatingIndicatorColor
-									)
-									Text(
-										text = "Рейтинг",
-										color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled)
-									)
-								}
+											RatingNegativeColor
+								)
+								Text(
+									text = "Карма",
+									color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled)
+								)
 							}
-							if (!isAppUser && !user.isReadonly) {
-								user.relatedData?.let {
-									var subscribed by rememberSaveable {
-										mutableStateOf(it.isSubscribed)
-									}
-									val subscriptionCoroutineScope = rememberCoroutineScope()
-									
-									SubscriptionButton(subscribed = subscribed, onClick = {
-										subscriptionCoroutineScope.launch(Dispatchers.IO) {
-											subscribed = !subscribed
-											subscribed = UserController.subscription(user.alias)
-										}
-									})
-								}
+							Column(
+								horizontalAlignment = Alignment.CenterHorizontally
+							) {
+								Text(
+									text = user.rating.toString(),
+									fontSize = 24.sp,
+									fontWeight = FontWeight.W600,
+									color = DefaultRatingIndicatorColor
+								)
+								Text(
+									text = "Рейтинг",
+									color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled)
+								)
 							}
-							
 						}
+						if (!isAppUser && !user.isReadonly) {
+							user.relatedData?.let {
+								var subscribed by rememberSaveable {
+									mutableStateOf(it.isSubscribed)
+								}
+								var blocked by rememberSaveable(userState?.isInBlockList) {
+									mutableStateOf(user.isInBlockList)
+								}
+								
+								val coroutineScope = rememberCoroutineScope()
+								
+								SubscriptionButton(subscribed = subscribed, onClick = {
+									coroutineScope.launch(Dispatchers.IO) {
+										subscribed = !subscribed
+										subscribed = UserController.subscription(user.alias)
+									}
+								})
+								BlockUserButton(blocked = blocked, onClick = {
+									coroutineScope.launch(Dispatchers.IO) {
+										blocked = !blocked
+										blocked = UserController.blockListToggle(user.alias) ?: !blocked // undo last change in case request failed
+									}
+								})
+							}
+						}
+						
+					}
 //					}
 					val note by viewModel.note.observeAsState()
 					if (!isAppUser && note?.text != null) {
@@ -332,7 +342,7 @@ internal fun UserProfile(
 												}
 											}
 										}
-
+										
 										whoIs.aboutHtml?.let {
 											if (it.isNotBlank()) {
 												TitledColumn(title = "О Себе") {
@@ -348,7 +358,7 @@ internal fun UserProfile(
 												}
 											}
 										}
-
+										
 										whoIs.invite?.let {
 											TitledColumn(title = "Приглашен") {
 												val context = LocalContext.current
@@ -388,12 +398,12 @@ internal fun UserProfile(
 																	null
 																)
 															)
-
+															
 														}
 													})
 											}
 										}
-
+										
 										whoIs.let {
 											if (it.contacts.size > 0) {
 												TitledColumn(title = "Контакты") {
@@ -445,9 +455,9 @@ internal fun UserProfile(
 																		)
 																	)
 																}
-
+																
 																Spacer(modifier = Modifier.width(12.dp))
-
+																
 																Text(it.title)
 															}
 														}
@@ -455,8 +465,8 @@ internal fun UserProfile(
 												}
 											}
 										}
-
-
+										
+										
 									}
 									hubs?.let {
 										if (it.list.isNotEmpty()) {
@@ -490,12 +500,12 @@ internal fun UserProfile(
 											}
 										}
 									}
-
+									
 								}
 							}
 						}
 					}
-
+					
 					Column(
 						modifier = Modifier
 							.fillMaxWidth()
@@ -527,7 +537,7 @@ internal fun UserProfile(
 										text = if (user.ratingPosition == null) "Не участвует" else user.ratingPosition.toString() + "-й",
 									)
 								}
-
+								
 								user.location?.let {
 									TitledColumn(title = "Откуда") {
 										Text(
@@ -535,7 +545,7 @@ internal fun UserProfile(
 										)
 									}
 								}
-
+								
 								if (user.workPlaces.size > 0) {
 									TitledColumn(title = "Работает в") {
 										Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -561,32 +571,32 @@ internal fun UserProfile(
 										}
 									}
 								}
-
+								
 								if (user.birthday != null) {
-
+									
 									TitledColumn(title = "Дата рождения") {
 										Text(
 											text = user.birthday,
 										)
 									}
 								}
-
+								
 								TitledColumn(title = "Дата регистрации") {
 									Text(
 										text = user.registrationDate,
 									)
 								}
-
+								
 								if (user.lastActivityDate != null) {
-
+									
 									TitledColumn(title = "Активность") {
 										Text(
 											text = user.lastActivityDate
 										)
 									}
 								}
-
-
+								
+								
 							}
 						}
 					}

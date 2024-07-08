@@ -14,6 +14,7 @@ import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.FilterElement
+import com.garnegsoft.hubs.ui.common.feedCards.article.BlockedAuthorArticleCard
 import kotlinx.coroutines.launch
 
 
@@ -26,6 +27,7 @@ fun ArticlesListPage(
 	onArticleAuthorClick: (authorAlias: String) -> Unit,
 	onArticleCommentsClick: (articleId: Int) -> Unit,
 	doInitialLoading: Boolean = true,
+	ignoreBlackList: Boolean = false
 ) {
 	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
 	val ratingIconPainter = painterResource(id = R.drawable.rating)
@@ -37,28 +39,35 @@ fun ArticlesListPage(
 	val readingTimeIconPainter = painterResource(id = R.drawable.clock_icon)
 	val translationIconPainter = painterResource(id = R.drawable.translation)
 	
-	cardsStyle?.let { articleCardStyle ->
+	cardsStyle?.let { articleCardsStyle ->
 		CommonPage(
 			listModel = listModel,
 			lazyListState = lazyListState,
 			collapsingBar = filterIndicator,
 			doInitialLoading = doInitialLoading
 		) {
-			ArticleCard(
-				article = it,
-				onClick = { onArticleSnippetClick(it.id) },
-				onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
-				onCommentsClick = { onArticleCommentsClick(it.id) },
-				style = articleCardStyle,
-				ratingIconPainter,
-				viewsIconPainter,
-				bookmarkIconPainter,
-				filledBookmarkIconPainter,
-				commentIconPainter,
-				complexityIconPainter,
-				readingTimeIconPainter,
-				translationIconPainter
-			)
+			if (it.isInBlackList && !ignoreBlackList) {
+				BlockedAuthorArticleCard(
+					article = it,
+					articleCardStyle = articleCardsStyle,
+					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } })
+			} else {
+				ArticleCard(
+					article = it,
+					onClick = { onArticleSnippetClick(it.id) },
+					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
+					onCommentsClick = { onArticleCommentsClick(it.id) },
+					style = articleCardsStyle,
+					ratingIconPainter,
+					viewsIconPainter,
+					bookmarkIconPainter,
+					filledBookmarkIconPainter,
+					commentIconPainter,
+					complexityIconPainter,
+					readingTimeIconPainter,
+					translationIconPainter
+				)
+			}
 		}
 	}
 }
@@ -83,6 +92,7 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	onArticleAuthorClick: (authorAlias: String) -> Unit,
 	onArticleCommentsClick: (articleId: Int) -> Unit,
 	doInitialLoading: Boolean = true,
+	ignoreBlackList: Boolean = false,
 	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
 ) {
 	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
@@ -94,7 +104,7 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	val complexityIconPainter = painterResource(id = R.drawable.speedmeter_hard)
 	val readingTimeIconPainter = painterResource(id = R.drawable.clock_icon)
 	val translationIconPainter = painterResource(id = R.drawable.translation)
-	cardsStyle?.let { style ->
+	cardsStyle?.let { articleCardsStyle ->
 		CommonPageWithFilter(
 			listModel = listModel, filterDialog = filterDialog,
 			filter = filter,
@@ -102,21 +112,28 @@ fun <F : Filter> ArticlesListPageWithFilter(
 			lazyListState = lazyListState,
 			collapsingContentState = collapsingContentState
 		) {
-			ArticleCard(
-				article = it,
-				onClick = { onArticleSnippetClick(it.id) },
-				onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
-				onCommentsClick = { onArticleCommentsClick(it.id) },
-				style = style,
-				ratingIconPainter,
-				viewsIconPainter,
-				bookmarkIconPainter,
-				filledBookmarkIconPainter,
-				commentIconPainter,
-				complexityIconPainter,
-				readingTimeIconPainter,
-				translationIconPainter
-			)
+			if (it.isInBlackList && !ignoreBlackList) {
+				BlockedAuthorArticleCard(
+					article = it,
+					articleCardStyle = articleCardsStyle,
+					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } })
+			} else {
+				ArticleCard(
+					article = it,
+					onClick = { onArticleSnippetClick(it.id) },
+					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
+					onCommentsClick = { onArticleCommentsClick(it.id) },
+					style = articleCardsStyle,
+					ratingIconPainter,
+					viewsIconPainter,
+					bookmarkIconPainter,
+					filledBookmarkIconPainter,
+					commentIconPainter,
+					complexityIconPainter,
+					readingTimeIconPainter,
+					translationIconPainter
+				)
+			}
 		}
 	}
 	

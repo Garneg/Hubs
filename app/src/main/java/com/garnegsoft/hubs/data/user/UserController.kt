@@ -7,6 +7,7 @@ import com.garnegsoft.hubs.data.utils.formatTime
 import com.garnegsoft.hubs.data.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.jsoup.Jsoup
 
 class UserController {
@@ -123,7 +124,8 @@ class UserController {
 					commentsCount = it.counterStats.commentCount,
 					bookmarksCount = it.counterStats.favoriteCount,
 					workPlaces = it.workplace.map { User.WorkPlace(it.title, it.alias) },
-					relatedData = it.relatedData?.let { User.RelatedData(it.isSubscribed) }
+					relatedData = it.relatedData?.let { User.RelatedData(it.isSubscribed) },
+					isInBlockList = it.isInBlacklist ?: false
 				)
 			}
 			
@@ -172,6 +174,29 @@ class UserController {
 			}
 			return null
 		}
+		
+		fun addToBlockListWithNote(
+			alias: String,
+			note: String,
+			args: Map<String, String>? = null
+		): Boolean {
+			val response = HabrApi.post("users/$alias/blacklist/add", requestBody = "{note: \"$note\"}".toRequestBody())
+			return response?.isSuccessful ?: false
+		}
+		
+		/**
+		 * @return Whether user is blocklisted or not after this request or null if request failed
+		 */
+		fun blockListToggle(
+			alias: String,
+			args: Map<String, String>? = null
+		): Boolean? {
+			val response = HabrApi.post("users/$alias/blacklist/toggle")
+			return response?.body?.let {
+				Json.parseToJsonElement(it.string()).jsonObject["isBlocked"]?.jsonPrimitive?.boolean
+			}
+		}
+		
 		
 		/**
 		 * Subscribe/unsubscribe to user.
@@ -247,7 +272,8 @@ data class UserProfileData(
 	var workplace: List<WorkPlace>,
 	var counterStats: CounterStats,
 	var isReadonly: Boolean,
-	var canBeInvited: Boolean
+	var canBeInvited: Boolean,
+	var isInBlacklist: Boolean? = null
 ) {
 	@Serializable
 	data class RelatedData(var isSubscribed: Boolean)

@@ -262,6 +262,7 @@ class ArticleController {
                         )
                     },
                     isTranslation = formatted.postLabels?.find { it.type == "translation" } != null,
+                    isInBlackList = formatted.author?.isInBlacklist ?: false
                 )
 
             }
@@ -397,7 +398,8 @@ class ArticleController {
             var scoreStats: ArticleScoreStats,
             var rating: Float?,
             var relatedData: AuthorRelatedData?,
-            var speciality: String?
+            var speciality: String?,
+            var isInBlacklist: Boolean? = null
         )
 
         @Serializable

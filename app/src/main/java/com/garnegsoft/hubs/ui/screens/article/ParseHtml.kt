@@ -466,7 +466,7 @@ fun parseElement(
 		} else {
 			{ it: SpanStyle, settings ->
 				val sourceUrl = remember {
-					if (element.hasAttr("data-src")) {
+					if (element.attr("data-blurred") == "true") {
 						element.attr("data-src")
 					} else {
 						element.attr("src")

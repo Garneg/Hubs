@@ -150,7 +150,8 @@ class ArticlesListController {
 									)
 								},
 								isTranslation = it.postLabels?.contains(ArticlesListLabel("translation"))
-									?: false
+									?: false,
+								isInBlackList = it.isInBlacklist ?: false
 							)
 						)
 					}
@@ -217,6 +218,7 @@ class ArticlesListController {
 		var format: String?,
 		var readingTime: Int,
 		var complexity: String?,
+		var isInBlacklist: Boolean? = null,
 		var relatedData: RelatedData?
 	)
 	

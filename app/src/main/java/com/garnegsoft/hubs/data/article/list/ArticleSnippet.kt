@@ -90,6 +90,12 @@ data class ArticleSnippet(
      */
     val relatedData: Article.RelatedData?,
 	
-	val isTranslation: Boolean
+	val isTranslation: Boolean,
+	
+	/**
+	 * Flag that indicates whether user added author of this publication in black list or not.
+	 * If *true* article should be hidden or message about blocked author displayed instead
+	 */
+	val isInBlackList: Boolean
 
 ) : HabrSnippet
