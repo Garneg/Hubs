@@ -11,8 +11,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.data.article.Article
+import com.garnegsoft.hubs.data.article.list.ArticleSnippet
 
 
 @Composable

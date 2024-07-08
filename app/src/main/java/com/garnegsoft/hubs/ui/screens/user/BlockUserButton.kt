@@ -30,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.user.UserController
+import com.garnegsoft.hubs.data.user.UserController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

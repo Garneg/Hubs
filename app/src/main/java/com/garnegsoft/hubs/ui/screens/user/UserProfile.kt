@@ -238,12 +238,14 @@ internal fun UserProfile(
 								
 								val coroutineScope = rememberCoroutineScope()
 								
-								SubscriptionButton(subscribed = subscribed, onClick = {
-									coroutineScope.launch(Dispatchers.IO) {
-										subscribed = !subscribed
-										subscribed = UserController.subscription(user.alias)
-									}
-								})
+								AnimatedVisibility(visible = !blocked) {
+									SubscriptionButton(subscribed = subscribed, onClick = {
+										coroutineScope.launch(Dispatchers.IO) {
+											subscribed = !subscribed
+											subscribed = UserController.subscription(user.alias)
+										}
+									})
+								}
 								BlockUserButton(blocked = blocked, onClick = {
 									coroutineScope.launch(Dispatchers.IO) {
 										blocked = !blocked
