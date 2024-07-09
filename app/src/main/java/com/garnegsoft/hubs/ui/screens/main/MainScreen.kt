@@ -133,14 +133,7 @@ fun MainScreen(
 				}
 			},
 			floatingActionButtonPosition = FabPosition.Center,
-			floatingActionButton = {
-				
-				ExtendedFloatingActionButton(
-					text = { Text("Фильтры") }, onClick = { /*TODO*/ },
-					icon = {
-						Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
-					})
-			}
+			
 		) {
 			if (authorizedState != null)
 				Column(

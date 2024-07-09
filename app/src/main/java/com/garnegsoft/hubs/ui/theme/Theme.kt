@@ -21,15 +21,15 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.material3.MaterialTheme as Material3Theme
 
 private val DarkColorPalette = darkColors(
-    primary = Color(0xFFE7E7E7),
+    primary = Color(0xFFBEBEBE),
     onPrimary = Color(0x88FFFFFF),
     primaryVariant = Color(0xFFE0E0E0),
-    secondary = Color(0xFFD3D3D3),
+    secondary = Color(0xFF3C3C3C),
     onSecondary = Color(0x88FFFFFF),
-    background = Color(32, 32, 32, 255),
-    surface = Color(49, 49, 49, 255),
-    onSurface = Color(0xFFDADADA),
-    onBackground = Color(0xFFD8D8D8),
+    background = Color(10, 10, 10, 255),
+    surface = Color(25, 25, 25, 255),
+    onSurface = Color(0xFFB4B4B4),
+    onBackground = Color(0xFFA5A5A5),
     secondaryVariant = Color(0xFFB4B4B4),
     onError = Color.White
 )

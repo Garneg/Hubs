@@ -1,10 +1,12 @@
 package com.garnegsoft.hubs.ui.common.snippetsPages
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -13,6 +15,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.data.CollapsingContent
 import com.garnegsoft.hubs.data.CollapsingContentState
@@ -23,6 +26,7 @@ import com.garnegsoft.hubs.data.article.HabrSnippetListModel
 import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.HubsCircularProgressIndicator
+import com.garnegsoft.hubs.ui.common.HubsFilterActionButton
 import com.garnegsoft.hubs.ui.common.LazyHabrSnippetsColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import kotlinx.coroutines.launch
@@ -153,17 +157,26 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 		)
 	}
 	
-	CommonPage(
-		listModel = listModel,
-		lazyListState = lazyListState,
-		collapsingBar = {
-			filter {
-				showDialog = true
-			}
-		},
-		doInitialLoading = doInitialLoading,
-		snippetCard = snippetCard,
-		collapsingContentState = collapsingContentState
-	)
+	Box {
+		
+		CommonPage(
+			listModel = listModel,
+			lazyListState = lazyListState,
+			collapsingBar = {
+				filter {
+					showDialog = true
+				}
+			},
+			doInitialLoading = doInitialLoading,
+			snippetCard = snippetCard,
+			collapsingContentState = collapsingContentState
+		)
+		
+		HubsFilterActionButton(
+			modifier = Modifier
+				.align(Alignment.BottomCenter)
+				.padding(bottom = 24.dp),
+			onClick = { showDialog = true })
+	}
 }
 

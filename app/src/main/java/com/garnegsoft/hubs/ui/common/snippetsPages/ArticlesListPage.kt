@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.common.snippetsPages
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -14,6 +15,7 @@ import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.common.FilterElement
+import com.garnegsoft.hubs.ui.common.HubsFilterActionButton
 import com.garnegsoft.hubs.ui.common.feedCards.article.BlockedAuthorArticleCard
 import kotlinx.coroutines.launch
 
@@ -105,34 +107,38 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	val readingTimeIconPainter = painterResource(id = R.drawable.clock_icon)
 	val translationIconPainter = painterResource(id = R.drawable.translation)
 	cardsStyle?.let { articleCardsStyle ->
-		CommonPageWithFilter(
-			listModel = listModel, filterDialog = filterDialog,
-			filter = filter,
-			doInitialLoading = doInitialLoading,
-			lazyListState = lazyListState,
-			collapsingContentState = collapsingContentState
-		) {
-			if (it.isInBlackList && !ignoreBlackList) {
-				BlockedAuthorArticleCard(
-					article = it,
-					articleCardStyle = articleCardsStyle,
-					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } })
-			} else {
-				ArticleCard(
-					article = it,
-					onClick = { onArticleSnippetClick(it.id) },
-					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
-					onCommentsClick = { onArticleCommentsClick(it.id) },
-					style = articleCardsStyle,
-					ratingIconPainter,
-					viewsIconPainter,
-					bookmarkIconPainter,
-					filledBookmarkIconPainter,
-					commentIconPainter,
-					complexityIconPainter,
-					readingTimeIconPainter,
-					translationIconPainter
-				)
+		Box {
+			
+			
+			CommonPageWithFilter(
+				listModel = listModel, filterDialog = filterDialog,
+				filter = filter,
+				doInitialLoading = doInitialLoading,
+				lazyListState = lazyListState,
+				collapsingContentState = collapsingContentState
+			) {
+				if (it.isInBlackList && !ignoreBlackList) {
+					BlockedAuthorArticleCard(
+						article = it,
+						articleCardStyle = articleCardsStyle,
+						onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } })
+				} else {
+					ArticleCard(
+						article = it,
+						onClick = { onArticleSnippetClick(it.id) },
+						onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
+						onCommentsClick = { onArticleCommentsClick(it.id) },
+						style = articleCardsStyle,
+						ratingIconPainter,
+						viewsIconPainter,
+						bookmarkIconPainter,
+						filledBookmarkIconPainter,
+						commentIconPainter,
+						complexityIconPainter,
+						readingTimeIconPainter,
+						translationIconPainter
+					)
+				}
 			}
 		}
 	}
