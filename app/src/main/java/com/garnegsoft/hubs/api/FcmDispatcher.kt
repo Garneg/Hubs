@@ -10,7 +10,7 @@ class FcmDispatcher {
 			extras: Bundle,
 		) {
 			if (extras.getString("type") == null || extras.getString("type") == "") {
-				Log.e("FcmDispatcher", "Msg cannot be dispatched without 'type' field")
+				Log.e("FcmDispatcher", "Msg cannot be dispatched without 'type' field, msg ignored")
 				return
 			}
 			

@@ -40,22 +40,7 @@ class MainActivity : ComponentActivity() {
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
-
-//		(this.getSystemService(ACTIVITY_SERVICE) as ActivityManager)
-//			.clearApplicationUserData()
-		val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 		
-		// todo: remove before release
-		FirebaseMessaging.getInstance().token.addOnCompleteListener {
-			Log.e("fcm_token", it.result)
-		}
-		
-		if (Build.VERSION.SDK_INT >= 26) {
-			val channel = NotificationChannel("updateNotifications", "Обновления", NotificationManager.IMPORTANCE_HIGH)
-			
-			(getSystemService(NOTIFICATION_SERVICE) as NotificationManager).createNotificationChannel(channel)
-			Log.e("fcm", "update notification channel registered!")
-		}
 		
 		intent.extras?.let {
 			FcmDispatcher.dispatchExtras(
@@ -65,10 +50,6 @@ class MainActivity : ComponentActivity() {
 					}, null))
 				},
 				extras = it)
-		}
-		
-		FirebaseMessaging.getInstance().subscribeToTopic("test").addOnCompleteListener {
-			if (it.isSuccessful) Log.e("fcm_test_subscription", "subscribed")
 		}
 		
 		var authStatus: Boolean? by mutableStateOf(null)
@@ -119,34 +100,4 @@ class MainActivity : ComponentActivity() {
 		Log.e("ExternalLink", intent.data.toString())
 		
 	}
-	
-//	override fun onResume() {
-//		super.onResume()
-//		GlobalScope.launch{
-//			Looper.prepare()
-//			val connectivityManager =
-//				this@MainActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-//			if (connectivityManager.activeNetwork == null) {
-//				Toast.makeText(this@MainActivity, "Connection failed!", Toast.LENGTH_SHORT).show()
-//			} else {
-//				withContext(Dispatchers.IO) {
-//					try {
-//						Socket().use { socket ->
-//							socket.connect(InetSocketAddress("habr.com", 80), 2000)
-//						}
-//						Toast.makeText(this@MainActivity, "Connected!", Toast.LENGTH_SHORT).show()
-//					} catch (e: IOException) {
-//						Toast.makeText(this@MainActivity, "Connection failed!", Toast.LENGTH_SHORT).show()
-//
-//
-//					}
-//				}
-//
-//			}
-//
-//
-//		}
-//	}
-	
-
 }

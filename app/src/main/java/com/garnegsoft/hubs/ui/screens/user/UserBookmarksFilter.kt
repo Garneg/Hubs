@@ -71,13 +71,6 @@ fun UserBookmarksFilter(
 					Text(text = "Новости")
 				}
 			}
-			// TODO: Add comments bookmarks 
-//			HubsFilterChip(
-//				selected = bookmarksType == UserBookmarksFilter.Bookmarks.Comments,
-//				onClick = { bookmarksType = UserBookmarksFilter.Bookmarks.Comments }
-//			) {
-//				Text(text = "Комментарии")
-//			}
 		}
 	}
 }
