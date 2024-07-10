@@ -145,7 +145,6 @@ fun MainScreen(
 				Modifier.padding(it)
 			) {
 				
-				
 				val myFeedLazyListState = rememberLazyListState()
 				val myFeedFilterContentState = rememberCollapsingContentState()
 				
