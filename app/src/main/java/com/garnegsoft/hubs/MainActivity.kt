@@ -108,6 +108,10 @@ class MainActivity : ComponentActivity() {
 				extras = it)
 		}
 		
+		FirebaseMessaging.getInstance().token.addOnCompleteListener {
+			Log.e("fcm-token", it.result)
+		}
+		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
 		val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
