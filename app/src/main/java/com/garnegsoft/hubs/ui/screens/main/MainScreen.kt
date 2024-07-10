@@ -27,10 +27,11 @@ import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.FilterSavingController
-import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
-import com.garnegsoft.hubs.api.rememberCollapsingContentState
+import com.garnegsoft.hubs.data.CollapsingContent
+import com.garnegsoft.hubs.data.dataStore.AuthDataController
+import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.data.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage

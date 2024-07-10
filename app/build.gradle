@@ -21,7 +21,7 @@ android {
         minSdk 23
         targetSdk 34
         versionCode 15
-        versionName "2.5.1"
+        versionName "3.0.0-alpha1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -33,7 +33,6 @@ android {
         release {
             minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-
         }
         benchmark {
             proguardFiles "proguard-rules.pro"
