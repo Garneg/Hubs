@@ -4,27 +4,33 @@ package com.garnegsoft.hubs.ui.screens.main
 import ArticleController
 import android.content.Context
 import android.net.ConnectivityManager
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.data.CollapsingContent
-import com.garnegsoft.hubs.data.dataStore.AuthDataController
+import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.FilterSavingController
-import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
-import com.garnegsoft.hubs.data.rememberCollapsingContentState
+import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
@@ -80,6 +86,7 @@ fun MainScreen(
 	}
 	
 	LaunchedEffect(key1 = lastArticleRead, block = {
+		
 		if (showSnackBar && lastArticleRead != null && lastArticleRead!! > 0) {
 			
 			launch(Dispatchers.IO) {

@@ -1,44 +1,58 @@
 package com.garnegsoft.hubs
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.Intent
 import android.net.ConnectivityManager
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeGestures
-import androidx.compose.foundation.layout.safeGesturesPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.Icon
+import androidx.compose.foundation.layout.safeContent
+import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.primarySurface
-import androidx.compose.material3.Divider
+import androidx.compose.material.Text
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import androidx.work.Constraints
@@ -50,22 +64,30 @@ import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
 
 class MainActivity : ComponentActivity() {
 	
-	
 	@OptIn(ExperimentalAnimationApi::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
-
-//		(this.getSystemService(ACTIVITY_SERVICE) as ActivityManager)
-//			.clearApplicationUserData()
-		val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
 		
+		
+		intent.extras?.let {
+			FcmDispatcher.dispatchExtras(
+				handleUrl = {
+					startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
+						this.data = Uri.parse(it)
+					}, null))
+				},
+				extras = it)
+		}
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
@@ -194,34 +216,4 @@ class MainActivity : ComponentActivity() {
 		Log.e("ExternalLink", intent.data.toString())
 		
 	}
-
-//	override fun onResume() {
-//		super.onResume()
-//		GlobalScope.launch{
-//			Looper.prepare()
-//			val connectivityManager =
-//				this@MainActivity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-//			if (connectivityManager.activeNetwork == null) {
-//				Toast.makeText(this@MainActivity, "Connection failed!", Toast.LENGTH_SHORT).show()
-//			} else {
-//				withContext(Dispatchers.IO) {
-//					try {
-//						Socket().use { socket ->
-//							socket.connect(InetSocketAddress("habr.com", 80), 2000)
-//						}
-//						Toast.makeText(this@MainActivity, "Connected!", Toast.LENGTH_SHORT).show()
-//					} catch (e: IOException) {
-//						Toast.makeText(this@MainActivity, "Connection failed!", Toast.LENGTH_SHORT).show()
-//
-//
-//					}
-//				}
-//
-//			}
-//
-//
-//		}
-//	}
-	
-
 }

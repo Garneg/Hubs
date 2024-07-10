@@ -177,6 +177,7 @@ class DownloadOfflineArticleWorker(
 								File(thisArticleDir, "img$index.${url.split(".").last()}")
 							resourceFile.createNewFile()
 							resourceFile.writeBytes(it)
+							
 						}
 					}
 				}
