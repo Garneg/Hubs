@@ -19,6 +19,13 @@
             android:shell="true"
             tools:targetApi="29" />
 
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/notification_default_icon"/>
+<!--        <meta-data-->
+<!--            android:name="com.google.firebase.messaging.default_notification_color"-->
+<!--            android:resource="@color/white" />-->
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -37,6 +44,8 @@
             <meta-data
                 android:name="android.app.shortcuts"
                 android:resource="@xml/shortcuts"/>
+
+
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
