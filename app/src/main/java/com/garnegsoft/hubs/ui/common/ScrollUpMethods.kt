@@ -1,7 +1,7 @@
 package com.garnegsoft.hubs.ui.common
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyListState
 
 
 sealed interface ScrollUpMethods {
