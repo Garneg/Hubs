@@ -4,7 +4,6 @@ plugins {
     id "kotlinx-serialization"
     id "kotlin-kapt"
     id 'com.google.gms.google-services'
-    id 'com.google.firebase.crashlytics'
 }
 
 def getDate() {
@@ -81,7 +80,6 @@ dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.1.1')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging'
-    implementation 'com.google.firebase:firebase-crashlytics'
 
     implementation "androidx.work:work-runtime-ktx:2.9.0"
 

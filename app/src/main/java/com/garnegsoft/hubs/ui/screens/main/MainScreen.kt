@@ -119,10 +119,8 @@ fun MainScreen(
 					)
 				},
 				actions = {
-					IconButton(
-						onClick = {
-						throw IOException("Ouch! You shouldn't have done that! How to fix it now?")
-						//onSearchClicked()
+					IconButton(onClick = {
+						onSearchClicked()
 					}) {
 						Icon(
 							modifier = Modifier
