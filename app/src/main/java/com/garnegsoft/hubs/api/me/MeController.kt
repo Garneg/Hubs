@@ -8,32 +8,33 @@ import kotlinx.serialization.Serializable
 
 class MeController {
     companion object {
-        private fun get(): Me? {
+        private fun get(): Result<Me?> {
             val response = HabrApi.get("me")
+            
             if (response?.code != 200)
-                return null
-            response.body?.string()?.let {
-                if (it == "null") return null
+                return Result.failure(Exception())
+            return response.body?.string()?.let {
+                if (it == "null") return Result.success(null)
                 val me = HabrDataParser.parseJson<Me>(it)
                 me.avatarUrl = me.avatarUrl?.let {
                     it.replace("//habrastorage", "https://hsto")
                 } ?: placeholderAvatarUrl(me.alias)
-                return me
-            }
-            return null
+                return Result.success(me)
+            } ?: Result.failure(Exception())
         }
 
-        fun getMe(): com.garnegsoft.hubs.api.me.Me? {
+        fun getMe(): Result<com.garnegsoft.hubs.api.me.Me?> {
             val raw = get()
-
-            raw?.let {
-                return Me(
+            if (raw.isFailure) return Result.failure(Exception())
+            
+            raw.getOrNull()?.let {
+                return Result.success(Me(
                     alias = it.alias,
                     avatarUrl = it.avatarUrl
-                )
+                ))
             }
 
-            return null
+            return Result.failure(Exception())
         }
 
     }
