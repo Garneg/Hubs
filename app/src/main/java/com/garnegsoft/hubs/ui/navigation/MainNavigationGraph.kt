@@ -123,17 +123,20 @@ fun MainNavigationGraph(
 						navController.navigate("savedArticles")
 					},
 					menu = {
-						val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(
-							LocalContext.current,
-							HubsDataStore.Auth.Authorized
-						)
+						val context = LocalContext.current
+						val isAuthorizedFlow = remember {
+							HubsDataStore.Auth.getValueFlow(
+								context,
+								HubsDataStore.Auth.Authorized
+							)
+						}
 						val showAuthorizedMenu by isAuthorizedFlow.collectAsState(
 							initial = false
 						)
 						val userAlias by HubsDataStore.Auth.getValueFlow(
 							LocalContext.current,
 							HubsDataStore.Auth.Alias
-						).collectAsState(initial = "")
+						).collectAsState(initial = "initial")
 						if (showAuthorizedMenu) {
 							AuthorizedMenu(
 								userAlias = userAlias,
@@ -185,7 +188,7 @@ fun MainNavigationGraph(
 																`package` =
 																	BuildConfig.APPLICATION_ID
 																data =
-																	Uri.parse("https://habr.com/users/${it.alias}/bookmarks")
+																	Uri.parse("https://habr.com/users/${it.getOrNull()?.alias}/bookmarks")
 															}
 														)
 														.setIcon(

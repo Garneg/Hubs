@@ -1,15 +1,25 @@
-package com.garnegsoft.hubs.data
+package com.garnegsoft.hubs.api
 
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
+import com.garnegsoft.hubs.BuildConfig
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.internal.EMPTY_RESPONSE
 import org.jsoup.Jsoup
+import java.io.File
 import java.io.IOException
+import java.net.ConnectException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class HabrApi {
 
@@ -23,6 +33,12 @@ class HabrApi {
         fun initialize(context: Context, cookies: String){
             this.cookies = cookies
             HttpClient = OkHttpClient.Builder()
+                .cache(
+                    Cache(
+                        directory = File(context.cacheDir, "okhttp_cache"),
+                        maxSize = 30 * 1024 * 1024
+                    )
+                )
                 .addInterceptor(Interceptor {
                     val req = it.request()
                         .newBuilder()
@@ -40,22 +56,35 @@ class HabrApi {
             HttpClient = client
         }
 
-        fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response? {
+        fun get(
+            path: String,
+            args: Map<String, String>? = null, version: Int = 2,
+            cacheControl: CacheControl = CacheControl.Builder()
+                .maxStale(2, TimeUnit.MINUTES)
+                .build()
+        ): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null) {
                 finalArgs.putAll(args)
             }
             val paramsString = StringBuilder()
             finalArgs.keys.forEach { paramsString.append("$it=${finalArgs[it]}&") }
-
+            Firebase.crashlytics.log("HABRAPI GET $path?$paramsString")
             val request = Request
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
+                .cacheControl(cacheControl)
                 .build()
             try {
                 return HttpClient.newCall(request).execute()
             } catch (ex: Exception) {
-                return null
+                if (ex is SocketTimeoutException ||
+                    ex is ConnectException ||
+                    ex is NoConnectionInterceptor.NoInternetException ||
+                    ex is NoConnectionInterceptor.NoConnectivityException) {
+                    return get(path, args, version, CacheControl.FORCE_CACHE)
+                } else
+                    return null
             }
         }
 
