@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.api
+package com.garnegsoft.hubs.data
 
 import android.content.Context
 import android.net.ConnectivityManager
