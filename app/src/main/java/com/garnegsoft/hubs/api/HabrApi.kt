@@ -5,6 +5,8 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.garnegsoft.hubs.BuildConfig
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_RESPONSE
@@ -50,7 +52,7 @@ class HabrApi {
             }
             val paramsString = StringBuilder()
             finalArgs.keys.forEach { paramsString.append("$it=${finalArgs[it]}&") }
-
+            Firebase.crashlytics.log("HABRAPI GET $path?$paramsString")
             val request = Request
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
