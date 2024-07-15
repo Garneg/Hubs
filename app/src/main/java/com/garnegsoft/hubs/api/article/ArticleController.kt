@@ -206,15 +206,15 @@ class ArticleController {
         var tags: List<ArticleTag>? = null,
         var metadata: ArticleMetadata? = null,
         //var polls: List<Any?>,
-        var commentsEnabled: Boolean,
-        var rulesRemindEnabled: Boolean?,
-        var votesEnabled: Boolean?,
-        var status: String?,
-        var plannedPublishTime: String? = null,
-        var checked: Boolean? = null,
-        var hasPinnedComments: Boolean,
+//        var commentsEnabled: Boolean,
+//        var rulesRemindEnabled: Boolean?,
+//        var votesEnabled: Boolean?,
+//        var status: String?,
+//        var plannedPublishTime: String? = null,
+//        var checked: Boolean? = null,
+//        var hasPinnedComments: Boolean,
         var format: String? = null,
-        var isEditorial: Boolean,
+//        var isEditorial: Boolean,
         var readingTime: Int,
         var complexity: String?
     ) {
@@ -312,18 +312,18 @@ class ArticleController {
 
         @Serializable
         data class ArticleRelatedData(
-            var unreadCommentsCount: Int?,
-            var vote: RelatedDataVote,
-            var bookmarked: Boolean,
+//            var unreadCommentsCount: Int?,
+//            var vote: RelatedDataVote,
+//            var bookmarked: Boolean,
             var canComment: Boolean,
-            var canEdit: Boolean,
-            var canVote: Boolean,
-            var canViewVotes: Boolean,
-            var canVotePlus: Boolean,
-            var canVoteMinus: Boolean,
-            var canModerateComments: Boolean,
-            var trackerSubscribed: Boolean,
-            var emailSubscribed: Boolean
+//            var canEdit: Boolean,
+//            var canVote: Boolean,
+//            var canViewVotes: Boolean,
+//            var canVotePlus: Boolean,
+//            var canVoteMinus: Boolean,
+//            var canModerateComments: Boolean,
+//            var trackerSubscribed: Boolean,
+//            var emailSubscribed: Boolean
         )
 
         @Serializable

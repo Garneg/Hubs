@@ -36,7 +36,7 @@ class ArticlesListController {
                 var responseJson = Json.parseToJsonElement(response.body!!.string())
                 var articles = kotlin.run {
                     var articlesIds =
-                        HabrDataParser.parseJson<List<Int>>(responseJson.jsonObject["articleIds"]?.jsonArray!!)
+                        HabrDataParser.parseJson<List<Int>>(responseJson.jsonObject["publicationIds"]?.jsonArray!!)
                     var pagesCount = responseJson.jsonObject["pagesCount"]?.jsonPrimitive?.intOrNull
 
 
@@ -49,7 +49,7 @@ class ArticlesListController {
                         try {
                             articlesRefs += mapOf(
                                 it.toString() to HabrDataParser.parseJson(
-                                    responseJson.jsonObject["articleRefs"]?.jsonObject?.get(it.toString())!!
+                                    responseJson.jsonObject["publicationRefs"]?.jsonObject?.get(it.toString())!!
                                 )
                             )
                             articleIdsfinal.add(it)

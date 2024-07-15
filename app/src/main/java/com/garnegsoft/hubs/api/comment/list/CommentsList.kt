@@ -109,8 +109,8 @@ class CommentsListController {
                         CommentSnippet(
                             id = it.id.toInt(),
                             parentPost = CommentSnippet.ParentPost(
-                                id = it.post!!.id,
-                                title = it.post!!.title
+                                id = it.publication!!.id,
+                                title = it.publication!!.title
                             ),
                             text = Jsoup.parse(it.message).text(),
                             timePublished = it.timePublished,
@@ -164,7 +164,7 @@ class CommentsListController {
             /**
              * poor
              */
-            var post: Post? = null,
+            var publication: Post? = null,
             var isPinned: Boolean
         ) {
 
@@ -172,8 +172,7 @@ class CommentsListController {
             data class Post(
                 var id: Int,
                 var title: String,
-                var commentsCount: Int,
-                var postType: String,
+                var publicationType: String,
 
                 )
 
