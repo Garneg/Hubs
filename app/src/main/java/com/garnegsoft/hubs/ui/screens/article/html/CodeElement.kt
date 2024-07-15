@@ -43,12 +43,13 @@ import com.garnegsoft.hubs.ui.screens.article.CODE_ALPHA_VALUE
 import com.garnegsoft.hubs.ui.screens.article.html.code.CPPHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.GolangHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.JavaScriptHighlighting
+import com.garnegsoft.hubs.ui.screens.article.html.code.KotlinHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.PythonHighlighting
 import com.garnegsoft.hubs.ui.screens.article.html.code.SqlHighlighting
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 
 
-@Preview
+@Preview(name = "aboba")
 @Composable
 fun CodeElementPreview() {
 	HubsTheme {
@@ -59,19 +60,78 @@ fun CodeElementPreview() {
 		) {
 			CodeElement(
 				code = """
-import os
+package com.garnegsoft.hubs.ui.screens.article.html.code
+
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 
 
-# Получаем все переменные среды. Переменные среды — это пары ключ-значение,
-# которые определяют аспекты окружения, в котором работает программа.
-spis = os.environ
+enum class Lock {
+	None,
+	String,
+	Char,
+	SingleLineComment,
+	MultilineString,
+	MultilineComment
+}
 
-# Итерируем по каждой паре ключ-значение
-for key, value in spis.items():
-    print(f"{key} = {value}")
+abstract class LanguageHighlighting {
+	
+	abstract fun highlight(code: String, useDarkThemeColor: Boolean = false): List<AnnotatedString.Range<SpanStyle>>
+	
+	object Defaults {
+		
+		fun highlightKeywords(
+			code: String,
+			keywordsList: List<String>,
+			keywordsSpanStyle: SpanStyle
+		): List<AnnotatedString.Range<SpanStyle>> {
+			val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
+			
+			var lastKeywordIndex = 0
+			while (true) {
+				val pair = code.findAnyOf(keywordsList, lastKeywordIndex)
+				
+				if (pair == null) break
+				val indexOfLastChar = pair.first + pair.second.length - 1
+				
+				if ((pair.first > 0 && (code[pair.first - 1].isLetterOrDigit() || code[pair.first - 1] == '_')) || (indexOfLastChar < code.lastIndex && (code[indexOfLastChar + 1].isLetterOrDigit() || code[indexOfLastChar + 1] == '_'))) {
+					lastKeywordIndex = indexOfLastChar
+					continue
+				}
+				spanStylesList.add(
+					AnnotatedString.Range(keywordsSpanStyle, pair.first, indexOfLastChar + 1)
+				)
+				lastKeywordIndex = indexOfLastChar
+			}
+			return spanStylesList
+		}
+	}
+	
+}
+
+class CycleBasedHighlightingPipeline(
+	val code: String,
+	val components: Array<CycleBasedComponent>
+) {
+	var lock: Lock = Lock.None
+	
+	fun iterateThroughCode() {
+		for (i in 0..code.lastIndex) {
+			components.forEach { it.cycle(i, code, ::lock) }
+		}
+	}
+	
+	fun getAnnotatedRanges(): List<AnnotatedString.Range<SpanStyle>> {
+		return components.map { it.ranges.toList() }.reduce { acc, ranges ->
+			acc + ranges
+		}
+	}
+}
+
 		""".trimIndent().replace("\t", "   "),
 				//code = SqlHighlighting().keywords.sorted().joinToString("\n"),
-				language = "Python", spanStyle = SpanStyle()
+				language = "Kotlin", spanStyle = SpanStyle()
 			)
 		}// aboba
 	}
@@ -96,6 +156,7 @@ fun CodeElement(
 			"JSON" -> JavaScriptHighlighting()
 			"SQL" -> SqlHighlighting()
 			"PostgreSQL" -> SqlHighlighting()
+			"Kotlin" -> KotlinHighlighting()
 			else -> null
 		}
 		highlighting?.let {
@@ -109,6 +170,24 @@ fun CodeElement(
 		)
 	}
 	Column(Modifier.clip(RoundedCornerShape(8.dp))) {
+		val jetbrainsMonoFontFamily = FontFamily(
+			listOf(
+				Font(R.font.jetbrains_mono_regular_nl, FontWeight.Normal),
+				Font(R.font.jetbrains_mono_medium_nl, FontWeight.Medium),
+				Font(
+					R.font.jetbrains_mono_medium_nl_italic,
+					FontWeight.Medium,
+					FontStyle.Italic
+				),
+				Font(
+					R.font.jetbrains_mono_regular_nl_italic,
+					FontWeight.Normal,
+					FontStyle.Italic
+				)
+			)
+		)
+		val robotoMono = FontFamily(Font(R.font.roboto_mono_variable))
+		
 		Surface(
 			color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
 			modifier = Modifier.fillMaxWidth()
@@ -162,14 +241,14 @@ fun CodeElement(
 									withStyle(
 										spanStyle.copy(
 											color = MaterialTheme.colors.onBackground.copy(
-												0.5f
+												0.25f
 											)
 										)
 									) { append(linesIndicator) }
 								},
-								lineHeight = 16.sp * 1.2f,
-								color = MaterialTheme.colors.onBackground.copy(0.5f),
-								fontFamily = FontFamily.Monospace,
+								lineHeight = 16.sp * 1.4f,
+								color = MaterialTheme.colors.onBackground.copy(0.25f),
+								fontFamily = jetbrainsMonoFontFamily,
 								textAlign = TextAlign.End
 							)
 						}
@@ -181,23 +260,6 @@ fun CodeElement(
 						.fillMaxWidth()
 						.padding(8.dp)
 				) {
-					val jetbrainsMonoFontFamily = FontFamily(
-						listOf(
-							Font(R.font.jetbrains_mono_regular_nl, FontWeight.Normal),
-							Font(R.font.jetbrains_mono_medium_nl, FontWeight.Medium),
-							Font(
-								R.font.jetbrains_mono_medium_nl_italic,
-								FontWeight.Medium,
-								FontStyle.Italic
-							),
-							Font(
-								R.font.jetbrains_mono_regular_nl_italic,
-								FontWeight.Normal,
-								FontStyle.Italic
-							)
-						)
-					)
-					val robotoMono = FontFamily(Font(R.font.roboto_mono_variable))
 					
 					
 						SelectionContainer {
@@ -205,7 +267,7 @@ fun CodeElement(
 								text = annotatedStringCode,
 								fontFamily = jetbrainsMonoFontFamily,
 								fontWeight = FontWeight.Normal,
-								lineHeight = 16.sp * 1.2f,
+								lineHeight = 16.sp * 1.4f,
 								color = MaterialTheme.colors.onBackground
 							)
 						}

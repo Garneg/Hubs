@@ -74,7 +74,7 @@ class SqlHighlighting : LanguageHighlighting() {
 		"OR",
 	).map { it.lowercase() }
 	val keywordSpanStyle = SpanStyle(color = Color(0xFF2F6BA7))
-	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
+	override fun highlight(code: String, useDarkThemeColor: Boolean): List<AnnotatedString.Range<SpanStyle>> {
 		return Defaults.highlightKeywords(code.lowercase(), keywords, keywordSpanStyle)
 	}
 	

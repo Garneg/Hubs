@@ -15,7 +15,7 @@ enum class Lock {
 
 abstract class LanguageHighlighting {
 	
-	abstract fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>>
+	abstract fun highlight(code: String, useDarkThemeColor: Boolean = false): List<AnnotatedString.Range<SpanStyle>>
 	
 	object Defaults {
 		

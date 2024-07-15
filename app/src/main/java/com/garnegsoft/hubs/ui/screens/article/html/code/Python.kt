@@ -24,7 +24,7 @@ class PythonHighlighting : LanguageHighlighting() {
 		color = Color(0xFF579737)
 	)
 	
-	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
+	override fun highlight(code: String, useDarkThemeColor: Boolean): List<AnnotatedString.Range<SpanStyle>> {
 		return Defaults.highlightKeywords(
 			code,
 			keywords,
@@ -33,7 +33,7 @@ class PythonHighlighting : LanguageHighlighting() {
 			code,
 			arrayOf(
 				CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
-				CycleBasedComponents.StringComponent(stringLiteralSpanStyle),
+				CycleBasedComponents.QuotationMarkStringComponent(stringLiteralSpanStyle),
 				PythonLineCommentComponent
 			)
 		).apply {
