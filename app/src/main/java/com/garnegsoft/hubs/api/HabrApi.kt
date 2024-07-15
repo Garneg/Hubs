@@ -47,6 +47,10 @@ class HabrApi {
                     it.proceed(req)
                 })
                 .addInterceptor(NoConnectionInterceptor(context))
+                .addInterceptor {
+                    Firebase.crashlytics.log("HABRAPI ${it.request().method} url:${it.request().url} requestBody:${it.request().body}")
+                    it.proceed(it.request())
+                }
                 .build()
 
         }
@@ -69,7 +73,7 @@ class HabrApi {
             }
             val paramsString = StringBuilder()
             finalArgs.keys.forEach { paramsString.append("$it=${finalArgs[it]}&") }
-            Firebase.crashlytics.log("HABRAPI GET $path?$paramsString")
+            
             val request = Request
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
