@@ -1,18 +1,19 @@
 package com.garnegsoft.hubs.api
 
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 
 class HabrDataParser<T> {
     companion object{
+        val customJson = Json { ignoreUnknownKeys = true }
         inline fun <reified T> parseJson(json: String): T {
-            val customJson = Json { ignoreUnknownKeys = true }
             return parseJson(customJson.parseToJsonElement(json))
         }
 
         inline fun <reified T> parseJson(json: JsonElement): T {
-            val customJson = Json { ignoreUnknownKeys = true }
             return parseJson(json, customJson)
         }
 
