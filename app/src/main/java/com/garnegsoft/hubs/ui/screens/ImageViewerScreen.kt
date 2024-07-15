@@ -51,6 +51,7 @@ import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
 import java.io.File
 import kotlin.math.absoluteValue
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 
@@ -86,7 +87,7 @@ fun ImageViewScreen(
 	}
 	
 	val draggableState = rememberDraggableState {
-		offset += it
+		offset += it * 0.75f
 	}
 	var isDragging by remember { mutableStateOf(false) }
 	val animatedOffset by animateFloatAsState(
@@ -106,12 +107,12 @@ fun ImageViewScreen(
 				isDragging = true
 			},
 			onDragStopped = {
-				if (it.absoluteValue > 8000f || offset.absoluteValue > screenHeight / 3) {
+				if (it.absoluteValue > 5500f || offset.absoluteValue > screenHeight / 5) {
 					launch {
 						var lastValue = 0f
 						AnimationState(
 							initialValue = 0f,
-							initialVelocity = it
+							initialVelocity = it * 0.75f
 						).animateDecay(splineBasedDecay) {
 							offset += value - lastValue
 							lastValue = value
