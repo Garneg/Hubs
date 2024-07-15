@@ -29,6 +29,8 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
@@ -63,6 +65,7 @@ class MainActivity : ComponentActivity() {
 		
 		runBlocking {
 			authStatus = isAuthorizedFlow.firstOrNull()
+			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
 			HabrApi.initialize(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
 		}
 		
