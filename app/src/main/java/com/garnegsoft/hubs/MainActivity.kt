@@ -71,6 +71,7 @@ class MainActivity : ComponentActivity() {
 		
 		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
 			.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+			
 			.build()
 		WorkManager.getInstance(this).enqueue(updateMeData)
 		

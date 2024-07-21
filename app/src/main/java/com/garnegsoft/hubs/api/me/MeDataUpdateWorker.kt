@@ -1,8 +1,16 @@
 package com.garnegsoft.hubs.api.me
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.os.Build
+import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +27,18 @@ class MeDataUpdateWorker(
 	params: WorkerParameters
 ) : CoroutineWorker(appContext, params) {
 	override suspend fun doWork(): Result {
+		if (Build.VERSION.SDK_INT >= 26) {
+			
+			val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			val channel = NotificationChannel("updateMe", "Обновление данных авторизации", NotificationManager.IMPORTANCE_DEFAULT)
+			notificationManager.createNotificationChannel(channel)
+			
+			val notification = Notification.Builder(applicationContext, "updateMe")
+				.setSmallIcon(R.drawable.notification_default_icon)
+				.build()
+			setForeground(ForegroundInfo(0, notification))
+		}
+		Log.e("updateMe", "started!")
 		withContext(Dispatchers.IO) {
 			val lastAvatarUrl = HubsDataStore.Auth.getValueFlow(
 				applicationContext,
@@ -31,6 +51,11 @@ class MeDataUpdateWorker(
 			
 			
 			val me = MeController.getMe()
+			if (me.isSuccess)
+				Log.e("updateMe", "Retrieved data successfully!")
+			else {
+				Log.e("updateMe", "Request failed + ${me.exceptionOrNull()?.message}")
+			}
 			if (me.isSuccess && me.getOrNull() == null) {
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.Alias, "")
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.AvatarFileName, "")
@@ -64,12 +89,12 @@ class MeDataUpdateWorker(
 						)
 					}
 				}
-				
+				Log.e("updateMe", "data saved!")
 			}
 			
 			
 		}
-		
+		Log.e("updateMe", "ended!")
 		
 		return Result.success()
 	}
