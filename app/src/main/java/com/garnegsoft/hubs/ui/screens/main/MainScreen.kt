@@ -59,7 +59,9 @@ fun MainScreen(
 		.collectAsState(initial = null)
 	
 	LaunchedEffect(key1 = authorizedState, block = {
-		isAuthorized = authorizedState == true
+		authorizedState?.let {
+			isAuthorized = it
+		}
 	})
 	
 	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
@@ -288,7 +290,6 @@ fun MainScreen(
 						checkInternetConnection = false
 					}
 				})
-				val coroutineScope = rememberCoroutineScope()
 				if (showNoInternetConnectionElement) {
 					
 					NoInternetElement(
