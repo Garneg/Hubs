@@ -54,9 +54,9 @@ class MainActivity : ComponentActivity() {
 				extras = it)
 		}
 		
-		FirebaseMessaging.getInstance().token.addOnCompleteListener {
-			Log.e("fcm-token", it.result)
-		}
+//		FirebaseMessaging.getInstance().token.addOnCompleteListener {
+//			Log.e("fcm-token", it.result)
+//		}
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
