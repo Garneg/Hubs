@@ -85,7 +85,8 @@ class HabrApi {
                 if (ex is SocketTimeoutException ||
                     ex is ConnectException ||
                     ex is NoConnectionInterceptor.NoInternetException ||
-                    ex is NoConnectionInterceptor.NoConnectivityException) {
+                    ex is NoConnectionInterceptor.NoConnectivityException &&
+                    cacheControl != CacheControl.FORCE_NETWORK) {
                     return get(path, args, version, CacheControl.FORCE_CACHE)
                 } else
                     return null

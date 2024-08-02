@@ -31,7 +31,7 @@ class MeDataUpdateWorker(
 		if (Build.VERSION.SDK_INT >= 26) {
 			
 			val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-			val channel = NotificationChannel("updateMe", "Обновление данных авторизации", NotificationManager.IMPORTANCE_DEFAULT)
+			val channel = NotificationChannel("updateMe", "Обновление данных авторизации", NotificationManager.IMPORTANCE_LOW)
 			notificationManager.createNotificationChannel(channel)
 			
 			val notification = Notification.Builder(applicationContext, "updateMe")
