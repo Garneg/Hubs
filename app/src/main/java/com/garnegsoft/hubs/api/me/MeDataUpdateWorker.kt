@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
@@ -36,7 +37,13 @@ class MeDataUpdateWorker(
 			val notification = Notification.Builder(applicationContext, "updateMe")
 				.setSmallIcon(R.drawable.notification_default_icon)
 				.build()
-			setForeground(ForegroundInfo(0, notification))
+			val foregroundInfo = if (Build.VERSION.SDK_INT >= 29) {
+				ForegroundInfo(0, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+			} else {
+				ForegroundInfo(0, notification)
+			}
+			setForeground(foregroundInfo)
+			
 		}
 		Log.e("updateMe", "started!")
 		withContext(Dispatchers.IO) {

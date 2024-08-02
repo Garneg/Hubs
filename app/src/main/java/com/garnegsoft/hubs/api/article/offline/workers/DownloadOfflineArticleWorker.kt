@@ -4,6 +4,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.Looper
 import android.webkit.WebView
@@ -59,7 +60,13 @@ class DownloadOfflineArticleWorker(
 			Notification()
 		}
 		
-		return ForegroundInfo(inputData.getInt("ARTICLE_ID", 0), notification)
+		val foregroundInfo = if (Build.VERSION.SDK_INT >= 29) {
+			ForegroundInfo(inputData.getInt("ARTICLE_ID", 0), notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+		} else {
+			ForegroundInfo(inputData.getInt("ARTICLE_ID", 0), notification)
+		}
+		
+		return foregroundInfo
 		
 	}
 	override suspend fun doWork(): Result {
