@@ -4,28 +4,29 @@ import com.garnegsoft.hubs.data.HabrApi
 import com.garnegsoft.hubs.data.HabrDataParser
 import com.garnegsoft.hubs.data.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
+import okhttp3.CacheControl
 
 
 class MeController {
     companion object {
         private fun get(): Result<Me?> {
-            val response = HabrApi.get("me")
+            val response = HabrApi.get("me", cacheControl = CacheControl.FORCE_NETWORK)
             
             if (response?.code != 200)
-                return Result.failure(Exception())
+                return Result.failure(Exception("Response code was ${response?.code}"))
             return response.body?.string()?.let {
-                if (it == "null") return Result.success(null)
+                if (it == "null") return Result.success(null) // this means that request were successful, but user is not authorized, so data about them is null
                 val me = HabrDataParser.parseJson<Me>(it)
                 me.avatarUrl = me.avatarUrl?.let {
                     it.replace("//habrastorage", "https://hsto")
                 } ?: placeholderAvatarUrl(me.alias)
                 return Result.success(me)
-            } ?: Result.failure(Exception())
+            } ?: Result.failure(Exception("Body was null"))
         }
 
         fun getMe(): Result<com.garnegsoft.hubs.data.me.Me?> {
             val raw = get()
-            if (raw.isFailure) return Result.failure(Exception())
+            if (raw.isFailure) return Result.failure(raw.exceptionOrNull()!!)
             
             raw.getOrNull()?.let {
                 return Result.success(Me(
@@ -34,7 +35,7 @@ class MeController {
                 ))
             }
 
-            return Result.failure(Exception())
+            return Result.failure(Exception("Raw was null"))
         }
 
     }

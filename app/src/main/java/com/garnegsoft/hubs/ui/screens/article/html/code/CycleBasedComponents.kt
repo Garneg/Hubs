@@ -13,8 +13,10 @@ abstract class CycleBasedComponent {
 }
 
 class CycleBasedComponents {
-	
-	class StringComponent(
+	/**
+	 * Made for strings that start and end with " (quotation mark)
+	 */
+	class QuotationMarkStringComponent(
 		override val spanStyle: SpanStyle
 	) : CycleBasedComponent() {
 		
@@ -38,6 +40,30 @@ class CycleBasedComponents {
 			}
 		}
 		
+	}
+	
+	class ApostropheStringComponent(
+		override val spanStyle: SpanStyle
+	) : CycleBasedComponent() {
+		private var firstStringApostropheIndex = -1
+		override fun cycle(index: Int, code: String, lock: KMutableProperty0<Lock>) {
+			if (code[index] == '\'' && !(index > 0 && code[index - 1] == '\\') && (lock.get() == Lock.None || lock.get() == Lock.String)) {
+				if (firstStringApostropheIndex < 0) {
+					firstStringApostropheIndex = index
+					lock.set(Lock.String)
+				} else {
+					ranges.add(
+						AnnotatedString.Range<SpanStyle>(
+							spanStyle,
+							firstStringApostropheIndex,
+							index + 1
+						)
+					)
+					firstStringApostropheIndex = -1
+					lock.set(Lock.None)
+				}
+			}
+		}
 	}
 	
 	class SinglelineCommentComponent(

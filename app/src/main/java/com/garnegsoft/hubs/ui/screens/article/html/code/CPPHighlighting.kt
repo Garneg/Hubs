@@ -118,11 +118,11 @@ class CPPHighlighting : LanguageHighlighting() {
 		fontWeight = FontWeight.W400
 	)
 	
-	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
+	override fun highlight(code: String, useDarkThemeColor: Boolean): List<AnnotatedString.Range<SpanStyle>> {
 		return Defaults.highlightKeywords(code, keywords, keywordSpanStyle) +
 			CycleBasedHighlightingPipeline(code,
 				arrayOf(
-					CycleBasedComponents.StringComponent(stringLiteralSpanStyle),
+					CycleBasedComponents.QuotationMarkStringComponent(stringLiteralSpanStyle),
 					CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
 					CycleBasedComponents.SinglelineCommentComponent(commentsSpanStyle),
 					CycleBasedComponents.MultilineComment(commentsSpanStyle)

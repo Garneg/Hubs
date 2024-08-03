@@ -33,7 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.dataStore.FilterSavingController
+import com.garnegsoft.hubs.data.dataStore.FilterSavingController
 import com.garnegsoft.hubs.data.CollapsingContent
 import com.garnegsoft.hubs.data.dataStore.AuthDataController
 import com.garnegsoft.hubs.data.dataStore.LastReadArticleController
@@ -72,7 +72,9 @@ fun MainScreen(
 		.collectAsState(initial = null)
 	
 	LaunchedEffect(key1 = authorizedState, block = {
-		isAuthorized = authorizedState == true
+		authorizedState?.let {
+			isAuthorized = it
+		}
 	})
 	
 	val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
@@ -300,7 +302,7 @@ fun MainScreen(
 							checkInternetConnection = false
 						}
 					})
-					val coroutineScope = rememberCoroutineScope()
+					
 					if (showNoInternetConnectionElement) {
 						
 						NoInternetElement(

@@ -1,10 +1,19 @@
 package com.garnegsoft.hubs.data.me
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
+import android.util.Log
+import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
+import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
 import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.utils.placeholderAvatarUrl
+import com.garnegsoft.hubs.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -18,6 +27,24 @@ class MeDataUpdateWorker(
 	params: WorkerParameters
 ) : CoroutineWorker(appContext, params) {
 	override suspend fun doWork(): Result {
+		if (Build.VERSION.SDK_INT >= 26) {
+			
+			val notificationManager = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+			val channel = NotificationChannel("updateMe", "Обновление данных авторизации", NotificationManager.IMPORTANCE_LOW)
+			notificationManager.createNotificationChannel(channel)
+			
+			val notification = Notification.Builder(applicationContext, "updateMe")
+				.setSmallIcon(R.drawable.notification_default_icon)
+				.build()
+			val foregroundInfo = if (Build.VERSION.SDK_INT >= 29) {
+				ForegroundInfo(0, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+			} else {
+				ForegroundInfo(0, notification)
+			}
+			setForeground(foregroundInfo)
+			
+		}
+		Log.e("updateMe", "started!")
 		withContext(Dispatchers.IO) {
 			val lastAvatarUrl = HubsDataStore.Auth.getValueFlow(
 				applicationContext,
@@ -30,6 +57,11 @@ class MeDataUpdateWorker(
 			
 			
 			val me = MeController.getMe()
+			if (me.isSuccess)
+				Log.e("updateMe", "Retrieved data successfully!")
+			else {
+				Log.e("updateMe", "Request failed + ${me.exceptionOrNull()?.message}")
+			}
 			if (me.isSuccess && me.getOrNull() == null) {
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.Alias, "")
 				HubsDataStore.Auth.edit(applicationContext, HubsDataStore.Auth.AvatarFileName, "")
@@ -63,12 +95,12 @@ class MeDataUpdateWorker(
 						)
 					}
 				}
-				
+				Log.e("updateMe", "data saved!")
 			}
 			
 			
 		}
-		
+		Log.e("updateMe", "ended!")
 		
 		return Result.success()
 	}

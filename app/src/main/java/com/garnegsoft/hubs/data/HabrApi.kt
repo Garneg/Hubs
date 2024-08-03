@@ -47,6 +47,10 @@ class HabrApi {
                     it.proceed(req)
                 })
                 .addInterceptor(NoConnectionInterceptor(context))
+                .addInterceptor {
+                    Firebase.crashlytics.log("HABRAPI ${it.request().method} url:${it.request().url} requestBody:${it.request().body}")
+                    it.proceed(it.request())
+                }
                 .build()
 
         }
@@ -60,7 +64,7 @@ class HabrApi {
             path: String,
             args: Map<String, String>? = null, version: Int = 2,
             cacheControl: CacheControl = CacheControl.Builder()
-                .maxStale(2, TimeUnit.MINUTES)
+                .maxStale(1, TimeUnit.MINUTES)
                 .build()
         ): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
@@ -69,7 +73,7 @@ class HabrApi {
             }
             val paramsString = StringBuilder()
             finalArgs.keys.forEach { paramsString.append("$it=${finalArgs[it]}&") }
-            Firebase.crashlytics.log("HABRAPI GET $path?$paramsString")
+            
             val request = Request
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
@@ -81,7 +85,8 @@ class HabrApi {
                 if (ex is SocketTimeoutException ||
                     ex is ConnectException ||
                     ex is NoConnectionInterceptor.NoInternetException ||
-                    ex is NoConnectionInterceptor.NoConnectivityException) {
+                    ex is NoConnectionInterceptor.NoConnectivityException &&
+                    cacheControl != CacheControl.FORCE_NETWORK) {
                     return get(path, args, version, CacheControl.FORCE_CACHE)
                 } else
                     return null

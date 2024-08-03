@@ -255,10 +255,12 @@ fun CompanyProfile(
 									text = company.statistics.rating.toString(),
 								)
 							}
+							company.registrationDate?.let {
 							TitledColumn(title = "Дата регистрации") {
-								Text(
-									text = company.registrationDate,
-								)
+									Text(
+										text = it,
+									)
+								}
 							}
 							if (company.foundationDate != null) {
 								TitledColumn(title = "Дата основания") {
@@ -267,11 +269,12 @@ fun CompanyProfile(
 									)
 								}
 							}
-							
+							company.staffNumber?.let {
 							TitledColumn(title = "Численность") {
-								Text(
-									text = company.staffNumber,
-								)
+									Text(
+										text = it,
+									)
+								}
 							}
 							
 							company.location?.let {

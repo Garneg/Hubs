@@ -28,7 +28,8 @@ class CompanyController {
                 result.settings.branding?.imageUrl?.let {
                     result.settings.branding?.imageUrl = "https:$it"
                 }
-                result.registrationDate = formatTime(result.registrationDate).split(' ').run { "${this[0]} ${this[1]} ${this[2]}" }
+                result.registrationDate =
+                    result.registrationDate?.let { it1 -> formatTime(it1).split(' ').run { "${this[0]} ${this[1]} ${this[2]}" } }
                 result.descriptionHtml?.let { it1 -> result.descriptionHtml = Jsoup.parse(it1).text() }
                 return result
             }
@@ -111,8 +112,8 @@ class CompanyController {
         var foundationDate: FoundationDate?,
         var location: Location?,
         var siteUrl: String?,
-        var staffNumber: String,
-        var registrationDate: String,
+        var staffNumber: String?,
+        var registrationDate: String?,
 //        var representativeUser: RepresentativeUser?,
         var contacts: List<Contact>,
         var settings: Settings,

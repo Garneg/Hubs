@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -83,6 +84,9 @@ import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -108,9 +112,9 @@ class MainActivity : ComponentActivity() {
 				extras = it)
 		}
 		
-		FirebaseMessaging.getInstance().token.addOnCompleteListener {
-			Log.e("fcm-token", it.result)
-		}
+//		FirebaseMessaging.getInstance().token.addOnCompleteListener {
+//			Log.e("fcm-token", it.result)
+//		}
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
@@ -119,11 +123,13 @@ class MainActivity : ComponentActivity() {
 		
 		runBlocking {
 			authStatus = isAuthorizedFlow.firstOrNull()
+			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
 			HabrApi.initialize(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
 		}
 		
 		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
 			.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+			
 			.build()
 		WorkManager.getInstance(this).enqueue(updateMeData)
 		

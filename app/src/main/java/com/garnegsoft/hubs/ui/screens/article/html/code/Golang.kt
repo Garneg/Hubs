@@ -48,7 +48,7 @@ class GolangHighlighting : LanguageHighlighting() {
 	val stringLiteralSpanStyle = SpanStyle(
 		color = Color(0xFF579737))
 	
-	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
+	override fun highlight(code: String, useDarkThemeColor: Boolean): List<AnnotatedString.Range<SpanStyle>> {
 		val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
 		
 		spanStylesList.addAll(LanguageHighlighting.Defaults
@@ -58,7 +58,7 @@ class GolangHighlighting : LanguageHighlighting() {
 			GolangFunctionCallComponent(functionCallSpanStyle),
 			GolangMultilineStringComponent(stringLiteralSpanStyle),
 			CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
-			CycleBasedComponents.StringComponent(stringLiteralSpanStyle),
+			CycleBasedComponents.QuotationMarkStringComponent(stringLiteralSpanStyle),
 			CycleBasedComponents.IntegerComponent(numberLiteralSpanStyle),
 			CycleBasedComponents.SinglelineCommentComponent(commentsSpanStyle),
 			CycleBasedComponents.MultilineComment(commentsSpanStyle)

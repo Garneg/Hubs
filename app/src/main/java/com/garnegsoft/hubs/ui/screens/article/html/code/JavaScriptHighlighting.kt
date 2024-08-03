@@ -28,6 +28,7 @@ class JavaScriptHighlighting : LanguageHighlighting() {
 		"import",
 		
 		"instanceof",
+		"let",
 		"new",
 		"null",
 		"return",
@@ -53,11 +54,12 @@ class JavaScriptHighlighting : LanguageHighlighting() {
 	val commentSpanStyle: SpanStyle = SpanStyle(
 		color = Color(0xFF888888)
 	)
-	override fun highlight(code: String): List<AnnotatedString.Range<SpanStyle>> {
+	override fun highlight(code: String, useDarkThemeColor: Boolean): List<AnnotatedString.Range<SpanStyle>> {
 		val pipeline = CycleBasedHighlightingPipeline(code, arrayOf(
-			CycleBasedComponents.StringComponent(stringLiteralSpanStyle),
+			CycleBasedComponents.QuotationMarkStringComponent(stringLiteralSpanStyle),
 			CycleBasedComponents.CharComponent(stringLiteralSpanStyle),
 			CycleBasedComponents.SinglelineCommentComponent(commentSpanStyle)))
+		
 		pipeline.iterateThroughCode()
 		return Defaults.highlightKeywords(code, keywords, keywordSpanStyle) + pipeline.getAnnotatedRanges()
 	}
