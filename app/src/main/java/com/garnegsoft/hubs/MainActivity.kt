@@ -29,6 +29,7 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
@@ -43,6 +44,8 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
 		
+		// Disable crashlytics if it's debug version
+		FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 		
 		intent.extras?.let {
 			FcmDispatcher.dispatchExtras(

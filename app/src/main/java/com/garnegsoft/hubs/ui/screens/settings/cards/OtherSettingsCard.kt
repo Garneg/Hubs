@@ -16,9 +16,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,7 +49,11 @@ fun OtherSettingsCard(
 				viewModel.captureLogsAndShare(context)
 				showDialog = false
 			})
-		SettingsCardItem(title = "Отправить отчёт об ошибке", onClick = { showDialog = true })
+		SettingsCardItem(title = "Отправить отчёт об ошибке",
+			onClick = { showDialog = true },
+			trailingIcon = {
+				Icon(imageVector = Icons.Outlined.Email, contentDescription = null)
+			})
 		
 	}
 }
