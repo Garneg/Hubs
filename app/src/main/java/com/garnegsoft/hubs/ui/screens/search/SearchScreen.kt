@@ -1,5 +1,8 @@
 package com.garnegsoft.hubs.ui.screens.search
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -45,6 +48,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.screens.article.ArticleShort
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
@@ -97,10 +101,10 @@ fun SearchScreen(
 				mutableStateOf(true)
 			}
 			LaunchedEffect(key1 = Unit) {
-//				if (doRequestFocus) {
-//					focusRequester.requestFocus()
-//					doRequestFocus = false
-//				}
+				if (doRequestFocus) {
+					focusRequester.requestFocus()
+					doRequestFocus = false
+				}
 				if(!viewModel.mostReadingArticles.isInitialized) {
 					viewModel.loadMostReading()
 				}
@@ -292,48 +296,52 @@ fun SearchScreen(
 				
 			}
 			else {
-				var firstCardHeight by remember() { mutableIntStateOf(0) }
-				BoxWithConstraints(
-					modifier = Modifier
-						.imePadding()
-						.fillMaxSize()
-						.verticalScroll(rememberScrollState())
-						.padding(horizontal = 16.dp)
+				AnimatedVisibility(
+					visible = mostReadingArticles != null,
+					enter = slideInVertically { it / 2 }
 				) {
-					
-					Box(
-						modifier = Modifier.padding(top = with(LocalDensity.current) {
-							this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
-						})
-					) {
-						TitledColumn(
-							title = "Читают сейчас",
-							titleStyle = MaterialTheme.typography.subtitle2.copy(
-								color = MaterialTheme.colors.onBackground.copy(
-									0.5f
-								)
-							),
-							verticalArrangement = Arrangement.spacedBy(8.dp),
-							modifier = Modifier.padding(bottom = 8.dp)
+						var firstCardHeight by remember() { mutableIntStateOf(0) }
+						BoxWithConstraints(
+							modifier = Modifier
+								.imePadding()
+								.fillMaxSize()
+								.verticalScroll(rememberScrollState())
+								.padding(horizontal = 16.dp)
 						) {
 							
-							mostReadingArticles?.let {
-								it.forEachIndexed() { index, it ->
-									Box(
-										modifier = if (index == 0) Modifier
-											.onGloballyPositioned {
-												firstCardHeight = it.size.height
-											} else Modifier
-									) {
-										ArticleShort(
-											article = it,
-											onClick = {
-												onArticleClicked(it.id)
-											}
+							Box(
+								modifier = Modifier.padding(top = with(LocalDensity.current) {
+									this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
+								})
+							) {
+								TitledColumn(
+									title = "Читают сейчас",
+									titleStyle = MaterialTheme.typography.subtitle2.copy(
+										color = MaterialTheme.colors.onBackground.copy(
+											0.5f
 										)
+									),
+									verticalArrangement = Arrangement.spacedBy(8.dp),
+									modifier = Modifier.padding(bottom = 16.dp)
+								) {
+									mostReadingArticles?.let { mostReading ->
+									mostReading.forEachIndexed() { index, it ->
+										Box(
+											modifier = if (index == 0) Modifier
+												.onGloballyPositioned {
+													firstCardHeight = it.size.height
+												} else Modifier
+										) {
+											ArticleShort(
+												article = it,
+												onClick = {
+													onArticleClicked(it.id)
+												}
+											)
+										}
 									}
 								}
-							} ?: CircularProgressIndicator()
+							}
 						}
 					}
 				}
