@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/saved_articles_shortcut_icon">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="hubs://saved-articles"
+            android:targetPackage="com.garnegsoft.hubs"
+            android:targetClass="com.garnegsoft.hubs.MainActivity" />
+        <capability-binding android:key="actions.intent.CREATE_MESSAGE" />
+    </shortcut>
+</shortcuts>

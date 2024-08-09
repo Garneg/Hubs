@@ -4,7 +4,11 @@
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
 
+    
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -29,6 +33,18 @@
         <profileable
             android:shell="true"
             tools:targetApi="29" />
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge"
+            />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/notification_default_icon"/>
+<!--        <meta-data-->
+<!--            android:name="com.google.firebase.messaging.default_notification_color"-->
+<!--            android:resource="@color/white" />-->
+
 
         <activity
             android:name=".MainActivity"
@@ -44,6 +60,12 @@
             <meta-data
                 android:name="android.app.lib_name"
                 android:value="" />
+
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts"/>
+
+
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
@@ -62,6 +84,25 @@
             android:name=".AuthActivity"
             android:exported="false"
             android:theme="@style/Theme.Hubs.Auth" />
+
+        <provider
+            android:name=".ui.screens.settings.LogFileProvider"
+            android:authorities="com.garnegsoft.hubs.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/log_file_path" />
+        </provider>
+
+        <service
+            android:name=".HubsFCMService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
     </application>
 
 </manifest>

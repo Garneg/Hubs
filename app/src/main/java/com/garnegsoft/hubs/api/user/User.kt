@@ -21,7 +21,7 @@ class User(
 	val canBeInvited: Boolean,
 	val location: String?,
 	val workPlaces: List<WorkPlace>,
-	
+	val isInBlockList: Boolean,
 	val relatedData: RelatedData?
 ){
 

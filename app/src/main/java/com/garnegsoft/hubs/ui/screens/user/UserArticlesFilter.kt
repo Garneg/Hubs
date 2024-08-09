@@ -1,11 +1,14 @@
 package com.garnegsoft.hubs.ui.screens.user
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
@@ -37,11 +40,13 @@ fun UserArticlesFilter(
 	
 	BaseFilterDialog(onDismiss = onDismiss, onDone = { onDone(UserArticlesFilter(showNews))}) {
 		TitledColumn(title = "Тип публикаций") {
-			HubsFilterChip(selected = !showNews, onClick = { showNews = false }) {
-				Text(text = "Статьи")
-			}
-			HubsFilterChip(selected = showNews, onClick = { showNews = true }) {
-				Text(text = "Новости")
+			Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+				HubsFilterChip(selected = !showNews, onClick = { showNews = false }) {
+					Text(text = "Статьи")
+				}
+				HubsFilterChip(selected = showNews, onClick = { showNews = true }) {
+					Text(text = "Новости")
+				}
 			}
 		}
 	}

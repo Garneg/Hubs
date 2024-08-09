@@ -102,20 +102,22 @@ class CommentsListController {
                 
 
                 return CommentsCollection(
-                    newList,
-                    CommentsCollection.CommentAccess(
+                    comments = newList,
+                    commentAccess = CommentsCollection.CommentAccess(
                         canComment = serializedData?.commentAccess?.isCanComment ?: false,
                         cantCommentReason = serializedData?.commentAccess?.cantCommentReason
-                    )
+                    ),
+                    pinnedComments = serializedData?.pinnedCommentIds?.map { it.toInt() } ?: emptyList()
                 )
             }
 
             return CommentsCollection(
-                commentsList,
-                CommentsCollection.CommentAccess(
+                comments = commentsList,
+                commentAccess = CommentsCollection.CommentAccess(
                     canComment = serializedData?.commentAccess?.isCanComment ?: false,
                     cantCommentReason = serializedData?.commentAccess?.cantCommentReason
-                )
+                ),
+                pinnedComments = serializedData?.pinnedCommentIds?.map { it.toInt() } ?: emptyList()
             )
         }
         
@@ -182,7 +184,7 @@ class CommentsListController {
                     }
                     if (doConcatinating) newComments.add(it)
                 }
-                CommentsCollection(newComments, it.commentAccess)
+                CommentsCollection(newComments, it.commentAccess, it.pinnedComments)
             }
         }
 
@@ -296,7 +298,7 @@ class CommentsListController {
                 "comments/posts/$articleId/add",
                 requestBody = serializedComment.toRequestBody(contentType = "application/json".toMediaType())
             )
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
 
             response.body?.string()?.let {
@@ -352,7 +354,8 @@ class CommentsListController {
         var moderated: Map<String, Comment>? = null,
         var commentAccess: CommentAccess? = null,
         val lastCommentTimestamp: Long? = null,
-        val pages: Int? = null
+        val pages: Int? = null,
+        val pinnedCommentIds: List<String>? = null
     ) {
         @Serializable
         data class Comment(

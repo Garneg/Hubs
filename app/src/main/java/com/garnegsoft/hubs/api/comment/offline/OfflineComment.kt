@@ -9,7 +9,7 @@ const val OFFLINE_COMMENTS_TABLE_NAME = "offline_comments"
 
 
 @Entity(
-	tableName = OFFLINE_COMMENTS_TABLE_NAME,)
+	tableName = OFFLINE_COMMENTS_TABLE_NAME)
 data class OfflineComment(
 	@ColumnInfo("comment_id")
 	val commentId: Int,

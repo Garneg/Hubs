@@ -5,10 +5,8 @@ import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
@@ -37,27 +35,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.lastReadDataStore
-import com.garnegsoft.hubs.api.dataStore.settingsDataStoreFlowWithDefault
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.screens.user.HubChip
-import com.garnegsoft.hubs.ui.theme.RatingNegative
-import com.garnegsoft.hubs.ui.theme.RatingPositive
+import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
 import org.jsoup.nodes.*
 import kotlin.math.abs
@@ -74,42 +69,33 @@ fun ArticleScreen(
 	onCompanyClick: (alias: String) -> Unit,
 	onViewImageRequest: (url: String) -> Unit,
 	onArticleClick: (id: Int) -> Unit,
-	viewModelStoreOwner: ViewModelStoreOwner,
-	isOffline: Boolean = false
+	viewModelStoreOwner: ViewModelStoreOwner
 ) {
 	val context = LocalContext.current
-	val fontSize by context.settingsDataStoreFlowWithDefault(
-		HubsDataStore.Settings.Keys.ArticleScreen.FontSize,
-		MaterialTheme.typography.body1.fontSize.value
-	).collectAsState(
-		initial = null
-	)
+	val fontSize by HubsDataStore.Settings
+		.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
+		.collectAsState(
+			initial = null
+		)
 	val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
 	val article by viewModel.article.observeAsState()
-	val offlineArticle by viewModel.offlineArticle.observeAsState()
 	
 	LaunchedEffect(key1 = Unit, block = {
 		if (!viewModel.article.isInitialized) {
-			if (isOffline) {
-				viewModel.loadArticleFromLocalDatabase(articleId, context)
-			} else {
-				viewModel.loadArticle(articleId)
-			}
+			viewModel.loadArticle(articleId)
 		}
 		if (!viewModel.mostReadingArticles.isInitialized) {
 			viewModel.loadMostReading()
 		}
 	})
 	
-	val scrollState = rememberScrollState()
-	
 	val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
-	val shareIntent = remember(article?.title, offlineArticle?.title) {
+	val shareIntent = remember(article?.title) {
 		val sendIntent = Intent(Intent.ACTION_SEND)
 		
 		sendIntent.putExtra(
 			Intent.EXTRA_TEXT,
-			"${article?.title ?: offlineArticle?.title} — https://habr.com/p/${articleId}/"
+			"${article?.title ?: ""} — https://habr.com/p/${articleId}/"
 		)
 		sendIntent.setType("text/plain")
 		Intent.createChooser(sendIntent, null)
@@ -151,7 +137,7 @@ fun ArticleScreen(
 					
 					IconButton(
 						onClick = { context.startActivity(shareIntent) },
-						enabled = article != null || offlineArticle != null
+						enabled = article != null
 					) {
 						Icon(Icons.Outlined.Share, contentDescription = "")
 					}
@@ -160,6 +146,7 @@ fun ArticleScreen(
 		backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
 		bottomBar = {
 			article?.let { article ->
+				
 				BottomAppBar(
 					elevation = 0.dp,
 					backgroundColor = MaterialTheme.colors.surface,
@@ -193,16 +180,16 @@ fun ArticleScreen(
 							contentDescription = "",
 							tint = statisticsColor
 						)
-						Spacer(modifier = Modifier.width(4.dp))
+						Spacer(modifier = Modifier.width(1.dp))
 						Text(
 							if (article.statistics.score > 0)
 								"+" + article.statistics.score.toString()
 							else
 								article.statistics.score.toString(),
 							color = if (article.statistics.score > 0)
-								RatingPositive
+								RatingPositiveColor
 							else if (article.statistics.score < 0)
-								RatingNegative
+								RatingNegativeColor
 							else
 								statisticsColor,
 							fontWeight = FontWeight.W500
@@ -254,7 +241,11 @@ fun ArticleScreen(
 											addedToBookmarksCount--
 											addedToBookmarksCount =
 												addedToBookmarksCount.coerceAtLeast(0)
-											if (!ArticleController.removeFromBookmarks(article.id, article.postType == PostType.News)) {
+											if (!ArticleController.removeFromBookmarks(
+													article.id,
+													article.postType == PostType.News
+												)
+											) {
 												addedToBookmarks = true
 												addedToBookmarksCount++
 												addedToBookmarksCount =
@@ -264,7 +255,11 @@ fun ArticleScreen(
 										} else {
 											addedToBookmarks = true
 											addedToBookmarksCount++
-											if (!ArticleController.addToBookmarks(article.id, article.postType == PostType.News)) {
+											if (!ArticleController.addToBookmarks(
+													article.id,
+													article.postType == PostType.News
+												)
+											) {
 												addedToBookmarks = false
 												addedToBookmarksCount--
 												addedToBookmarksCount =
@@ -310,7 +305,7 @@ fun ArticleScreen(
 											modifier = Modifier
 												.size(8.dp)
 												.clip(CircleShape)
-												.background(RatingPositive)
+												.background(RatingPositiveColor)
 										)
 									}
 								}
@@ -341,301 +336,49 @@ fun ArticleScreen(
 			}
 		}
 	) {
-		if (isOffline) {
-			offlineArticle?.let { article ->
-				val flingSpec = rememberSplineBasedDecay<Float>()
-				
-				Row {
-					Column(
-						modifier = Modifier
-							.verticalScroll(
-								state = scrollState,
-								flingBehavior = object : FlingBehavior {
-									override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-										if (abs(initialVelocity) <= 1f)
-											return initialVelocity
-										
-										val performedInitialVelocity = initialVelocity * 1.2f
-										
-										var velocityLeft = performedInitialVelocity
-										var lastValue = 0f
-										AnimationState(
-											initialValue = 0f,
-											initialVelocity = performedInitialVelocity
-										).animateDecay(flingSpec) {
-											val delta = value - lastValue
-											val consumed = scrollBy(delta)
-											lastValue = value
-											velocityLeft = velocity
-											
-											if (abs(delta - consumed) > 0.5f) this.cancelAnimation()
-											
-										}
-										return velocityLeft
-										
-									}
-									
-								}
-							)
-							.padding(bottom = 12.dp)
-							.padding(16.dp)
-					) {
-						if (article.authorName != null) {
-							Row(
-								verticalAlignment = Alignment.CenterVertically,
-							) {
-								if (article.authorAvatarUrl != null)
-									AsyncImage(
-										modifier = Modifier
-											.size(34.dp)
-											.clip(RoundedCornerShape(8.dp))
-											.background(Color.White),
-										model = article.authorAvatarUrl,
-										contentDescription = ""
-									)
-								else
-									Icon(
-										modifier = Modifier
-											.size(34.dp)
-											.border(
-												width = 2.dp,
-												color = placeholderColorLegacy(article.authorName),
-												shape = RoundedCornerShape(8.dp)
-											)
-											.background(
-												Color.White,
-												shape = RoundedCornerShape(8.dp)
-											)
-											.padding(2.dp),
-										painter = painterResource(id = R.drawable.user_avatar_placeholder),
-										contentDescription = "",
-										tint = placeholderColorLegacy(article.authorName)
-									)
-								Spacer(modifier = Modifier.width(4.dp))
-								Text(
-									text = article.authorName, fontWeight = FontWeight.W600,
-									fontSize = 14.sp,
-									color = MaterialTheme.colors.onBackground
-								)
-								Spacer(modifier = Modifier.weight(1f))
-								Text(
-									text = formatTime(article.timePublished), color = Color.Gray,
-									fontSize = 12.sp, fontWeight = FontWeight.W400
-								)
-							}
-						}
-						Spacer(modifier = Modifier.size(8.dp))
-						Column {
-							SelectionContainer() {
-								Text(
-									text = article.title,
-									fontSize = 22.sp,
-									fontWeight = FontWeight.W700,
-									color = MaterialTheme.colors.onBackground
-								)
-							}
-							Spacer(modifier = Modifier.height(4.dp))
-							Row(
-								verticalAlignment = Alignment.CenterVertically
-							) {
-								
-								Icon(
-									painter = painterResource(id = R.drawable.clock_icon),
-									modifier = Modifier.size(14.dp),
-									contentDescription = "",
-									tint = statisticsColor
-								)
-								Spacer(modifier = Modifier.width(4.dp))
-								Text(
-									text = "${article.readingTime} мин",
-									color = statisticsColor,
-									fontWeight = FontWeight.W500,
-									fontSize = 14.sp
-								)
-								Spacer(modifier = Modifier.width(12.dp))
-								if (article.isTranslation) {
-									Icon(
-										painter = painterResource(id = R.drawable.translate),
-										modifier = Modifier.size(14.dp),
-										contentDescription = "",
-										tint = statisticsColor
-									)
-									Spacer(modifier = Modifier.width(4.dp))
-									Text(
-										text = "Перевод",
-										color = statisticsColor,
-										fontWeight = FontWeight.W500,
-										fontSize = 14.sp
-									)
-									Spacer(modifier = Modifier.width(12.dp))
-								}
-								Row(
-									verticalAlignment = Alignment.CenterVertically
-								) {
-									Icon(
-										painter = painterResource(id = R.drawable.offline),
-										modifier = Modifier.size(14.dp),
-										contentDescription = "",
-										tint = statisticsColor
-									)
-									Spacer(modifier = Modifier.width(4.dp))
-									Text(
-										text = "оффлайн режим",
-										color = statisticsColor,
-										fontWeight = FontWeight.W500,
-										fontSize = 14.sp
-									)
-								}
-							}
-							Spacer(Modifier.height(4.dp))
-							var hubsText by remember { mutableStateOf("") }
-							
-							LaunchedEffect(key1 = Unit, block = {
-								if (hubsText == "") {
-									hubsText =
-										article.hubs.hubsList.joinToString(separator = ", ") {
-											it.replace(" ", "\u00A0")
-										}
-								}
-							})
-							// Hubs
-							Text(
-								text = hubsText, style = TextStyle(
-									color = Color.Gray,
-									fontWeight = FontWeight.W500
-								)
-							)
-							
-							Spacer(modifier = Modifier.height(8.dp))
-							val elementsSettings = remember {
-								ElementSettings(
-									fontSize = fontSize?.sp ?: 16.sp,
-									lineHeight = 16.sp,
-									fitScreenWidth = false
-								)
-							}
-							SelectionContainer() {
-								parseElement(
-									element = Jsoup.parse(article.contentHtml),
-									spanStyle = SpanStyle(
-										color = MaterialTheme.colors.onSurface,
-										fontSize = fontSize?.sp
-											?: MaterialTheme.typography.body1.fontSize,
-									),
-									onViewImageRequest = onViewImageRequest
-								).second?.let { it1 ->
-									it1(
-										SpanStyle(
-											color = MaterialTheme.colors.onSurface,
-											fontSize = fontSize?.sp
-												?: MaterialTheme.typography.body1.fontSize
-										),
-										elementsSettings
-									)
-								}
-							}
-							// Tags
-//                        Row(
-//                            verticalAlignment = Alignment.Top,
-//                            modifier = Modifier.padding(vertical = 8.dp)
-//                        ) {
-//                            Text(
-//                                text = "Теги:",
-//                                style = TextStyle(color = Color.Gray, fontWeight = FontWeight.W500)
-//                            )
-//                            Spacer(modifier = Modifier.width(8.dp))
-//
-//                            var tags = String()
-//
-//                            article.tags.forEach { tags += "$it, " }
-//                            if (tags.length > 0) tags = tags.dropLast(2)
-//                            Text(
-//                                text = tags,
-//                                style = TextStyle(
-//                                    color = Color.Gray,
-//                                    fontWeight = FontWeight.W500
-//                                )
-//                            )
-//                        }
-							Divider(modifier = Modifier.padding(vertical = 24.dp))
-							// Hubs
-							TitledColumn(
-								title = "Хабы",
-								titleStyle = MaterialTheme.typography.subtitle2.copy(
-									color = MaterialTheme.colors.onBackground.copy(
-										0.5f
-									)
-								)
-							) {
-//                            HubsRow(
-//                                hubs = article.hubs,
-//                                onHubClicked = onHubClicked,
-//                                onCompanyClicked = onCompanyClick
-//                            )
-								FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-									article.hubs.hubsList.forEach {
-										HubChip(it) { }
-									}
-								}
-							}
-							
-							
-						}
-					}
-					ScrollBar(scrollState = scrollState)
-				}
-			}
-		} else {
-			article?.let { article ->
-				
-				val lineHeightFactor by context.settingsDataStoreFlowWithDefault(
-					HubsDataStore.Settings.Keys.ArticleScreen.LineHeightFactor,
-					1.5f
-				).collectAsState(
-					initial = null
+		article?.let { article ->
+			val color = MaterialTheme.colors.onSurface
+			val spanStyle = remember(fontSize, color) {
+				SpanStyle(
+					color = color,
+					fontSize = fontSize?.sp ?: 16.sp
 				)
-				val color = MaterialTheme.colors.onSurface
-				val spanStyle = remember(fontSize, color) {
-					SpanStyle(
-						color = color,
-						fontSize = fontSize?.sp ?: 16.sp
+			}
+			val elementsSettings = remember {
+				ElementSettings(
+					fontSize = fontSize?.sp ?: 16.sp,
+					lineHeight = 16.sp,
+					fitScreenWidth = false
+				)
+			}
+			var nodeParsed by rememberSaveable {
+				mutableStateOf(false)
+			}
+			LaunchedEffect(key1 = Unit, block = {
+				LastReadArticleController.setLastArticle(context, articleId)
+				withContext(Dispatchers.IO) {
+					HistoryController.insertArticle(articleId, context)
+				}
+				if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
+					val element =
+						Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
+							.child(0)
+							?: Element("")
+					
+					viewModel.parsedArticleContent.postValue(
+						parseChildElements(
+							element,
+							spanStyle,
+							onViewImageRequest
+						).second
 					)
+					nodeParsed = true
 				}
-				val elementsSettings = remember {
-					ElementSettings(
-						fontSize = fontSize?.sp ?: 16.sp,
-						lineHeight = 16.sp,
-						fitScreenWidth = false
-					)
-				}
-				var nodeParsed by rememberSaveable {
-					mutableStateOf(false)
-				}
-				LaunchedEffect(key1 = Unit, block = {
-					context.lastReadDataStore.edit {
-						it[HubsDataStore.LastRead.Keys.LastArticleRead] = articleId
-					}
-					if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
-						val element =
-							Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()!!
-								.child(0)
-								?: Element("")
-						
-						viewModel.parsedArticleContent.postValue(
-							parseChildElements(
-								element,
-								spanStyle,
-								onViewImageRequest
-							).second
-						)
-						nodeParsed = true
-					}
-				})
-				LaunchedEffect(key1 = fontSize, block = {
-				
-				})
-				Box(modifier = Modifier.padding(it)) {
-					if (nodeParsed && fontSize != null)
+			})
+			
+			Box(modifier = Modifier.padding(it)) {
+				if (nodeParsed && fontSize != null) {
+					SelectionContainer {
 						ArticleContent(
 							article = article,
 							onAuthorClicked = { onAuthorClicked(article.author!!.alias) },
@@ -644,52 +387,13 @@ fun ArticleScreen(
 							onViewImageRequest = onViewImageRequest,
 							onArticleClick = onArticleClick
 						)
+					}
 				}
-			} ?: Box(
-				modifier = Modifier
-					.fillMaxSize()
-					.padding(it)
-			) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
-		}
-		
+			}
+		} ?: Box(
+			modifier = Modifier
+				.fillMaxSize()
+				.padding(it)
+		) { CircularProgressIndicator(modifier = Modifier.align(Alignment.Center)) }
 	}
 }
-
-@Composable
-fun ScrollBar(
-	scrollState: ScrollState,
-	modifier: Modifier = Modifier
-) {
-	val targetAlpha = if (scrollState.isScrollInProgress) 1f else 0f
-	val duration = if (scrollState.isScrollInProgress) 150 else 1000
-	
-	val alpha by animateFloatAsState(
-		targetValue = targetAlpha,
-		animationSpec = tween(durationMillis = duration)
-	)
-	
-	var scrollbarWidth = with(LocalDensity.current) { 3.dp.toPx() }
-	val scrollbarColor =
-		if (MaterialTheme.colors.isLight) Color(0x59_000000) else Color(0x59_FFFFFF)
-	Box(modifier = modifier
-		.fillMaxHeight()
-		.width(6.dp)
-		.drawBehind {
-			
-			var scrollbarheight = size.height / scrollState.maxValue * size.height
-			var place = size.height - scrollbarheight
-			var offsetheight =
-				scrollState.value.toFloat() / scrollState.maxValue.toFloat() * place
-			drawRoundRect(
-				color = scrollbarColor,
-				size = Size(size.width - scrollbarWidth, scrollbarheight),
-				topLeft = Offset(x = -scrollbarWidth / 2, y = offsetheight),
-				cornerRadius = CornerRadius(40.dp.toPx(), 40.dp.toPx()),
-				alpha = alpha
-			)
-			
-		})
-	
-}
-
-

@@ -30,7 +30,7 @@ class HubController {
             return get(path = "hubs/$alias/profile")
         }
 
-        fun get(path: String, args: Map<String, String>? = null): Hub? {
+        private fun get(path: String, args: Map<String, String>? = null): Hub? {
             var raw = getProfile(path, args)
 
             var result: Hub? = null
@@ -62,7 +62,7 @@ class HubController {
          */
         fun subscription(alias: String): Boolean {
             val response = HabrApi.post("hubs/$alias/subscription")
-            response.body?.string()?.let {
+            response?.body?.string()?.let {
                 return Json.parseToJsonElement(it).jsonObject["isSubscribed"]?.jsonPrimitive!!.boolean
             }
             throw UnsupportedOperationException("User is not authorized")

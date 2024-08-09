@@ -1,7 +1,14 @@
 package com.garnegsoft.hubs.api.article.offline
 
-import ArticleController
 import android.content.Context
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import com.garnegsoft.hubs.api.article.offline.workers.DeleteOfflineArticleWorker
+import com.garnegsoft.hubs.api.article.offline.workers.DownloadOfflineArticleWorker
+import java.io.File
 
 
 class OfflineArticlesController {
@@ -9,40 +16,45 @@ class OfflineArticlesController {
 		
 		private var _dao: OfflineArticlesDao? = null
 		
-		private fun getDao(context: Context): OfflineArticlesDao {
-			if (_dao == null){
-				synchronized(this){
+		val Context.articles_offline_resource_dir
+			get() = File(filesDir, "offline_resources")
+		
+		fun getDao(context: Context): OfflineArticlesDao {
+			
+			if (_dao == null) {
+				synchronized(this) {
 					_dao = OfflineArticlesDatabase.getDb(context).articlesDao()
 					return _dao!!
 				}
 			} else {
 				return _dao!!
-				
 			}
 			
 		}
 		
-		suspend fun downloadArticle(articleId: Int, context: Context): Boolean {
-			val dao = getDao(context)
-			
-			val article = ArticleController.getOfflineArticle(articleId)
-			val articleSnippet = ArticleController.getOfflineArticleSnippet(articleId)
-			if (article == null || articleSnippet == null) {
-				return false
-			}
-			dao.insert(article)
-			dao.insertSnippet(articleSnippet)
-			return true
+		fun downloadArticle(articleId: Int, context: Context) {
+			val request = OneTimeWorkRequestBuilder<DownloadOfflineArticleWorker>()
+				.setConstraints(Constraints(NetworkType.CONNECTED))
+				.setInputData(Data.Builder().putInt("ARTICLE_ID", articleId).build())
+				.build()
+			WorkManager.getInstance(context).enqueue(request)
 		}
 		
-		suspend fun deleteArticle(articleId: Int, context: Context): Boolean {
-			val dao = getDao(context)
-			if (dao.exists(articleId)){
-				dao.delete(articleId)
-				dao.deleteSnippet(articleId)
-				return true
-			}
+		fun deleteArticle(articleId: Int, context: Context): Boolean {
+			val request = OneTimeWorkRequestBuilder<DeleteOfflineArticleWorker>()
+				.setInputData(Data.Builder().putInt("ARTICLE_ID", articleId).build())
+				.build()
+			WorkManager.getInstance(context).enqueue(request)
+			
 			return false
 		}
+		
+		fun deleteAllArticles(context: Context) {
+			val request = OneTimeWorkRequestBuilder<DeleteOfflineArticleWorker>()
+				.setConstraints(Constraints(NetworkType.NOT_REQUIRED))
+				.build()
+			WorkManager.getInstance(context).enqueue(request)
+		}
 	}
+	
 }

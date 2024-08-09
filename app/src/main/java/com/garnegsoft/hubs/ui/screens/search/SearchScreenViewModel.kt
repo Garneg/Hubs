@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.search
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -71,6 +72,18 @@ class SearchScreenViewModel : ViewModel() {
 					users.postValue(users.value!! + it)
 				} else
 					users.postValue(it)
+			}
+		}
+	}
+	
+	
+	private var _mostReadingArticles = MutableLiveData<List<ArticleSnippet>>()
+	val mostReadingArticles: LiveData<List<ArticleSnippet>> get() = _mostReadingArticles
+	
+	fun loadMostReading() {
+		viewModelScope.launch(Dispatchers.IO) {
+			ArticlesListController.getMostReading()?.let {
+				_mostReadingArticles.postValue(it.list.take(5))
 			}
 		}
 	}

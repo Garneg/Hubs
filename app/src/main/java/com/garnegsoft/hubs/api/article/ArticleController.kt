@@ -37,12 +37,12 @@ class ArticleController {
                 OfflineArticle(
                     articleId = it.id.toInt(),
                     authorName = it.author?.alias,
-                    authorAvatarUrl = if (article.author?.avatarUrl == null) {
+                    authorAvatarUrl = it.author?.let { if (article.author?.avatarUrl == null) {
                         placeholderAvatarUrl(article.author!!.alias)
                     }
                     else {
                         "https:" + article.author!!.avatarUrl
-                    },
+                    }},
                     timePublished = it.timePublished,
                     title = Jsoup.parse(it.titleHtml).text(),
                     contentHtml = it.textHtml,
@@ -64,12 +64,12 @@ class ArticleController {
                 OfflineArticleSnippet(
                     articleId = it.id.toInt(),
                     authorName = it.author?.alias,
-                    authorAvatarUrl = if (article.author?.avatarUrl == null) {
+                    authorAvatarUrl = article.author?.let { if (article.author?.avatarUrl == null) {
                         placeholderAvatarUrl(article.author!!.alias)
                     }
                     else {
                         "https:" + article.author!!.avatarUrl
-                    },
+                    }},
                     timePublished = it.timePublished,
                     title = Jsoup.parse(it.titleHtml).text(),
                     hubs = HubsList(it.hubs.map { it.title }),
@@ -152,14 +152,12 @@ class ArticleController {
                     metadata = if (it.metadata != null) com.garnegsoft.hubs.api.article.Article.Metadata(
                         it.metadata!!.mainImageUrl
                     ) else null,
-                    complexity = PostComplexity.fromString(it.complexity),
+                    complexity = PublicationComplexity.fromString(it.complexity),
                     readingTime = it.readingTime,
                     relatedData = it.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
                             bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
                         )
                     },
                     contentHtml = it.textHtml,
@@ -255,17 +253,16 @@ class ArticleController {
                         )
 
                     },
-                    complexity = PostComplexity.fromString(formatted.complexity),
+                    complexity = PublicationComplexity.fromString(formatted.complexity),
                     readingTime = formatted.readingTime,
                     relatedData = formatted.relatedData?.let {
                         com.garnegsoft.hubs.api.article.Article.RelatedData(
                             unreadComments = it.unreadCommentsCount,
-                            bookmarked = it.bookmarked,
-                            canVoteMinus = it.canVoteMinus,
-                            canVotePlus = it.canVotePlus
+                            bookmarked = it.bookmarked
                         )
                     },
                     isTranslation = formatted.postLabels?.find { it.type == "translation" } != null,
+                    isInBlackList = formatted.author?.isInBlacklist ?: false
                 )
 
             }
@@ -302,7 +299,7 @@ class ArticleController {
         fun addToBookmarks(id: Int, isNews: Boolean): Boolean {
             val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
             val response = HabrApi.post(path)
-            if (response.code != 200)
+            if (response?.code != 200)
                 return false
             return true
         }
@@ -311,7 +308,7 @@ class ArticleController {
             val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
             
             val response = HabrApi.delete(path)
-            if (response.code != 200)
+            if (response?.code != 200)
                 return false
             return true
         }
@@ -324,7 +321,7 @@ class ArticleController {
         fun vote(pollId: Int, variantsIds: List<Int>): com.garnegsoft.hubs.api.article.Article.Poll? {
             val requestBody = Json.encodeToString(PollVote(variantsIds.map { it.toString() }))
             val response = HabrApi.post("polls/$pollId/vote", requestBody = requestBody.toRequestBody())
-            if (response.code != 200)
+            if (response?.code != 200)
                 return null
             val raw = response.body?.string()?.let {
                 HabrDataParser.parseJson<Article.Poll>(it)
@@ -401,7 +398,8 @@ class ArticleController {
             var scoreStats: ArticleScoreStats,
             var rating: Float?,
             var relatedData: AuthorRelatedData?,
-            var speciality: String?
+            var speciality: String?,
+            var isInBlacklist: Boolean? = null
         )
 
         @Serializable
@@ -492,16 +490,16 @@ class ArticleController {
         @Serializable
         data class ArticleRelatedData(
             var unreadCommentsCount: Int,
-            var vote: RelatedDataVote,
+//            var vote: RelatedDataVote,
             var bookmarked: Boolean,
             var canComment: Boolean,
-            var canEdit: Boolean,
-            var canViewVotes: Boolean,
-            var canVotePlus: Boolean,
-            var canVoteMinus: Boolean,
-            var canModerateComments: Boolean,
-            var trackerSubscribed: Boolean,
-            var emailSubscribed: Boolean
+//            var canEdit: Boolean,
+//            var canViewVotes: Boolean,
+//            var canVotePlus: Boolean,
+//            var canVoteMinus: Boolean,
+//            var canModerateComments: Boolean,
+//            var trackerSubscribed: Boolean,
+//            var emailSubscribed: Boolean
         )
 
         @Serializable

@@ -5,15 +5,21 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
 import com.garnegsoft.hubs.BuildConfig
-import com.garnegsoft.hubs.cookies
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.internal.EMPTY_RESPONSE
 import org.jsoup.Jsoup
+import java.io.File
 import java.io.IOException
+import java.net.ConnectException
 import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
+import java.net.SocketTimeoutException
+import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 class HabrApi {
 
@@ -22,9 +28,17 @@ class HabrApi {
         private const val baseAddress = "https://habr.com"
         private lateinit var HttpClient: OkHttpClient
         private var csrfToken: String? = null
+        private var cookies: String = ""
 
-        fun initialize(context: Context){
+        fun initialize(context: Context, cookies: String){
+            this.cookies = cookies
             HttpClient = OkHttpClient.Builder()
+                .cache(
+                    Cache(
+                        directory = File(context.cacheDir, "okhttp_cache"),
+                        maxSize = 30 * 1024 * 1024
+                    )
+                )
                 .addInterceptor(Interceptor {
                     val req = it.request()
                         .newBuilder()
@@ -33,35 +47,59 @@ class HabrApi {
                     it.proceed(req)
                 })
                 .addInterceptor(NoConnectionInterceptor(context))
+                .addInterceptor {
+                    Firebase.crashlytics.log("HABRAPI ${it.request().method} url:${it.request().url} requestBody:${it.request().body}")
+                    it.proceed(it.request())
+                }
                 .build()
 
         }
+        
+        // Shouldn't be used in production. Use only in tests
+        fun setHttpClient(client: OkHttpClient) {
+            HttpClient = client
+        }
 
-        fun get(path: String, args: Map<String, String>? = null, version: Int = 2): Response? {
+        fun get(
+            path: String,
+            args: Map<String, String>? = null, version: Int = 2,
+            cacheControl: CacheControl = CacheControl.Builder()
+                .maxStale(1, TimeUnit.MINUTES)
+                .build()
+        ): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null) {
                 finalArgs.putAll(args)
             }
             val paramsString = StringBuilder()
             finalArgs.keys.forEach { paramsString.append("$it=${finalArgs[it]}&") }
-
+            
             val request = Request
                 .Builder()
                 .url("$baseAddress/kek/v$version/$path?$paramsString")
+                .cacheControl(cacheControl)
                 .build()
             try {
                 return HttpClient.newCall(request).execute()
             } catch (ex: Exception) {
-                return null
+                if (ex is SocketTimeoutException ||
+                    ex is ConnectException ||
+                    ex is NoConnectionInterceptor.NoInternetException ||
+                    ex is NoConnectionInterceptor.NoConnectivityException &&
+                    cacheControl != CacheControl.FORCE_NETWORK) {
+                    return get(path, args, version, CacheControl.FORCE_CACHE)
+                } else
+                    return null
             }
         }
 
+        
         fun post(
             path: String,
             args: Map<String, String>? = null,
             requestBody: RequestBody = String().toRequestBody(),
             version: Int = 2
-        ): Response {
+        ): Response? {
             val token = getCsrfToken()
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null) {
@@ -75,7 +113,11 @@ class HabrApi {
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
-            return HttpClient.newCall(request).execute()
+            try {
+                return HttpClient.newCall(request).execute()
+            } catch (ex: Exception) {
+                return null
+            }
         }
 
         fun delete(
@@ -83,7 +125,7 @@ class HabrApi {
             args: Map<String, String>? = null,
             requestBody: RequestBody = String().toRequestBody(),
             version: Int = 2
-        ): Response {
+        ): Response? {
             val token = getCsrfToken()
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
             if (args != null) {
@@ -97,16 +139,25 @@ class HabrApi {
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
-            return HttpClient.newCall(request).execute()
+            try {
+                return HttpClient.newCall(request).execute()
+            } catch (ex: Exception) {
+                return null
+            }
         }
 
         fun getCsrfToken(): String? {
             if (csrfToken == null) {
-                var request = Request
+                val request = Request
                     .Builder()
                     .url("$baseAddress/ru/beta")
                     .build()
-                val response = HttpClient.newCall(request).execute()
+                
+                val response = try {
+                    HttpClient.newCall(request).execute()
+                } catch (ex: Exception) {
+                    return null
+                }
 
                 response.body?.string()?.let {
                     Jsoup.parse(it).getElementsByTag("meta")

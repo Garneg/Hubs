@@ -2,50 +2,50 @@ package com.garnegsoft.hubs.api.article
 
 import com.garnegsoft.hubs.api.ArticleFormat
 import com.garnegsoft.hubs.api.EditorVersion
-import com.garnegsoft.hubs.api.PostComplexity
+import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
 
 
 /**
  * Represents article
  */
-class Article(
-
-    val id: Int,
-
-    val title: String,
-
-    val timePublished: String,
-
-    val author: Author?,
-
-    val contentHtml: String,
-
-    val isCorporative: Boolean,
-
-    val editorVersion: EditorVersion,
-
-    val hubs: List<Hub>,
-
-    val tags: List<String>,
-
-    val statistics: Statistics,
-
-    val format: ArticleFormat?,
-
-    val postType: PostType,
-
-    val metadata: Metadata?,
-
-    val readingTime: Int,
-
-    val complexity: PostComplexity,
-
-    val relatedData: RelatedData?,
-
-    val translationData: TranslationData,
-
-    val polls: List<Poll>
+data class Article(
+	
+	val id: Int,
+	
+	val title: String,
+	
+	val timePublished: String,
+	
+	val author: Author?,
+	
+	val contentHtml: String,
+	
+	val isCorporative: Boolean,
+	
+	val editorVersion: EditorVersion,
+	
+	val hubs: List<Hub>,
+	
+	val tags: List<String>,
+	
+	val statistics: Statistics,
+	
+	val format: ArticleFormat?,
+	
+	val postType: PostType,
+	
+	val metadata: Metadata?,
+	
+	val readingTime: Int,
+	
+	val complexity: PublicationComplexity,
+	
+	val relatedData: RelatedData?,
+	
+	val translationData: TranslationData,
+	
+	val polls: List<Poll>
 
 ) {
 
@@ -88,8 +88,8 @@ class Article(
     data class RelatedData(
         val unreadComments: Int,
         val bookmarked: Boolean,
-        val canVotePlus: Boolean,
-        val canVoteMinus: Boolean
+//        val canVotePlus: Boolean,
+//        val canVoteMinus: Boolean
     )
 
     data class TranslationData(
@@ -126,3 +126,5 @@ class Article(
         )
     }
 }
+
+

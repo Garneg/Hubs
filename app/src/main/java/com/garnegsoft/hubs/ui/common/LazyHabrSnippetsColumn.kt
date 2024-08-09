@@ -1,14 +1,11 @@
 package com.garnegsoft.hubs.ui.common
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.core.AnimationState
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollScope
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -23,10 +20,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HabrSnippet
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.math.abs
 
 @Composable
 fun <T : HabrSnippet> LazyHabrSnippetsColumn(
@@ -44,11 +37,69 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     },
     snippet: @Composable (T) -> Unit,
 ) {
+    BaseHubsLazyColumn(
+        data = data,
+        onScrollEnd = onScrollEnd,
+        lazyList = {
+            val density = LocalDensity.current
+            LazyColumn(
+                modifier = modifier,
+                state = it,
+                flingBehavior = object : FlingBehavior {
+                    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+                        var lastValue = 0f
+                        var lastVelocity = 0f
+                        AnimationState(
+                            initialValue = 0f,
+                            initialVelocity = initialVelocity * 1.3f
+                        ).animateDecay(splineBasedDecay(density)) {
+                            val delta = value - lastValue
+                            val consumed = scrollBy(delta)
+                            lastValue = value
+                            lastVelocity = velocity
+                    
+                            if (consumed == 0f)
+                                cancelAnimation()
+                        }
+                
+                        return lastVelocity
+                    }
+                },
+                contentPadding = contentPadding,
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment
+            ) {
+                items(
+                    items = data.list,
+                    key = { it.id },
+                ) {
+                    snippet(it)
+                }
+                nextPageLoadingIndicator?.let {
+                    item {
+                        nextPageLoadingIndicator()
+                    }
+                }
+            }
+        },
+        lazyListState = lazyListState)
+    
+}
+
+// Most simple lazy column that notifies about scroll end
+@Composable
+fun <T : HabrSnippet> BaseHubsLazyColumn(
+    data: HabrList<T>,
+    onScrollEnd: () -> Unit,
+    lazyList: @Composable (state: LazyListState) -> Unit,
+    lazyListState: LazyListState,
+) {
     val derivedItemsCount by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount } }
     val isLastDerived by remember {
         derivedStateOf {
-            if (data.list.size > 0 && lazyListState.layoutInfo.totalItemsCount > 0)
-                lazyListState.layoutInfo.totalItemsCount - 1 == lazyListState.layoutInfo.visibleItemsInfo.last().index
+            // will work only if controller loads more than 8 snippets per page
+            if (data.list.size > 8 && lazyListState.layoutInfo.totalItemsCount > 8)
+                lazyListState.layoutInfo.totalItemsCount - 7 <= lazyListState.layoutInfo.visibleItemsInfo.last().index
             else
                 false
         }
@@ -64,48 +115,8 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
         doPageLoad = true
     }
     
-    val density = LocalDensity.current
-    LazyColumn(
-        modifier = modifier,
-        state = lazyListState,
-        flingBehavior = object : FlingBehavior {
-            override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-                var lastValue = 0f
-                var lastVelocity = 0f
-                AnimationState(
-                    initialValue = 0f,
-                    initialVelocity = initialVelocity * 1.3f
-                ).animateDecay(splineBasedDecay(density)) {
-                    val delta = value - lastValue
-                    val consumed = scrollBy(delta)
-                    lastValue = value
-                    lastVelocity = velocity
-                    
-                    if (consumed == 0f)
-                        cancelAnimation()
-                }
-                
-                return lastVelocity
-            }
-        },
-        contentPadding = contentPadding,
-        verticalArrangement = verticalArrangement,
-        horizontalAlignment = horizontalAlignment
-    ) {
-        items(
-            items = data.list,
-            key = { it.id },
-        ) {
-            snippet(it)
-        }
-        nextPageLoadingIndicator?.let {
-            item {
-                nextPageLoadingIndicator()
-            }
-        }
-    }
+    lazyList(lazyListState)
 }
-
 
 @Composable
 @SuppressLint("ModifierParameter")
@@ -127,7 +138,6 @@ fun <T : HabrSnippet> PagedHabrSnippetsColumn(
     },
     snippet: @Composable (T) -> Unit,
 ) {
-    val scrollEndCoroutineScope = rememberCoroutineScope()
     LazyHabrSnippetsColumn(
         data = data,
         modifier = modifier,

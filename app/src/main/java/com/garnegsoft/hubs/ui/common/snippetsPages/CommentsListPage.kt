@@ -4,7 +4,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import com.garnegsoft.hubs.api.comment.CommentsListModel
-import com.garnegsoft.hubs.ui.common.CommentCard
+import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 
 
 @Composable

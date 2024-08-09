@@ -34,4 +34,6 @@
     <string name="follow_button_label">Подписаться</string>
     <string name="following_button_label">Вы подписаны</string>
     <string name="news_widget_description">Новости</string>
+    <string name="saved_articles_shortcut_long_label">Сохраненные статьи</string>
+    <string name="saved_articles_shortcut_short_label">Сохраненные</string>
 </resources>
