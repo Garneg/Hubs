@@ -2,7 +2,9 @@ package com.garnegsoft.hubs.ui.screens.search
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -105,7 +107,7 @@ fun SearchScreen(
 					focusRequester.requestFocus()
 					doRequestFocus = false
 				}
-				if(!viewModel.mostReadingArticles.isInitialized) {
+				if (!viewModel.mostReadingArticles.isInitialized) {
 					viewModel.loadMostReading()
 				}
 			}
@@ -124,51 +126,66 @@ fun SearchScreen(
 					.height(20.dp),
 				verticalAlignment = Alignment.CenterVertically
 			) {
-				BasicTextField(
+				Box(
 					modifier = Modifier
-						.weight(1f)
-						.focusRequester(focusRequester)
-						.onFocusEvent {
-							if (it.isCaptured) {
-								keyboardController?.show()
+						.weight(1f),
+					contentAlignment = Alignment.CenterStart
+				) {
+					BasicTextField(
+						modifier = Modifier
+							.focusRequester(focusRequester)
+							.onFocusEvent {
+								if (it.isCaptured) {
+									keyboardController?.show()
+								}
+							}
+							.fillMaxWidth(),
+						value = searchTextValue,
+						onValueChange = {
+							searchTextValue = it
+							showClearAllButton = it.length > 0
+						},
+						textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
+						keyboardOptions = KeyboardOptions(
+							capitalization = KeyboardCapitalization.Sentences,
+							autoCorrect = false,
+							imeAction = ImeAction.Search
+						),
+						keyboardActions = KeyboardActions {
+							if (searchTextValue.isNotBlank()) {
+								keyboardController?.hide()
+								if (searchTextValue.startsWith(".id")) {
+									if (searchTextValue.drop(3).isDigitsOnly())
+										onArticleClicked(searchTextValue.drop(3).toInt())
+								} else {
+									currentQuery = searchTextValue
+									
+									
+									viewModel.articlesListModel.editFilter(
+										ArticlesSearchFilter(
+											order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
+											query = currentQuery
+										)
+									)
+									showPages = true
+								}
 							}
 						},
-					
-					value = searchTextValue,
-					onValueChange = {
-						searchTextValue = it
-						showClearAllButton = it.length > 0
-					},
-					textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-					keyboardOptions = KeyboardOptions(
-						capitalization = KeyboardCapitalization.Sentences,
-						autoCorrect = false,
-						imeAction = ImeAction.Search
-					),
-					keyboardActions = KeyboardActions {
-						if (searchTextValue.isNotBlank()) {
-							keyboardController?.hide()
-							if (searchTextValue.startsWith(".id")) {
-								if (searchTextValue.drop(3).isDigitsOnly())
-									onArticleClicked(searchTextValue.drop(3).toInt())
-							} else {
-								currentQuery = searchTextValue
-								
-								
-								viewModel.articlesListModel.editFilter(
-									ArticlesSearchFilter(
-										order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
-										query = currentQuery
-									)
-								)
-								showPages = true
-							}
-						}
-					},
-					singleLine = true,
-					cursorBrush = SolidColor(MaterialTheme.colors.secondary)
-				)
-				if (showClearAllButton)
+						singleLine = true,
+						cursorBrush = SolidColor(MaterialTheme.colors.secondary)
+					)
+					if (searchTextValue.isEmpty()) {
+						Text(
+							text = "Введите запрос",
+							color = MaterialTheme.colors.secondary.copy(0.5f)
+						)
+					}
+				}
+				AnimatedVisibility(
+					visible = showClearAllButton,
+					enter = slideInHorizontally { it },
+					exit = slideOutHorizontally { it }
+				) {
 					IconButton(
 						onClick = {
 							searchTextValue = ""
@@ -180,6 +197,7 @@ fun SearchScreen(
 							contentDescription = ""
 						)
 					}
+				}
 				
 			}
 			
@@ -195,17 +213,27 @@ fun SearchScreen(
 					)
 				}
 				
-				HabrScrollableTabRow(pagerState = pagerState, tabs = tabs
-				){ index, title ->
+				HabrScrollableTabRow(
+					pagerState = pagerState, tabs = tabs
+				) { index, title ->
 					when {
 						title.startsWith("Публикации") -> {
 							articlesFilterContentState.show()
 							ScrollUpMethods.scrollLazyList(articlesLazyListState)
 						}
-						title.startsWith("Хабы") -> { ScrollUpMethods.scrollLazyList(hubsLazyListState) }
-						title.startsWith("Компании") -> { ScrollUpMethods.scrollLazyList(companiesLazyListState) }
-						title.startsWith("Пользователи") -> { ScrollUpMethods.scrollLazyList(usersLazyListState) }
-
+						
+						title.startsWith("Хабы") -> {
+							ScrollUpMethods.scrollLazyList(hubsLazyListState)
+						}
+						
+						title.startsWith("Компании") -> {
+							ScrollUpMethods.scrollLazyList(companiesLazyListState)
+						}
+						
+						title.startsWith("Пользователи") -> {
+							ScrollUpMethods.scrollLazyList(usersLazyListState)
+						}
+						
 					}
 				}
 				HorizontalPager(state = pagerState) {
@@ -294,37 +322,36 @@ fun SearchScreen(
 					}
 				}
 				
-			}
-			else {
+			} else {
 				AnimatedVisibility(
 					visible = mostReadingArticles != null,
 					enter = slideInVertically { it / 2 }
 				) {
-						var firstCardHeight by remember() { mutableIntStateOf(0) }
-						BoxWithConstraints(
-							modifier = Modifier
-								.imePadding()
-								.fillMaxSize()
-								.verticalScroll(rememberScrollState())
-								.padding(horizontal = 16.dp)
+					var firstCardHeight by remember() { mutableIntStateOf(0) }
+					BoxWithConstraints(
+						modifier = Modifier
+							.imePadding()
+							.fillMaxSize()
+							.verticalScroll(rememberScrollState())
+							.padding(horizontal = 16.dp)
+					) {
+						
+						Box(
+							modifier = Modifier.padding(top = with(LocalDensity.current) {
+								this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
+							})
 						) {
-							
-							Box(
-								modifier = Modifier.padding(top = with(LocalDensity.current) {
-									this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
-								})
+							TitledColumn(
+								title = "Читают сейчас",
+								titleStyle = MaterialTheme.typography.subtitle2.copy(
+									color = MaterialTheme.colors.onBackground.copy(
+										0.5f
+									)
+								),
+								verticalArrangement = Arrangement.spacedBy(8.dp),
+								modifier = Modifier.padding(bottom = 16.dp)
 							) {
-								TitledColumn(
-									title = "Читают сейчас",
-									titleStyle = MaterialTheme.typography.subtitle2.copy(
-										color = MaterialTheme.colors.onBackground.copy(
-											0.5f
-										)
-									),
-									verticalArrangement = Arrangement.spacedBy(8.dp),
-									modifier = Modifier.padding(bottom = 16.dp)
-								) {
-									mostReadingArticles?.let { mostReading ->
+								mostReadingArticles?.let { mostReading ->
 									mostReading.forEachIndexed() { index, it ->
 										Box(
 											modifier = if (index == 0) Modifier
