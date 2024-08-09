@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.search
 
-import ArticlesListController
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -8,10 +7,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -27,35 +28,23 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.article.ArticlesListModel
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.comment.list.CommentSnippet
-import com.garnegsoft.hubs.api.company.list.CompaniesListController
-import com.garnegsoft.hubs.api.company.list.CompanySnippet
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
-import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
-import com.garnegsoft.hubs.api.user.list.UserSnippet
-import com.garnegsoft.hubs.api.user.list.UsersListController
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.garnegsoft.hubs.ui.screens.article.ArticleShort
 
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
@@ -73,6 +62,7 @@ fun SearchScreen(
 	var showPages by rememberSaveable {
 		mutableStateOf(false)
 	}
+	val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
 	
 	Scaffold(
 		topBar = {
@@ -107,9 +97,12 @@ fun SearchScreen(
 				mutableStateOf(true)
 			}
 			LaunchedEffect(key1 = Unit) {
-				if (doRequestFocus) {
-					focusRequester.requestFocus()
-					doRequestFocus = false
+//				if (doRequestFocus) {
+//					focusRequester.requestFocus()
+//					doRequestFocus = false
+//				}
+				if(!viewModel.mostReadingArticles.isInitialized) {
+					viewModel.loadMostReading()
 				}
 			}
 			Row(
@@ -185,6 +178,8 @@ fun SearchScreen(
 					}
 				
 			}
+			
+			
 			var pagerState = rememberPagerState { 4 }
 			if (showPages) {
 				val tabs = remember {
@@ -295,6 +290,53 @@ fun SearchScreen(
 					}
 				}
 				
+			}
+			else {
+				var firstCardHeight by remember() { mutableIntStateOf(0) }
+				BoxWithConstraints(
+					modifier = Modifier
+						.imePadding()
+						.fillMaxSize()
+						.verticalScroll(rememberScrollState())
+						.padding(horizontal = 16.dp)
+				) {
+					
+					Box(
+						modifier = Modifier.padding(top = with(LocalDensity.current) {
+							this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
+						})
+					) {
+						TitledColumn(
+							title = "Читают сейчас",
+							titleStyle = MaterialTheme.typography.subtitle2.copy(
+								color = MaterialTheme.colors.onBackground.copy(
+									0.5f
+								)
+							),
+							verticalArrangement = Arrangement.spacedBy(8.dp),
+							modifier = Modifier.padding(bottom = 8.dp)
+						) {
+							
+							mostReadingArticles?.let {
+								it.forEachIndexed() { index, it ->
+									Box(
+										modifier = if (index == 0) Modifier
+											.onGloballyPositioned {
+												firstCardHeight = it.size.height
+											} else Modifier
+									) {
+										ArticleShort(
+											article = it,
+											onClick = {
+												onArticleClicked(it.id)
+											}
+										)
+									}
+								}
+							} ?: CircularProgressIndicator()
+						}
+					}
+				}
 			}
 		}
 		

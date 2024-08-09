@@ -39,7 +39,7 @@ fun ArticleShort(
 ) {
 	Row(
 		modifier = Modifier.clip(RoundedCornerShape(24.dp))
-			//.background(MaterialTheme.colors.background)
+			.background(MaterialTheme.colors.surface)
 			.clickable(onClick = onClick)
 			//.padding(bottom = 8.dp)
 			.padding(12.dp)

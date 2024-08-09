@@ -49,7 +49,8 @@ fun OtherSettingsCard(
 				viewModel.captureLogsAndShare(context)
 				showDialog = false
 			})
-		SettingsCardItem(title = "Отправить отчёт об ошибке",
+		SettingsCardItem(
+			title = "Отправить отчёт об ошибке",
 			onClick = { showDialog = true },
 			trailingIcon = {
 				Icon(imageVector = Icons.Outlined.Email, contentDescription = null)

@@ -5,7 +5,9 @@ import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
+import okhttp3.CacheControl
 import org.jsoup.Jsoup
+import java.util.concurrent.TimeUnit
 
 
 class ArticlesListController {
@@ -18,8 +20,8 @@ class ArticlesListController {
 		 * @return articles list normally, if empty - no articles found with that path and/or args.
 		 * *null* if path or/and args are invalid or status code is not 200
 		 **/
-		private fun get(path: String, args: Map<String, String>? = null): ArticlesList? {
-			var response = HabrApi.get(path, args)
+		private fun get(path: String, args: Map<String, String>? = null, cacheControl: CacheControl? = null): ArticlesList? {
+			var response = cacheControl?.let { HabrApi.get(path, args, cacheControl = it) } ?: HabrApi.get(path, args)
 			
 			if (response != null && response.code != 200) {
 				return null
@@ -96,7 +98,7 @@ class ArticlesListController {
 		}
 		
 		/**
-		 * Return valid list of articles snippets. If list is empty, no articles has found.
+		 * Returns valid list of articles snippets. If list is empty, no articles has found.
 		 * Null if request wasn't valid, or server error
 		 */
 		fun getArticlesSnippets(
@@ -104,6 +106,71 @@ class ArticlesListController {
 			args: Map<String, String>? = null
 		): HabrList<ArticleSnippet>? {
 			var raw = get(path, args)
+			
+			var result: HabrList<ArticleSnippet>? = null
+			
+			var articles = arrayListOf<ArticleSnippet>()
+			
+			if (raw != null) {
+				raw.articleIds?.forEach { id ->
+					raw.articleRefs.get(id.toString())?.let {
+						articles.add(
+							ArticleSnippet(
+								id = it.id,
+								timePublished = it.timePublished,
+								isCorporative = it.isCorporative,
+								title = Jsoup.parse(it.titleHtml).text(),
+								editorVersion = EditorVersion.fromString(it.editorVersion),
+								type = PostType.fromString(it.postType),
+								author = if (it.author != null) {
+									com.garnegsoft.hubs.api.article.Article.Author(
+										alias = it.author!!.alias,
+										fullname = it.author!!.fullname,
+										avatarUrl = it.author!!.avatarUrl,
+									)
+								} else
+									null,
+								format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
+								labels = listOf(),
+								hubs = parseHubs(it.hubs),
+								statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
+									score = it.statistics.score,
+									readingCount = it.statistics.readingCount,
+									commentsCount = it.statistics.commentsCount,
+									bookmarksCount = it.statistics.favoritesCount,
+									votesCountMinus = it.statistics.votesCountMinus,
+									votesCountPlus = it.statistics.votesCountPlus
+								),
+								imageUrl = it.leadData.imageUrl,
+								textSnippet = it.leadData.textHtml,
+								complexity = PublicationComplexity.fromString(it.complexity),
+								readingTime = it.readingTime,
+								relatedData = it.relatedData?.let {
+									com.garnegsoft.hubs.api.article.Article.RelatedData(
+										unreadComments = it.unreadCommentsCount,
+										bookmarked = it.bookmarked
+									)
+								},
+								isTranslation = it.postLabels?.contains(ArticlesListLabel("translation"))
+									?: false,
+								isInBlackList = it.isInBlacklist ?: false
+							)
+						)
+					}
+				}
+				
+				result = HabrList(articles, raw.pagesCount ?: 0)
+			}
+			
+			return result
+		}
+		private val mostReadingCacheControl = CacheControl.Builder().maxStale(10, TimeUnit.MINUTES).build()
+		
+		/**
+		 * Returns list of most reading articles. Typically it contents 20 articles
+		 */
+		fun getMostReading(): HabrList<ArticleSnippet>? {
+			val raw = get("articles/most-reading", cacheControl = mostReadingCacheControl)
 			
 			var result: HabrList<ArticleSnippet>? = null
 			
