@@ -83,7 +83,7 @@ class SearchScreenViewModel : ViewModel() {
 	fun loadMostReading() {
 		viewModelScope.launch(Dispatchers.IO) {
 			ArticlesListController.getMostReading()?.let {
-				_mostReadingArticles.postValue(it.list.take(10))
+				_mostReadingArticles.postValue(it.list.take(5))
 			}
 		}
 	}
