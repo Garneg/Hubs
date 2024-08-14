@@ -28,7 +28,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -73,8 +72,14 @@ class MainActivity : ComponentActivity() {
 //		}
 		
 		val workRequest = PeriodicWorkRequestBuilder<NewsWidgetUpdateWorker>(
-			15, TimeUnit.MINUTES
-		).build()
+			6, TimeUnit.HOURS
+		)
+			.setConstraints(
+				Constraints.Builder()
+					.setRequiredNetworkType(NetworkType.UNMETERED)
+					.setRequiresBatteryNotLow(true)
+					.build())
+			.build()
 		
 		WorkManager.getInstance(this).enqueueUniquePeriodicWork(
 			"update_news_work",

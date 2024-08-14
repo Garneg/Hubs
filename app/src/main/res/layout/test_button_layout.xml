@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/news_widget_background_shape"
     android:text="aboba"
+
     android:clickable="true"
     android:focusable="true">
 
