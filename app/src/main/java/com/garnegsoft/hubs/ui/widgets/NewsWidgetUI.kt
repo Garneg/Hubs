@@ -1,33 +1,16 @@
 package com.garnegsoft.hubs.ui.widgets
 
-import ArticlesListController
 import android.app.PendingIntent
-import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.net.Uri
 import android.util.Log
-import android.util.TimeUtils
-import android.widget.RelativeLayout
-import android.widget.RemoteViews
 import androidx.glance.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.Button
 import androidx.glance.ExperimentalGlanceApi
 import androidx.glance.GlanceComposable
-import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.ImageProvider
@@ -35,16 +18,9 @@ import androidx.glance.LocalContext
 import androidx.glance.action.action
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.AndroidRemoteViews
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.LocalAppWidgetOptions
-import androidx.glance.appwidget.action.actionStartActivity
-import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.components.CircleIconButton
 import androidx.glance.appwidget.lazy.LazyColumn
-import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.lazy.itemsIndexed
-import androidx.glance.appwidget.state.getAppWidgetState
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -61,22 +37,9 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.MainActivity
-import com.garnegsoft.hubs.NewsWidget
 import com.garnegsoft.hubs.NewsWidgetUpdateWorker
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.OfflineArticle
-import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 @OptIn(ExperimentalGlanceApi::class)
 @GlanceComposable
@@ -163,7 +126,7 @@ fun WidgetArticleCard(
 				ImageProvider(R.drawable.news_widget_background_shape_dark)
 			)
 			
-			.clickable(action(block = onClick), rippleOverride = R.drawable.circle_ripple)
+			.clickable(action(block = onClick), rippleOverride = R.drawable.rounded_corners_ripple)
 			.padding(12.dp)
 	
 	) {
@@ -186,13 +149,16 @@ fun WidgetBar(modifier: GlanceModifier = GlanceModifier) {
 	Box(
 		modifier = GlanceModifier.padding(8.dp)
 			.background(ImageProvider(R.drawable.widget_bar_background))
+			.clickable(onClick = action {}, rippleOverride = R.drawable.invisible_ripple)
 	) {
 		Row(
-			modifier = modifier.fillMaxWidth(),
+			modifier = modifier
+				.fillMaxWidth(),
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			Text(
-				modifier = GlanceModifier.padding(start = 8.dp),
+				modifier = GlanceModifier.padding(start = 8.dp)
+					.clickable(onClick = actionStartActivity(MainActivity::class.java), rippleOverride = R.drawable.rounded_corners_ripple),
 				text = "Хабы",
 				style = TextStyle(
 					color = ColorProvider(Color.White),

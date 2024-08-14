@@ -18,7 +18,7 @@
        android:layout_centerVertical="true"
        android:layout_alignParentEnd="true"
        android:clickable="true"
-       android:background="@drawable/circle_ripple"
+       android:background="@drawable/rounded_corners_ripple"
 
        android:focusable="true" />
     <Button
