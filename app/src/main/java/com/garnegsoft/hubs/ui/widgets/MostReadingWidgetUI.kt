@@ -38,13 +38,13 @@ import androidx.glance.unit.ColorProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.garnegsoft.hubs.MainActivity
-import com.garnegsoft.hubs.NewsWidgetUpdateWorker
+import com.garnegsoft.hubs.MostReadingWidgetUpdateWorker
 import com.garnegsoft.hubs.R
 
 @OptIn(ExperimentalGlanceApi::class)
 @GlanceComposable
 @Composable
-fun NewsWidgetLayout(articles: List<String>) {
+fun MostReadingWidgetLayout(articles: List<String>) {
 //	var isDarkTheme = false
 	val context = LocalContext.current
 //	if (LocalContext.current.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES){
@@ -123,7 +123,7 @@ fun WidgetArticleCard(
 	Box(
 		modifier.fillMaxWidth()
 			.background(
-				ImageProvider(R.drawable.news_widget_background_shape_dark)
+				ImageProvider(R.drawable.widget_list_card_background_shape)
 			)
 			
 			.clickable(action(block = onClick), rippleOverride = R.drawable.rounded_corners_ripple)
@@ -153,11 +153,12 @@ fun WidgetBar(modifier: GlanceModifier = GlanceModifier) {
 	) {
 		Row(
 			modifier = modifier
-				.fillMaxWidth(),
+				.fillMaxWidth()
+				.padding(start = 8.dp),
 			verticalAlignment = Alignment.CenterVertically
 		) {
 			Text(
-				modifier = GlanceModifier.padding(start = 8.dp)
+				modifier = GlanceModifier
 					.clickable(onClick = actionStartActivity(MainActivity::class.java), rippleOverride = R.drawable.rounded_corners_ripple),
 				text = "Хабы",
 				style = TextStyle(
@@ -178,7 +179,7 @@ fun WidgetBar(modifier: GlanceModifier = GlanceModifier) {
 					imageProvider = ImageProvider(R.drawable.refresh),
 					contentDescription = null,
 					onClick = {
-						val updateRequest = OneTimeWorkRequestBuilder<NewsWidgetUpdateWorker>().build()
+						val updateRequest = OneTimeWorkRequestBuilder<MostReadingWidgetUpdateWorker>().build()
 						WorkManager.getInstance(context).enqueue(updateRequest)
 					})
 			}

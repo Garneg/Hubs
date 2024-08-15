@@ -1,11 +1,7 @@
 package com.garnegsoft.hubs
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
 import android.content.Intent
-import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -18,13 +14,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.lifecycle.coroutineScope
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
@@ -41,7 +30,6 @@ import com.garnegsoft.hubs.ui.theme.HubsTheme
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
-import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
@@ -71,7 +59,7 @@ class MainActivity : ComponentActivity() {
 //			Log.e("fcm-token", it.result)
 //		}
 		
-		val workRequest = PeriodicWorkRequestBuilder<NewsWidgetUpdateWorker>(
+		val workRequest = PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(
 			6, TimeUnit.HOURS
 		)
 			.setConstraints(

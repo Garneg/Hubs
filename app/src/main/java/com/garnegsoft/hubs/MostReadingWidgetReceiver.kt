@@ -1,17 +1,12 @@
 package com.garnegsoft.hubs
 
-import android.appwidget.AppWidgetManager
 import android.content.Context
-import android.content.Intent
-import android.os.Looper
-import android.util.Log
 import android.widget.Toast
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.work.WorkManager
 
 class NewsWidgetReceiver(
-	override val glanceAppWidget: GlanceAppWidget = NewsWidget()
+	override val glanceAppWidget: GlanceAppWidget = MostReadingWidget()
 ) : GlanceAppWidgetReceiver() {
 	override fun onEnabled(context: Context?) {
 		Toast.makeText(context, "Новый виджет добавлен!", Toast.LENGTH_LONG).show()

@@ -20,14 +20,14 @@
         tools:targetApi="34">
 
         <receiver android:name=".NewsWidgetReceiver"
-            android:label="@string/news_widget_description"
+            android:label="@string/most_reading_widget_description"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/news_widget_info" />
+                android:resource="@xml/most_readig_widget_info" />
         </receiver>
 
         <profileable
