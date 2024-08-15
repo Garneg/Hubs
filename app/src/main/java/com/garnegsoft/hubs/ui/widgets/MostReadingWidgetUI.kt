@@ -37,14 +37,18 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.MainActivity
 import com.garnegsoft.hubs.MostReadingWidgetUpdateWorker
 import com.garnegsoft.hubs.R
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 
 @OptIn(ExperimentalGlanceApi::class)
 @GlanceComposable
 @Composable
-fun MostReadingWidgetLayout(articles: List<String>) {
+fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 //	var isDarkTheme = false
 	val context = LocalContext.current
 //	if (LocalContext.current.resources.configuration.uiMode.and(Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES){
@@ -58,50 +62,85 @@ fun MostReadingWidgetLayout(articles: List<String>) {
 			.fillMaxSize()
 			.background(ImageProvider(R.drawable.widget_background))
 	) {
-//		val time = Calendar.getInstance().time
-//		Text(text = "Latest update: ${SimpleDateFormat("HH:mm:ss", Locale.US).format(time)}")
+	
 		
 		
 		Box(
 			modifier = GlanceModifier.padding(8.dp)
 		) {
 			
-			
-			LazyColumn(modifier = GlanceModifier.padding(top = 35.dp)) {
-				item {
-					Spacer(GlanceModifier.height(23.dp + 0.dp))
-				}
-				
-				itemsIndexed(
-					articles
-				) { index, it ->
-					Column {
-						Spacer(modifier = GlanceModifier.height(4.dp))
-						WidgetArticleCard(
-							title = it.split("*&^").first(),
-							onClick = {
-								val intent = Intent(context, MainActivity::class.java).apply {
-									data = Uri.parse("https://habr.com/p/${it.split("*&^")[1]}")
+			if (articles.isNotEmpty()) {
+				LazyColumn(modifier = GlanceModifier.padding(top = 35.dp)) {
+					item {
+						Spacer(GlanceModifier.height(23.dp + 0.dp))
+					}
+					
+					itemsIndexed(
+						articles
+					) { index, it ->
+						Column {
+							Spacer(modifier = GlanceModifier.height(4.dp))
+							WidgetArticleCard(
+								title = it.first,
+								onClick = {
+									val intent = Intent(context, MainActivity::class.java).apply {
+										data = Uri.parse("https://habr.com/p/${it.second}")
 //								`package` = BuildConfig.APPLICATION_ID
 //								addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 //								addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-								}
-								val pendingIntent = PendingIntent.getActivity(
-									context,
-									0,
-									intent,
-									PendingIntent.FLAG_IMMUTABLE
-								)
-								pendingIntent.send()
-								
-								context.startActivity(intent)
+									}
+									val pendingIntent = PendingIntent.getActivity(
+										context,
+										0,
+										intent,
+										PendingIntent.FLAG_IMMUTABLE
+									)
+									pendingIntent.send()
+									
+									context.startActivity(intent)
 //							actionStartActivity<MainActivity>()
-							}
-						)
+								}
+							)
+						}
+					}
+					if (BuildConfig.DEBUG) {
+						item {
+							val time = Calendar.getInstance().time
+							Text(
+								text = "Latest update: ${
+									SimpleDateFormat(
+										"HH:mm:ss",
+										Locale.US
+									).format(time)
+								}"
+							)
+						}
+					}
+				}
+			} 
+			else {
+				Box(
+					modifier = GlanceModifier.fillMaxSize().padding(top = 23.dp),
+					contentAlignment = Alignment.Center
+				) {
+					Column(
+						horizontalAlignment = Alignment.CenterHorizontally
+					) {
+						Text(text = "Нет данных", style = TextStyle(ColorProvider(Color.Black.copy(0.5f)), fontWeight = FontWeight.Medium))
+						if (BuildConfig.DEBUG) {
+							val time = Calendar.getInstance().time
+							Text(
+								text = "Latest update: ${
+									SimpleDateFormat(
+										"HH:mm:ss",
+										Locale.US
+									).format(time)
+								}"
+							)
+						}
 					}
 				}
 			}
-			
 			WidgetBar()
 		}
 		Box(

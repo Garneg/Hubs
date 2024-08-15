@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
 		runBlocking {
 			authStatus = isAuthorizedFlow.firstOrNull()
 			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
-			HabrApi.initialize(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
+			HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
 		}
 		
 		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()

@@ -6,7 +6,6 @@ import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
@@ -35,8 +34,6 @@ import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.lifecycle.coroutineScope
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavDeepLink
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -65,7 +62,6 @@ import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.ImageViewScreen
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
-import com.garnegsoft.hubs.ui.screens.comments.CommentsThreadScreen
 import com.garnegsoft.hubs.ui.screens.company.CompanyScreen
 import com.garnegsoft.hubs.ui.screens.history.HistoryScreen
 import com.garnegsoft.hubs.ui.screens.hub.HubScreen
@@ -181,7 +177,7 @@ fun MainNavigationGraph(
 												pref = HubsDataStore.Auth.Authorized,
 												value = true
 											)
-											HabrApi.initialize(parentActivity, result)
+											HabrApi.initializeWithCookies(parentActivity, result)
 											launch(Dispatchers.IO) {
 												MeController.getMe()?.let {
 													val shortcut = ShortcutInfoCompat.Builder(
@@ -531,7 +527,7 @@ fun MainNavigationGraph(
 							)
 							
 							AuthDataController.clearAuthData(context)
-							HabrApi.initialize(context, "")
+							HabrApi.initializeWithCookies(context, "")
 							
 							val updateMeDataRequest =
 								OneTimeWorkRequestBuilder<MeDataUpdateWorker>()

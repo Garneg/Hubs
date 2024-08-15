@@ -13,15 +13,21 @@ import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.ui.theme.HubsWidgetTheme
 import com.garnegsoft.hubs.ui.widgets.MostReadingWidgetLayout
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 
 class MostReadingWidget : GlanceAppWidget() {
-	var articles: List<ArticleSnippet> = emptyList()
+	var articles: List<Pair<String, Int>> = emptyList()
 	override suspend fun provideGlance(context: Context, id: GlanceId) {
 		
-		val articles = context.getSharedPreferences("widget", Context.MODE_PRIVATE).getStringSet("titles", emptySet())!!
+		withContext(Dispatchers.IO) {
+			articles = ArticlesListController.getMostReading()?.list?.map { Pair(it.title, it.id) } ?: emptyList()
+		}
 		Log.e("articles", articles.isEmpty().toString())
 		provideContent(content = {
 			HubsWidgetTheme {
@@ -32,6 +38,8 @@ class MostReadingWidget : GlanceAppWidget() {
 	}
 	
 	
+	
+	
 }
 
 class MostReadingWidgetUpdateWorker(
@@ -39,20 +47,14 @@ class MostReadingWidgetUpdateWorker(
 	params: WorkerParameters
 ) : CoroutineWorker(context, params) {
 	override suspend fun doWork(): Result {
-		val mostReadingWidget = MostReadingWidget()
-		mostReadingWidget.updateAll(context)
-		val prefs = context.getSharedPreferences("widget", Context.MODE_PRIVATE)
-		val mostReading = ArticlesListController.getMostReading()
-		prefs.edit {
-			this.clear()
-		}
-		prefs.edit().putStringSet("titles", mostReading!!.list.map { it.title + "*&^" + it.id.toString() }.toSet()).apply()
-		
-		
 		val widgetManager = GlanceAppWidgetManager(context)
-		MostReadingWidget().update(context, widgetManager.getGlanceIds(MostReadingWidget::class.java).first())
-		Looper.prepare()
-		Toast.makeText(context, "Data received, widget updated!", Toast.LENGTH_SHORT).show()
+		val widgets = widgetManager.getGlanceIds(MostReadingWidget::class.java)
+		Log.i("most_reading_widget", "Count of widget to update: ${widgets.size}")
+		MostReadingWidget().updateAll(context)
+		if (BuildConfig.DEBUG) {
+			Looper.prepare()
+			Toast.makeText(context, "Data received, widget updated!", Toast.LENGTH_SHORT).show()
+		}
 		return Result.success()
 	}
 	
