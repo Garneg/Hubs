@@ -11,7 +11,11 @@ import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
+import androidx.work.Constraints
 import androidx.work.CoroutineWorker
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
@@ -28,7 +32,9 @@ class MostReadingWidget : GlanceAppWidget() {
 		withContext(Dispatchers.IO) {
 			articles = ArticlesListController.getMostReading()?.list?.map { Pair(it.title, it.id) } ?: emptyList()
 		}
-		Log.e("articles", articles.isEmpty().toString())
+		if (BuildConfig.DEBUG) {
+			Toast.makeText(context, "Data received, widget updated!", Toast.LENGTH_SHORT).show()
+		}
 		provideContent(content = {
 			HubsWidgetTheme {
 				MostReadingWidgetLayout(articles.toList())
@@ -51,10 +57,7 @@ class MostReadingWidgetUpdateWorker(
 		val widgets = widgetManager.getGlanceIds(MostReadingWidget::class.java)
 		Log.i("most_reading_widget", "Count of widget to update: ${widgets.size}")
 		MostReadingWidget().updateAll(context)
-		if (BuildConfig.DEBUG) {
-			Looper.prepare()
-			Toast.makeText(context, "Data received, widget updated!", Toast.LENGTH_SHORT).show()
-		}
+		
 		return Result.success()
 	}
 	
