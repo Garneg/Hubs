@@ -2,10 +2,12 @@ package com.garnegsoft.hubs.ui.screens.settings.cards
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
@@ -38,7 +40,13 @@ fun SettingsCardItem(
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		Text(modifier = Modifier.weight(1f), text = title)
-		trailingIcon()
+		Box(
+			modifier = Modifier.sizeIn(48.dp),
+			contentAlignment = Alignment.Center
+		) {
+			trailingIcon()
+		}
+		
 	}
 	
 }

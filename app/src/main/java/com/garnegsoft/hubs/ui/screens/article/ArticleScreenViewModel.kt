@@ -54,7 +54,7 @@ class ArticleScreenViewModel : ViewModel() {
 	
 	fun loadMostReading() {
 		viewModelScope.launch(Dispatchers.IO) {
-			ArticlesListController.getArticlesSnippets("articles/most-reading")?.let {
+			ArticlesListController.getMostReading()?.let {
 				_mostReadingArticles.postValue(it.list.take(5))
 			}
 		}

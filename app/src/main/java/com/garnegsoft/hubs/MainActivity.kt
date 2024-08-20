@@ -1,13 +1,9 @@
 package com.garnegsoft.hubs
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -74,6 +70,8 @@ import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
 import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -84,14 +82,13 @@ import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
@@ -101,6 +98,8 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 		WindowCompat.setDecorFitsSystemWindows(window, false)
 		
+		// Disable crashlytics if it's debug version
+		FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
 		
 		intent.extras?.let {
 			FcmDispatcher.dispatchExtras(
@@ -116,6 +115,22 @@ class MainActivity : ComponentActivity() {
 //			Log.e("fcm-token", it.result)
 //		}
 		
+		val workRequest = PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(
+			6, TimeUnit.HOURS
+		)
+			.setConstraints(
+				Constraints.Builder()
+					.setRequiredNetworkType(NetworkType.UNMETERED)
+					.setRequiresBatteryNotLow(true)
+					.build())
+			.build()
+		
+		WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+			"update_news_work",
+			ExistingPeriodicWorkPolicy.KEEP,
+			workRequest
+		)
+		
 		var authStatus: Boolean? by mutableStateOf(null)
 		
 		val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
@@ -124,7 +139,7 @@ class MainActivity : ComponentActivity() {
 		runBlocking {
 			authStatus = isAuthorizedFlow.firstOrNull()
 			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
-			HabrApi.initialize(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
+			HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
 		}
 		
 		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()

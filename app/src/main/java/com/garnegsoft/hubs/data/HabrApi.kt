@@ -3,13 +3,10 @@ package com.garnegsoft.hubs.data
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.util.Log
-import com.garnegsoft.hubs.BuildConfig
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.internal.EMPTY_RESPONSE
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.IOException
@@ -18,7 +15,6 @@ import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.SocketTimeoutException
-import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class HabrApi {
@@ -26,11 +22,11 @@ class HabrApi {
     companion object {
 
         private const val baseAddress = "https://habr.com"
-        private lateinit var HttpClient: OkHttpClient
+        private var HttpClient: OkHttpClient = OkHttpClient.Builder().build()
         private var csrfToken: String? = null
         private var cookies: String = ""
 
-        fun initialize(context: Context, cookies: String){
+        fun initializeWithCookies(context: Context, cookies: String){
             this.cookies = cookies
             HttpClient = OkHttpClient.Builder()
                 .cache(

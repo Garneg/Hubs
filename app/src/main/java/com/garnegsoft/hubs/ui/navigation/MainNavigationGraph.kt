@@ -176,7 +176,7 @@ fun MainNavigationGraph(
 												pref = HubsDataStore.Auth.Authorized,
 												value = true
 											)
-											HabrApi.initialize(parentActivity, result)
+											HabrApi.initializeWithCookies(parentActivity, result)
 											launch(Dispatchers.IO) {
 												MeController.getMe()?.let {
 													val shortcut = ShortcutInfoCompat.Builder(
@@ -543,7 +543,7 @@ fun MainNavigationGraph(
 							)
 							
 							AuthDataController.clearAuthData(context)
-							HabrApi.initialize(context, "")
+							HabrApi.initializeWithCookies(context, "")
 							
 							val updateMeDataRequest =
 								OneTimeWorkRequestBuilder<MeDataUpdateWorker>()

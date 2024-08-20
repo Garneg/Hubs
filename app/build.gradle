@@ -85,7 +85,12 @@ dependencies {
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-crashlytics-ktx:19.0.3'
 
+    // workmanager
     implementation "androidx.work:work-runtime-ktx:2.9.0"
+
+    // glance
+    implementation "androidx.glance:glance-appwidget:1.1.0"
+    implementation "androidx.glance:glance-material:1.1.0"
 
     implementation "androidx.profileinstaller:profileinstaller:1.3.1"
 

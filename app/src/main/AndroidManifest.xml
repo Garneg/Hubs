@@ -5,7 +5,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
 
+    
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -15,16 +18,33 @@
         android:supportsRtl="false"
         android:theme="@style/Theme.Hubs"
         tools:targetApi="34">
+
+        <receiver android:name=".NewsWidgetReceiver"
+            android:label="@string/most_reading_widget_description"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/most_readig_widget_info" />
+        </receiver>
+
         <profileable
             android:shell="true"
             tools:targetApi="29" />
-
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="dataSync"
+            tools:node="merge"
+            />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/notification_default_icon"/>
 <!--        <meta-data-->
 <!--            android:name="com.google.firebase.messaging.default_notification_color"-->
 <!--            android:resource="@color/white" />-->
+
 
         <activity
             android:name=".MainActivity"

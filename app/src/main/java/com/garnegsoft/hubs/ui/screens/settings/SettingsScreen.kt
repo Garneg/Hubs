@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.settings
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -80,13 +81,23 @@ class SettingsScreenViewModel : ViewModel() {
 		val logsPath = File(context.filesDir, "")
 		val file = File(logsPath, name)
 		val logFileUri = FileProvider.getUriForFile(context, "com.garnegsoft.hubs.fileprovider", file)
-		val sendIntent = Intent(Intent.ACTION_SEND).apply {
-			type = "message/rfc822"
-			putExtra(Intent.EXTRA_EMAIL, arrayOf("garnegsoft@gmail.com"))
-			putExtra(Intent.EXTRA_SUBJECT, "Отчет об ошибке (логи)")
-			putExtra(Intent.EXTRA_STREAM, logFileUri)
+		val intent = if (BuildConfig.DEBUG){
+			Toast.makeText(context, "Debug mode, logs will be opened", Toast.LENGTH_SHORT).show()
+			
+			Intent(Intent.ACTION_VIEW).apply {
+				this.data = logFileUri
+				addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+			}
+		} else {
+			Intent(Intent.ACTION_SEND).apply {
+				type = "message/rfc822"
+				putExtra(Intent.EXTRA_EMAIL, arrayOf("garnegsoft@gmail.com"))
+				putExtra(Intent.EXTRA_SUBJECT, "Отчет об ошибке (логи)")
+				putExtra(Intent.EXTRA_STREAM, logFileUri)
+			}
 		}
-		context.startActivity(Intent.createChooser(sendIntent, null))
+		context.startActivity(Intent.createChooser(intent, null))
+		
 		
 	}
 }
