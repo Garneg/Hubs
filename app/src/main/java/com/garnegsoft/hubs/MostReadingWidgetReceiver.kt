@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
@@ -23,8 +24,7 @@ class NewsWidgetReceiver(
 	}
 	
 	override fun onEnabled(context: Context?) {
-		Toast.makeText(context, "Новый виджет добавлен!", Toast.LENGTH_LONG).show()
-
+		Log.i("most_reading_widget", "widget added")
 		val periodicalWidgetUpdateRequest =
 			PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(6, TimeUnit.HOURS)
 				.addTag(periodicalWorkTag)
@@ -43,7 +43,7 @@ class NewsWidgetReceiver(
 	}
 	
 	override fun onDisabled(context: Context?) {
-		Toast.makeText(context, "Все виджеты удалены", Toast.LENGTH_LONG).show()
+		Log.i("most_reading_widget", "widget deleted")
 		context?.let {
 			val wm = WorkManager.getInstance(it)
 			wm.cancelAllWorkByTag(periodicalWorkTag)

@@ -57,7 +57,7 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 		isDarkTheme = true
 	}
 	
-	Log.e("offline articles:", articles.size.toString())
+	Log.i("most_reading", "articles count: ${articles.size.toString()}")
 	
 	Box(
 		modifier = GlanceModifier
