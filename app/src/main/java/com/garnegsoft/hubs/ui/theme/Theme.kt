@@ -109,8 +109,9 @@ fun HubsWidgetTheme(
     content: @Composable () -> Unit
 ) {
     GlanceTheme(
+        
         colors = ColorProviders(
-            light = LightColorPalette,
+            light = LightColorPalette.copy(surface = Color.White),
             dark = DarkColorPalette
         )
     ) {
