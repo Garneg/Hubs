@@ -78,11 +78,12 @@ class HabrApi {
             try {
                 return HttpClient.newCall(request).execute()
             } catch (ex: Exception) {
-                if (ex is SocketTimeoutException ||
+                if ((ex is SocketTimeoutException ||
                     ex is ConnectException ||
                     ex is NoConnectionInterceptor.NoInternetException ||
-                    ex is NoConnectionInterceptor.NoConnectivityException &&
-                    cacheControl != CacheControl.FORCE_NETWORK) {
+                    ex is NoConnectionInterceptor.NoConnectivityException) &&
+                    (cacheControl != CacheControl.FORCE_NETWORK ||
+                    cacheControl != CacheControl.FORCE_CACHE)) {
                     return get(path, args, version, CacheControl.FORCE_CACHE)
                 } else
                     return null
