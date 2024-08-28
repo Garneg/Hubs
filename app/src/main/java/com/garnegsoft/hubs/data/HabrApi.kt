@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.data
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.util.Log
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
 import okhttp3.*
@@ -78,11 +79,13 @@ class HabrApi {
             try {
                 return HttpClient.newCall(request).execute()
             } catch (ex: Exception) {
-                if (ex is SocketTimeoutException ||
-                    ex is ConnectException ||
-                    ex is NoConnectionInterceptor.NoInternetException ||
-                    ex is NoConnectionInterceptor.NoConnectivityException &&
-                    cacheControl != CacheControl.FORCE_NETWORK) {
+                if ((ex is SocketTimeoutException ||
+                        ex is ConnectException ||
+                        ex is NoConnectionInterceptor.NoInternetException ||
+                    ex is NoConnectionInterceptor.NoConnectivityException) &&
+                    (cacheControl != CacheControl.FORCE_NETWORK &&
+                    cacheControl != CacheControl.FORCE_CACHE)) {
+                    Log.e("HabrApi", "exception: $ex")
                     return get(path, args, version, CacheControl.FORCE_CACHE)
                 } else
                     return null
