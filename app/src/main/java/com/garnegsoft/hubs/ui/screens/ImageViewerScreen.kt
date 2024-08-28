@@ -15,7 +15,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -147,7 +146,7 @@ fun ImageViewScreen(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.End
 		) {
-			CompositionLocalProvider(LocalRippleTheme provides customRippleTheme) {
+//			CompositionLocalProvider(LocalRippleTheme provides customRippleTheme) {
 				Box(
 					modifier = Modifier
 						.size(48.dp)
@@ -162,20 +161,20 @@ fun ImageViewScreen(
 						tint = Color.White
 					)
 				}
-			}
+//			}
 		}
 	}
 }
 
-val customRippleTheme = object : RippleTheme {
-	@Composable
-	override fun defaultColor(): Color {
-		return Color.White
-	}
-	
-	@Composable
-	override fun rippleAlpha(): RippleAlpha {
-		return RippleAlpha(0.5f, 0.5f, 0.5f, 0.5f)
-	}
-	
-}
+//val customRippleTheme = object : RippleTheme {
+//	@Composable
+//	override fun defaultColor(): Color {
+//		return Color.White
+//	}
+//
+//	@Composable
+//	override fun rippleAlpha(): RippleAlpha {
+//		return RippleAlpha(0.5f, 0.5f, 0.5f, 0.5f)
+//	}
+//
+//}

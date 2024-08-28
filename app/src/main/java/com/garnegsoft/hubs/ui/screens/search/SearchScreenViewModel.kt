@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.data.HabrList
 import com.garnegsoft.hubs.data.article.ArticlesListModel
+import com.garnegsoft.hubs.data.article.list.ArticleSnippet
 import com.garnegsoft.hubs.data.comment.list.CommentSnippet
 import com.garnegsoft.hubs.data.company.list.CompaniesListController
 import com.garnegsoft.hubs.data.company.list.CompanySnippet

@@ -17,8 +17,8 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import com.garnegsoft.hubs.api.HabrApi
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
+import com.garnegsoft.hubs.data.HabrApi
+import com.garnegsoft.hubs.data.article.list.ArticleSnippet
 import com.garnegsoft.hubs.ui.theme.HubsWidgetTheme
 import com.garnegsoft.hubs.ui.widgets.MostReadingWidgetLayout
 import kotlinx.coroutines.Dispatchers

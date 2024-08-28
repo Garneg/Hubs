@@ -9,15 +9,19 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.data.HabrList
 import com.garnegsoft.hubs.data.HabrSnippet
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
     modifier: Modifier = Modifier.fillMaxSize(),
@@ -51,38 +55,50 @@ fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
         }
 
     })
-
+    
     val state = rememberPullRefreshState(
         refreshing = refreshing,
         refreshThreshold = 50.dp,
         onRefresh = onRefresh
     )
+    
+    val statem3 = rememberPullToRefreshState()
 
     isInProgress.value = remember { derivedStateOf { state.progress > 0f } }.value
-    Box(modifier = Modifier.pullRefresh(state)) {
-        PagedHabrSnippetsColumn(
-            modifier = modifier,
-            data = data,
-            lazyListState = lazyListState,
-            contentPadding = contentPadding,
-            verticalArrangement = verticalArrangement,
-            horizontalAlignment = horizontalAlignment,
-            onNextPageLoad = onNextPageLoad,
-            nextPageLoadingIndicator = nextPageLoadingIndicator,
-            page = page,
-            snippet = snippet
-        )
-        PullRefreshIndicator(
-            refreshing = refreshing,
-            state = state,
-            modifier = Modifier.align(Alignment.TopCenter),
-            contentColor = MaterialTheme.colors.secondary
-        )
+    
+    Box(modifier = Modifier
+//        .pullRefresh(state)
+    ) {
+        
+        PullToRefreshBox(
+            state = statem3,
+            isRefreshing = refreshing,
+            onRefresh = onRefresh
+        ) {
+            PagedHabrSnippetsColumn(
+                modifier = modifier,
+                data = data,
+                lazyListState = lazyListState,
+                contentPadding = contentPadding,
+                verticalArrangement = verticalArrangement,
+                horizontalAlignment = horizontalAlignment,
+                onNextPageLoad = onNextPageLoad,
+                nextPageLoadingIndicator = nextPageLoadingIndicator,
+                page = page,
+                snippet = snippet
+            )
+        }
+//        PullRefreshIndicator(
+//            refreshing = refreshing,
+//            state = state,
+//            modifier = Modifier.align(Alignment.TopCenter),
+//            contentColor = MaterialTheme.colors.secondary
+//        )
     }
 
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun RefreshableContainer(
     isPullingInProgress: MutableState<Boolean> = remember {
@@ -92,19 +108,11 @@ fun RefreshableContainer(
     refreshing: Boolean,
     content: @Composable () -> Unit
 ) {
-    val state = rememberPullRefreshState(
-        refreshing = refreshing,
-        refreshThreshold = 50.dp,
-        onRefresh = onRefresh
-    )
-    isPullingInProgress.value = remember { derivedStateOf { state.progress > 0f } }.value
-    Box(modifier = Modifier.pullRefresh(state)) {
+    val state = rememberPullToRefreshState()
+    isPullingInProgress.value = remember { derivedStateOf { state.distanceFraction > 0f } }.value
+    
+    PullToRefreshBox(
+        isRefreshing = refreshing, onRefresh = onRefresh, state = state) {
         content()
-        PullRefreshIndicator(
-            refreshing = refreshing,
-            state = state,
-            modifier = Modifier.align(Alignment.TopCenter),
-            contentColor = MaterialTheme.colors.secondary
-        )
     }
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.RippleDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -31,7 +33,7 @@ fun SettingsCardItem(
 		.clip(RoundedCornerShape(10.dp))
 		.clickable(
 			interactionSource = interactionSource,
-			indication = rememberRipple(),
+			indication = ripple(),
 			enabled = enabled,
 			onClick = onClick
 		)
