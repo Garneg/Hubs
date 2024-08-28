@@ -76,7 +76,7 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.garnegsoft.hubs.api.FcmDispatcher
+import com.garnegsoft.hubs.data.FcmDispatcher
 import com.garnegsoft.hubs.data.HabrApi
 import com.garnegsoft.hubs.data.dataStore.HubsDataStore
 import com.garnegsoft.hubs.data.me.MeDataUpdateWorker

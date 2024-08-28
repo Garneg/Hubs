@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.api
+package com.garnegsoft.hubs.data
 
 import android.os.Bundle
 import android.util.Log

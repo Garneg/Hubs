@@ -188,7 +188,7 @@ class ArticlesListController {
 								editorVersion = EditorVersion.fromString(it.editorVersion),
 								type = PostType.fromString(it.postType),
 								author = if (it.author != null) {
-									com.garnegsoft.hubs.api.article.Article.Author(
+									com.garnegsoft.hubs.data.article.Article.Author(
 										alias = it.author!!.alias,
 										fullname = it.author!!.fullname,
 										avatarUrl = it.author!!.avatarUrl,
@@ -198,7 +198,7 @@ class ArticlesListController {
 								format = if (it.format != null) ArticleFormat.fromString(it.format!!) else null,
 								labels = listOf(),
 								hubs = parseHubs(it.hubs),
-								statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
+								statistics = com.garnegsoft.hubs.data.article.Article.Statistics(
 									score = it.statistics.score,
 									readingCount = it.statistics.readingCount,
 									commentsCount = it.statistics.commentsCount,
@@ -211,7 +211,7 @@ class ArticlesListController {
 								complexity = PublicationComplexity.fromString(it.complexity),
 								readingTime = it.readingTime,
 								relatedData = it.relatedData?.let {
-									com.garnegsoft.hubs.api.article.Article.RelatedData(
+									com.garnegsoft.hubs.data.article.Article.RelatedData(
 										unreadComments = it.unreadCommentsCount,
 										bookmarked = it.bookmarked
 									)
