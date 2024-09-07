@@ -13,9 +13,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -170,20 +167,7 @@ fun OfflineArticleCard(
 		) {
 			Column {
 				Spacer(modifier = Modifier.height(style.innerPadding / 2))
-				CompositionLocalProvider(
-					LocalRippleTheme provides object : RippleTheme {
-						@Composable
-						override fun defaultColor(): Color {
-							return RatingNegativeColor
-						}
-						
-						@Composable
-						override fun rippleAlpha(): RippleAlpha {
-							return RippleAlpha(0.1f, 0.1f, 0.1f, 0.1f)
-						}
-						
-					}
-				) {
+				
 					TextButton(
 						modifier = Modifier
 							.fillMaxWidth()
@@ -198,7 +182,7 @@ fun OfflineArticleCard(
 					) {
 						Text(text = "Удалить")
 					}
-				}
+				
 			}
 		}
 	}

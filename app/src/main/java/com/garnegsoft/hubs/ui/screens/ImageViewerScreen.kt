@@ -17,9 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -160,12 +157,13 @@ fun ImageViewScreen(
 			verticalAlignment = Alignment.CenterVertically,
 			horizontalArrangement = Arrangement.End
 		) {
-			CompositionLocalProvider(LocalRippleTheme provides customRippleTheme) {
+			
 				Box(
 					modifier = Modifier
 						.size(48.dp)
 						.clip(CircleShape)
-						.clickable(onClick = onBack)
+						.clickable(onClick = onBack, interactionSource = null, indication = ripple())
+						
 						.background(Color.Black.copy(0.5f)),
 					contentAlignment = Alignment.Center
 				) {
@@ -175,20 +173,7 @@ fun ImageViewScreen(
 						tint = Color.White
 					)
 				}
-			}
+			
 		}
 	}
-}
-
-val customRippleTheme = object : RippleTheme {
-	@Composable
-	override fun defaultColor(): Color {
-		return Color.White
-	}
-	
-	@Composable
-	override fun rippleAlpha(): RippleAlpha {
-		return RippleAlpha(0.5f, 0.5f, 0.5f, 0.5f)
-	}
-	
 }
