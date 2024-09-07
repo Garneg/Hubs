@@ -7,6 +7,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.glance.layout.Row
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,9 +73,6 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 			modifier = GlanceModifier.padding(8.dp)
 		) {
 			if (articles.isNotEmpty()) {
-				
-					
-					
 					LazyColumn(modifier = GlanceModifier.padding(top = 62.dp)) {
 //						item {
 //							Spacer(GlanceModifier.height(32.dp + 0.dp))
@@ -87,12 +85,14 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 								if (index > 0) {
 									Spacer(modifier = GlanceModifier.height(4.dp))
 								}
+								val id = remember { it.second }
 								WidgetArticleCard(
 									title = it.first,
+									clickableKey = it.second.toString(),
 									onClick = {
 										val intent =
 											Intent(context, MainActivity::class.java).apply {
-												data = Uri.parse("https://habr.com/p/${it.second}")
+												data = Uri.parse("https://habr.com/p/${id}")
 //								`package` = BuildConfig.APPLICATION_ID
 //								addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 //								addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -106,7 +106,6 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 										pendingIntent.send()
 										
 										context.startActivity(intent)
-//							actionStartActivity<MainActivity>()
 									}
 								)
 							}
@@ -186,6 +185,7 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 fun WidgetArticleCard(
 	modifier: GlanceModifier = GlanceModifier,
 	title: String,
+	clickableKey: String? = null,
 	onClick: () -> Unit
 ) {
 	var isDarkTheme = false
@@ -207,8 +207,7 @@ fun WidgetArticleCard(
 					)
 				)
 			)
-			
-			.clickable(action(block = onClick), rippleOverride = R.drawable.rounded_corners_ripple)
+			.clickable(action(key = clickableKey, block = onClick), rippleOverride = R.drawable.rounded_corners_ripple)
 			.padding(12.dp)
 	
 	) {
