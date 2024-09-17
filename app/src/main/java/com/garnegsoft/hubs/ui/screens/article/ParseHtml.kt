@@ -6,7 +6,10 @@ import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
 import android.widget.EditText
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -652,11 +655,8 @@ fun parseElement(
 					.padding(vertical = 4.dp)
 					.clip(RoundedCornerShape(4.dp))
 			) {
-				Column(
-					modifier = Modifier
-						.animateContentSize()
 				
-				) {
+				Column {
 					Row(
 						modifier = Modifier
 							.fillMaxWidth()
@@ -667,14 +667,17 @@ fun parseElement(
 						Icon(
 							tint = Color(0xFF5587A3),
 							modifier = Modifier
-                                .size(18.dp)
-                                .rotate(
-                                    if (!showDetails) {
-                                        -90f
-                                    } else {
-                                        0f
-                                    }
-                                ),
+								.size(18.dp)
+								.rotate(
+									animateFloatAsState(
+										targetValue =
+									if (!showDetails) {
+										-90f
+									} else {
+										0f
+									}).value
+									
+								),
 							imageVector = Icons.Outlined.ArrowDropDown, contentDescription = ""
 						)
 						Spacer(modifier = Modifier.width(4.dp))
@@ -688,6 +691,8 @@ fun parseElement(
 					}
 					if (showDetails) {
 						Divider()
+					}
+					AnimatedVisibility(visible = showDetails) {
 						Column(
 							modifier = Modifier.padding(
 								start = 12.dp,
@@ -712,8 +717,8 @@ fun parseElement(
 				LocalDensity.current.fontScale * MaterialTheme.typography.body1.fontSize.value
 			AndroidView(modifier = Modifier
 //                    .fillMaxWidth()
-                .padding(vertical = 8.dp)
-                .clip(RoundedCornerShape(0.dp)),
+				.padding(vertical = 8.dp)
+				.clip(RoundedCornerShape(0.dp)),
 				factory = {
 					WebView(it).apply {
 						this.setBackgroundColor(backgroundColor.toArgb())
@@ -955,9 +960,9 @@ fun Code(
 				}
 				Row(
 					modifier = Modifier
-                        .horizontalScroll(rememberScrollState())
-                        .fillMaxWidth()
-                        .padding(8.dp)
+						.horizontalScroll(rememberScrollState())
+						.fillMaxWidth()
+						.padding(8.dp)
 				) {
 					Text(
 						text = buildAnnotatedString { withStyle(spanStyle) { append(code) } },
