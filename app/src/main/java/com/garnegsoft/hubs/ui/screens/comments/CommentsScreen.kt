@@ -3,6 +3,8 @@ package com.garnegsoft.hubs.ui.screens.comments
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateIntSizeAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -536,7 +538,8 @@ fun CommentsScreen(
 				
 				
 			}
-			
+			val articleHeaderOffsetAnimation by animateFloatAsState(targetValue =
+			if (showArticleHeader) 0f else 1f)
 			articleSnippet?.let {
 				Layout(
 					content = {
@@ -584,9 +587,7 @@ fun CommentsScreen(
 					val placeables = measurables.map { it.measure(constraints) }
 					articleHeaderOffset = placeables.first().height
 					layout(constraints.maxWidth, constraints.maxHeight) {
-						if (showArticleHeader) {
-							placeables.first().placeRelative(0, 0)
-						}
+						placeables.first().placeRelative(0, (-placeables.first().height * articleHeaderOffsetAnimation).toInt())
 					}
 				}
 				
