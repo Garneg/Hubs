@@ -13,7 +13,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
@@ -358,7 +357,7 @@ fun CommentItem(
 					IconButton(onClick = onGoToPinnedComment!!) {
 						Icon(
 							modifier = Modifier.size(22.dp),
-							imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+							imageVector = Icons.Filled.ArrowForward,
 							contentDescription = "",
 							tint = statisticsColor
 						)
