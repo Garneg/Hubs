@@ -4,24 +4,26 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 
 
-class CommentsScreenState(
+class CommentsScreenNavigationState(
 	val lazyListState: LazyListState,
 	val commentsCollection: CommentsCollection? // null indicates that comments are not loaded yet
 ) {
 	private val commentsIds: List<Int> = commentsCollection?.comments?.map { it.id } ?: emptyList()
 	
+	private val newCommentsIds: List<Int> = commentsCollection?.comments?.filter { it.isNew }?.map { it.id } ?: emptyList()
+	
 	private val _collapsedComments: MutableState<List<Int>> = mutableStateOf(emptyList())
-	val collapsedComments: State<List<Int>> = _collapsedComments
+	val collapsedComments: List<Int> by _collapsedComments
 	
 	// Necessary for showing that thread were collapsed with special "header"
 	private val _collapsedCommentsParents: MutableState<List<Int>> = mutableStateOf(emptyList())
-	val collapsedCommentsParents: State<List<Int>> = _collapsedCommentsParents
+	val collapsedCommentsParents: List<Int> by _collapsedCommentsParents
 	
 	suspend fun scrollToComment(commentId: Int, offset: Int) {
 		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset)
@@ -92,9 +94,9 @@ class CommentsScreenState(
 }
 
 @Composable
-fun rememberCommentsScreenState(
+fun rememberCommentsScreenNavigationState(
 	commentsList: CommentsCollection?,
 	lazyListState: LazyListState = rememberLazyListState()
-): CommentsScreenState {
-	return remember(commentsList) { CommentsScreenState(lazyListState, commentsList) }
+): CommentsScreenNavigationState {
+	return remember(commentsList) { CommentsScreenNavigationState(lazyListState, commentsList) }
 }

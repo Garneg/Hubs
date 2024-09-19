@@ -4,13 +4,11 @@ import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntSizeAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -87,7 +85,6 @@ fun CommentsScreen(
 	showArticleSnippet: Boolean = true,
 	onBackClicked: () -> Unit,
 	onArticleClicked: () -> Unit,
-	onThreadClick: (threadId: Int) -> Unit,
 	onUserClicked: (alias: String) -> Unit,
 	onImageClick: (imageUrl: String) -> Unit
 ) {
@@ -98,7 +95,7 @@ fun CommentsScreen(
 	val lazyListState = rememberLazyListState()
 	
 	val screenState =
-		rememberCommentsScreenState(commentsList = commentsData, lazyListState = lazyListState)
+		rememberCommentsScreenNavigationState(commentsList = commentsData, lazyListState = lazyListState)
 	
 	
 	val context = LocalContext.current
@@ -308,9 +305,6 @@ fun CommentsScreen(
 						bookmarksButtonAllowedBeEnabled = articleSnippet?.relatedData != null
 					)
 				
-				val collapsedCommentsList by screenState.collapsedComments
-				val collapsedCommentsHeadersList by screenState.collapsedCommentsParents
-				
 				val ratingIconPainter = painterResource(id = R.drawable.rating)
 				val replyIconPainter = painterResource(id = R.drawable.reply)
 				
@@ -407,8 +401,8 @@ fun CommentsScreen(
 							items = commentsData!!.comments,
 							key = { index, it -> it.id }
 						) { index, it ->
-							if (!collapsedCommentsList.contains(it.id)) {
-								if (collapsedCommentsHeadersList.contains(it.id)){
+							if (!screenState.collapsedComments.contains(it.id)) {
+								if (screenState.collapsedCommentsParents.contains(it.id)){
 									CollapsedThreadHeaderComment(
 										modifier = Modifier
 											.padding(start = 20.dp * it.level.coerceAtMost(5))

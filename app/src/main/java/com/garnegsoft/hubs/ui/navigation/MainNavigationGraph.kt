@@ -472,7 +472,6 @@ fun MainNavigationGraph(
 					onArticleClicked = { navController.navigate("article/$postId") },
 					onUserClicked = { navController.navigate("user/$it") },
 					onImageClick = { navController.navigate(route = "imageViewer?imageUrl=$it") },
-					onThreadClick = { navController.navigate("thread/$postId/$it") }
 				)
 				
 			}
