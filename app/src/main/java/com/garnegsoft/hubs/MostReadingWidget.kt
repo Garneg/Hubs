@@ -30,7 +30,7 @@ class MostReadingWidget : GlanceAppWidget() {
 	override suspend fun provideGlance(context: Context, id: GlanceId) {
 		
 		withContext(Dispatchers.IO) {
-			articles = ArticlesListController.getMostReading()?.list?.map { Pair(it.title, it.id) }?.shuffled() ?: emptyList()
+			articles = ArticlesListController.getMostReading()?.list?.map { Pair(it.title, it.id) } ?: emptyList()
 		}
 		if (BuildConfig.DEBUG) {
 			Toast.makeText(context, "Data received, widget updated!", Toast.LENGTH_SHORT).show()
