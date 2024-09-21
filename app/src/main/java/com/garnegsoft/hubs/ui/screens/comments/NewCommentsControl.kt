@@ -9,10 +9,12 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -24,11 +26,14 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.launch
 
@@ -40,6 +45,7 @@ fun NewCommentsControl(
 	currentCommentNumber: Int,
 	nextCommentButtonClick: () -> Unit,
 	previousCommentButtonClick: () -> Unit,
+	currentCommentButtonClick: () -> Unit,
 	onGoToNewCommentsLabelClick: () -> Unit,
 	nextCommentButtonEnabled: Boolean,
 	previousCommentButtonEnabled: Boolean,
@@ -86,19 +92,32 @@ fun NewCommentsControl(
 					) {
 						Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
 					}
-					AnimatedContent(targetState = currentCommentNumber,
-						transitionSpec = {
-							if (initialState < targetState) {
-								(slideInVertically { -it / 2 } + fadeIn())
-									.togetherWith(slideOutVertically { it / 2 } + fadeOut())
-							} else {
-								(slideInVertically { it / 2 } + fadeIn())
-									.togetherWith(slideOutVertically { -it / 2 } + fadeOut())
-							}
-						}) {
-						Text(text = "$it")
+					Row(
+						modifier = Modifier
+							.fillMaxHeight()
+							.clickable(
+								onClick = currentCommentButtonClick,
+								indication = null,
+								interactionSource = null
+							),
+						verticalAlignment = Alignment.CenterVertically
+					) {
+						
+						
+						AnimatedContent(targetState = currentCommentNumber,
+							transitionSpec = {
+								if (initialState < targetState) {
+									(slideInVertically { -it / 2 } + fadeIn())
+										.togetherWith(slideOutVertically { it / 2 } + fadeOut())
+								} else {
+									(slideInVertically { it / 2 } + fadeIn())
+										.togetherWith(slideOutVertically { -it / 2 } + fadeOut())
+								}
+							}) {
+							Text(text = "$it")
+						}
+						Text(text = "/$newCommentsCount")
 					}
-					Text(text = "/$newCommentsCount")
 					IconButton(
 						onClick = nextCommentButtonClick,
 						enabled = nextCommentButtonEnabled
@@ -125,7 +144,8 @@ fun NewCommentsControl(
 		newCommentsCount = state.newCommentsAmount,
 		currentCommentNumber = state.currentCommentNumber,
 		nextCommentButtonClick = { coroutineScope.launch { state.scrollToNextComment() } },
-		previousCommentButtonClick = { coroutineScope.launch { state.scrollToPreviousComment() }},
+		previousCommentButtonClick = { coroutineScope.launch { state.scrollToPreviousComment() } },
+		currentCommentButtonClick = { coroutineScope.launch { state.scrollToCurrentComment() } },
 		onGoToNewCommentsLabelClick = { coroutineScope.launch { state.scrollToFirst() } },
 		nextCommentButtonEnabled = state.nextCommentButtonEnabled,
 		previousCommentButtonEnabled = state.previousCommentButtonEnabled,

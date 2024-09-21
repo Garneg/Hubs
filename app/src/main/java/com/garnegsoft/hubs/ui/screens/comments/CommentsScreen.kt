@@ -45,6 +45,7 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
+import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
@@ -541,8 +542,7 @@ fun CommentsScreen(
 								modifier = Modifier
 									.clickable {
 										coroutineScope.launch {
-											lazyListState.scrollToItem(1)
-											lazyListState.animateScrollToItem(0)
+											lazyListState.animateShortScrollToItem(0)
 										}
 									}
 									.background(MaterialTheme.colors.surface)
@@ -588,7 +588,9 @@ fun CommentsScreen(
 				
 			}
 			screenState.newCommentsNavigationControlState?.let {
-				Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
+				Box(modifier = Modifier.align(Alignment.BottomCenter)
+					.padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
+				) {
 					
 						NewCommentsControl(state = screenState.newCommentsNavigationControlState!!)
 					

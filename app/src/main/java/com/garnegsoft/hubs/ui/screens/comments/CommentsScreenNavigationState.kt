@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
+import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.garnegsoft.hubs.api.comment.CommentsCollection
+import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 
 
 class CommentsScreenNavigationState(
@@ -34,7 +36,7 @@ class CommentsScreenNavigationState(
 	
 	private var baseOffset: Int = 0
 	suspend fun scrollToComment(commentId: Int, offset: Int = 0) {
-		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset + baseOffset)
+		lazyListState.animateShortScrollToItem(calculateIndexOfComment(commentId), offset + baseOffset, teleportItemOffset = 2)
 	}
 	
 	fun collapseComment(commentId: Int) {
@@ -143,6 +145,13 @@ class CommentsScreenNavigationState(
 			}
 		}
 		
+		suspend fun scrollToCurrentComment() {
+			commentsScreenState.scrollToComment(
+				commentsScreenState.newCommentsIds[currentCommentIndex],
+				0
+			)
+		}
+		
 		/**
 		 * Scrolls to first of new comments.
 		 * Also sets _showGoToNewCommentsLabel_ to false, which triggers control to show counter and buttons
@@ -158,10 +167,6 @@ class CommentsScreenNavigationState(
 		
 	}
 }
-
-//class NewCommentsNavigationControlState() {
-//
-//}
 
 @Composable
 fun rememberCommentsScreenNavigationState(
