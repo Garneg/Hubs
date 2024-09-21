@@ -292,10 +292,10 @@ fun CommentsScreen(
 				}
 			})
 		
-		Box {
+		Box(modifier = Modifier.padding(it).fillMaxSize()) {
 			Column(
 				modifier = Modifier
-					.padding(it)
+					
 					.imePadding()
 			) {
 				val articleCardStyle =
@@ -477,8 +477,7 @@ fun CommentsScreen(
 													coroutineScope.launch(Dispatchers.Main) {
 														it.parentCommentId?.let {
 															screenState.scrollToComment(
-																it,
-																-articleHeaderOffset
+																it
 															)
 														}
 													}
@@ -542,6 +541,7 @@ fun CommentsScreen(
 								modifier = Modifier
 									.clickable {
 										coroutineScope.launch {
+											lazyListState.scrollToItem(1)
 											lazyListState.animateScrollToItem(0)
 										}
 									}
@@ -580,11 +580,19 @@ fun CommentsScreen(
 				) { measurables, constraints ->
 					val placeables = measurables.map { it.measure(constraints) }
 					articleHeaderOffset = placeables.first().height
+					screenState.setScrollBaseOffset(-placeables.first().height)
 					layout(constraints.maxWidth, constraints.maxHeight) {
 						placeables.first().placeRelative(0, (-placeables.first().height * articleHeaderOffsetAnimation).toInt())
 					}
 				}
 				
+			}
+			screenState.newCommentsNavigationControlState?.let {
+				Box(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp)) {
+					
+						NewCommentsControl(state = screenState.newCommentsNavigationControlState!!)
+					
+				}
 			}
 			
 		}

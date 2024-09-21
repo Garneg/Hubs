@@ -4,9 +4,12 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 
 
@@ -16,7 +19,7 @@ class CommentsScreenNavigationState(
 ) {
 	private val commentsIds: List<Int> = commentsCollection?.comments?.map { it.id } ?: emptyList()
 	
-	private val newCommentsIds: List<Int> = commentsCollection?.comments?.filter { it.isNew }?.map { it.id } ?: emptyList()
+	val newCommentsIds: List<Int> = commentsCollection?.comments?.filter { it.isNew }?.map { it.id } ?: emptyList()
 	
 	private val _collapsedComments: MutableState<List<Int>> = mutableStateOf(emptyList())
 	val collapsedComments: List<Int> by _collapsedComments
@@ -25,8 +28,13 @@ class CommentsScreenNavigationState(
 	private val _collapsedCommentsParents: MutableState<List<Int>> = mutableStateOf(emptyList())
 	val collapsedCommentsParents: List<Int> by _collapsedCommentsParents
 	
-	suspend fun scrollToComment(commentId: Int, offset: Int) {
-		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset)
+	fun setScrollBaseOffset(offset: Int) {
+		baseOffset = offset
+	}
+	
+	private var baseOffset: Int = 0
+	suspend fun scrollToComment(commentId: Int, offset: Int = 0) {
+		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset + baseOffset)
 	}
 	
 	fun collapseComment(commentId: Int) {
@@ -91,7 +99,69 @@ class CommentsScreenNavigationState(
 		_collapsedComments.value = _collapsedComments.value.filterNot { ids.contains(it) }
 	}
 	
+	
+	
+	var showNewCommentsNavigationControl: Boolean by mutableStateOf(false)
+	private var _newCommentsControlState: NewCommentsNavigationControlState? by mutableStateOf(null)
+	val newCommentsNavigationControlState: NewCommentsNavigationControlState? by derivedStateOf { _newCommentsControlState }
+	
+	init {
+		if (newCommentsIds.isNotEmpty()){
+			showNewCommentsNavigationControl = true
+			_newCommentsControlState = NewCommentsNavigationControlState(this)
+		}
+	}
+	class NewCommentsNavigationControlState(
+		val commentsScreenState: CommentsScreenNavigationState,
+		
+	) {
+		var showGoToNewCommentsLabel: Boolean by mutableStateOf(true)
+		private var currentCommentIndex: Int by mutableIntStateOf(0)
+		
+		val newCommentsAmount: Int = commentsScreenState.newCommentsIds.size
+		val currentCommentNumber: Int by derivedStateOf { currentCommentIndex + 1 }
+		val nextCommentButtonEnabled: Boolean by derivedStateOf { currentCommentIndex < commentsScreenState.newCommentsIds.lastIndex }
+		val previousCommentButtonEnabled: Boolean by derivedStateOf { currentCommentIndex > 0 }
+		
+		suspend fun scrollToNextComment() {
+			if (currentCommentIndex < commentsScreenState.newCommentsIds.size) {
+				currentCommentIndex++
+				commentsScreenState.scrollToComment(
+					commentsScreenState.newCommentsIds[currentCommentIndex],
+					0
+				)
+			}
+		}
+		
+		suspend fun scrollToPreviousComment() {
+			if (currentCommentIndex > 0) {
+				currentCommentIndex--
+				commentsScreenState.scrollToComment(
+					commentsScreenState.newCommentsIds[currentCommentIndex],
+					0
+				)
+			}
+		}
+		
+		/**
+		 * Scrolls to first of new comments.
+		 * Also sets _showGoToNewCommentsLabel_ to false, which triggers control to show counter and buttons
+		 */
+		suspend fun scrollToFirst() {
+			showGoToNewCommentsLabel = false
+			currentCommentIndex = 0
+			commentsScreenState.scrollToComment(
+				commentsScreenState.newCommentsIds[currentCommentIndex],
+				0
+			)
+		}
+		
+	}
 }
+
+//class NewCommentsNavigationControlState() {
+//
+//}
 
 @Composable
 fun rememberCommentsScreenNavigationState(
