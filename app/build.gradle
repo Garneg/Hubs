@@ -91,6 +91,9 @@ dependencies {
     implementation "androidx.glance:glance-appwidget:1.1.0"
     implementation "androidx.glance:glance-material:1.1.0"
 
+    //lottie
+    implementation "com.airbnb.android:lottie-compose:6.5.2"
+
     implementation "androidx.profileinstaller:profileinstaller:1.4.0"
 
     implementation "androidx.compose.runtime:runtime-livedata:$compose_ui_version"
