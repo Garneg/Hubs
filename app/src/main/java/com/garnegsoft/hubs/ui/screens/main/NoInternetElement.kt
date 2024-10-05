@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,10 +34,8 @@ import com.airbnb.lottie.compose.LottieCancellationBehavior
 import com.airbnb.lottie.compose.LottieClipSpec
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieAnimatable
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.airbnb.lottie.compose.resetToBeginning
 import com.garnegsoft.hubs.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -131,16 +128,17 @@ fun NoInternetElement(
                                 )
                             }
 
-
-                            val successful = onTryAgain()
-                            isRetryInProgress = false
-                            if (!successful) {
+                            val connected = onTryAgain()
+                            delay(500) // Without this delay animation stops at first frame for some reason
+                            if (!connected) {
                                 lottieAnimatable.animate(
                                     noInternetAnimationComposition,
                                     clipSpec = animationSegments[3],
+                                    cancellationBehavior = LottieCancellationBehavior.OnIterationFinish,
                                     iterations = 1
                                 )
                             }
+                            isRetryInProgress = false
 
                         }
                     }
