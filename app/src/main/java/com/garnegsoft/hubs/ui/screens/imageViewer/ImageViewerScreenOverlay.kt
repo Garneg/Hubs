@@ -58,13 +58,7 @@ fun ImageViewerScreenOverlay(
 		state.close()
 	}
 	val context = LocalContext.current
-	val zoomableState = rememberZoomableState(
-		autoApplyTransformations = false,
-		zoomSpec = ZoomSpec(maxZoomFactor = 3f, preventOverOrUnderZoom = false)
-	)
-	
-	val zoomableImageState = rememberZoomableImageState(zoomableState = zoomableState)
-	
+
 	val systemUiController = rememberSystemUiController()
 
 	var offset by remember {
@@ -97,6 +91,13 @@ fun ImageViewerScreenOverlay(
 		exit = fadeOut() + scaleOut(),
 
 	) {
+		val zoomableState = rememberZoomableState(
+			autoApplyTransformations = false,
+			zoomSpec = ZoomSpec(maxZoomFactor = 3f, preventOverOrUnderZoom = false)
+		)
+
+		val zoomableImageState = rememberZoomableImageState(zoomableState = zoomableState)
+
 		val animatedOffset by animateFloatAsState(
 			targetValue = if (isDragging) offset else 0f
 		)
