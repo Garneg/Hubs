@@ -984,7 +984,7 @@ fun handleUrl(context: Context, url: String) {
 		url
 	)
 	val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-		if (url.startsWith("https://habr.com")){
+		if (url.startsWith("https://habr.com") || url.startsWith("http://habrahabr.ru")){
 			this.`package` = BuildConfig.APPLICATION_ID
 		}
 	}
