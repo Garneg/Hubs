@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -42,6 +43,7 @@ import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
 import me.saket.telephoto.zoomable.rememberZoomableImageState
 import me.saket.telephoto.zoomable.rememberZoomableState
+import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
 
@@ -71,22 +73,26 @@ fun ImageViewerScreenOverlay(
 		}
 	})
 
-	val screenHeight = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
 	val splineBasedDecay = rememberSplineBasedDecay<Float>()
+	var viewportHeight by remember { mutableStateOf(0) }
+
 	AnimatedVisibility(
 		modifier = Modifier.fillMaxSize(),
 		visible = state.show,
 		enter = fadeIn() + scaleIn(initialScale = 0.9f),
-		exit = fadeOut() + scaleOut(targetScale = 0.9f),
+		exit = fadeOut(),
 
 	) {
 		var offset by remember {
 			mutableStateOf(0f)
 		}
 
-
 		val draggableState = rememberDraggableState {
 			offset += it * 0.75f
+		}
+
+		val backgroundAlpha by remember {
+			derivedStateOf { 1f - abs(offset) / viewportHeight }
 		}
 		var isDragging by remember { mutableStateOf(false) }
 
@@ -102,6 +108,9 @@ fun ImageViewerScreenOverlay(
 		)
 		Box(modifier = Modifier
 			.fillMaxSize()
+			.onGloballyPositioned {
+				viewportHeight = it.size.height
+			}
 			.draggable(
 				state = draggableState,
 				orientation = Orientation.Vertical,
@@ -110,7 +119,7 @@ fun ImageViewerScreenOverlay(
 					isDragging = true
 				},
 				onDragStopped = {
-					if (it.absoluteValue > 5500f || offset.absoluteValue > screenHeight / 5) {
+					if (it.absoluteValue > 5500f || offset.absoluteValue > viewportHeight / 5) {
 						launch {
 							var lastValue = 0f
 							AnimationState(
@@ -134,7 +143,7 @@ fun ImageViewerScreenOverlay(
 			.drawBehind {
 				drawRect(
 					color = Color.Black,
-					alpha = 1f
+					alpha = backgroundAlpha
 				)
 			}
 		) {
