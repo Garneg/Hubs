@@ -64,10 +64,10 @@ fun NoInternetElement(
             val lottieAnimatable = rememberLottieAnimatable()
             val animationSegments = remember {
                 arrayListOf(
-                    LottieClipSpec.Marker("FirstAppearance"),      // appearance
-                    LottieClipSpec.Marker("NoWifi2Spinner"),  // no-wifi to spinner
-                    LottieClipSpec.Marker("SpinnerSpin"),     // spinner spinning
-                    LottieClipSpec.Marker("Spinner2NoWifi")   // spinner to no-wifi
+                    LottieClipSpec.Marker("FirstAppearance"),  // appearance
+                    LottieClipSpec.Marker("NoWifi2Spinner"),   // no-wifi to spinner
+                    LottieClipSpec.Marker("SpinnerSpin"),      // spinner spinning
+                    LottieClipSpec.Marker("Spinner2NoWifi")    // spinner to no-wifi
                 )
             }
 

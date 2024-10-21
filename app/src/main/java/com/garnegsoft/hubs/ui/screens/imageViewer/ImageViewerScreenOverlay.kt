@@ -61,20 +61,9 @@ fun ImageViewerScreenOverlay(
 
 	val systemUiController = rememberSystemUiController()
 
-	var offset by remember {
-		mutableStateOf(0f)
-	}
-
-	
-	val draggableState = rememberDraggableState {
-		offset += it * 0.75f
-	}
-	var isDragging by remember { mutableStateOf(false) }
 
 	LaunchedEffect(state.show, block = {
 		if (state.show) {
-			offset = 0f
-			isDragging = false
 			systemUiController.setStatusBarColor(Color.Black.copy(0.5f))
 		} else {
 			systemUiController.setStatusBarColor(Color.Transparent)
@@ -87,10 +76,20 @@ fun ImageViewerScreenOverlay(
 	AnimatedVisibility(
 		modifier = Modifier.fillMaxSize(),
 		visible = state.show,
-		enter = fadeIn() + scaleIn(),
-		exit = fadeOut() + scaleOut(),
+		enter = fadeIn() + scaleIn(initialScale = 0.9f),
+		exit = fadeOut() + scaleOut(targetScale = 0.9f),
 
 	) {
+		var offset by remember {
+			mutableStateOf(0f)
+		}
+
+
+		val draggableState = rememberDraggableState {
+			offset += it * 0.75f
+		}
+		var isDragging by remember { mutableStateOf(false) }
+
 		val zoomableState = rememberZoomableState(
 			autoApplyTransformations = false,
 			zoomSpec = ZoomSpec(maxZoomFactor = 3f, preventOverOrUnderZoom = false)
@@ -135,7 +134,7 @@ fun ImageViewerScreenOverlay(
 			.drawBehind {
 				drawRect(
 					color = Color.Black,
-					alpha = 0.5f
+					alpha = 1f
 				)
 			}
 		) {
