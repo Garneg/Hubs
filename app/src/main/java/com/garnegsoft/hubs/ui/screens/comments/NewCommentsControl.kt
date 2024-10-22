@@ -37,6 +37,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -44,32 +46,33 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NewCommentsControl(
-	modifier: Modifier = Modifier,
-	newCommentsCount: Int,
-	currentCommentNumber: Int,
-	nextCommentButtonClick: () -> Unit,
-	previousCommentButtonClick: () -> Unit,
-	currentCommentButtonClick: () -> Unit,
-	onGoToNewCommentsLabelClick: () -> Unit,
-	nextCommentButtonEnabled: Boolean,
-	previousCommentButtonEnabled: Boolean,
-	showGoToNewCommentsLabel: Boolean,
+    modifier: Modifier = Modifier,
+    newCommentsCount: Int,
+    currentCommentNumber: Int,
+    nextCommentButtonClick: () -> Unit,
+    previousCommentButtonClick: () -> Unit,
+    currentCommentButtonClick: () -> Unit,
+    onGoToNewCommentsLabelClick: () -> Unit,
+    showGoToNewCommentsLabel: Boolean,
 ) {
-	Box(
-		modifier = modifier.shadow(5.dp, shape = CircleShape)
+    Box(
+        modifier = modifier
+            .pointerInput(Unit){}
+            .padding(8.dp)
+			.shadow(5.dp, shape = CircleShape)
 			.clip(CircleShape)
 			.border(1.dp, MaterialTheme.colors.onSurface.copy(0.1f), CircleShape)
-			
+
 			.background(MaterialTheme.colors.surface),
-		contentAlignment = Alignment.Center
-	) {
-		AnimatedContent(
-			targetState = showGoToNewCommentsLabel,
-			contentAlignment = Alignment.Center
-		) {
-			if (it) {
-				Row(
-					modifier = modifier
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedContent(
+            targetState = showGoToNewCommentsLabel,
+            contentAlignment = Alignment.Center
+        ) {
+            if (it) {
+                Row(
+                    modifier = modifier
 						.clip(CircleShape)
 						.clickable(onClick = onGoToNewCommentsLabelClick)
 						.matchParentSize()
@@ -77,84 +80,83 @@ fun NewCommentsControl(
 //						.border(1.dp, MaterialTheme.colors.onSurface.copy(0.1f), CircleShape)
 						.heightIn(48.dp)
 						.padding(horizontal = 16.dp),
-					horizontalArrangement = Arrangement.Center,
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					Text(text = "К новым комментариям")
-					Spacer(modifier = Modifier.width(4.dp))
-					Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)
-				}
-			} else {
-				Row(
-					modifier = Modifier.heightIn(max = 48.dp),
-					horizontalArrangement = Arrangement.Center,
-					verticalAlignment = Alignment.CenterVertically
-				) {
-					IconButton(
-						onClick = previousCommentButtonClick,
-						enabled = previousCommentButtonEnabled
-					) {
-						Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
-					}
-					Row(
-						modifier = Modifier
-							.fillMaxHeight()
-							.clickable(
-								onClick = currentCommentButtonClick,
-								indication = null,
-								interactionSource = null
-							),
-						verticalAlignment = Alignment.CenterVertically
-					) {
-						
-						
-						AnimatedContent(targetState = currentCommentNumber,
-							transitionSpec = {
-								if (initialState < targetState) {
-									(slideInVertically(tween(delayMillis = 100)) { -it / 2 } + fadeIn(
-										tween(delayMillis = 100)
-									))
-										.togetherWith(slideOutVertically { it / 2 } + fadeOut())
-								} else {
-									(slideInVertically(tween(delayMillis = 100)) { it / 2 } + fadeIn(tween(delayMillis = 100)))
-										.togetherWith(slideOutVertically { -it / 2 } + fadeOut())
-								}
-							}) {
-							Text(text = "$it")
-						}
-						Text(text = "/$newCommentsCount")
-					}
-					IconButton(
-						onClick = nextCommentButtonClick,
-						enabled = nextCommentButtonEnabled
-					) {
-						Icon(
-							imageVector = Icons.Default.KeyboardArrowDown,
-							contentDescription = null
-						)
-					}
-				}
-			}
-		}
-	}
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(text = "К новым комментариям")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = null)
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+						.heightIn(max = 48.dp)
+						.clickable(
+							onClick = currentCommentButtonClick,
+							indication = null,
+							interactionSource = null
+						),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(
+                        onClick = previousCommentButtonClick,
+                    ) {
+                        Icon(imageVector = Icons.Default.KeyboardArrowUp, contentDescription = null)
+                    }
+                    Row(
+                        modifier = Modifier
+							.fillMaxHeight(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+
+                        AnimatedContent(targetState = currentCommentNumber,
+                            transitionSpec = {
+                                if (initialState < targetState) {
+                                    (slideInVertically(tween(delayMillis = 100)) { -it / 2 } + fadeIn(
+                                        tween(delayMillis = 100)
+                                    ))
+                                        .togetherWith(slideOutVertically { it / 2 } + fadeOut())
+                                } else {
+                                    (slideInVertically(tween(delayMillis = 100)) { it / 2 } + fadeIn(
+                                        tween(delayMillis = 100)
+                                    ))
+                                        .togetherWith(slideOutVertically { -it / 2 } + fadeOut())
+                                }
+                            }) {
+                            Text(text = "$it")
+                        }
+                        Text(text = "/$newCommentsCount")
+                    }
+                    IconButton(
+                        onClick = nextCommentButtonClick,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
 
 @Composable
 fun NewCommentsControl(
-	modifier: Modifier = Modifier,
-	state: CommentsScreenNavigationState.NewCommentsNavigationControlState
+    modifier: Modifier = Modifier,
+    state: CommentsScreenNavigationState.NewCommentsNavigationControlState
 ) {
-	val coroutineScope = rememberCoroutineScope()
-	NewCommentsControl(
-		modifier = modifier,
-		newCommentsCount = state.newCommentsAmount,
-		currentCommentNumber = state.currentCommentNumber,
-		nextCommentButtonClick = { coroutineScope.launch { state.scrollToNextComment() } },
-		previousCommentButtonClick = { coroutineScope.launch { state.scrollToPreviousComment() } },
-		currentCommentButtonClick = { coroutineScope.launch { state.scrollToCurrentComment() } },
-		onGoToNewCommentsLabelClick = { coroutineScope.launch { state.scrollToFirst() } },
-		nextCommentButtonEnabled = state.nextCommentButtonEnabled,
-		previousCommentButtonEnabled = state.previousCommentButtonEnabled,
-		showGoToNewCommentsLabel = state.showGoToNewCommentsLabel
-	)
+    val coroutineScope = rememberCoroutineScope()
+    NewCommentsControl(
+        modifier = modifier,
+        newCommentsCount = state.newCommentsAmount,
+        currentCommentNumber = state.currentCommentNumber,
+        nextCommentButtonClick = { coroutineScope.launch { state.scrollToNextComment() } },
+        previousCommentButtonClick = { coroutineScope.launch { state.scrollToPreviousComment() } },
+        currentCommentButtonClick = { coroutineScope.launch { state.scrollToCurrentComment() } },
+        onGoToNewCommentsLabelClick = { coroutineScope.launch { state.scrollToFirst() } },
+        showGoToNewCommentsLabel = state.showGoToNewCommentsLabel
+    )
 }

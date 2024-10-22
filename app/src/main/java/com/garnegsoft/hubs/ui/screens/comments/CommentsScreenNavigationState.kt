@@ -122,16 +122,16 @@ class CommentsScreenNavigationState(
 		
 		val newCommentsAmount: Int = commentsScreenState.newCommentsIds.size
 		val currentCommentNumber: Int by derivedStateOf { currentCommentIndex + 1 }
-		val nextCommentButtonEnabled: Boolean by derivedStateOf { currentCommentIndex < commentsScreenState.newCommentsIds.lastIndex }
-		val previousCommentButtonEnabled: Boolean by derivedStateOf { currentCommentIndex > 0 }
-		
+
 		suspend fun scrollToNextComment() {
-			if (currentCommentIndex < commentsScreenState.newCommentsIds.size) {
+			if (currentCommentIndex < commentsScreenState.newCommentsIds.lastIndex) {
 				currentCommentIndex++
 				commentsScreenState.scrollToComment(
 					commentsScreenState.newCommentsIds[currentCommentIndex],
 					0
 				)
+			} else {
+				scrollToFirst()
 			}
 		}
 		
@@ -142,10 +142,16 @@ class CommentsScreenNavigationState(
 					commentsScreenState.newCommentsIds[currentCommentIndex],
 					0
 				)
+			} else {
+				currentCommentIndex = commentsScreenState.newCommentsIds.lastIndex
+				commentsScreenState.scrollToComment(
+					commentsScreenState.newCommentsIds[currentCommentIndex]
+				)
 			}
 		}
 		
 		suspend fun scrollToCurrentComment() {
+			currentCommentIndex = 0
 			commentsScreenState.scrollToComment(
 				commentsScreenState.newCommentsIds[currentCommentIndex],
 				0
