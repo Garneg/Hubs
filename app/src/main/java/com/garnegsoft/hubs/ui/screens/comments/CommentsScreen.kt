@@ -101,7 +101,8 @@ fun CommentsScreen(
 	
 	
 	val context = LocalContext.current
-	
+
+	var returnToCommentOffset by remember { mutableStateOf<Int?>(null) }
 	var returnToCommentIndex by remember { mutableStateOf<Int?>(null) }
 	
 	LaunchedEffect(key1 = Unit) {
@@ -172,17 +173,17 @@ fun CommentsScreen(
 		},
 		floatingActionButton = {
 			returnToCommentIndex?.let { index ->
-				
-				
+
 				FloatingActionButton(
-					modifier = Modifier.sizeIn(maxWidth = 52.dp, maxHeight = 52.dp),
+					modifier = Modifier.sizeIn(maxWidth = 48.dp, maxHeight = 48.dp),
 					onClick = {
 						coroutineScope.launch {
 							lazyListState.animateScrollToItem(
 								index + itemOffsetCount,
-								(-articleHeaderOffset).toInt()
+								-articleHeaderOffset + (returnToCommentOffset ?: 0)
 							)
 							returnToCommentIndex = null
+							returnToCommentOffset = null
 						}
 					},
 					content = {
@@ -402,30 +403,30 @@ fun CommentsScreen(
 						itemsIndexed(
 							items = commentsData!!.comments,
 							key = { index, it -> it.id }
-						) { index, it ->
-							if (!screenState.collapsedComments.contains(it.id)) {
-								if (screenState.collapsedCommentsParents.contains(it.id)){
+						) { index, comment ->
+							if (!screenState.collapsedComments.contains(comment.id)) {
+								if (screenState.collapsedCommentsParents.contains(comment.id)){
 									CollapsedThreadHeaderComment(
 										modifier = Modifier
-											.padding(start = 20.dp * it.level.coerceAtMost(5))
+											.padding(start = 20.dp * comment.level.coerceAtMost(5))
 											.padding(bottom = 8.dp),
-										onExpandClick = { screenState.expandThread(it.id) },
-										comment = it
+										onExpandClick = { screenState.expandThread(comment.id) },
+										comment = comment
 									)
 								} else {
 									Column(horizontalAlignment = Alignment.End) {
 										val parentComment = remember {
-											commentsData!!.comments.firstOrNull { com -> com.id == it.parentCommentId }
+											commentsData!!.comments.firstOrNull { com -> com.id == comment.parentCommentId }
 										}
-										val parentCommentIndex = remember {
-											parentComment?.let {
-												return@remember commentsData!!.comments.indexOf(it)
-											} ?: 0
-										}
-										if (it.deleted) {
+//										val parentCommentIndex = remember {
+//											parentComment?.let {
+//												return@remember commentsData!!.comments.indexOf(it)
+//											} ?: 0
+//										}
+										if (comment.deleted) {
 											DeletedCommentItem(
 												modifier = Modifier.padding(
-													start = 20.dp * it.level.coerceAtMost(
+													start = 20.dp * comment.level.coerceAtMost(
 														5
 													)
 												)
@@ -434,22 +435,22 @@ fun CommentsScreen(
 											var showMenu by remember { mutableStateOf(false) }
 											CommentItem(
 												modifier = Modifier
-													.padding(start = 20.dp * it.level.coerceAtMost(5)),
-												comment = it,
-												onAuthorClick = { onUserClicked(it.author.alias) },
+													.padding(start = 20.dp * comment.level.coerceAtMost(5)),
+												comment = comment,
+												onAuthorClick = { onUserClicked(comment.author.alias) },
 												parentComment = parentComment,
-												highlight = it.id == commentId,
+												highlight = comment.id == commentId,
 												showReplyButton = commentsData!!.commentAccess.canComment,
 												menu = {
 													if (showMenu) {
 														CommentItemMenu(
 															onCollapseCommentClick = {
-																screenState.collapseComment(it.id)
+																screenState.collapseComment(comment.id)
 																showMenu = false
 															},
 															onCollapseThreadClick = {
 																screenState.collapseThread(
-																	it.id
+																	comment.id
 																)
 																showMenu = false
 															},
@@ -461,7 +462,7 @@ fun CommentsScreen(
 													val intent = Intent(Intent.ACTION_SEND)
 													intent.putExtra(
 														Intent.EXTRA_TEXT,
-														"https://habr.com/p/${parentPostId}/comments/#comment_${it.id}"
+														"https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
 													)
 													intent.setType("text/plain")
 													context.startActivity(
@@ -472,15 +473,14 @@ fun CommentsScreen(
 													)
 												},
 												onReplyClick = {
-													answeringComment = it
+													answeringComment = comment
 													commentTextFieldFocusRequester.requestFocus()
 												},
 												onParentCommentSnippetClick = {
+													returnToCommentIndex = index
 													coroutineScope.launch(Dispatchers.Main) {
-														it.parentCommentId?.let {
-															screenState.scrollToComment(
-																it
-															)
+														comment.parentCommentId?.let {
+															screenState.scrollToComment(it)
 														}
 													}
 												},
@@ -488,7 +488,7 @@ fun CommentsScreen(
 												replyIconPainter = replyIconPainter
 											) {
 												Column {
-													it.let {
+													comment.let {
 														SelectionContainer {
 															((parseChildElements(
 																Jsoup.parse(it.message).body(),
