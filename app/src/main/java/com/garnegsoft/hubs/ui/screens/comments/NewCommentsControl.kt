@@ -57,8 +57,6 @@ fun NewCommentsControl(
 ) {
     Box(
         modifier = modifier
-            .pointerInput(Unit){}
-            .padding(8.dp)
 			.shadow(5.dp, shape = CircleShape)
 			.clip(CircleShape)
 			.border(1.dp, MaterialTheme.colors.onSurface.copy(0.1f), CircleShape)

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -589,6 +590,8 @@ fun CommentsScreen(
 			}
 			screenState.newCommentsNavigationControlState?.let {
 				Box(modifier = Modifier.align(Alignment.BottomCenter)
+					.pointerInput(Unit){}
+					.padding(start = 16.dp, top = 16.dp, end = 16.dp)
 					.padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
 				) {
 					

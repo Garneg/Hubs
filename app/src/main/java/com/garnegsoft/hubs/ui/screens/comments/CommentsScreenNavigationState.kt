@@ -126,10 +126,7 @@ class CommentsScreenNavigationState(
 		suspend fun scrollToNextComment() {
 			if (currentCommentIndex < commentsScreenState.newCommentsIds.lastIndex) {
 				currentCommentIndex++
-				commentsScreenState.scrollToComment(
-					commentsScreenState.newCommentsIds[currentCommentIndex],
-					0
-				)
+				scrollToCurrentComment()
 			} else {
 				scrollToFirst()
 			}
@@ -138,20 +135,13 @@ class CommentsScreenNavigationState(
 		suspend fun scrollToPreviousComment() {
 			if (currentCommentIndex > 0) {
 				currentCommentIndex--
-				commentsScreenState.scrollToComment(
-					commentsScreenState.newCommentsIds[currentCommentIndex],
-					0
-				)
 			} else {
 				currentCommentIndex = commentsScreenState.newCommentsIds.lastIndex
-				commentsScreenState.scrollToComment(
-					commentsScreenState.newCommentsIds[currentCommentIndex]
-				)
 			}
+			scrollToCurrentComment()
 		}
 		
 		suspend fun scrollToCurrentComment() {
-			currentCommentIndex = 0
 			commentsScreenState.scrollToComment(
 				commentsScreenState.newCommentsIds[currentCommentIndex],
 				0
@@ -165,10 +155,7 @@ class CommentsScreenNavigationState(
 		suspend fun scrollToFirst() {
 			showGoToNewCommentsLabel = false
 			currentCommentIndex = 0
-			commentsScreenState.scrollToComment(
-				commentsScreenState.newCommentsIds[currentCommentIndex],
-				0
-			)
+			scrollToCurrentComment()
 		}
 		
 	}
