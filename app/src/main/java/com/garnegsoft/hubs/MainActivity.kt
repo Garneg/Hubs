@@ -59,21 +59,6 @@ class MainActivity : ComponentActivity() {
 //			Log.e("fcm-token", it.result)
 //		}
 		
-		val workRequest = PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(
-			6, TimeUnit.HOURS
-		)
-			.setConstraints(
-				Constraints.Builder()
-					.setRequiredNetworkType(NetworkType.UNMETERED)
-					.setRequiresBatteryNotLow(true)
-					.build())
-			.build()
-		
-		WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-			"update_news_work",
-			ExistingPeriodicWorkPolicy.KEEP,
-			workRequest
-		)
 		
 		var authStatus: Boolean? by mutableStateOf(null)
 		

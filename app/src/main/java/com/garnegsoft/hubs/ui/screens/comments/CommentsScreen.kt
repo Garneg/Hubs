@@ -3,12 +3,12 @@ package com.garnegsoft.hubs.ui.screens.comments
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -45,6 +46,7 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
+import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
@@ -85,7 +87,6 @@ fun CommentsScreen(
 	showArticleSnippet: Boolean = true,
 	onBackClicked: () -> Unit,
 	onArticleClicked: () -> Unit,
-	onThreadClick: (threadId: Int) -> Unit,
 	onUserClicked: (alias: String) -> Unit,
 	onImageClick: (imageUrl: String) -> Unit
 ) {
@@ -96,7 +97,7 @@ fun CommentsScreen(
 	val lazyListState = rememberLazyListState()
 	
 	val screenState =
-		rememberCommentsScreenState(commentsList = commentsData, lazyListState = lazyListState)
+		rememberCommentsScreenNavigationState(commentsList = commentsData, lazyListState = lazyListState)
 	
 	
 	val context = LocalContext.current
@@ -293,10 +294,10 @@ fun CommentsScreen(
 				}
 			})
 		
-		Box {
+		Box(modifier = Modifier.padding(it).fillMaxSize()) {
 			Column(
 				modifier = Modifier
-					.padding(it)
+					
 					.imePadding()
 			) {
 				val articleCardStyle =
@@ -305,9 +306,6 @@ fun CommentsScreen(
 						showTextSnippet = false,
 						bookmarksButtonAllowedBeEnabled = articleSnippet?.relatedData != null
 					)
-				
-				val collapsedCommentsList by screenState.collapsedComments
-				val collapsedCommentsHeadersList by screenState.collapsedCommentsParents
 				
 				val ratingIconPainter = painterResource(id = R.drawable.rating)
 				val replyIconPainter = painterResource(id = R.drawable.reply)
@@ -405,8 +403,8 @@ fun CommentsScreen(
 							items = commentsData!!.comments,
 							key = { index, it -> it.id }
 						) { index, it ->
-							if (!collapsedCommentsList.contains(it.id)) {
-								if (collapsedCommentsHeadersList.contains(it.id)){
+							if (!screenState.collapsedComments.contains(it.id)) {
+								if (screenState.collapsedCommentsParents.contains(it.id)){
 									CollapsedThreadHeaderComment(
 										modifier = Modifier
 											.padding(start = 20.dp * it.level.coerceAtMost(5))
@@ -481,8 +479,7 @@ fun CommentsScreen(
 													coroutineScope.launch(Dispatchers.Main) {
 														it.parentCommentId?.let {
 															screenState.scrollToComment(
-																it,
-																-articleHeaderOffset
+																it
 															)
 														}
 													}
@@ -536,7 +533,8 @@ fun CommentsScreen(
 				
 				
 			}
-			
+			val articleHeaderOffsetAnimation by animateFloatAsState(targetValue =
+			if (showArticleHeader) 0f else 1f)
 			articleSnippet?.let {
 				Layout(
 					content = {
@@ -545,7 +543,7 @@ fun CommentsScreen(
 								modifier = Modifier
 									.clickable {
 										coroutineScope.launch {
-											lazyListState.animateScrollToItem(0)
+											lazyListState.animateShortScrollToItem(0)
 										}
 									}
 									.background(MaterialTheme.colors.surface)
@@ -583,13 +581,23 @@ fun CommentsScreen(
 				) { measurables, constraints ->
 					val placeables = measurables.map { it.measure(constraints) }
 					articleHeaderOffset = placeables.first().height
+					screenState.setScrollBaseOffset(-placeables.first().height)
 					layout(constraints.maxWidth, constraints.maxHeight) {
-						if (showArticleHeader) {
-							placeables.first().placeRelative(0, 0)
-						}
+						placeables.first().placeRelative(0, (-placeables.first().height * articleHeaderOffsetAnimation).toInt())
 					}
 				}
 				
+			}
+			screenState.newCommentsNavigationControlState?.let {
+				Box(modifier = Modifier.align(Alignment.BottomCenter)
+					.pointerInput(Unit){}
+					.padding(start = 16.dp, top = 16.dp, end = 16.dp)
+					.padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
+				) {
+					
+						NewCommentsControl(state = screenState.newCommentsNavigationControlState!!)
+					
+				}
 			}
 			
 		}

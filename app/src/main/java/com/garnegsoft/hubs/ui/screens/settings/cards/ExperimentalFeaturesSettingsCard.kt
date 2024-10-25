@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreenViewModel
-import com.garnegsoft.hubs.ui.screens.settings.noRipple
 import kotlinx.coroutines.launch
 
 

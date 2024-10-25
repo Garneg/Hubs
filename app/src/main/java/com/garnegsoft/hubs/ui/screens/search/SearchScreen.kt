@@ -2,6 +2,8 @@ package com.garnegsoft.hubs.ui.screens.search
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
@@ -21,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
@@ -183,18 +186,20 @@ fun SearchScreen(
 				}
 				AnimatedVisibility(
 					visible = showClearAllButton,
-					enter = slideInHorizontally { it },
-					exit = slideOutHorizontally { it }
+					enter = slideInHorizontally { it } + fadeIn(),
+					exit = slideOutHorizontally { it } + fadeOut()
 				) {
 					IconButton(
 						onClick = {
 							searchTextValue = ""
 							showClearAllButton = false
-						}) {
+						},
+						
+					) {
 						Icon(
 							tint = MaterialTheme.colors.secondary,
-							imageVector = Icons.Outlined.Close,
-							contentDescription = ""
+							imageVector = Icons.Outlined.Clear,
+							contentDescription = "clear input"
 						)
 					}
 				}

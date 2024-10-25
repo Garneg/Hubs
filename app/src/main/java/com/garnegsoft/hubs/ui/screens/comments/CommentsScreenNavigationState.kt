@@ -1,30 +1,42 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
+import androidx.compose.foundation.lazy.LazyListPrefetchStrategy
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import com.garnegsoft.hubs.api.comment.CommentsCollection
+import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 
 
-class CommentsScreenState(
+class CommentsScreenNavigationState(
 	val lazyListState: LazyListState,
 	val commentsCollection: CommentsCollection? // null indicates that comments are not loaded yet
 ) {
 	private val commentsIds: List<Int> = commentsCollection?.comments?.map { it.id } ?: emptyList()
 	
+	val newCommentsIds: List<Int> = commentsCollection?.comments?.filter { it.isNew }?.map { it.id } ?: emptyList()
+	
 	private val _collapsedComments: MutableState<List<Int>> = mutableStateOf(emptyList())
-	val collapsedComments: State<List<Int>> = _collapsedComments
+	val collapsedComments: List<Int> by _collapsedComments
 	
 	// Necessary for showing that thread were collapsed with special "header"
 	private val _collapsedCommentsParents: MutableState<List<Int>> = mutableStateOf(emptyList())
-	val collapsedCommentsParents: State<List<Int>> = _collapsedCommentsParents
+	val collapsedCommentsParents: List<Int> by _collapsedCommentsParents
 	
-	suspend fun scrollToComment(commentId: Int, offset: Int) {
-		lazyListState.animateScrollToItem(calculateIndexOfComment(commentId), offset)
+	fun setScrollBaseOffset(offset: Int) {
+		baseOffset = offset
+	}
+	
+	private var baseOffset: Int = 0
+	suspend fun scrollToComment(commentId: Int, offset: Int = 0) {
+		lazyListState.animateShortScrollToItem(calculateIndexOfComment(commentId), offset + baseOffset, teleportItemOffset = 2)
 	}
 	
 	fun collapseComment(commentId: Int) {
@@ -89,12 +101,70 @@ class CommentsScreenState(
 		_collapsedComments.value = _collapsedComments.value.filterNot { ids.contains(it) }
 	}
 	
+	
+	
+	var showNewCommentsNavigationControl: Boolean by mutableStateOf(false)
+	private var _newCommentsControlState: NewCommentsNavigationControlState? by mutableStateOf(null)
+	val newCommentsNavigationControlState: NewCommentsNavigationControlState? by derivedStateOf { _newCommentsControlState }
+	
+	init {
+		if (newCommentsIds.isNotEmpty()){
+			showNewCommentsNavigationControl = true
+			_newCommentsControlState = NewCommentsNavigationControlState(this)
+		}
+	}
+	class NewCommentsNavigationControlState(
+		val commentsScreenState: CommentsScreenNavigationState,
+		
+	) {
+		var showGoToNewCommentsLabel: Boolean by mutableStateOf(true)
+		private var currentCommentIndex: Int by mutableIntStateOf(0)
+		
+		val newCommentsAmount: Int = commentsScreenState.newCommentsIds.size
+		val currentCommentNumber: Int by derivedStateOf { currentCommentIndex + 1 }
+
+		suspend fun scrollToNextComment() {
+			if (currentCommentIndex < commentsScreenState.newCommentsIds.lastIndex) {
+				currentCommentIndex++
+				scrollToCurrentComment()
+			} else {
+				scrollToFirst()
+			}
+		}
+		
+		suspend fun scrollToPreviousComment() {
+			if (currentCommentIndex > 0) {
+				currentCommentIndex--
+			} else {
+				currentCommentIndex = commentsScreenState.newCommentsIds.lastIndex
+			}
+			scrollToCurrentComment()
+		}
+		
+		suspend fun scrollToCurrentComment() {
+			commentsScreenState.scrollToComment(
+				commentsScreenState.newCommentsIds[currentCommentIndex],
+				0
+			)
+		}
+		
+		/**
+		 * Scrolls to first of new comments.
+		 * Also sets _showGoToNewCommentsLabel_ to false, which triggers control to show counter and buttons
+		 */
+		suspend fun scrollToFirst() {
+			showGoToNewCommentsLabel = false
+			currentCommentIndex = 0
+			scrollToCurrentComment()
+		}
+		
+	}
 }
 
 @Composable
-fun rememberCommentsScreenState(
+fun rememberCommentsScreenNavigationState(
 	commentsList: CommentsCollection?,
 	lazyListState: LazyListState = rememberLazyListState()
-): CommentsScreenState {
-	return remember(commentsList) { CommentsScreenState(lazyListState, commentsList) }
+): CommentsScreenNavigationState {
+	return remember(commentsList) { CommentsScreenNavigationState(lazyListState, commentsList) }
 }
