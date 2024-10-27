@@ -36,10 +36,14 @@ import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
+import androidx.glance.text.TextAlign
+import androidx.glance.text.TextDefaults
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
+import androidx.work.Data
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.MainActivity
 import com.garnegsoft.hubs.MostReadingWidgetUpdateWorker
@@ -92,10 +96,11 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 									onClick = {
 										val intent =
 											Intent(context, MainActivity::class.java).apply {
-												data = Uri.parse("https://habr.com/p/${id}")
+												data = Uri.parse("hubs://article/${id}")
 //								`package` = BuildConfig.APPLICATION_ID
 //								addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-//								addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+								addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+												addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 											}
 										val pendingIntent = PendingIntent.getActivity(
 											context,
@@ -104,25 +109,32 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 											PendingIntent.FLAG_IMMUTABLE
 										)
 										pendingIntent.send()
-										
+
 										context.startActivity(intent)
 									}
 								)
 							}
 						}
-						if (BuildConfig.DEBUG) {
+
 							item {
 								val time = Calendar.getInstance().time
-								Text(
-									text = "Latest update: ${
-										SimpleDateFormat(
-											"HH:mm:ss",
-											Locale.US
-										).format(time)
-									}"
-								)
+								Box(
+									modifier = GlanceModifier.padding(2.dp)
+								) {
+									Text(
+										modifier = GlanceModifier.fillMaxWidth(),
+										text = "обновлено в ${
+											SimpleDateFormat(
+												"HH:mm",
+												Locale.US
+											).format(time)
+										}",
+										style = TextStyle(color = ColorProvider(TextDefaults.defaultTextColor.getColor(context).copy(0.5f)), fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
+									)
+								}
+
 							}
-						}
+
 					}
 					
 				
@@ -271,13 +283,16 @@ fun WidgetBar(modifier: GlanceModifier = GlanceModifier) {
 				modifier = GlanceModifier.fillMaxWidth(),
 				contentAlignment = Alignment.CenterEnd
 			) {
+
 				CircleIconButton(
 					modifier = GlanceModifier.size(38.dp),
 					imageProvider = ImageProvider(R.drawable.refresh),
 					contentDescription = null,
 					onClick = {
 						val updateRequest =
-							OneTimeWorkRequestBuilder<MostReadingWidgetUpdateWorker>().build()
+							OneTimeWorkRequestBuilder<MostReadingWidgetUpdateWorker>()
+								.setInputData(workDataOf("keepArticles" to false))
+								.build()
 						WorkManager.getInstance(context).enqueue(updateRequest)
 					})
 			}
