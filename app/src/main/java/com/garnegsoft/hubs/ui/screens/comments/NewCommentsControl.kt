@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,7 +10,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -28,19 +26,13 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.*
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -155,6 +147,6 @@ fun NewCommentsControl(
         previousCommentButtonClick = { coroutineScope.launch { state.scrollToPreviousComment() } },
         currentCommentButtonClick = { coroutineScope.launch { state.scrollToCurrentComment() } },
         onGoToNewCommentsLabelClick = { coroutineScope.launch { state.scrollToFirst() } },
-        showGoToNewCommentsLabel = state.showGoToNewCommentsLabel
+        showGoToNewCommentsLabel = state.showGoToNewCommentsButton
     )
 }
