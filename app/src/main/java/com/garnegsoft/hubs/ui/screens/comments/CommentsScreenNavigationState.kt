@@ -200,8 +200,10 @@ class CommentsScreenNavigationState(
         }
 
         suspend fun scrollToCurrentComment() {
+            val commentId = commentsScreenState.newCommentsIds[currentCommentIndex]
+            commentsScreenState.expandThread(commentId)
             commentsScreenState.scrollToComment(
-                commentsScreenState.newCommentsIds[currentCommentIndex],
+                commentId,
                 0
             )
         }
