@@ -5,6 +5,8 @@ import android.net.Uri
 import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
@@ -102,6 +104,9 @@ fun MainNavigationGraph(
 ) {
     val imageViewerState =
         rememberImageViewerState(offlineResourcesRootPath = parentActivity.filesDir.absolutePath + "/offline_resources/")
+
+
+
     NavHost(
         modifier = Modifier
             .statusBarsPadding()
@@ -302,7 +307,7 @@ fun MainNavigationGraph(
                     }
                 }
 
-                BackHandler(enabled = true) {
+                BackHandler(enabled = !imageViewerState.show) {
                     clearLastArticle()
                     if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
                         parentActivity.finish()
@@ -711,9 +716,9 @@ fun MainNavigationGraph(
                     it.surface
             })
     )
+
     ImageViewerScreenOverlay(
         state = imageViewerState
     )
-
 
 }

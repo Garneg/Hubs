@@ -118,7 +118,9 @@ fun NoInternetElement(
                             launch {
                                 lottieAnimatable.animate(
                                     noInternetAnimationComposition,
-                                    clipSpec = animationSegments[1]
+                                    clipSpec = animationSegments[1],
+                                    iterations = 1,
+                                    cancellationBehavior = LottieCancellationBehavior.OnIterationFinish
                                 )
                                 lottieAnimatable.animate(
                                     noInternetAnimationComposition,
@@ -134,8 +136,8 @@ fun NoInternetElement(
                                 lottieAnimatable.animate(
                                     noInternetAnimationComposition,
                                     clipSpec = animationSegments[3],
+                                    iterations = 1,
                                     cancellationBehavior = LottieCancellationBehavior.OnIterationFinish,
-                                    iterations = 1
                                 )
                             }
                             isRetryInProgress = false
