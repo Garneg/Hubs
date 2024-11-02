@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -51,7 +52,8 @@ fun HabrScrollableTabRow(
 					
 					)
 					.padding(horizontal = 8.dp)
-					.clip(CircleShape)
+					.clip(RoundedCornerShape(100, 100)),
+				height = 2.5.dp
 			)
 		},
 		contentColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.secondary else MaterialTheme.colors.primary
