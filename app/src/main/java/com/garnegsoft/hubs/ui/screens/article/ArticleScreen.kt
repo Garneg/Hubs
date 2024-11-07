@@ -2,6 +2,8 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
 import android.content.Intent
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeechService
 import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
 import androidx.compose.animation.core.animateDecay
@@ -35,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
@@ -48,6 +51,7 @@ import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.screens.article.tts.TtsTestDialog
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
@@ -102,7 +106,9 @@ fun ArticleScreen(
 	}
 	val articleSaved by viewModel.articleExists(LocalContext.current, articleId)
 		.collectAsState(false)
-	
+
+	var showTtsDialog by remember { mutableStateOf(false) }
+	TtsTestDialog(showTtsDialog, {showTtsDialog = false})
 	Scaffold(
 		topBar = {
 			TopAppBar(
@@ -140,6 +146,16 @@ fun ArticleScreen(
 						enabled = article != null
 					) {
 						Icon(Icons.Outlined.Share, contentDescription = "")
+					}
+
+					IconButton(
+						onClick = {
+							showTtsDialog = true
+
+						},
+						enabled = true
+					) {
+						Icon(painterResource(id = R.drawable.headphones), contentDescription = "text to speech")
 					}
 				})
 		},
