@@ -41,6 +41,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreenViewModel
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
 import java.util.Locale
 
 // TODO: REMOVE THIS GARBAGE ASAP
@@ -66,15 +67,17 @@ fun TtsTestDialog(
     var ttsCreatedSuccessfully by remember(ttsEnginePackage) { mutableStateOf(false) }
     LaunchedEffect(textToSpeech, ttsEnginePackage) {
         if (textToSpeech == null) {
-            textToSpeech = TextToSpeech(context, {
-                if (it == TextToSpeech.ERROR)
-                    textToSpeech = null
-                else {
-                    ttsCreatedSuccessfully = true
-                    textToSpeech!!.language = Locale("ru")
-                }
-            },
-                ttsEnginePackage)
+            textToSpeech = TextToSpeech(
+                context, {
+                    if (it == TextToSpeech.ERROR)
+                        textToSpeech = null
+                    else {
+                        ttsCreatedSuccessfully = true
+                        textToSpeech!!.language = Locale("ru")
+                    }
+                },
+                ttsEnginePackage
+            )
         }
         //val article = articleScreenViewModel.article.value
 
@@ -99,13 +102,13 @@ fun TtsTestDialog(
 
 
                 Column(
-
                     verticalArrangement = Arrangement.spacedBy(24.dp)
-
                 ) {
                     Text("Озвучка публикации", fontWeight = FontWeight.W700, fontSize = 24.sp)
                     Column(
-                        modifier = Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                        modifier = Modifier
+                            .weight(1f)
+                            .verticalScroll(rememberScrollState()),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Box(
@@ -128,20 +131,21 @@ fun TtsTestDialog(
                             verticalArrangement = Arrangement.spacedBy(8.dp),
                         ) {
 
-                                    ttsEnginesList.forEach {
-                                        Text(
-                                            modifier = Modifier.clip(RoundedCornerShape(12.dp))
-                                                .clickable {
-                                                    ttsEnginePackage = it.name
-                                                    textToSpeech?.stop()
-                                                }
-                                                .sizeIn(maxWidth = 200.dp)
-                                                .background(MaterialTheme.colors.secondary.copy(0.1f))
-                                                .padding(vertical = 8.dp, horizontal = 12.dp),
-                                            text = it.label,
-                                            fontWeight = if (ttsEnginePackage == it.name || (ttsEnginePackage == null && it.name == textToSpeech?.defaultEngine)) FontWeight.W500 else FontWeight.W400
-                                        )
-                                    }
+                            ttsEnginesList.forEach {
+                                Text(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .clickable {
+                                            ttsEnginePackage = it.name
+                                            textToSpeech?.stop()
+                                        }
+                                        .sizeIn(maxWidth = 200.dp)
+                                        .background(MaterialTheme.colors.secondary.copy(0.1f))
+                                        .padding(vertical = 8.dp, horizontal = 12.dp),
+                                    text = it.label,
+                                    fontWeight = if (ttsEnginePackage == it.name || (ttsEnginePackage == null && it.name == textToSpeech?.defaultEngine)) FontWeight.W500 else FontWeight.W400
+                                )
+                            }
 
                         }
                         Text("Голоса:", fontWeight = FontWeight.W500, fontSize = 18.sp)
@@ -149,19 +153,21 @@ fun TtsTestDialog(
 
                             textToSpeech?.let { tts ->
                                 var voiceSelected by remember { mutableStateOf(tts.voice.name) }
-                                tts.voices.filter { it.locale.language == Locale("ru").language }.forEach {
-                                    Text(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .clickable {
-                                                textToSpeech?.setVoice(it)
-                                            voiceSelected = it.name}
-                                            .background(MaterialTheme.colors.secondary.copy(0.1f))
-                                            .padding(vertical = 2.dp, horizontal = 8.dp),
-                                        text = it.name,
-                                        fontWeight = if (voiceSelected == it.name) FontWeight.W500 else FontWeight.W400
-                                    )
-                                }
+                                tts.voices.filter { it.locale.language == Locale("ru").language }
+                                    .forEach {
+                                        Text(
+                                            modifier = Modifier
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .clickable {
+                                                    textToSpeech?.setVoice(it)
+                                                    voiceSelected = it.name
+                                                }
+                                                .background(MaterialTheme.colors.secondary.copy(0.1f))
+                                                .padding(vertical = 2.dp, horizontal = 8.dp),
+                                            text = it.name,
+                                            fontWeight = if (voiceSelected == it.name) FontWeight.W500 else FontWeight.W400
+                                        )
+                                    }
                             }
                         }
 
@@ -196,6 +202,7 @@ fun TtsTestDialog(
                             enabled = ttsCreatedSuccessfully
                         ) {
                             Text("Стоп")
+                            ArticleContentSplitter.breakIntoPieces(Element("p"))
                         }
                     }
 
