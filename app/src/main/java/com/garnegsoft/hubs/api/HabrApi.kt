@@ -43,11 +43,18 @@ class HabrApi {
                         .build()
                     it.proceed(req)
                 })
+                .addInterceptor {
+                    if (it.request().method != "GET"){
+                        HttpClient.cache?.evictAll()
+                    }
+                    it.proceed(it.request())
+                }
                 .addInterceptor(NoConnectionInterceptor(context))
                 .addInterceptor {
                     Firebase.crashlytics.log("HABRAPI ${it.request().method} url:${it.request().url} requestBody:${it.request().body}")
                     it.proceed(it.request())
                 }
+
                 .build()
 
         }
@@ -112,6 +119,7 @@ class HabrApi {
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
+
             try {
                 return HttpClient.newCall(request).execute()
             } catch (ex: Exception) {
