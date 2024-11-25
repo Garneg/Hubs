@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,16 +23,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.LinkInteractionListener
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.company.Company
+import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
@@ -37,6 +46,7 @@ import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.common.commonTextLinkStyles
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
@@ -44,6 +54,7 @@ import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -80,8 +91,7 @@ internal fun UserProfile(
 								.fillMaxWidth()
 								.padding(12.dp)
 						) {
-							if (user.avatarUrl != null) {
-								AsyncImage(
+							AsyncImage(
 									model = user.avatarUrl,
 									modifier = Modifier
 										.size(65.dp)
@@ -92,23 +102,6 @@ internal fun UserProfile(
 										.background(Color.White),
 									contentDescription = ""
 								)
-							} else {
-								Icon(
-									modifier = Modifier
-										.size(65.dp)
-										.background(Color.White, shape = RoundedCornerShape(12.dp))
-										.border(
-											width = 4.dp,
-											color = placeholderColorLegacy(user.alias),
-											shape = RoundedCornerShape(12.dp)
-										)
-										.align(Alignment.Center)
-										.padding(5.dp),
-									painter = painterResource(id = R.drawable.user_avatar_placeholder),
-									contentDescription = "",
-									tint = placeholderColorLegacy(user.alias)
-								)
-							}
 						}
 						Box(modifier = Modifier.fillMaxWidth()) {
 							if (user.fullname != null)
@@ -253,6 +246,8 @@ internal fun UserProfile(
 						}
 						
 					}
+
+
 					val note by viewModel.note.observeAsState()
 					if (!isAppUser && note?.text != null) {
 						Column(
@@ -357,48 +352,43 @@ internal fun UserProfile(
 											}
 										}
 										
-										whoIs.invite?.let {
+										whoIs.invite?.let { invite ->
 											TitledColumn(title = "Приглашен") {
 												val context = LocalContext.current
-												ClickableText(
+												val textLinkStyles = commonTextLinkStyles()
+												Text(
 													text = remember {
 														buildAnnotatedString {
-															append("${it.inviteDate} по приглашению от ")
-															if (it.inviterAlias != null) {
-																withStyle(
-																	SpanStyle(
-																		color = Color(
-																			88,
-																			132,
-																			185
-																		)
-																	)
-																) {
-																	append("@${it.inviterAlias}")
+															append("${invite.inviteDate} по приглашению от ")
+															if (invite.inviterAlias != null) {
+																withLink(LinkAnnotation.Url(
+																	url = "https://habr.com/ru/users/$invite",
+																	styles = textLinkStyles,
+																	linkInteractionListener = {
+																			val intent = Intent(
+																				Intent.ACTION_VIEW,
+																				Uri.parse("https://habr.com/ru/users/$it")
+																			).apply {
+																				setPackage(BuildConfig.APPLICATION_ID)
+																			}
+																			context.startActivity(
+																				Intent.createChooser(
+																					intent,
+																					null
+																				)
+																			)
+																	}
+																)){
+																	append("@${invite.inviterAlias}")
 																}
+
 															} else {
 																append("НЛО")
 															}
 														}
 													},
 													style = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
-													onClick = { letterIndex ->
-														it.inviterAlias?.let {
-															val intent = Intent(
-																Intent.ACTION_VIEW,
-																Uri.parse("https://habr.com/ru/users/$it")
-															).apply {
-																setPackage(BuildConfig.APPLICATION_ID)
-															}
-															context.startActivity(
-																Intent.createChooser(
-																	intent,
-																	null
-																)
-															)
-															
-														}
-													})
+													)
 											}
 										}
 										
@@ -548,10 +538,17 @@ internal fun UserProfile(
 									TitledColumn(title = "Работает в") {
 										Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
 											user.workPlaces.forEach {
+												var company by remember{ mutableStateOf<Company?>(null) }
+												LaunchedEffect(Unit) {
+													if (company == null) withContext(Dispatchers.IO) {
+															company = CompanyController.get(it.alias)
+														}
+
+												}
 												Row(
 													modifier = Modifier
 														.fillMaxWidth()
-														.clip(RoundedCornerShape(8.dp))
+														.clip(RoundedCornerShape(4.dp))
 														.background(
 															MaterialTheme.colors.onSurface.copy(
 																0.04f
@@ -563,6 +560,14 @@ internal fun UserProfile(
 														.padding(12.dp),
 													verticalAlignment = Alignment.CenterVertically
 												) {
+													AsyncImage(
+														modifier = Modifier.size(24.dp).clip(
+															RoundedCornerShape(8.dp)
+														),
+														model = company?.avatarUrl,
+														contentDescription = null
+													)
+													Spacer(modifier = Modifier.width(12.dp))
 													Text(it.title)
 												}
 											}

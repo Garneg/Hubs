@@ -20,7 +20,6 @@ import kotlin.math.absoluteValue
 /**
  * @param onCurrentPositionTabClick - calls when page that tab is associated with click is already current pager page
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HabrScrollableTabRow(
 	pagerState: PagerState,
