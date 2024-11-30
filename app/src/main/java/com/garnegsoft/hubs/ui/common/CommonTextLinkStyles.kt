@@ -16,7 +16,7 @@ private val basicSpanStyle = SpanStyle(
 
 @Composable
 fun commonTextLinkStyles(): TextLinkStyles {
-    val pressedStyleBackgroundColor = MaterialTheme.colors.onSurface
+    val pressedStyleBackgroundColor = if (MaterialTheme.colors.isLight) TextLinkColor else MaterialTheme.colors.onSurface
     return remember {
         TextLinkStyles(
             style = basicSpanStyle,
