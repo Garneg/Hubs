@@ -349,9 +349,10 @@ fun ArticleContent(
 				if (article.polls.size > 0) {
 					item {
 						Divider(modifier = Modifier.padding(vertical = 24.dp))
+						ArticleTitledColumn(title = if (article.polls.size > 1) "Опросы" else "Опрос") { }
 					}
 				}
-				items(items = article.polls) { originalPoll ->
+				itemsIndexed(items = article.polls) { index, originalPoll ->
 					val poll =
 						updatedPolls?.find { originalPoll.id == it.id } ?: originalPoll
 					Poll(
@@ -360,19 +361,15 @@ fun ArticleContent(
 							viewModel.vote(poll.id, variants)
 						},
 						onPass = {})
+					if (article.polls.lastIndex != index) {
+						Spacer(Modifier.height(48.dp))
+					}
 				}
 				item {
 					DisableSelection {
 						Divider(modifier = Modifier.padding(vertical = 24.dp))
 						// Hubs
-						TitledColumn(
-							title = "Хабы",
-							titleStyle = MaterialTheme.typography.subtitle2.copy(
-								color = MaterialTheme.colors.onBackground.copy(
-									0.5f
-								)
-							)
-						) {
+						ArticleTitledColumn(title = "Хабы") {
 							FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
 								article.hubs.forEach {
 									HubChip(
@@ -392,16 +389,9 @@ fun ArticleContent(
 				article.author?.let { author ->
 					item {
 						Divider(modifier = Modifier.padding(vertical = 24.dp))
+
 						DisableSelection {
-							TitledColumn(
-								title = "Автор",
-								titleStyle = MaterialTheme.typography.subtitle2.copy(
-									color = MaterialTheme.colors.onBackground.copy(
-										0.5f
-									)
-								)
-							) {
-								
+							ArticleTitledColumn(title = "Автор") {
 								ArticleAuthorElement(
 									onClick = { onAuthorClicked() },
 									userAvatarUrl = author.avatarUrl!!,
@@ -417,13 +407,8 @@ fun ArticleContent(
 				item {
 					if (viewModel.mostReadingArticles.isInitialized) {
 						Divider(modifier = Modifier.padding(vertical = 24.dp))
-						TitledColumn(
+						ArticleTitledColumn(
 							title = "Читают сейчас",
-							titleStyle = MaterialTheme.typography.subtitle2.copy(
-								color = MaterialTheme.colors.onBackground.copy(
-									0.5f
-								)
-							),
 							verticalArrangement = Arrangement.spacedBy(8.dp)
 						) {
 							var readMoreMode by remember { mutableStateOf(ReadMoreMode.MostReading) }

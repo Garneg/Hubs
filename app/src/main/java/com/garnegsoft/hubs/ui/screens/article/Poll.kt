@@ -39,7 +39,7 @@ fun Poll(
 	}
 	
 	Column(
-		verticalArrangement = Arrangement.spacedBy(16.dp),
+		verticalArrangement = Arrangement.spacedBy(12.dp),
 		modifier = Modifier.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background)
 	) {
 		Text(
