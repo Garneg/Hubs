@@ -68,7 +68,7 @@ class HabrApi {
             path: String,
             args: Map<String, String>? = null, version: Int = 2,
             cacheControl: CacheControl = CacheControl.Builder()
-                .maxStale(1, TimeUnit.MINUTES)
+                .maxStale(3, TimeUnit.MINUTES)
                 .build()
         ): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
