@@ -19,39 +19,36 @@ fun BaseFilterDialog(
     title: String = "Фильтр",
     content: @Composable () -> Unit,
 ) {
-    Dialog(
-        properties = DialogProperties(true, true),
-        onDismissRequest = onDismiss
+    BaseTitledDialog(
+        onDismiss = onDismiss,
+        dialogProperties = DialogProperties(true, true),
+        title = title
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(26.dp))
-                .background(MaterialTheme.colors.surface)
-                .padding(24.dp)
-        ) {
-            Column(modifier = Modifier.height(IntrinsicSize.Min)) {
-                Text(
-                    text = title,
-                    color = MaterialTheme.colors.onSurface,
-                    style = MaterialTheme.typography.subtitle1
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                Box(modifier = Modifier.weight(1f)) {
-                    content()
+        Column(modifier = Modifier.height(IntrinsicSize.Min)) {
+            Box(modifier = Modifier.weight(1f)) {
+                content()
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text(text = "Отмена")
                 }
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = onDone,
+                    elevation = null,
+                    //colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary, contentColor = MaterialTheme.colors.surface)
                 ) {
-                    TextButton(onClick = onDone) {
-                        Text(text = "Применить")
-                    }
+                    Text(text = "Применить")
                 }
             }
         }
     }
+
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
