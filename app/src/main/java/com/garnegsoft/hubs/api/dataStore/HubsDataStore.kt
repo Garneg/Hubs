@@ -62,18 +62,16 @@ object HubsDataStore {
 			val TitleFontSize = DataStorePreference.FloatPreference("article_card_title_font_size", 20f)
 			val TextSnippetMaxLines = DataStorePreference.IntPreference("article_card_snippet_max_lines", 4)
 		}
-		
-		object CommentsDisplayMode : DataStorePreference<Int> {
-			
-			override val key = intPreferencesKey("comment_display_mode")
-			
-			override val defaultValue = CommentsDisplayModes.Default.ordinal
-			
-			enum class CommentsDisplayModes {
-				Default,
-				Threads,
-			}
-		}
+
+	}
+
+	/**
+	 * Every preferences in this data store represents various flags related to dialogs that shows
+	 * at some place in the app (usually at start)
+	 */
+	object DialogFlags : SingleDataStore(name = "dialog_flags") {
+		val showSetOpenUrlByDefault = DataStorePreference.BooleanPreference("show_set_open_url_by_default", true)
+
 	}
 	
 	object Auth : SingleDataStore(name = "auth") {

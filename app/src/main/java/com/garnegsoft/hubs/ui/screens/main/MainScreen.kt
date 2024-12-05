@@ -4,30 +4,28 @@ package com.garnegsoft.hubs.ui.screens.main
 import ArticleController
 import android.content.Context
 import android.net.ConnectivityManager
-import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.*
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.FilterSavingController
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
+import com.garnegsoft.hubs.api.utils.checkAppCanOpenLinks
 import com.garnegsoft.hubs.ui.common.*
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
@@ -63,6 +61,42 @@ fun MainScreen(
             isAuthorized = it
         }
     })
+
+
+    // TODO: Move it to its own file so it won't bother when refactoring main screen 
+    // Kinda ugly, isn't it? Have to come up with something better next time when building things
+    val showSetOpenUrlByDefaultDialogPreference by HubsDataStore.DialogFlags.getValueFlow(
+        context,
+        HubsDataStore.DialogFlags.showSetOpenUrlByDefault
+    ).collectAsState(null)
+
+    // allows/disallows launched effect check values and show dialog (works as cache)
+    var setOpenByDefaultDialogShown by rememberSaveable { mutableStateOf(false) }
+
+    // actually shows dialog
+    var showSetOpenByDefaultDialog by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(showSetOpenUrlByDefaultDialogPreference) {
+        if (!setOpenByDefaultDialogShown && showSetOpenUrlByDefaultDialogPreference == true && !checkAppCanOpenLinks(context)) {
+            showSetOpenByDefaultDialog = true
+            setOpenByDefaultDialogShown = true
+        }
+    }
+
+    if (showSetOpenByDefaultDialog) {
+        HandleUrlByDefaultAdviceDialog(
+            onDismissRequest = {
+                showSetOpenByDefaultDialog = false
+            },
+            onNeverShowAgain = {
+                showSetOpenByDefaultDialog = false
+                coroutineScope.launch {
+                    HubsDataStore.DialogFlags.edit(context, HubsDataStore.DialogFlags.showSetOpenUrlByDefault, false)
+                }
+            },
+            onRedirectedToSettings = {
+                showSetOpenByDefaultDialog = false
+            })
+    }
 
     val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
         // todo: Replace runblocking with something better as it probably slows down initialization of main screen
