@@ -46,6 +46,7 @@ import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.list.CommentsListController
+import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
@@ -101,6 +102,8 @@ fun CommentsScreen(
 	
 	
 	val context = LocalContext.current
+
+	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
 
 	var returnToCommentOffset by remember { mutableStateOf<Int?>(null) }
 	var returnToCommentIndex by remember { mutableStateOf<Int?>(null) }
@@ -305,7 +308,7 @@ fun CommentsScreen(
 					ArticleCardStyle.defaultArticleCardStyle()?.copy(
 						showImage = false,
 						showTextSnippet = false,
-						bookmarksButtonAllowedBeEnabled = articleSnippet?.relatedData != null
+						bookmarksButtonAllowedBeEnabled = userAuthenticated
 					)
 				
 				val ratingIconPainter = painterResource(id = R.drawable.rating)
