@@ -42,6 +42,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModelStoreOwner
@@ -343,7 +344,7 @@ fun SearchScreen(
 						
 						Box(
 							modifier = Modifier.padding(top = with(LocalDensity.current) {
-								this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
+								(this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp).coerceAtLeast(0.dp) // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
 							})
 						) {
 							TitledColumn(
