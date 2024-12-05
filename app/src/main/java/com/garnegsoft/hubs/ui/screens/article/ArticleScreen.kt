@@ -40,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.PostType
+import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.history.HistoryController
@@ -72,6 +73,7 @@ fun ArticleScreen(
 	viewModelStoreOwner: ViewModelStoreOwner
 ) {
 	val context = LocalContext.current
+	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
 	val fontSize by HubsDataStore.Settings
 		.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
 		.collectAsState(
@@ -232,7 +234,7 @@ fun ArticleScreen(
 							.weight(1f)
 							.fillMaxHeight()
 							.clickable(
-								enabled = article.relatedData != null
+								enabled = userAuthenticated
 							) {
 								article.relatedData?.let {
 									favoriteCoroutineScope.launch(Dispatchers.IO) {
