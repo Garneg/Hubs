@@ -3,15 +3,19 @@ package com.garnegsoft.hubs.ui.common.snippetsPages
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.article.ArticlesListModel
+import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
@@ -31,7 +35,9 @@ fun ArticlesListPage(
 	doInitialLoading: Boolean = true,
 	ignoreBlackList: Boolean = false
 ) {
-	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
+	val context = LocalContext.current
+	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
+	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()?.copy(bookmarksButtonAllowedBeEnabled = userAuthenticated)
 	val ratingIconPainter = painterResource(id = R.drawable.rating)
 	val viewsIconPainter = painterResource(id = R.drawable.views_icon)
 	val bookmarkIconPainter = painterResource(id = R.drawable.bookmark)
@@ -97,7 +103,9 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	ignoreBlackList: Boolean = false,
 	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
 ) {
-	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
+	val context = LocalContext.current
+	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
+	val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()?.copy(bookmarksButtonAllowedBeEnabled = userAuthenticated)
 	val ratingIconPainter = painterResource(id = R.drawable.rating)
 	val viewsIconPainter = painterResource(id = R.drawable.views_icon)
 	val bookmarkIconPainter = painterResource(id = R.drawable.bookmark)
