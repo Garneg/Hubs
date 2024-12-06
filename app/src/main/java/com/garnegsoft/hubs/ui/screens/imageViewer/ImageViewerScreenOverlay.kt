@@ -79,7 +79,7 @@ fun ImageViewerScreenOverlay(
 	AnimatedVisibility(
 		modifier = Modifier.fillMaxSize(),
 		visible = state.show,
-		enter = fadeIn() + scaleIn(initialScale = 0.9f),
+		enter = fadeIn() + scaleIn(initialScale = 1.1f),
 		exit = fadeOut(),
 
 	) {
