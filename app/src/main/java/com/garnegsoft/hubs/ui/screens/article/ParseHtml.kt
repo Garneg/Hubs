@@ -515,18 +515,19 @@ fun parseElement(
 				
 				AndroidView(modifier = Modifier
 					.fillMaxWidth()
+
 					.aspectRatio(16f / 9f)
 					.padding(vertical = 4.dp)
 					.clip(RoundedCornerShape(4.dp)),
-					factory = {
-						WebView(it).apply {
-							
-							this.settings.javaScriptEnabled = true
-							this.settings.databaseEnabled = true
-							isFocusable = true
-							isLongClickable = true
-							loadUrl(element.attr("data-src"))
-						}
+					factory = { context ->
+						WebView(context)
+					},
+					update = { webView ->
+						webView.settings.javaScriptEnabled = true
+						webView.settings.databaseEnabled = true
+						webView.isFocusable = true
+						webView.isLongClickable = true
+						webView.loadUrl(element.attr("data-src"))
 					})
 			}
 		else
