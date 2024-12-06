@@ -125,7 +125,7 @@ fun ImageViewerScreenOverlay(
 							var lastValue = 0f
 							AnimationState(
 								initialValue = 0f,
-								initialVelocity = it * 0.75f
+								initialVelocity = it * 1.2f
 							).animateDecay(splineBasedDecay) {
 								offset += value - lastValue
 								lastValue = value
