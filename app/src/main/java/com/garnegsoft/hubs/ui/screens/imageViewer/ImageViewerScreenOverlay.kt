@@ -101,6 +101,7 @@ fun ImageViewerScreenOverlay(
 			zoomSpec = ZoomSpec(maxZoomFactor = 3f, preventOverOrUnderZoom = false)
 		)
 
+
 		val zoomableImageState = rememberZoomableImageState(zoomableState = zoomableState)
 
 		val animatedOffset by animateFloatAsState(
@@ -114,7 +115,7 @@ fun ImageViewerScreenOverlay(
 			.draggable(
 				state = draggableState,
 				orientation = Orientation.Vertical,
-				enabled = true,
+				enabled = zoomableState.zoomFraction?.let { it < 0.1f } ?: true,
 				onDragStarted = {
 					isDragging = true
 				},
