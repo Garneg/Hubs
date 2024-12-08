@@ -89,6 +89,7 @@ import com.garnegsoft.hubs.ui.screens.search.SearchScreen
 import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.FeedSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
+import com.garnegsoft.hubs.ui.screens.subscriptions.SubscriptionManagementScreen
 import com.garnegsoft.hubs.ui.screens.user.LogoutConfirmDialog
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
@@ -123,7 +124,10 @@ fun MainNavigationGraph(
 
                 MainScreen(
                     viewModelStoreOwner = it,
-                    onSearchClicked = { navController.navigate("search") },
+                    onSearchClicked = {
+//                        navController.navigate("search")
+                        navController.navigate("subscriptionManagement")
+                    },
                     onArticleClicked = {
                         navController.navigate("article/$it")
                     },
@@ -701,6 +705,17 @@ fun MainNavigationGraph(
                     onArticleClick = { navController.navigate("article/$it") },
                     onUserClick = { navController.navigate("user/$it") },
                     onHubClick = { navController.navigate("hub/$it") },
+                    onCompanyClick = { navController.navigate("company/$it") }
+                )
+            }
+
+            composable(
+                route = "subscriptionManagement"
+            ) {
+                SubscriptionManagementScreen(
+                    onBack = { navController.popBackStack() },
+                    onHubClick = { navController.navigate("hub/$it") },
+                    onUserClick = { navController.navigate("user/$it") },
                     onCompanyClick = { navController.navigate("company/$it") }
                 )
             }

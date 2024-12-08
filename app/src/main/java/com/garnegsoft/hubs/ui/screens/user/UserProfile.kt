@@ -548,7 +548,7 @@ internal fun UserProfile(
 												Row(
 													modifier = Modifier
 														.fillMaxWidth()
-														.clip(RoundedCornerShape(4.dp))
+														.clip(RoundedCornerShape(8.dp))
 														.background(
 															MaterialTheme.colors.onSurface.copy(
 																0.04f
@@ -562,7 +562,7 @@ internal fun UserProfile(
 												) {
 													AsyncImage(
 														modifier = Modifier.size(24.dp).clip(
-															RoundedCornerShape(8.dp)
+															RoundedCornerShape(4.dp)
 														),
 														model = company?.avatarUrl,
 														contentDescription = null
