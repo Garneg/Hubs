@@ -8,8 +8,10 @@ import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.company.list.CompaniesListController
 import com.garnegsoft.hubs.api.company.list.CompanySnippet
+import com.garnegsoft.hubs.api.hub.HubController
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
+import com.garnegsoft.hubs.api.user.UserController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import kotlinx.coroutines.Dispatchers
@@ -42,8 +44,8 @@ class SubscriptionsManagementScreenViewModel : ViewModel() {
     val authors: LiveData<HabrList<UserSnippet>?> get() = _authors
 
     // TODO: Implement blacklisted users list at UsersListController
-    private val _blacklisted = MutableLiveData<HabrList<UserSnippet>?>()
-    val blacklisted: LiveData<HabrList<UserSnippet>?> get() = _blacklisted
+    private val _blocklisted = MutableLiveData<List<UsersListController.BlockedUser>?>()
+    val blocklisted: LiveData<List<UsersListController.BlockedUser>?> get() = _blocklisted
 
     fun loadData(userAlias: String) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -84,13 +86,27 @@ class SubscriptionsManagementScreenViewModel : ViewModel() {
                 )
             )
 
-            _companies.postValue(CompaniesListController.get("users/$userAlias/subscriptions/companies"))
+            _companies.postValue(
+                CompaniesListController.get("users/$userAlias/subscriptions/companies")
+            )
+
             _authors.postValue(
                 UsersListController.get(
                     "users/$userAlias/followed",
                     mapOf("perPage" to "100")
                 )
             )
+
+            _blocklisted.postValue(UsersListController.getListOfBlockedByUser(perPage = 100))
         }
     }
+
+    fun toggleHubSubscription(alias: String): Boolean = HubController.subscription(alias)
+
+    fun toggleUserSubscription(alias: String): Boolean = UserController.subscription(alias)
+
+    fun toggleCompanySubscription(alias: String): Boolean = CompanyController.subscription(alias)
+
+    fun toggleUserBlocklist(alias: String): Boolean = UserController.blockListToggle(alias)
+
 }

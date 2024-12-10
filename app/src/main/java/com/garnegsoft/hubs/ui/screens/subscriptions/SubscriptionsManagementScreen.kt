@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -21,6 +22,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.Text
+import androidx.compose.material.TriStateCheckbox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -37,7 +39,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
+import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 
 
@@ -63,7 +67,7 @@ fun SubscriptionManagementScreen(
 
     val companies by viewModel.companies.observeAsState()
     val authors by viewModel.authors.observeAsState()
-
+    val blocklisted by viewModel.blocklisted.observeAsState()
 
     val lazyListState = rememberLazyListState()
 
@@ -97,20 +101,12 @@ fun SubscriptionManagementScreen(
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(8.dp),
+                contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 state = lazyListState
             ) {
 
-                stickyHeader {
-                    Text(
-                        modifier = Modifier
-                            .background(MaterialTheme.colors.surface.copy(0.5f)).padding(vertical = 16.dp),
-                        text = "Хабы",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.W600
-                    )
-                }
+                commonSubscriptionsHeader("Хабы")
 
                 developHubs?.let {
                     hubSection(
@@ -160,8 +156,70 @@ fun SubscriptionManagementScreen(
                     )
                 }
 
+
+                companies?.let {
+                    commonSubscriptionsHeader("Компании")
+
+                    items(
+                        items = it.list
+                    ) {
+                        CompanyCard(
+                            company = it,
+                            onClick = { onCompanyClick(it.alias) }
+                        )
+                    }
+                }
+
+                authors?.let {
+                    commonSubscriptionsHeader("Авторы")
+
+                    items(
+                        items = it.list
+                    ) {
+                        UserCard(
+                            user = it,
+                            onClick = { onUserClick(it.alias) }
+                        )
+                    }
+                }
+
+                blocklisted?.let {
+                    commonSubscriptionsHeader("Заблокированные авторы")
+
+                    items(
+                        items = it
+                    ) {
+                        BlockedUserCard(
+                            user = it,
+                            onClick = { onUserClick(it.alias)}
+                        ) {
+
+                            Text(text = "penis")
+                        }
+                    }
+
+                }
+
             }
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.commonSubscriptionsHeader(
+    headerTitle: String
+) {
+    item {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                //.background(MaterialTheme.colors.surface.copy(0.9f))
+
+                .padding(start = 8.dp, top = 16.dp, bottom = 0.dp),
+            text = headerTitle,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.W600
+        )
     }
 }
 
@@ -174,8 +232,10 @@ private fun LazyListScope.hubSection(
 ) {
     item {
         Text(
-            modifier = Modifier.padding(vertical = 8.dp),
+            modifier = Modifier.padding(top = 4.dp)
+                .padding(start = 8.dp),
             text = sectionTitle,
+            color = MaterialTheme.colors.onBackground.copy(0.5f),
             fontSize = 18.sp,
             fontWeight = FontWeight.W500
         )

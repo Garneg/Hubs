@@ -710,7 +710,11 @@ fun MainNavigationGraph(
             }
 
             composable(
-                route = "subscriptionManagement"
+                route = "subscriptionManagement",
+                enterTransition = Transitions.GenericTransitions.enterTransition,
+                exitTransition = Transitions.GenericTransitions.exitTransition,
+                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
+                popExitTransition = Transitions.GenericTransitions.popExitTransition
             ) {
                 SubscriptionManagementScreen(
                     onBack = { navController.popBackStack() },

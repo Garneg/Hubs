@@ -42,7 +42,7 @@ data class UserCardStyle(
 )
 
 @Composable
-private fun defaultUserCardStyle(): UserCardStyle {
+fun defaultUserCardStyle(): UserCardStyle {
     return UserCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
         specialityTextStyle = TextStyle(color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
@@ -51,12 +51,16 @@ private fun defaultUserCardStyle(): UserCardStyle {
 
 @Composable
 fun UserCard(
-	user: UserSnippet,
-	style: UserCardStyle = defaultUserCardStyle(),
-	indicator: @Composable () -> Unit = {
-        Text(text = user.rating.toString(), fontWeight = FontWeight.W400, color = DefaultRatingIndicatorColor)
+    user: UserSnippet,
+    style: UserCardStyle = defaultUserCardStyle(),
+    indicator: @Composable () -> Unit = {
+        Text(
+            text = user.rating.toString(),
+            fontWeight = FontWeight.W400,
+            color = DefaultRatingIndicatorColor
+        )
     },
-	onClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -68,28 +72,14 @@ fun UserCard(
             .padding(style.padding),
         verticalAlignment = if (style.showSpeciality && user.speciality != null) Alignment.Top else Alignment.CenterVertically
     ) {
-        if (user.avatarUrl != null) {
-            AsyncImage(
-                modifier = Modifier
-                    .size(size = style.avatarSize)
-                    .clip(shape = style.avatarShape)
-                    .background(Color.White, shape = style.avatarShape),
-                model = user.avatarUrl,
-                contentDescription = ""
-            )
-        } else {
-            Icon(
-                modifier = Modifier
-                    .size(style.avatarSize)
-                    .background(Color.White, shape = style.avatarShape)
-                    .border(2.3.dp, color = placeholderColorLegacy(user.alias), shape = style.avatarShape)
-                    .padding(3.dp),
-                painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                contentDescription = "",
-                tint = placeholderColorLegacy(user.alias)
-            )
-
-        }
+        AsyncImage(
+            modifier = Modifier
+                .size(size = style.avatarSize)
+                .clip(shape = style.avatarShape)
+                .background(Color.White, shape = style.avatarShape),
+            model = user.avatarUrl,
+            contentDescription = ""
+        )
         Spacer(modifier = Modifier.width(style.padding.calculateStartPadding(LayoutDirection.Ltr)))
         Column(modifier = Modifier.weight(1f)) {
 
@@ -108,8 +98,7 @@ fun UserCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-            }
-            else {
+            } else {
                 Text(
                     modifier = Modifier.offset(0.dp, 0.dp),
                     text = user.alias,
@@ -117,7 +106,12 @@ fun UserCard(
                 )
             }
         }
-        Box(modifier = Modifier.padding(start = 4.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .padding(start = 4.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
             indicator()
 
         }
