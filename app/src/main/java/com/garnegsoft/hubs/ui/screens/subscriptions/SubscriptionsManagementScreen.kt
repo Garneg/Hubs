@@ -91,7 +91,8 @@ fun SubscriptionManagementScreen(
                             contentDescription = null
                         )
                     }
-                }
+                },
+                elevation = 0.dp
             )
         }
     ) {
@@ -178,7 +179,10 @@ fun SubscriptionManagementScreen(
                     ) {
                         UserCard(
                             user = it,
-                            onClick = { onUserClick(it.alias) }
+                            onClick = { onUserClick(it.alias) },
+                            indicator = {
+                                Text(text = "test")
+                            }
                         )
                     }
                 }
@@ -194,7 +198,7 @@ fun SubscriptionManagementScreen(
                             onClick = { onUserClick(it.alias)}
                         ) {
 
-                            Text(text = "penis")
+                            Text(text = "test")
                         }
                     }
 
