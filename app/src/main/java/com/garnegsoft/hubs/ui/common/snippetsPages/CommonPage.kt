@@ -120,13 +120,7 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	filter: (@Composable (onClick: () -> Unit) -> Unit) = { onClick ->
 		listModel.filter.observeAsState().value?.let {
-			val corscop = rememberCoroutineScope()
-			FilterElement(title = it.getTitle(), onClick = {
-				corscop.launch {
-					collapsingContentState.animateShow()
-				}
-				onClick()
-			})
+			FilterElement(title = it.getTitle(), onClick = onClick)
 		}
 	},
 	doInitialLoading: Boolean = true,
@@ -149,13 +143,16 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 			}
 		)
 	}
-	
+	val coroutineScope = rememberCoroutineScope()
 	CommonPage(
 		listModel = listModel,
 		lazyListState = lazyListState,
 		collapsingBar = {
 			filter {
 				showDialog = true
+				coroutineScope.launch {
+					collapsingContentState.animateShow()
+				}
 			}
 		},
 		doInitialLoading = doInitialLoading,

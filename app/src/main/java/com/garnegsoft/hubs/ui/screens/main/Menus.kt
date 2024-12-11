@@ -49,6 +49,7 @@ fun AuthorizedMenu(
 	onArticlesClick: () -> Unit,
 	onCommentsClick: () -> Unit,
 	onBookmarksClick: () -> Unit,
+	onSubscriptionsClick: () -> Unit,
 	onSavedArticlesClick: () -> Unit,
 	onHistoryClick: () -> Unit,
 	onSettingsClick: () -> Unit,
@@ -216,6 +217,22 @@ fun AuthorizedMenu(
 								)
 							}, onClick = {
 								onBookmarksClick()
+								expanded = false
+							}
+						)
+
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.35f
+							},
+							title = "Подписки", icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.group),
+									contentDescription = "",
+								)
+							}, onClick = {
+								onSubscriptionsClick()
 								expanded = false
 							}
 						)

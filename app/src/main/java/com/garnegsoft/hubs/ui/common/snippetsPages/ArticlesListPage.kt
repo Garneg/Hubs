@@ -87,13 +87,7 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
 	filter: (@Composable (onClick: () -> Unit) -> Unit) = { onClick ->
 		listModel.filter.observeAsState().value?.let {
-			val corscop = rememberCoroutineScope()
-			FilterElement(title = it.getTitle(), onClick = {
-				corscop.launch {
-					collapsingContentState.animateShow()
-				}
-				onClick()
-			})
+			FilterElement(title = it.getTitle(), onClick = { onClick() })
 		}
 	},
 	onArticleSnippetClick: (articleId: Int) -> Unit,

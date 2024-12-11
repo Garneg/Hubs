@@ -9,8 +9,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
@@ -42,6 +46,7 @@ import java.net.Socket
 fun MainScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
     onArticleClicked: (articleId: Int) -> Unit,
+    onSubscriptionsClicked: () -> Unit,
     onSearchClicked: () -> Unit,
     onCommentsClicked: (articleId: Int) -> Unit,
     onUserClicked: (alias: String) -> Unit,
@@ -282,7 +287,20 @@ fun MainScreen(
                                     lazyListState = myFeedLazyListState,
                                     onArticleSnippetClick = onArticleClicked,
                                     onArticleAuthorClick = onUserClicked,
-                                    onArticleCommentsClick = onCommentsClicked
+                                    onArticleCommentsClick = onCommentsClicked,
+                                    filter = { onClick ->
+                                        viewModel.newsListModel.filter.observeAsState().value?.let {
+                                            FilterElement(it.getTitle(), onClick = onClick) {
+                                                Box(modifier = Modifier.padding(end = 8.dp)) {
+                                                    IconButton(
+                                                        onClick = { onSubscriptionsClicked() },
+                                                    ) {
+                                                        Icon(imageVector = Icons.Default.Settings, contentDescription = null)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
                                 ) { defaultValues, onDismiss, onDone ->
                                     MyFeedFilter(
                                         defaultValues = defaultValues,

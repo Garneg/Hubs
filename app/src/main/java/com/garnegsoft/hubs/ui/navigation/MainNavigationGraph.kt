@@ -125,8 +125,7 @@ fun MainNavigationGraph(
                 MainScreen(
                     viewModelStoreOwner = it,
                     onSearchClicked = {
-//                        navController.navigate("search")
-                        navController.navigate("subscriptionManagement")
+                        navController.navigate("search")
                     },
                     onArticleClicked = {
                         navController.navigate("article/$it")
@@ -145,6 +144,9 @@ fun MainNavigationGraph(
                     },
                     onSavedArticles = {
                         navController.navigate("savedArticles")
+                    },
+                    onSubscriptionsClicked = {
+                        navController.navigate("subscriptionManagement")
                     },
                     menu = {
                         val context = LocalContext.current
@@ -172,6 +174,7 @@ fun MainNavigationGraph(
                                         "user/${userAlias}?page=${UserScreenPages.Bookmarks}"
                                     )
                                 },
+                                onSubscriptionsClick = { navController.navigate("subscriptionManagement") },
                                 onSavedArticlesClick = {
                                     navController.navigate(
                                         "savedArticles"
