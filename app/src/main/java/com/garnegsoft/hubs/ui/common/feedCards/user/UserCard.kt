@@ -76,7 +76,7 @@ fun UserCard(
             modifier = Modifier
                 .size(size = style.avatarSize)
                 .clip(shape = style.avatarShape)
-                .background(Color.White, shape = style.avatarShape),
+                .background(Color.White, shape = style.avatarShape as RoundedCornerShape),
             model = user.avatarUrl,
             contentDescription = ""
         )

@@ -287,20 +287,7 @@ fun MainScreen(
                                     lazyListState = myFeedLazyListState,
                                     onArticleSnippetClick = onArticleClicked,
                                     onArticleAuthorClick = onUserClicked,
-                                    onArticleCommentsClick = onCommentsClicked,
-                                    filter = { onClick ->
-                                        viewModel.newsListModel.filter.observeAsState().value?.let {
-                                            FilterElement(it.getTitle(), onClick = onClick) {
-                                                Box(modifier = Modifier.padding(end = 8.dp)) {
-                                                    IconButton(
-                                                        onClick = { onSubscriptionsClicked() },
-                                                    ) {
-                                                        Icon(imageVector = Icons.Default.Settings, contentDescription = null)
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    },
+                                    onArticleCommentsClick = onCommentsClicked
                                 ) { defaultValues, onDismiss, onDone ->
                                     MyFeedFilter(
                                         defaultValues = defaultValues,
