@@ -194,7 +194,7 @@ fun PollItem(
 				)
 				if (data.selected) {
 					Icon(
-						modifier = Modifier.size(18.dp),
+						modifier = Modifier.padding(start = 4.dp).size(18.dp),
 						imageVector = Icons.Default.Done,
 						contentDescription = null,
 						tint = colors.secondaryVariant
