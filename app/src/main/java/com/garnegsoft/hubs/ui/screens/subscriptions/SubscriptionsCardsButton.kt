@@ -54,7 +54,7 @@ fun SubscriptionsCardsButton(
                 onClick()
                 buttonClickable = false
                 coroutineScope.launch {
-                    delay(500)
+                    delay(200)
                     buttonClickable = true
                 }
             }, enabled = buttonClickable),
