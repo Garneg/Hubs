@@ -47,8 +47,8 @@ private fun defaultCompanyCardStyle(): CompanyCardStyle {
 fun CompanyCard(
 	company: CompanySnippet,
 	style: CompanyCardStyle = defaultCompanyCardStyle(),
+    onClick: () -> Unit,
 	indicator: @Composable () -> Unit = { DefaultCompanyIndicator(company = company) },
-	onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier

@@ -28,6 +28,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -39,10 +43,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -70,7 +77,7 @@ fun SubscriptionManagementScreen(
     val blocklisted by viewModel.blocklisted.observeAsState()
 
     val lazyListState = rememberLazyListState()
-
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(userAlias) {
         if (developHubs == null && userAlias != null && userAlias != "") {
@@ -113,14 +120,17 @@ fun SubscriptionManagementScreen(
                     hubSection(
                         sectionTitle = "Разработка",
                         onHubClick = onHubClick,
-                        items = it.list
-                    )
+                        toggleSubscription = viewModel::toggleHubSubscription,
+                        items = it.list,
+
+                        )
                 }
 
                 adminHubs?.let {
                     hubSection(
                         sectionTitle = "Администрирование",
                         onHubClick = onHubClick,
+                        toggleSubscription = viewModel::toggleHubSubscription,
                         items = it.list
                     )
                 }
@@ -129,6 +139,7 @@ fun SubscriptionManagementScreen(
                     hubSection(
                         sectionTitle = "Дизайн",
                         onHubClick = onHubClick,
+                        toggleSubscription = viewModel::toggleHubSubscription,
                         items = it.list
                     )
                 }
@@ -137,6 +148,7 @@ fun SubscriptionManagementScreen(
                     hubSection(
                         sectionTitle = "Менеджмент",
                         onHubClick = onHubClick,
+                        toggleSubscription = viewModel::toggleHubSubscription,
                         items = it.list
                     )
                 }
@@ -145,6 +157,7 @@ fun SubscriptionManagementScreen(
                     hubSection(
                         sectionTitle = "Маркетинг",
                         onHubClick = onHubClick,
+                        toggleSubscription = viewModel::toggleHubSubscription,
                         items = it.list
                     )
                 }
@@ -153,6 +166,7 @@ fun SubscriptionManagementScreen(
                     hubSection(
                         sectionTitle = "Научпоп",
                         onHubClick = onHubClick,
+                        toggleSubscription = viewModel::toggleHubSubscription,
                         items = it.list
                     )
                 }
@@ -164,10 +178,23 @@ fun SubscriptionManagementScreen(
                     items(
                         items = it.list
                     ) {
+                        var subscribed by rememberSaveable {
+                            mutableStateOf(true)
+                        }
                         CompanyCard(
                             company = it,
                             onClick = { onCompanyClick(it.alias) }
-                        )
+                        ) {
+                            SubscriptionsCardsButton(
+                                onClick = {
+                                    subscribed = !subscribed
+                                    coroutineScope.launch {
+                                        subscribed = viewModel.toggleCompanySubscription(it.alias)
+                                    }
+                                },
+                                subscribed = subscribed
+                            )
+                        }
                     }
                 }
 
@@ -181,7 +208,18 @@ fun SubscriptionManagementScreen(
                             user = it,
                             onClick = { onUserClick(it.alias) },
                             indicator = {
-                                Text(text = "test")
+                                var subscribed by rememberSaveable {
+                                    mutableStateOf(true)
+                                }
+                                SubscriptionsCardsButton(
+                                    onClick = {
+                                        subscribed = !subscribed
+                                        coroutineScope.launch {
+                                            subscribed = viewModel.toggleUserSubscription(it.alias)
+                                        }
+                                    },
+                                    subscribed = subscribed
+                                )
                             }
                         )
                     }
@@ -195,7 +233,7 @@ fun SubscriptionManagementScreen(
                     ) {
                         BlockedUserCard(
                             user = it,
-                            onClick = { onUserClick(it.alias)}
+                            onClick = { onUserClick(it.alias) }
                         ) {
 
                             Text(text = "test")
@@ -213,7 +251,9 @@ fun SubscriptionManagementScreen(
 private fun LazyListScope.commonSubscriptionsHeader(
     headerTitle: String
 ) {
-    item {
+    item(
+        contentType = headerTitle
+    ) {
         Text(
             modifier = Modifier
                 .fillMaxWidth()
@@ -230,13 +270,13 @@ private fun LazyListScope.commonSubscriptionsHeader(
 private fun LazyListScope.hubSection(
     sectionTitle: String,
     onHubClick: (alias: String) -> Unit,
-//    onSubscribe: (alias: String) -> Boolean,
-//    onUnsubscribe: (alias: String) -> Boolean,
+    toggleSubscription: suspend (alias: String) -> Boolean, // returns whether user subscribed after call or not
     items: List<HubSnippet>
 ) {
     item {
         Text(
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier
+                .padding(top = 4.dp)
                 .padding(start = 8.dp),
             text = sectionTitle,
             color = MaterialTheme.colors.onBackground.copy(0.5f),
@@ -252,16 +292,19 @@ private fun LazyListScope.hubSection(
             hub = snippet,
             onClick = { onHubClick(snippet.alias) },
             indicator = {
-                Button(
-                    onClick = {},
-                    elevation = null,
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = RatingPositiveColor,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Подписаться")
+                var subscribed by rememberSaveable {
+                    mutableStateOf(true)
                 }
+                val coroutineScope = rememberCoroutineScope()
+                SubscriptionsCardsButton(
+                    onClick = {
+                        subscribed = !subscribed
+                        coroutineScope.launch {
+                            subscribed = toggleSubscription(snippet.alias)
+                        }
+                    },
+                    subscribed = subscribed
+                )
             }
         )
     }

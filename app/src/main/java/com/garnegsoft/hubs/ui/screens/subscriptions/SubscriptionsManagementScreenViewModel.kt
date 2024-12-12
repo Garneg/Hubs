@@ -16,6 +16,7 @@ import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class SubscriptionsManagementScreenViewModel : ViewModel() {
@@ -101,12 +102,12 @@ class SubscriptionsManagementScreenViewModel : ViewModel() {
         }
     }
 
-    fun toggleHubSubscription(alias: String): Boolean = HubController.subscription(alias)
+    suspend fun toggleHubSubscription(alias: String): Boolean = withContext(Dispatchers.IO) { HubController.subscription(alias) }
 
-    fun toggleUserSubscription(alias: String): Boolean = UserController.subscription(alias)
+    suspend fun toggleUserSubscription(alias: String): Boolean = withContext(Dispatchers.IO) { UserController.subscription(alias) }
 
-    fun toggleCompanySubscription(alias: String): Boolean = CompanyController.subscription(alias)
+    suspend fun toggleCompanySubscription(alias: String): Boolean = withContext(Dispatchers.IO) {CompanyController.subscription(alias) }
 
-    fun toggleUserBlocklist(alias: String): Boolean = UserController.blockListToggle(alias)
+    suspend fun toggleUserBlocklist(alias: String): Boolean = withContext(Dispatchers.IO) { UserController.blockListToggle(alias) }
 
 }
