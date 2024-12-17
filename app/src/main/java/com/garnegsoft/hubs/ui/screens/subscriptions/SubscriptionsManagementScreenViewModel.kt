@@ -108,6 +108,6 @@ class SubscriptionsManagementScreenViewModel : ViewModel() {
 
     suspend fun toggleCompanySubscription(alias: String): Boolean = withContext(Dispatchers.IO) {CompanyController.subscription(alias) }
 
-    suspend fun toggleUserBlocklist(alias: String): Boolean = withContext(Dispatchers.IO) { UserController.blockListToggle(alias) }
+    suspend fun toggleUserBlocked(alias: String): Boolean = withContext(Dispatchers.IO) { UserController.blockListToggle(alias) }
 
 }

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
-import androidx.compose.material.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Done
@@ -24,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 import kotlinx.coroutines.delay
@@ -31,10 +32,12 @@ import kotlinx.coroutines.launch
 
 
 @Composable
-fun SubscriptionsCardsButton(
+fun SubscriptionSmallButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
     subscribed: Boolean,
+    subscribedIcon: Painter = rememberVectorPainter(Icons.Default.Done),
+    notSubscribedIcon: Painter = rememberVectorPainter(Icons.Default.Add)
 ) {
     var buttonClickable by remember {
         mutableStateOf(true)
@@ -54,7 +57,7 @@ fun SubscriptionsCardsButton(
                 onClick()
                 buttonClickable = false
                 coroutineScope.launch {
-                    delay(200)
+                    delay(200) // just a way of throttle :)
                     buttonClickable = true
                 }
             }, enabled = buttonClickable),
@@ -65,13 +68,13 @@ fun SubscriptionsCardsButton(
         ) {
             if (it) {
                 Icon(
-                    imageVector = Icons.Default.Done,
+                    painter = subscribedIcon,
                     tint = Color.White,
                     contentDescription = null
                 )
             } else {
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    painter = notSubscribedIcon,
                     tint = HubSubscribedColor,
                     contentDescription = null
                 )

@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.subscriptions
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,8 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -22,7 +19,8 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.Text
-import androidx.compose.material.TriStateCheckbox
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,22 +31,18 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
-import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
-import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -107,6 +101,8 @@ fun SubscriptionManagementScreen(
             modifier = Modifier
                 .padding(it)
         ) {
+            val subscribedIcon = rememberVectorPainter(Icons.Default.Done)
+            val notSubscribedIcon = rememberVectorPainter(Icons.Default.Add)
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp),
@@ -122,7 +118,8 @@ fun SubscriptionManagementScreen(
                         onHubClick = onHubClick,
                         toggleSubscription = viewModel::toggleHubSubscription,
                         items = it.list,
-
+                        subscribedIcon = subscribedIcon,
+                        notSubscribedIcon = notSubscribedIcon
                         )
                 }
 
@@ -131,7 +128,9 @@ fun SubscriptionManagementScreen(
                         sectionTitle = "Администрирование",
                         onHubClick = onHubClick,
                         toggleSubscription = viewModel::toggleHubSubscription,
-                        items = it.list
+                        items = it.list,
+                        subscribedIcon = subscribedIcon,
+                        notSubscribedIcon = notSubscribedIcon
                     )
                 }
 
@@ -140,7 +139,9 @@ fun SubscriptionManagementScreen(
                         sectionTitle = "Дизайн",
                         onHubClick = onHubClick,
                         toggleSubscription = viewModel::toggleHubSubscription,
-                        items = it.list
+                        items = it.list,
+                        subscribedIcon = subscribedIcon,
+                        notSubscribedIcon = notSubscribedIcon
                     )
                 }
 
@@ -149,7 +150,9 @@ fun SubscriptionManagementScreen(
                         sectionTitle = "Менеджмент",
                         onHubClick = onHubClick,
                         toggleSubscription = viewModel::toggleHubSubscription,
-                        items = it.list
+                        items = it.list,
+                        subscribedIcon = subscribedIcon,
+                        notSubscribedIcon = notSubscribedIcon
                     )
                 }
 
@@ -158,7 +161,9 @@ fun SubscriptionManagementScreen(
                         sectionTitle = "Маркетинг",
                         onHubClick = onHubClick,
                         toggleSubscription = viewModel::toggleHubSubscription,
-                        items = it.list
+                        items = it.list,
+                        subscribedIcon = subscribedIcon,
+                        notSubscribedIcon = notSubscribedIcon
                     )
                 }
 
@@ -167,7 +172,9 @@ fun SubscriptionManagementScreen(
                         sectionTitle = "Научпоп",
                         onHubClick = onHubClick,
                         toggleSubscription = viewModel::toggleHubSubscription,
-                        items = it.list
+                        items = it.list,
+                        subscribedIcon = subscribedIcon,
+                        notSubscribedIcon = notSubscribedIcon
                     )
                 }
 
@@ -176,7 +183,8 @@ fun SubscriptionManagementScreen(
                     commonSubscriptionsHeader("Компании")
 
                     items(
-                        items = it.list
+                        items = it.list,
+                        key = { it.id }
                     ) {
                         var subscribed by rememberSaveable {
                             mutableStateOf(true)
@@ -185,14 +193,16 @@ fun SubscriptionManagementScreen(
                             company = it,
                             onClick = { onCompanyClick(it.alias) }
                         ) {
-                            SubscriptionsCardsButton(
+                            SubscriptionSmallButton(
                                 onClick = {
                                     subscribed = !subscribed
                                     coroutineScope.launch {
                                         subscribed = viewModel.toggleCompanySubscription(it.alias)
                                     }
                                 },
-                                subscribed = subscribed
+                                subscribed = subscribed,
+                                subscribedIcon = subscribedIcon,
+                                notSubscribedIcon = notSubscribedIcon
                             )
                         }
                     }
@@ -202,7 +212,8 @@ fun SubscriptionManagementScreen(
                     commonSubscriptionsHeader("Авторы")
 
                     items(
-                        items = it.list
+                        items = it.list,
+                        key = { it.id }
                     ) {
                         UserCard(
                             user = it,
@@ -211,14 +222,16 @@ fun SubscriptionManagementScreen(
                                 var subscribed by rememberSaveable {
                                     mutableStateOf(true)
                                 }
-                                SubscriptionsCardsButton(
+                                SubscriptionSmallButton(
                                     onClick = {
                                         subscribed = !subscribed
                                         coroutineScope.launch {
                                             subscribed = viewModel.toggleUserSubscription(it.alias)
                                         }
                                     },
-                                    subscribed = subscribed
+                                    subscribed = subscribed,
+                                    subscribedIcon = subscribedIcon,
+                                    notSubscribedIcon = notSubscribedIcon
                                 )
                             }
                         )
@@ -229,14 +242,25 @@ fun SubscriptionManagementScreen(
                     commonSubscriptionsHeader("Заблокированные авторы")
 
                     items(
-                        items = it
+                        items = it,
+                        key = { it.alias }
                     ) {
                         BlockedUserCard(
                             user = it,
                             onClick = { onUserClick(it.alias) }
                         ) {
-
-                            Text(text = "test")
+                            var blocked by rememberSaveable {
+                                mutableStateOf(true)
+                            }
+                            BlockUserSmallButton(
+                                blocked = blocked,
+                                onClick = {
+                                    blocked = !blocked
+                                    coroutineScope.launch {
+                                        blocked = viewModel.toggleUserBlocked(it.alias)
+                                    }
+                                }
+                            )
                         }
                     }
 
@@ -271,7 +295,9 @@ private fun LazyListScope.hubSection(
     sectionTitle: String,
     onHubClick: (alias: String) -> Unit,
     toggleSubscription: suspend (alias: String) -> Boolean, // returns whether user subscribed after call or not
-    items: List<HubSnippet>
+    items: List<HubSnippet>,
+    subscribedIcon: Painter,
+    notSubscribedIcon: Painter
 ) {
     item {
         Text(
@@ -296,14 +322,16 @@ private fun LazyListScope.hubSection(
                     mutableStateOf(true)
                 }
                 val coroutineScope = rememberCoroutineScope()
-                SubscriptionsCardsButton(
+                SubscriptionSmallButton(
                     onClick = {
                         subscribed = !subscribed
                         coroutineScope.launch {
                             subscribed = toggleSubscription(snippet.alias)
                         }
                     },
-                    subscribed = subscribed
+                    subscribed = subscribed,
+                    subscribedIcon = subscribedIcon,
+                    notSubscribedIcon = notSubscribedIcon
                 )
             }
         )
