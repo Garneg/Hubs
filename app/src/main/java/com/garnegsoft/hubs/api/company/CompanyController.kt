@@ -59,6 +59,10 @@ class CompanyController {
                         employeesCount = it.statistics.employeesCount
                     ),
                     branding = Company.Branding(bannerImageUrl = it.settings.branding?.imageUrl, bannerLinkUrl = it.settings.branding?.linkUrl),
+                    status = when (it.settings.status) {
+                        "active" -> Company.Status.Active
+                        else -> Company.Status.Expired
+                    },
                     relatedData = it.relatedData?.let { Company.RelatedData(it.isSubscribed) }
                 )
             }
