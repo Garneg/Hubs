@@ -119,7 +119,7 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 							item {
 								val time = Calendar.getInstance().time
 								Box(
-									modifier = GlanceModifier.padding(2.dp)
+									modifier = GlanceModifier.padding(top = 2.dp)
 								) {
 									Text(
 										modifier = GlanceModifier.fillMaxWidth(),
@@ -129,7 +129,7 @@ fun MostReadingWidgetLayout(articles: List<Pair<String, Int>>) {
 												Locale.US
 											).format(time)
 										}",
-										style = TextStyle(color = ColorProvider(TextDefaults.defaultTextColor.getColor(context).copy(0.5f)), fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
+										style = TextStyle(color = ColorProvider(GlanceTheme.colors.onBackground.getColor(context).copy(0.5f)), fontWeight = FontWeight.Medium, textAlign = TextAlign.Center)
 									)
 								}
 

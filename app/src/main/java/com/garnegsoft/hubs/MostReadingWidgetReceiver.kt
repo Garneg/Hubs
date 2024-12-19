@@ -19,7 +19,7 @@ class MostReadingWidgetReceiver(
 	override fun onEnabled(context: Context?) {
 		Log.i("most_reading_widget", "widget added")
 		val periodicalWidgetUpdateRequest =
-			PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(6, TimeUnit.HOURS)
+			PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(3, TimeUnit.HOURS)
 				.addTag(periodicalWorkTag)
 				.setInitialDelay(6, TimeUnit.HOURS)
 				.build()
