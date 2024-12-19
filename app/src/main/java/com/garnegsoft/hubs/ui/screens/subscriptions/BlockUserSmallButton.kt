@@ -62,7 +62,7 @@ fun BlockUserSmallButton(
                 onClick()
                 buttonClickable = false
                 coroutineScope.launch {
-                    delay(200) // just a way of throttle :)
+                    delay(200) // just a way to throttle :)
                     buttonClickable = true
                 }
             }, enabled = buttonClickable),
@@ -74,7 +74,7 @@ fun BlockUserSmallButton(
             if (blocked) {
                 Icon(
                     painter = blockedIcon,
-                    tint = Color.White,
+                    tint = MaterialTheme.colors.surface,
                     contentDescription = null
                 )
             } else {
