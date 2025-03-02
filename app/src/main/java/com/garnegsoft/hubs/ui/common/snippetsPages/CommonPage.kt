@@ -135,9 +135,9 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 	
 	if (showDialog) {
 		filterDialog(
-			defaultValues = filterValues!! as F,
-			onDismiss = { showDialog = false },
-			onDone = {
+			filterValues!! as F,
+			{ showDialog = false },
+			{
 				listModel.editFilter(it)
 				showDialog = false
 			}

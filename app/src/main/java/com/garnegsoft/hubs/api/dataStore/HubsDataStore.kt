@@ -28,7 +28,7 @@ object HubsDataStore {
 				override val defaultValue = ColorScheme.SystemDefined.ordinal
 				
 				fun mapValues(flow: Flow<Int>): Flow<ColorScheme> {
-					return flow.map { ColorScheme.values()[it] }
+					return flow.map { ColorScheme.entries[it] }
 				}
 				
 				enum class ColorScheme {

@@ -44,7 +44,6 @@ class SubscriptionsManagementScreenViewModel : ViewModel() {
     private val _authors = MutableLiveData<HabrList<UserSnippet>?>()
     val authors: LiveData<HabrList<UserSnippet>?> get() = _authors
 
-    // TODO: Implement blacklisted users list at UsersListController
     private val _blocklisted = MutableLiveData<List<UsersListController.BlockedUser>?>()
     val blocklisted: LiveData<List<UsersListController.BlockedUser>?> get() = _blocklisted
 

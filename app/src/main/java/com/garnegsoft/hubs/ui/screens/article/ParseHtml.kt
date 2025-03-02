@@ -52,6 +52,7 @@ import coil.ImageLoader
 import coil.compose.AsyncImagePainter
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.AsyncGifImage
+import com.garnegsoft.hubs.api.utils.handleUrl
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.screens.article.html.CodeElement
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -975,16 +976,5 @@ fun Code(
 	}
 }
 
-/**
- * Handles url. If url refers to habr, opens this link via app
- */
-fun handleUrl(context: Context, url: String) {
-	Log.e("URL Clicked", url)
-	val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-		if (url.startsWith("https://habr.com") || url.startsWith("http://habrahabr.ru")){
-			this.`package` = BuildConfig.APPLICATION_ID
-		}
-	}
-	context.startActivity(intent)
-}
+
 
