@@ -14,6 +14,7 @@ import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.hub.list.HubsListController
 import com.garnegsoft.hubs.api.user.list.UserSnippet
 import com.garnegsoft.hubs.api.user.list.UsersListController
+import com.garnegsoft.hubs.api.utils.SearchUrlHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -75,7 +76,27 @@ class SearchScreenViewModel : ViewModel() {
 			}
 		}
 	}
-	
+
+
+	private var _urlDataType = MutableLiveData<SearchUrlHandler.UrlDataType>()
+	val urlDataType: LiveData<SearchUrlHandler.UrlDataType> get() = _urlDataType
+
+	// Represents both id of articles and alias of users/hubs/companies
+	private var _urlDataIdentifier = MutableLiveData<String>()
+	val urlDataIdentifier: LiveData<String> get() = _urlDataIdentifier
+
+	fun handleUrl(url: String) {
+		SearchUrlHandler.recongnizeUrlDataTypeAndIdentifier(url).let { result ->
+			if (result.first != SearchUrlHandler.UrlDataType.Unknown) {
+				_urlDataType.postValue(result.first)
+				_urlDataIdentifier.postValue(result.second)
+			}
+		}
+	}
+
+	fun parseUrl(url: String): Pair<SearchUrlHandler.UrlDataType, String?> =
+		SearchUrlHandler.recongnizeUrlDataTypeAndIdentifier(url)
+
 	
 	private var _mostReadingArticles = MutableLiveData<List<ArticleSnippet>>()
 	val mostReadingArticles: LiveData<List<ArticleSnippet>> get() = _mostReadingArticles
