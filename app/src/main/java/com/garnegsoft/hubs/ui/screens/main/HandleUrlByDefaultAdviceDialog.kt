@@ -82,6 +82,7 @@ fun HandleUrlByDefaultAdviceDialog(
 
                 val context = LocalContext.current
                 Button(
+                    elevation = null,
                     onClick = {
 
                         if (Build.VERSION.SDK_INT >= 31) {
