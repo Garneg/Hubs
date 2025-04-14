@@ -22,6 +22,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Clear
 import androidx.compose.runtime.*
@@ -36,7 +37,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -45,7 +46,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -57,6 +57,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.screens.article.ArticleShort
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
@@ -77,6 +78,13 @@ fun SearchScreen(
         mutableStateOf(false)
     }
     val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
+    var showCopiedLinkSuggestSnippet by rememberSaveable {
+        mutableStateOf(false)
+    }
+    val copiedLinkSuggestSnippetData by viewModel.clipboardLinkSnippetData.observeAsState()
+    var copiedLinkSuggestSnippetDataIdentifier by rememberSaveable {
+        mutableStateOf("")
+    }
 
     Scaffold(
         topBar = {
@@ -85,14 +93,18 @@ fun SearchScreen(
                 elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {
-                        Icon(imageVector = Icons.Outlined.ArrowBack, contentDescription = "")
+                        Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "")
                     }
                 })
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
             var searchTextValue by rememberSaveable { mutableStateOf("") }
-            val queryIsUrlToHabr by remember { derivedStateOf { searchTextValue.trimStart().startsWith("https://habr.com") } }
+            val queryIsUrlToHabr by remember {
+                derivedStateOf {
+                    searchTextValue.trimStart().startsWith("https://habr.com")
+                }
+            }
             var showClearAllButton by rememberSaveable { mutableStateOf(false) }
             val focusRequester by remember { mutableStateOf(FocusRequester()) }
             val keyboardController = LocalSoftwareKeyboardController.current
@@ -111,6 +123,8 @@ fun SearchScreen(
             var doRequestFocus by rememberSaveable {
                 mutableStateOf(true)
             }
+            val clipboard = LocalClipboardManager.current
+
             LaunchedEffect(key1 = Unit) {
                 if (doRequestFocus) {
                     focusRequester.requestFocus()
@@ -119,7 +133,25 @@ fun SearchScreen(
                 if (!viewModel.mostReadingArticles.isInitialized) {
                     viewModel.loadMostReading()
                 }
+
+                delay(1000)
+                    if (clipboard.getText() != null && clipboard.getText()!!.trimStart()
+                            .startsWith("https://habr.com/")
+                    ) {
+                        val copiedLink = clipboard.getText()!!.text
+                        val result = SearchUrlHandler.recongnizeUrlDataTypeAndIdentifier(copiedLink)
+                        if (result.first != SearchUrlHandler.UrlDataType.Unknown) {
+                            showCopiedLinkSuggestSnippet = true
+                            viewModel.loadCopiedLinkSnippetData(copiedLink)
+                            copiedLinkSuggestSnippetDataIdentifier = result.second!!
+                        }
+                    } else {
+                        showCopiedLinkSuggestSnippet = false
+                    }
+
+
             }
+
             Row(
                 modifier = Modifier
                     .background(if (currentQuery.isNotEmpty()) MaterialTheme.colors.surface else MaterialTheme.colors.background)
@@ -183,20 +215,37 @@ fun SearchScreen(
                                     }
 
                                     queryIsUrlToHabr -> {
-                                        viewModel.parseUrl(searchTextValue.trimStart()).let { data ->
-                                            val type = data.first
-                                            val identifier = data.second
+                                        viewModel.parseUrl(searchTextValue.trimStart())
+                                            .let { data ->
+                                                val type = data.first
+                                                val identifier = data.second
 
-                                            when(type) {
-                                                SearchUrlHandler.UrlDataType.Article -> onArticleClicked(identifier!!.toInt())
-                                                SearchUrlHandler.UrlDataType.User -> onUserClicked(identifier!!)
-                                                SearchUrlHandler.UrlDataType.Hub -> onHubClicked(identifier!!)
-                                                SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(identifier!!)
-                                                else -> {
-                                                    Toast.makeText(context, "Не удалось перейти по ссылке.", Toast.LENGTH_SHORT).show()
+                                                when (type) {
+                                                    SearchUrlHandler.UrlDataType.Article -> onArticleClicked(
+                                                        identifier!!.toInt()
+                                                    )
+
+                                                    SearchUrlHandler.UrlDataType.User -> onUserClicked(
+                                                        identifier!!
+                                                    )
+
+                                                    SearchUrlHandler.UrlDataType.Hub -> onHubClicked(
+                                                        identifier!!
+                                                    )
+
+                                                    SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(
+                                                        identifier!!
+                                                    )
+
+                                                    else -> {
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Не удалось перейти по ссылке.",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    }
                                                 }
                                             }
-                                        }
                                     }
 
                                     else -> {
@@ -247,7 +296,7 @@ fun SearchScreen(
             }
 
 
-            var pagerState = rememberPagerState { 4 }
+            val pagerState = rememberPagerState { 4 }
             if (showPages) {
                 val tabs = remember {
                     listOf(
@@ -368,19 +417,45 @@ fun SearchScreen(
                 }
 
             } else {
-                AnimatedVisibility(
-                    visible = mostReadingArticles != null,
-                    enter = slideInVertically { it / 2 }
-                ) {
-                    var firstCardHeight by remember() { mutableIntStateOf(0) }
-                    BoxWithConstraints(
-                        modifier = Modifier
-                            .imePadding()
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp)
-                    ) {
 
+
+                var firstCardHeight by remember() { mutableIntStateOf(0) }
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .imePadding()
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Box {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = showCopiedLinkSuggestSnippet,
+                            enter = slideInVertically { -it }
+                            ) {
+                            ClipboardLinkSnippet(
+                                modifier = Modifier.padding(top = 8.dp),
+                                data = copiedLinkSuggestSnippetData,
+                                onClick = {
+                                    copiedLinkSuggestSnippetData?.let { data ->
+                                        when(copiedLinkSuggestSnippetData?.type) {
+                                            SearchUrlHandler.UrlDataType.Article -> onArticleClicked(copiedLinkSuggestSnippetDataIdentifier.toInt())
+                                            SearchUrlHandler.UrlDataType.User -> onUserClicked(copiedLinkSuggestSnippetDataIdentifier)
+                                            SearchUrlHandler.UrlDataType.Hub -> onHubClicked(copiedLinkSuggestSnippetDataIdentifier)
+                                            SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(copiedLinkSuggestSnippetDataIdentifier)
+                                            else -> {}
+                                        }
+                                    }
+
+                                }
+                            )
+                        }
+
+                    }
+
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = mostReadingArticles != null,
+                        enter = slideInVertically { it / 2 }
+                    ) {
                         Box(
                             modifier = Modifier.padding(top = with(LocalDensity.current) {
                                 (this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp).coerceAtLeast(
