@@ -299,16 +299,18 @@ private fun LazyListScope.hubSection(
     subscribedIcon: Painter,
     notSubscribedIcon: Painter
 ) {
-    item {
-        Text(
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .padding(start = 8.dp),
-            text = sectionTitle,
-            color = MaterialTheme.colors.onBackground.copy(0.5f),
-            fontSize = 18.sp,
-            fontWeight = FontWeight.W500
-        )
+    if (items.isNotEmpty()) {
+        item {
+            Text(
+                modifier = Modifier
+                    .padding(top = 4.dp)
+                    .padding(start = 8.dp),
+                text = sectionTitle,
+                color = MaterialTheme.colors.onBackground.copy(0.5f),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.W500
+            )
+        }
     }
 
     items(
