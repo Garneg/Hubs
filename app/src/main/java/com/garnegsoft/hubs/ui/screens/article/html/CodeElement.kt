@@ -163,6 +163,7 @@ fun CodeElement(
 			codeSpanStylesList = it.highlight(code)
 		}
 	})
+
 	val annotatedStringCode = remember(codeSpanStylesList) {
 		AnnotatedString(
 			text = code,
@@ -246,7 +247,7 @@ fun CodeElement(
 										)
 									) { append(linesIndicator) }
 								},
-								lineHeight = 16.sp * 1.4f,
+								lineHeight = spanStyle.fontSize * 1.4f,
 								color = MaterialTheme.colors.onBackground.copy(0.25f),
 								fontFamily = jetbrainsMonoFontFamily,
 								textAlign = TextAlign.End
@@ -266,8 +267,9 @@ fun CodeElement(
 							Text(
 								text = annotatedStringCode,
 								fontFamily = jetbrainsMonoFontFamily,
+								fontSize = spanStyle.fontSize,
 								fontWeight = FontWeight.Normal,
-								lineHeight = 16.sp * 1.4f,
+								lineHeight = spanStyle.fontSize * 1.4f,
 								color = MaterialTheme.colors.onBackground
 							)
 						}
