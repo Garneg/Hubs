@@ -5,6 +5,7 @@ import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,11 +22,11 @@ import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
 
 
-class CollapsingContentState {
+class CollapsingContentState(initialOffset: Float = 0f, initialContentHeight: Float = 0f) {
     
-    val offset = mutableFloatStateOf(0f)
+    val offset = mutableFloatStateOf(initialOffset)
     
-    val contentHeight = mutableFloatStateOf(0f)
+    val contentHeight = mutableFloatStateOf(initialContentHeight)
     
     suspend fun animateHide() {
         animateOffsetTo(contentHeight.floatValue)
@@ -53,12 +54,23 @@ class CollapsingContentState {
         offset.floatValue = contentHeight.floatValue
         
     }
+
+    companion object {
+        val Saver = listSaver<CollapsingContentState, Any>(
+            save = {
+                listOf(it.offset.floatValue, it.contentHeight.floatValue)
+            },
+            restore = {
+                CollapsingContentState(it[0] as Float, it[1] as Float)
+            }
+        )
+    }
     
 }
 
 @Composable
 fun rememberCollapsingContentState(): CollapsingContentState {
-    return remember {
+    return rememberSaveable(saver = CollapsingContentState.Saver) {
         CollapsingContentState()
     }
 }
