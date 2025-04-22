@@ -39,6 +39,8 @@ fun Modifier.shimmerEffect(
     shape: Shape = RectangleShape,
     color: Color = MaterialTheme.colors.onBackground.copy(0.1f)
 ): Modifier {
+    val enabledTransition = updateTransition(enabled)
+    val animatedAlpha by enabledTransition.animateFloat(transitionSpec = { tween(durationMillis = 300) }) { if (it) 1f else 0f }
     // TODO: implement shimmer animation
     return this.drawWithContent {
         if (enabled) {
@@ -48,6 +50,13 @@ fun Modifier.shimmerEffect(
                 color = color
             )
         } else {
+            if (animatedAlpha > 0f){
+                val densityStruct = Density(this.density, this.fontScale)
+                drawOutline(
+                    outline = shape.createOutline(size, layoutDirection, densityStruct),
+                    color = color.copy(alpha = color.alpha * animatedAlpha)
+                )
+            }
             drawContent()
         }
     }
