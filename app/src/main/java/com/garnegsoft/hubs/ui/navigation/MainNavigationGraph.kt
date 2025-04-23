@@ -355,6 +355,7 @@ fun MainNavigationGraph(
                     onArticleClick = {
                         navController.navigate("article/$it")
                     },
+                    navigationTransition = transition,
                     viewModelStoreOwner = it
                 )
 

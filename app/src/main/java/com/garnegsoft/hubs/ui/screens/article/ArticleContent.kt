@@ -56,6 +56,7 @@ fun ArticleContent(
     onHubClicked: (alias: String) -> Unit,
     onCompanyClick: (alias: String) -> Unit,
     onArticleClick: (id: Int) -> Unit,
+    fontSize: TextUnit,
     onViewImageRequest: (url: String) -> Unit
 ) {
     val context = LocalContext.current
@@ -66,22 +67,17 @@ fun ArticleContent(
 
     Box() {
         val contentNodes by viewModel.parsedArticleContent.observeAsState()
-        val fontSize by HubsDataStore.Settings
-            .getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
-            .collectAsState(
-                initial = null
-            )
 
         val color = MaterialTheme.colors.onSurface
         val spanStyle = remember(fontSize, color) {
             SpanStyle(
                 color = color,
-                fontSize = fontSize?.sp ?: 16.sp
+                fontSize = fontSize
             )
         }
         val elementsSettings = remember {
             ElementSettings(
-                fontSize = fontSize?.sp ?: 16.sp,
+                fontSize = fontSize,
                 lineHeight = 16.sp,
                 fitScreenWidth = false
             )
@@ -244,7 +240,7 @@ fun ArticleContent(
 
                 Text(
                     text = article.title,
-                    fontSize = ((fontSize ?: 16f) + 4f).sp,
+                    fontSize = (fontSize.value + 4f).sp,
                     fontWeight = FontWeight.W700,
                     color = MaterialTheme.colors.onBackground
                 )

@@ -4,6 +4,7 @@ import ArticleController
 import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDecay
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -70,15 +71,15 @@ fun ArticleScreen(
 	onCompanyClick: (alias: String) -> Unit,
 	onViewImageRequest: (url: String) -> Unit,
 	onArticleClick: (id: Int) -> Unit,
+	navigationTransition: Transition<EnterExitState>,
 	viewModelStoreOwner: ViewModelStoreOwner
 ) {
 	val context = LocalContext.current
 	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
 	val fontSize by HubsDataStore.Settings
 		.getValueFlow(context, HubsDataStore.Settings.ArticleScreen.FontSize)
-		.collectAsState(
-			initial = null
-		)
+		.collectAsState(initial = null)
+
 	val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
 	val article by viewModel.article.observeAsState()
 	
@@ -377,9 +378,9 @@ fun ArticleScreen(
 					nodeParsed = true
 				}
 			})
-			
+
 			Box(modifier = Modifier.padding(it)) {
-				if (nodeParsed && fontSize != null) {
+				if (nodeParsed && fontSize != null && navigationTransition.currentState == EnterExitState.Visible) {
 					SelectionContainer {
 						ArticleContent(
 							article = article,
@@ -387,7 +388,8 @@ fun ArticleScreen(
 							onHubClicked = onHubClicked,
 							onCompanyClick = onCompanyClick,
 							onViewImageRequest = onViewImageRequest,
-							onArticleClick = onArticleClick
+							onArticleClick = onArticleClick,
+							fontSize = fontSize!!.sp
 						)
 					}
 				}
