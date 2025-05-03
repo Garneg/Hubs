@@ -55,7 +55,7 @@ data class Article(
     data class Author(
         val alias: String,
         val fullname: String? = null,
-        val avatarUrl: String? = null,
+        val avatarUrl: String,
     )
 
     /**

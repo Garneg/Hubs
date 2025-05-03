@@ -1,14 +1,11 @@
 package com.garnegsoft.hubs.api
 
-import android.content.Context
-import android.graphics.Canvas
-import android.webkit.WebView
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.Stable
 
 
 @Immutable
-class HabrList<T>(val list: List<T>, val pagesCount: Int) where T : HabrSnippet  {
+class HabrList<T>(val list: List<T>, val pagesCount: Int) where T : HubsLazyListItem  {
 
     operator fun plus(secondList: HabrList<T>): HabrList<T>{
         var templist = ArrayList<T>().apply {
@@ -21,8 +18,8 @@ class HabrList<T>(val list: List<T>, val pagesCount: Int) where T : HabrSnippet 
 
 }
 
-@Stable
-interface HabrSnippet {
+
+interface HubsLazyListItem {
     val id: Int
 }
 

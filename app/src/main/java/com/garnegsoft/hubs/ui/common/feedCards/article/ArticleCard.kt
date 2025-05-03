@@ -17,11 +17,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -29,22 +26,21 @@ import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
-import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticleCard(
-	article: ArticleSnippet,
+	cardData: ArticleCardData,
 	onClick: () -> Unit,
 	onAuthorClick: () -> Unit,
 	onCommentsClick: () -> Unit,
-	style: ArticleCardStyle,
+	configuration: ArticleCardConfiguration,
 	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
 	viewsIconPainter: Painter = painterResource(id = R.drawable.views_icon),
 	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
@@ -57,11 +53,11 @@ fun ArticleCard(
 	
 	Column(
 		modifier = Modifier
-			.clip(style.cardShape)
+			.clip(configuration.cardShape)
 			.clickable(
 				onClick = onClick
 			)
-			.background(style.backgroundColor)
+			.background(configuration.backgroundColor)
 	) {
 		val authorInteractionSource = remember { MutableInteractionSource() }
 		//Author and published time
@@ -74,21 +70,21 @@ fun ArticleCard(
 					onClick = onAuthorClick
 				)
 				.absolutePadding(
-					left = style.innerPadding,
-					top = style.innerPadding,
-					right = style.innerPadding
+					left = configuration.innerPadding,
+					top = configuration.innerPadding,
+					right = configuration.innerPadding
 				)
 		) {
 			Row(
 				modifier = Modifier
-					.height(style.authorAvatarSize)
+					.height(configuration.authorAvatarSize)
 					.weight(1f)
 			) {
-				article.author?.let {
+				cardData.author?.let {
 					Row(
 						verticalAlignment = Alignment.CenterVertically,
 						modifier = Modifier
-							.clip(style.innerElementsShape)
+							.clip(configuration.innerElementsShape)
 							.clickable(
 								onClick = onAuthorClick
 							)
@@ -96,11 +92,14 @@ fun ArticleCard(
 						
 						AsyncImage(
 							modifier = Modifier
-								.size(style.authorAvatarSize)
-								.clip(style.innerElementsShape)
+								.size(configuration.authorAvatarSize)
+								.clip(configuration.innerElementsShape)
 								// I set shape here because it works better and white rounded corners are
 								// less visible. Although, it's still noticeable :(
-								.background(color = Color.White, shape = style.innerElementsShape),
+								.background(
+									color = Color.White,
+									shape = configuration.innerElementsShape
+								),
 							model = it.avatarUrl,
 							contentDescription = "avatar",
 							onState = { })
@@ -109,7 +108,7 @@ fun ArticleCard(
 						Text(
 							modifier = Modifier.weight(1f),
 							text = it.alias,
-							style = style.authorTextStyle,
+							style = configuration.authorTextStyle,
 							overflow = TextOverflow.Ellipsis,
 							maxLines = 1
 						)
@@ -118,35 +117,35 @@ fun ArticleCard(
 				}
 			}
 			
-			Spacer(modifier = Modifier.width(style.innerPadding))
+			Spacer(modifier = Modifier.width(configuration.innerPadding))
 			
 			// Published time
 			Text(
-				text = article.timePublished,
+				text = cardData.articlePublicationDate,
 				maxLines = 1,
-				style = style.publishedTimeTextStyle
+				style = configuration.publishedTimeTextStyle
 			)
 		}
 		
-		Spacer(modifier = Modifier.height(style.innerPadding / 2))
+		Spacer(modifier = Modifier.height(configuration.innerPadding / 2))
 		// Title
 		Text(
-			modifier = Modifier.padding(horizontal = style.innerPadding),
-			text = article.title,
-			style = style.titleTextStyle
+			modifier = Modifier.padding(horizontal = configuration.innerPadding),
+			text = cardData.articleTitle,
+			style = configuration.titleTextStyle
 		)
 		Spacer(modifier = Modifier.height(0.dp))
 		Row(
-			modifier = Modifier.padding(horizontal = style.innerPadding, vertical = 2.dp),
+			modifier = Modifier.padding(horizontal = configuration.innerPadding, vertical = 2.dp),
 			verticalAlignment = Alignment.CenterVertically,
 		) {
-			if (article.complexity != PublicationComplexity.None) {
+			if (cardData.articleComplexity != PublicationComplexity.None) {
 				val publicationComplexityColor = remember {
-					when (article.complexity) {
+					when (cardData.articleComplexity) {
 						PublicationComplexity.Low -> Color(0xFF4CBE51)
 						PublicationComplexity.Medium -> Color(0xFFEEBC25)
 						PublicationComplexity.High -> Color(0xFFEB3B2E)
-						else -> style.statisticsColor
+						else -> configuration.statisticsColor
 					}
 				}
 				Icon(
@@ -157,7 +156,7 @@ fun ArticleCard(
 				)
 				Spacer(modifier = Modifier.width(4.dp))
 				Text(
-					text = when (article.complexity) {
+					text = when (cardData.articleComplexity) {
 						PublicationComplexity.Low -> "Простой"
 						PublicationComplexity.Medium -> "Средний"
 						PublicationComplexity.High -> "Сложный"
@@ -175,16 +174,16 @@ fun ArticleCard(
 				modifier = Modifier.size(14.dp),
 				painter = readingTimeIconPainter,
 				contentDescription = "",
-				tint = style.statisticsColor
+				tint = configuration.statisticsColor
 			)
 			Spacer(modifier = Modifier.width(4.dp))
 			Text(
-				text = "${article.readingTime} мин",
-				color = style.statisticsColor,
+				text = "${cardData.timeToRead} мин",
+				color = configuration.statisticsColor,
 				fontWeight = FontWeight.W500,
 				fontSize = 14.sp
 			)
-			if (article.isTranslation) {
+			if (cardData.isArticleTranslation) {
 				Spacer(modifier = Modifier.width(12.dp))
 				Icon(
 					modifier = Modifier.size(14.dp),
@@ -201,117 +200,53 @@ fun ArticleCard(
 				)
 			}
 		}
-		
-		var hubsText by remember { mutableStateOf(buildAnnotatedString { }) }
-		
-		// TODO: This concatenation takes some time and leads to laggy scroll of feeds. Needs to be refactored
-		LaunchedEffect(key1 = Unit, block = {
-			if (hubsText.text == "") {
-				hubsText = buildAnnotatedString {
-					article.hubs!!.forEachIndexed { index, it ->
-						val textFunc = if (it.isProfiled) {
-							{ append((it.title + "*").replace(" ", "\u00A0")) }
-						} else {
-							{ append(it.title.replace(" ", "\u00A0")) }
-						}
-						if (it.relatedData != null && it.relatedData.isSubscribed) {
-							withStyle(SpanStyle(color = HubSubscribedColor)) {
-								textFunc()
-							}
-						} else {
-							textFunc()
-						}
-						if (index < article.hubs.size - 1) {
-							append(", ")
-						}
-					}
-				}
-			}
-		})
+
+
 		// Hubs
-		if (style.showHubsList)
+		if (configuration.showHubsList)
 			Text(
-				modifier = Modifier.padding(horizontal = style.innerPadding),
-				text = hubsText, style = style.hubsTextStyle,
-				minLines = if (hubsText.text == "") 2 else 1 // todo: remove this hack after fixing hubs string formatting on fly
+				modifier = Modifier.padding(horizontal = configuration.innerPadding),
+				text = cardData.hubs, style = configuration.hubsTextStyle,
 			)
 		
 		
 		// Snippet
-		if (style.showTextSnippet) {
+		if (configuration.showTextSnippet) {
 			Spacer(modifier = Modifier.height(2.dp))
 			Text(
-				modifier = Modifier.padding(horizontal = style.innerPadding),
-				text = article.textSnippet,
-				maxLines = style.snippetMaxLines,
+				modifier = Modifier.padding(horizontal = configuration.innerPadding),
+				text = cardData.articleTextSnippet,
+				maxLines = configuration.snippetMaxLines,
 				overflow = TextOverflow.Ellipsis,
-				style = style.snippetTextStyle
+				style = configuration.snippetTextStyle
 			)
 		}
 		// Image to draw attention (a.k.a. KDPV)
-		if (style.showImage && !article.imageUrl.isNullOrBlank()) {
+		if (configuration.showImage && !cardData.articleImageUrl.isNullOrBlank()) {
 			Spacer(modifier = Modifier.height(6.dp))
 			AsyncImage(
 				modifier = Modifier
-					.padding(horizontal = style.innerPadding)
+					.padding(horizontal = configuration.innerPadding)
 					.fillMaxWidth()
-					.clip(style.innerElementsShape)
+					.clip(configuration.innerElementsShape)
 					.aspectRatio(1.8f)
 					.background(MaterialTheme.colors.onSurface.copy(0.1f)),
 				model = ImageRequest.Builder(LocalContext.current)
 					.crossfade(true)
-					.data(article.imageUrl).build(),
+					.data(cardData.articleImageUrl).build(),
 				contentScale = ContentScale.Crop,
 				contentDescription = "",
 			)
 			
 		}
 		var addedToBookmarks by remember {
-			mutableStateOf(article.relatedData?.bookmarked ?: false)
+			mutableStateOf(cardData.articleBookmarked)
 		}
 		var addedToBookmarksCount by remember {
-			mutableIntStateOf(article.statistics.bookmarksCount)
+			mutableIntStateOf(cardData.articleStatistics.bookmarks)
 		}
 		val bookmarksCoroutineScope = rememberCoroutineScope()
-		val bookmarkButtonClickLambda: () -> Unit = remember {
-			{
-				article.relatedData?.let {
-					bookmarksCoroutineScope.launch(Dispatchers.IO) {
-						if (addedToBookmarks) {
-							addedToBookmarks = false
-							addedToBookmarksCount--
-							addedToBookmarksCount =
-								addedToBookmarksCount.coerceAtLeast(0)
-							if (!ArticleController.removeFromBookmarks(
-									article.id,
-									article.type == PostType.News
-								)
-							) {
-								addedToBookmarks = true
-								addedToBookmarksCount++
-								addedToBookmarksCount =
-									addedToBookmarksCount.coerceAtLeast(0)
-							}
-							
-						} else {
-							addedToBookmarks = true
-							addedToBookmarksCount++
-							if (!ArticleController.addToBookmarks(
-									article.id,
-									article.type == PostType.News
-								)
-							) {
-								addedToBookmarks = false
-								addedToBookmarksCount--
-								addedToBookmarksCount =
-									addedToBookmarksCount.coerceAtLeast(0)
-							}
-						}
-					}
-				}
-				
-			}
-		}
+
 		
 		
 		val context = LocalContext.current
@@ -320,29 +255,32 @@ fun ArticleCard(
 		}
 		
 		val hapticFeedback = LocalHapticFeedback.current
-		
+		val bookmarkState = rememberBookmarkState(cardData.articleStatistics.bookmarks, cardData.articleBookmarked)
+
 		ArticleStats(
-			statistics = article.statistics,
+			statistics = cardData.articleStatistics,
 			addedToBookmarks = addedToBookmarks,
 			bookmarksCount = addedToBookmarksCount,
-			onAddToBookmarksClicked = bookmarkButtonClickLambda,
+			onAddToBookmarksClicked = {
+				bookmarksCoroutineScope.launch {
+					configuration.toggleBookmarksLambda?.let { bookmarkState.toggleBookmark(it, cardData.id)}
+				}},
 			onCommentsClick = onCommentsClick,
-			unreadCommentsCount = article.relatedData?.let { if (it.unreadComments < article.statistics.commentsCount) it.unreadComments else 0 } ?: 0,
 			saveArticlePopup = { bounds ->
 				SaveArticlePopup(
 					show = showPopup,
 					bounds = bounds,
-					cardStyle = style,
+					cardStyle = configuration,
 					onSaveClick = {
-						OfflineArticlesController.downloadArticle(article.id, context)
+						OfflineArticlesController.downloadArticle(cardData.id, context)
 						showPopup = false
 					},
 					onDeleteClick = {
-						OfflineArticlesController.deleteArticle(article.id, context)
+						OfflineArticlesController.deleteArticle(cardData.id, context)
 						showPopup = false
 					},
 					onDismissRequest = { showPopup = false },
-					articleId = article.id
+					articleId = cardData.id
 				)
 			},
 			onShowSavingPopup = {
@@ -351,8 +289,8 @@ fun ArticleCard(
 					HapticFeedbackType.LongPress
 				)
 			},
-			bookmarksButtonEnabled = article.relatedData != null,
-			style = style,
+			bookmarksButtonEnabled = configuration.commentsButtonEnabled,
+			style = configuration,
 			ratingIconPainter = ratingIconPainter,
 			viewsIconPainter = viewsIconPainter,
 			bookmarkIconPainter = bookmarkIconPainter,
@@ -360,4 +298,64 @@ fun ArticleCard(
 			commentIconPainter = commentIconPainter,
 		)
 	}
+}
+
+class BookmarkState(
+	initialBookmarksCount: Int,
+	bookmarked: Boolean
+) {
+	private val _bookmarksCount = mutableIntStateOf(initialBookmarksCount)
+	val bookmarksCount: Int by _bookmarksCount
+
+	private val _bookmarked = mutableStateOf(bookmarked)
+	val bookmarked: Boolean by _bookmarked
+
+	// Used to disable bookmark button, when user already pressed it, but server hasn't responded yet
+	private val _throttleButton = mutableStateOf(false)
+	val throttleButton: Boolean by _throttleButton
+
+	var isRealBookmarked: Boolean = bookmarked
+
+	/**
+	 * @param lambda takes a function with arguments addToBookmarks (**true** - it should add article to bookmarks, **false** - remove),
+	 * and articleId that indicates which article should be toggled. The function should return true on success and false if request failed
+	 * @param articleId id of an article just to pass it down to [lambda]
+	 */
+	suspend fun toggleBookmark(lambda: suspend (addToBookmarks: Boolean, articleId: Int) -> Boolean, articleId: Int) {
+		if (!throttleButton){
+			if (isRealBookmarked) {
+				_bookmarksCount.intValue--
+				_bookmarksCount.intValue.coerceAtLeast(0)
+			} else {
+				_bookmarksCount.intValue++
+			}
+			_bookmarked.value = !isRealBookmarked
+			_throttleButton.value = true
+			if (lambda(!isRealBookmarked, articleId)){	// success case
+				isRealBookmarked = !isRealBookmarked
+
+			} else {									// failed case
+				_bookmarked.value = isRealBookmarked
+				if (isRealBookmarked) {
+					_bookmarksCount.intValue++
+				} else {
+					_bookmarksCount.intValue--
+					_bookmarksCount.intValue.coerceAtLeast(0)
+				}
+			}
+			_throttleButton.value = false
+		}
+	}
+
+//	companion object{
+//		val Saver = listSaver<BookmarkState, Any>(
+//			save = { listOf(it.isRealBookmarked) },
+//			restore = { BookmarkState(it[0] as Boolean)}
+//		)
+//	}
+}
+
+@Composable
+fun rememberBookmarkState(initialBookmarksCount: Int, bookmarked: Boolean): BookmarkState {
+	return remember(bookmarked) { BookmarkState(initialBookmarksCount, bookmarked) }
 }

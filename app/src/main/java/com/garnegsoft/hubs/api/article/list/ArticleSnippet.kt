@@ -98,4 +98,4 @@ data class ArticleSnippet(
 	 */
 	val isInBlackList: Boolean
 
-) : HabrSnippet
+) : HubsLazyListItem

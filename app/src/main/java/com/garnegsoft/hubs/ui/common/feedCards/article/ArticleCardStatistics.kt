@@ -24,22 +24,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.R
-import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 
@@ -47,16 +42,15 @@ import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ArticleStats(
-	statistics: Article.Statistics,
+	statistics: ArticleCardData.Statistics,
 	addedToBookmarks: Boolean,
 	bookmarksCount: Int,
 	onAddToBookmarksClicked: () -> Unit,
 	onCommentsClick: () -> Unit,
-	unreadCommentsCount: Int,
 	bookmarksButtonEnabled: Boolean,
 	onShowSavingPopup: () -> Unit,
 	saveArticlePopup: @Composable (bounds: IntSize) -> Unit,
-	style: ArticleCardStyle,
+	style: ArticleCardConfiguration,
 	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
 	viewsIconPainter: Painter = painterResource(id = R.drawable.views_icon),
 	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
@@ -89,22 +83,22 @@ fun ArticleStats(
 				tint = style.statisticsColor
 			)
 			Spacer(modifier = Modifier.width(2.dp))
-			if (statistics.score > 0) {
+			if (statistics.rating > 0) {
 				Text(
-					text = '+' + statistics.score.toString(),
+					text = '+' + statistics.rating.toString(),
 					style = style.statisticsTextStyle,
 					color = RatingPositiveColor
 				)
 			} else
-				if (statistics.score < 0) {
+				if (statistics.rating < 0) {
 					Text(
-						text = statistics.score.toString(),
+						text = statistics.rating.toString(),
 						style = style.statisticsTextStyle,
 						color = RatingNegativeColor
 					)
 				} else {
 					Text(
-						text = statistics.score.toString(),
+						text = statistics.rating.toString(),
 						style = style.statisticsTextStyle
 					)
 				}
@@ -127,7 +121,7 @@ fun ArticleStats(
 			)
 			Spacer(modifier = Modifier.width(5.dp))
 			Text(
-				text = formatLongNumbers(statistics.readingCount),
+				text = statistics.views,
 				style = style.statisticsTextStyle
 			)
 		}
@@ -135,8 +129,7 @@ fun ArticleStats(
 		var bounds by remember {
 			mutableStateOf(IntSize.Zero)
 		}
-		
-		
+
 		
 		//Added to bookmarks
 		Row(
@@ -203,7 +196,7 @@ fun ArticleStats(
 			
 			BadgedBox(
 				badge = {
-					if (unreadCommentsCount > 0) {
+					if (statistics.hasUnreadComments) {
 						Box(
 							modifier = Modifier
 								.size(8.dp)
@@ -225,7 +218,7 @@ fun ArticleStats(
 					)
 					Spacer(modifier = Modifier.width(4.dp))
 					Text(
-						text = formatLongNumbers(statistics.commentsCount),
+						text = statistics.comments,
 						style = style.statisticsTextStyle,
 						overflow = TextOverflow.Clip,
 						maxLines = 1

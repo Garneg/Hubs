@@ -123,7 +123,7 @@ class ArticlesListController {
 									com.garnegsoft.hubs.api.article.Article.Author(
 										alias = it.author!!.alias,
 										fullname = it.author!!.fullname,
-										avatarUrl = it.author!!.avatarUrl,
+										avatarUrl = it.author!!.avatarUrl!!,
 									)
 								} else
 									null,
@@ -188,7 +188,7 @@ class ArticlesListController {
 									com.garnegsoft.hubs.api.article.Article.Author(
 										alias = it.author!!.alias,
 										fullname = it.author!!.fullname,
-										avatarUrl = it.author!!.avatarUrl,
+										avatarUrl = it.author!!.avatarUrl!!,
 									)
 								} else
 									null,

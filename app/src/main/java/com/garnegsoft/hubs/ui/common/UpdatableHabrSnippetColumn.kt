@@ -15,11 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun <T : HabrSnippet> PagedRefreshableHabrSnippetsColumn(
+fun <T : HubsLazyListItem> PagedRefreshableHabrSnippetsColumn(
     modifier: Modifier = Modifier.fillMaxSize(),
     data: HabrList<T>,
     lazyListState: LazyListState = rememberLazyListState(),

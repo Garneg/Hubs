@@ -35,7 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
-import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import kotlinx.coroutines.flow.Flow
 
 class OfflineArticlesListScreenViewModel(context: Context) : ViewModel() {
@@ -83,7 +83,7 @@ fun OfflineArticlesListScreen(
 			
 		}
 	) {
-		val cardsStyle = ArticleCardStyle.defaultArticleCardStyle()
+		val cardsStyle = ArticleCardConfiguration.defaultArticleCardStyle()
 		cardsStyle?.let { style ->
 			articles?.let { articlesList ->
 				if (articlesList.isEmpty()) {

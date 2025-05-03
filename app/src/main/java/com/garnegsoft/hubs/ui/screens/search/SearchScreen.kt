@@ -360,6 +360,9 @@ fun SearchScreen(
                                     modifier = Modifier.fillMaxHeight(),
                                     data = hubs!!,
                                     lazyListState = hubsLazyListState,
+                                    contentPadding = PaddingValues(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    horizontalAlignment = Alignment.Start,
                                     onNextPageLoad = { viewModel.loadHubs(currentQuery, it) }
                                 ) {
                                     HubCard(hub = it, onClick = { onHubClicked(it.alias) })

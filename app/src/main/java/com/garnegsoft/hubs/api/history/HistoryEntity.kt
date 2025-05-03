@@ -12,7 +12,7 @@ import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.Upsert
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -36,7 +36,7 @@ data class HistoryEntity(
 	
 	@PrimaryKey(autoGenerate = true)
 	override val id: Int = 0
-) : HabrSnippet
+) : HubsLazyListItem
 
 enum class HistoryActionType {
 	Undefined,

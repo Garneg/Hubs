@@ -36,13 +36,13 @@ import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
 
 @Composable
 fun SaveArticlePopup(
-	show: Boolean,
-	bounds: IntSize,
-	cardStyle: ArticleCardStyle,
-	onSaveClick: () -> Unit,
-	onDeleteClick: () -> Unit,
-	onDismissRequest: () -> Unit,
-	articleId: Int
+    show: Boolean,
+    bounds: IntSize,
+    cardStyle: ArticleCardConfiguration,
+    onSaveClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    articleId: Int
 ) {
 	val density = LocalDensity.current.density
 	val context = LocalContext.current

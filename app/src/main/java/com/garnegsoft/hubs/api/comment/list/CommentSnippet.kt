@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.api.comment.list
 
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 import com.garnegsoft.hubs.api.article.Article
 
 /**
@@ -20,7 +20,7 @@ data class CommentSnippet(
 
     val author: Article.Author
 
-) : HabrSnippet {
+) : HubsLazyListItem {
     data class ParentPost(
 
         val id: Int,

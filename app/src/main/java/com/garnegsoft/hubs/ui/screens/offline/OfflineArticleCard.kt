@@ -31,7 +31,7 @@ import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 
@@ -41,7 +41,7 @@ fun OfflineArticleCard(
 	article: OfflineArticleSnippet,
 	onClick: () -> Unit,
 	onDelete: () -> Unit,
-	style: ArticleCardStyle
+	style: ArticleCardConfiguration
 ) {
 	var showDeleteButton by rememberSaveable { mutableStateOf(false) }
 	val haptic = LocalHapticFeedback.current

@@ -4,7 +4,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -16,15 +15,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.size.Size
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
 
+
+// TODO: Refactor configuration class - create nested style class that represents appearance settings
 /**
- * Style of the [ArticleCard]
+ * Configuration of the [ArticleCard]
  */
 @Immutable
-data class ArticleCardStyle(
+data class ArticleCardConfiguration(
 	val innerPadding: Dp = 16.dp,
 	val innerElementsShape: Shape = RoundedCornerShape(10.dp),
 	val cardShape: Shape = RoundedCornerShape(26.dp),
@@ -98,13 +98,15 @@ data class ArticleCardStyle(
 		color = textColor.copy(alpha = 0.5f),
 		fontSize = 14.sp,
 		fontWeight = FontWeight.W500
-	)
+	),
+
+	val toggleBookmarksLambda: (suspend (addToBookmarks: Boolean, articleId: Int) -> Boolean)? = null
 
 ) {
 	companion object {
 		
 		@Composable
-		fun defaultArticleCardStyle(): ArticleCardStyle? {
+		fun defaultArticleCardStyle(): ArticleCardConfiguration? {
 			val showImage by HubsDataStore.Settings.getValueFlow(
 				LocalContext.current,
 				HubsDataStore.Settings.ArticleCard.ShowImage
@@ -137,7 +139,7 @@ data class ArticleCardStyle(
 			
 			val colors = MaterialTheme.colors
 			val defaultCardStyle = remember {
-				ArticleCardStyle(textColor = colors.onSurface,
+				ArticleCardConfiguration(textColor = colors.onSurface,
 					statisticsColor = colors.onSurface.copy(
 					alpha = if (colors.isLight) {
 						0.75f
@@ -170,10 +172,5 @@ data class ArticleCardStyle(
 			)
 		}
 	}
-}
-
-class lol {
-	var aboba: Int = 0
-	
 }
 

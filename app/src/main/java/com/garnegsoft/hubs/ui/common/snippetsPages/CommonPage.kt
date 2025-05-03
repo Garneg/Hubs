@@ -1,8 +1,6 @@
 package com.garnegsoft.hubs.ui.common.snippetsPages
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyListState
@@ -13,11 +11,10 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.CollapsingContent
 import com.garnegsoft.hubs.api.CollapsingContentState
 import com.garnegsoft.hubs.api.Filter
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.article.HabrSnippetListModel
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
@@ -27,7 +24,7 @@ import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import kotlinx.coroutines.launch
 
 @Composable
-fun <T : HabrSnippet> CommonPage(
+fun <T : HubsLazyListItem> CommonPage(
 	listModel: HabrSnippetListModel<T>,
 	lazyListState: LazyListState = rememberLazyListState(),
 	collapsingBar: (@Composable () -> Unit)? = null,
@@ -86,7 +83,7 @@ fun <T : HabrSnippet> CommonPage(
 				LazyHabrSnippetsColumn(
 					modifier = Modifier.fillMaxSize(),
 					lazyListState = lazyListState,
-					data = data!!,
+					data = data!!.list,
 					onScrollEnd = listModel::loadNextPage,
 					snippet = snippetCard,
 					nextPageLoadingIndicator = if (lastLoadedPageNumber < data!!.pagesCount) {
@@ -114,7 +111,7 @@ fun <T : HabrSnippet> CommonPage(
 }
 
 @Composable
-fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
+fun <T : HubsLazyListItem, F : Filter> CommonPageWithFilter(
 	listModel: AbstractSnippetListModel<T>,
 	lazyListState: LazyListState = rememberLazyListState(),
 	collapsingContentState: CollapsingContentState = rememberCollapsingContentState(),
@@ -160,4 +157,5 @@ fun <T : HabrSnippet, F : Filter> CommonPageWithFilter(
 		collapsingContentState = collapsingContentState
 	)
 }
+
 

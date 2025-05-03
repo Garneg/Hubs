@@ -195,7 +195,7 @@ class CommentsListController {
                     level = comment.level,
                     author = Article.Author(
                         alias = "",
-                        avatarUrl = null,
+                        avatarUrl = "",
                         fullname = null
                     ),
                     publishedTime = comment.timePublished,
@@ -216,7 +216,7 @@ class CommentsListController {
                 level = comment.level,
                 author = Article.Author(
                     alias = comment.author!!.alias!!,
-                    avatarUrl = comment.author?.avatarUrl,
+                    avatarUrl = comment.author?.avatarUrl!!,
                     fullname = comment.author!!.fullname
                 ),
                 publishedTime = comment.timePublished,
@@ -260,7 +260,7 @@ class CommentsListController {
                                     author = Article.Author(
                                         alias = it.author!!.alias!!,
                                         fullname = it.author!!.fullname,
-                                        avatarUrl = it.author!!.avatarUrl,
+                                        avatarUrl = it.author!!.avatarUrl!!,
                                     )
                                 )
                             )

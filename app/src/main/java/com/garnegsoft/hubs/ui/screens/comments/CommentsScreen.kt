@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
@@ -49,7 +50,8 @@ import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
-import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
+import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import kotlinx.coroutines.Dispatchers
@@ -94,7 +96,7 @@ fun CommentsScreen(
 	var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 	
 	val commentsData by viewModel.commentsData.observeAsState()
-	val articleSnippet = viewModel.parentPostSnippet.observeAsState().value
+	val articleSnippet = viewModel.parentPostSnippet.map { it.toArticleCardData() }.observeAsState().value
 	val lazyListState = rememberLazyListState()
 	
 	val screenState =
@@ -304,8 +306,8 @@ fun CommentsScreen(
 					
 					.imePadding()
 			) {
-				val articleCardStyle =
-					ArticleCardStyle.defaultArticleCardStyle()?.copy(
+				val articleCardConfiguration =
+					ArticleCardConfiguration.defaultArticleCardStyle()?.copy(
 						showImage = false,
 						showTextSnippet = false,
 						bookmarksButtonAllowedBeEnabled = userAuthenticated
@@ -324,11 +326,11 @@ fun CommentsScreen(
 					if (articleSnippet != null) {
 						item {
 							
-							articleCardStyle?.let {
+							articleCardConfiguration?.let {
 								ArticleCard(
-									article = articleSnippet,
+									cardData = articleSnippet,
 									onClick = onArticleClicked,
-									style = it,
+									configuration = it,
 									onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
 									onCommentsClick = { }
 								)
@@ -570,7 +572,7 @@ fun CommentsScreen(
 									)
 									
 									Text(
-										text = articleSnippet?.title!!,
+										text = articleSnippet.articleTitle!!,
 										style = MaterialTheme.typography.body2,
 										maxLines = 1,
 										overflow = TextOverflow.Ellipsis
