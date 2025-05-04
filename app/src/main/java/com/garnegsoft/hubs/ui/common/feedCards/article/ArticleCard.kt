@@ -294,7 +294,7 @@ fun ArticleCard(
 					HapticFeedbackType.LongPress
 				)
 			},
-			bookmarksButtonEnabled = configuration.commentsButtonEnabled && !bookmarkState.throttleButton,
+			bookmarksButtonEnabled = configuration.commentsButtonEnabled && !bookmarkState.throttleButton && toggleBookmark != null,
 			style = configuration,
 			ratingIconPainter = ratingIconPainter,
 			viewsIconPainter = viewsIconPainter,

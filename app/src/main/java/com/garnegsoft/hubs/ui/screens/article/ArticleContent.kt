@@ -177,8 +177,7 @@ fun ArticleContent(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 modifier = Modifier
-                                    .widthIn(min = 120.dp)
-
+                                    .fillMaxWidth()
 									.shimmerEffect(
                                         enabled = companyTitle == null,
                                         shape = RoundedCornerShape(4.dp)
