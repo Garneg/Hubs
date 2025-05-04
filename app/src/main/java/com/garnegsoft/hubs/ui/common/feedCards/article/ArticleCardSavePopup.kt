@@ -14,6 +14,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -74,11 +75,11 @@ fun SaveArticlePopup(
 		) {
 			Box(
 				modifier = Modifier
-					.graphicsLayer(
-						scaleX = animatedSize,
-						scaleY = animatedSize,
+					.graphicsLayer {
+						scaleX = animatedSize
+						scaleY = animatedSize
 						alpha = animatedSize
-					)
+					}
 					.size((bounds.width / density).dp, (bounds.height / density).dp)
 					.shadow(1.dp, shape = cardStyle.innerElementsShape)
 					.clip(cardStyle.innerElementsShape)

@@ -332,7 +332,7 @@ fun CommentsScreen(
 									onClick = onArticleClicked,
 									configuration = it,
 									onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-									onCommentsClick = { }
+									onCommentsClick = { },
 								)
 								Spacer(modifier = Modifier.height(8.dp))
 							}

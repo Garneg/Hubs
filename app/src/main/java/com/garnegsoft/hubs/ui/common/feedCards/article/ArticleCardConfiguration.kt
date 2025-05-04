@@ -100,8 +100,6 @@ data class ArticleCardConfiguration(
 		fontWeight = FontWeight.W500
 	),
 
-	val toggleBookmarksLambda: (suspend (addToBookmarks: Boolean, articleId: Int) -> Boolean)? = null
-
 ) {
 	companion object {
 		

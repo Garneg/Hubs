@@ -52,6 +52,8 @@ fun VotesCountIndicator(
 	val offset by transition.animateFloat{
 		if (it) 0f else 8f
 	}
+
+
 	
 	val alpha by transition.animateFloat{
 		if (it) 1f else 0.0f

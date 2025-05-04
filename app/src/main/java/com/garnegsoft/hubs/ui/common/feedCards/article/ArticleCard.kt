@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,6 +42,7 @@ fun ArticleCard(
 	onAuthorClick: () -> Unit,
 	onCommentsClick: () -> Unit,
 	configuration: ArticleCardConfiguration,
+	toggleBookmark: (suspend (addToBookmarks: Boolean, articleId: Int) -> Boolean)? = null,
 	ratingIconPainter: Painter = painterResource(id = R.drawable.rating),
 	viewsIconPainter: Painter = painterResource(id = R.drawable.views_icon),
 	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
@@ -259,12 +261,15 @@ fun ArticleCard(
 
 		ArticleStats(
 			statistics = cardData.articleStatistics,
-			addedToBookmarks = addedToBookmarks,
-			bookmarksCount = addedToBookmarksCount,
+			addedToBookmarks = bookmarkState.bookmarked,
+			bookmarksCount = bookmarkState.bookmarksCount,
 			onAddToBookmarksClicked = {
-				bookmarksCoroutineScope.launch {
-					configuration.toggleBookmarksLambda?.let { bookmarkState.toggleBookmark(it, cardData.id)}
-				}},
+				toggleBookmark?.let {
+					bookmarksCoroutineScope.launch {
+						bookmarkState.toggleBookmark(it, cardData.id)
+					}
+				}
+				},
 			onCommentsClick = onCommentsClick,
 			saveArticlePopup = { bounds ->
 				SaveArticlePopup(
@@ -289,7 +294,7 @@ fun ArticleCard(
 					HapticFeedbackType.LongPress
 				)
 			},
-			bookmarksButtonEnabled = configuration.commentsButtonEnabled,
+			bookmarksButtonEnabled = configuration.commentsButtonEnabled && !bookmarkState.throttleButton,
 			style = configuration,
 			ratingIconPainter = ratingIconPainter,
 			viewsIconPainter = viewsIconPainter,
@@ -347,15 +352,20 @@ class BookmarkState(
 		}
 	}
 
-//	companion object{
-//		val Saver = listSaver<BookmarkState, Any>(
-//			save = { listOf(it.isRealBookmarked) },
-//			restore = { BookmarkState(it[0] as Boolean)}
-//		)
-//	}
+	companion object{
+		val Saver = listSaver<BookmarkState, Any>(
+			save = { listOf(it.bookmarksCount, it.isRealBookmarked) },
+			restore = { BookmarkState(it[0] as Int, it[1] as Boolean)}
+		)
+	}
 }
 
 @Composable
 fun rememberBookmarkState(initialBookmarksCount: Int, bookmarked: Boolean): BookmarkState {
-	return remember(bookmarked) { BookmarkState(initialBookmarksCount, bookmarked) }
+	return rememberSaveable(
+		bookmarked,
+		saver = BookmarkState.Saver
+	) {
+		BookmarkState(initialBookmarksCount, bookmarked)
+	}
 }

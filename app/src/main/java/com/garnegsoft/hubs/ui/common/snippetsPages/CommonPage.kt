@@ -121,7 +121,7 @@ fun <T : HubsLazyListItem, F : Filter> CommonPageWithFilter(
 		}
 	},
 	doInitialLoading: Boolean = true,
-	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
+	filterDialog: (@Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit)?,
 	snippetCard: @Composable (T) -> Unit,
 ) {
 	var showDialog by rememberSaveable {
@@ -131,14 +131,16 @@ fun <T : HubsLazyListItem, F : Filter> CommonPageWithFilter(
 	val filterValues by listModel.filter.observeAsState()
 	
 	if (showDialog) {
-		filterDialog(
-			filterValues!! as F,
-			{ showDialog = false },
-			{
-				listModel.editFilter(it)
-				showDialog = false
-			}
-		)
+		filterDialog?.let {
+			it(
+				filterValues!! as F,
+				{ showDialog = false },
+				{
+					listModel.editFilter(it)
+					showDialog = false
+				}
+			)
+		}
 	}
 	val coroutineScope = rememberCoroutineScope()
 	CommonPage(

@@ -1,11 +1,16 @@
 package com.garnegsoft.hubs.api.article
 
+import ArticleController
+import androidx.compose.ui.util.fastAny
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrList
+import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardData
 import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 
 /// ORIGINAL ONE
@@ -55,9 +60,37 @@ class ArticlesListModel(
 	coroutineScope = coroutineScope,
 	initialFilter = initialFilter
 ) {
+
+	val listOfModelArticles = mutableListOf<ArticleSnippet>()
+
+	private fun isArticleTypeNews(articleId: Int): Boolean
+		= listOfModelArticles.any { it.type == PostType.News && it.id == articleId }
+
+
+	override fun refresh() {
+		listOfModelArticles.clear()
+		super.refresh()
+	}
+
 	override fun load(args: Map<String, String>): HabrList<ArticleCardData>? {
 		return ArticlesListController.getArticlesSnippets(path, args)?.let {
+			listOfModelArticles.addAll(it.list)
 			HabrList(it.list.map { it.toArticleCardData() }, it.pagesCount)
 		}
+	}
+
+
+
+	suspend fun toggleArticleBookmark(targetStateBookmarked: Boolean, articleId: Int): Boolean {
+		var result: Boolean
+		withContext(Dispatchers.IO) {
+			val isNews = isArticleTypeNews(articleId)
+			if (targetStateBookmarked){
+                result = ArticleController.addToBookmarks(articleId, isNews)
+			} else {
+				result = ArticleController.removeFromBookmarks(articleId, isNews)
+			}
+		}
+		return result
 	}
 }

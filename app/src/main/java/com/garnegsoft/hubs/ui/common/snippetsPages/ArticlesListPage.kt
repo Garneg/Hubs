@@ -18,62 +18,40 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.feedCards.article.BlockedAuthorArticleCard
+import com.garnegsoft.hubs.ui.screens.main.ArticlesFilter
 
+
+private object dummyFilter : Filter {
+	override fun toArgsMap(): Map<String, String> {
+		TODO("Not yet implemented")
+	}
+
+	override fun getTitle(): String {
+		TODO("Not yet implemented")
+	}
+
+}
 
 @Composable
 fun ArticlesListPage(
 	listModel: ArticlesListModel,
 	lazyListState: LazyListState = rememberLazyListState(),
-	filterIndicator: (@Composable () -> Unit)? = null,
 	onArticleSnippetClick: (articleId: Int) -> Unit,
 	onArticleAuthorClick: (authorAlias: String) -> Unit,
 	onArticleCommentsClick: (articleId: Int) -> Unit,
 	doInitialLoading: Boolean = true,
 	ignoreBlackList: Boolean = false
 ) {
-	val context = LocalContext.current
-	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
-	val cardsStyle = ArticleCardConfiguration.defaultArticleCardStyle()?.copy(bookmarksButtonAllowedBeEnabled = userAuthenticated)
-	val ratingIconPainter = painterResource(id = R.drawable.rating)
-	val viewsIconPainter = painterResource(id = R.drawable.views_icon)
-	val bookmarkIconPainter = painterResource(id = R.drawable.bookmark)
-	val filledBookmarkIconPainter = painterResource(id = R.drawable.bookmark_filled)
-	val commentIconPainter = painterResource(id = R.drawable.comments_icon)
-	val complexityIconPainter = painterResource(id = R.drawable.speedmeter_hard)
-	val readingTimeIconPainter = painterResource(id = R.drawable.clock_icon)
-	val translationIconPainter = painterResource(id = R.drawable.translation)
-	
-	cardsStyle?.let { articleCardsStyle ->
-		CommonPage(
-			listModel = listModel,
-			lazyListState = lazyListState,
-			collapsingBar = filterIndicator,
-			doInitialLoading = doInitialLoading
-		) {
-			if (it.author?.isBlockListed == true && !ignoreBlackList) {
-				BlockedAuthorArticleCard(
-					cardData = it,
-					articleCardConfiguration = articleCardsStyle,
-					onAuthorClick = { onArticleAuthorClick(it.author.alias) })
-			} else {
-				ArticleCard(
-					cardData = it,
-					onClick = { onArticleSnippetClick(it.id) },
-					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
-					onCommentsClick = { onArticleCommentsClick(it.id) },
-					configuration = articleCardsStyle,
-					ratingIconPainter,
-					viewsIconPainter,
-					bookmarkIconPainter,
-					filledBookmarkIconPainter,
-					commentIconPainter,
-					complexityIconPainter,
-					readingTimeIconPainter,
-					translationIconPainter
-				)
-			}
-		}
-	}
+	ArticlesListPageWithFilter<dummyFilter>(
+		listModel = listModel,
+		lazyListState = lazyListState,
+		onArticleSnippetClick = onArticleSnippetClick,
+		onArticleAuthorClick = onArticleAuthorClick,
+		onArticleCommentsClick = onArticleCommentsClick,
+		doInitialLoading = doInitialLoading,
+		ignoreBlackList = ignoreBlackList,
+		filterDialog = null,
+	)
 }
 
 @Composable
@@ -91,7 +69,7 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	onArticleCommentsClick: (articleId: Int) -> Unit,
 	doInitialLoading: Boolean = true,
 	ignoreBlackList: Boolean = false,
-	filterDialog: @Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit,
+	filterDialog: (@Composable (defaultValues: F, onDismiss: () -> Unit, onDone: (F) -> Unit) -> Unit)?,
 ) {
 	val context = LocalContext.current
 	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
@@ -124,14 +102,15 @@ fun <F : Filter> ArticlesListPageWithFilter(
 					onAuthorClick = { it.author?.alias?.let { onArticleAuthorClick(it) } },
 					onCommentsClick = { onArticleCommentsClick(it.id) },
 					configuration = articleCardsStyle,
-					ratingIconPainter,
-					viewsIconPainter,
-					bookmarkIconPainter,
-					filledBookmarkIconPainter,
-					commentIconPainter,
-					complexityIconPainter,
-					readingTimeIconPainter,
-					translationIconPainter
+					toggleBookmark = { addToBookmarks, articleId ->  listModel.toggleArticleBookmark(addToBookmarks, articleId) },
+					ratingIconPainter = ratingIconPainter,
+					viewsIconPainter = viewsIconPainter,
+					bookmarkIconPainter = bookmarkIconPainter,
+					filledBookmarkIconPainter = filledBookmarkIconPainter,
+					commentIconPainter = commentIconPainter,
+					complexityIconPainter = complexityIconPainter,
+					readingTimeIconPainter = readingTimeIconPainter,
+					translationIconPainter = translationIconPainter,
 				)
 			}
 		}
