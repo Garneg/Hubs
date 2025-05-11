@@ -19,6 +19,24 @@ class HabrDataParser<T> {
 
         inline fun <reified T> parseJson(jsonElement: JsonElement, json: Json): T {
             return json.decodeFromJsonElement(jsonElement)
+
+        }
+
+        inline fun <reified T> parseJsonOrNull(json: String): T? {
+            return try {
+                parseJson(json)
+            } catch (ex: Exception) {
+                null
+            }
+        }
+
+        inline fun <reified T> parseJsonResult(json: String): Result<T> {
+            return try {
+                val result = parseJson<T>(json)
+                Result.success(result)
+            } catch (ex: Exception) {
+                Result.failure(ex)
+            }
         }
     }
 }

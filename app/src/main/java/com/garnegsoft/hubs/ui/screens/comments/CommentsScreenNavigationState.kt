@@ -52,8 +52,10 @@ class CommentsScreenNavigationState(
         addCommentsToSkipList(getChildrenOfComment(commentId))
     }
 
-    fun collapseThread(childCommentId: Int) {
-        collapseComment(getRootCommentId(childCommentId))
+    suspend fun collapseThread(childCommentId: Int) {
+        val rootCommentId = getRootCommentId(childCommentId)
+        collapseComment(rootCommentId)
+        scrollToComment(rootCommentId)
     }
 
     fun getRootCommentId(childCommentId: Int): Int {

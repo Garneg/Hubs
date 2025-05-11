@@ -454,9 +454,11 @@ fun CommentsScreen(
 																showMenu = false
 															},
 															onCollapseThreadClick = {
-																screenState.collapseThread(
-																	comment.id
-																)
+																coroutineScope.launch {
+																	screenState.collapseThread(
+																		comment.id
+																	)
+																}
 																showMenu = false
 															},
 															onDismiss = { showMenu = false })
