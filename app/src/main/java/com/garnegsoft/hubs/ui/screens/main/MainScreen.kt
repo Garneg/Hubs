@@ -9,12 +9,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
@@ -70,10 +66,8 @@ fun MainScreen(
 
     // TODO: Move it to its own file so it won't bother when refactoring main screen 
     // Kinda ugly, isn't it? Have to come up with something better next time when building things
-    val showSetOpenUrlByDefaultDialogPreference by HubsDataStore.DialogFlags.getValueFlow(
-        context,
-        HubsDataStore.DialogFlags.showSetOpenUrlByDefault
-    ).collectAsState(null)
+    val showSetOpenUrlByDefaultDialogPreference by HubsDataStore
+        .applicationFlags.ShowSetOpenUrlByDefaultDialog.getFlow(context).collectAsState(null)
 
     // allows/disallows launched effect check values and show dialog (works as cache)
     var setOpenByDefaultDialogShown by rememberSaveable { mutableStateOf(false) }
@@ -95,7 +89,8 @@ fun MainScreen(
             onNeverShowAgain = {
                 showSetOpenByDefaultDialog = false
                 coroutineScope.launch {
-                    HubsDataStore.DialogFlags.edit(context, HubsDataStore.DialogFlags.showSetOpenUrlByDefault, false)
+                    HubsDataStore.applicationFlags.edit(context, HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog
+                        , false)
                 }
             },
             onRedirectedToSettings = {

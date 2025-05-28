@@ -13,19 +13,16 @@ import kotlinx.serialization.json.Json
 class FilterSavingController {
 	companion object {
 		suspend fun saveMyFeedFilter(context: Context, filterPreferences: MyFeedFilter) {
-			HubsDataStore.FiltersPreferences.edit(
+			HubsDataStore.Filters.edit(
 				context,
-				HubsDataStore.FiltersPreferences.MyFeed,
+				HubsDataStore.Filters.MyFeed,
 				Json.encodeToString(filterPreferences)
 			)
 		}
 		
 		suspend fun getMyFeedFilter(context: Context, defaultFilterPreferences: MyFeedFilter) : MyFeedFilter {
-			
-			return HubsDataStore.FiltersPreferences.getValueFlow(
-				context,
-				HubsDataStore.FiltersPreferences.MyFeed
-			).firstOrNull()?.let {
+			HubsDataStore.applicationFlags
+			return HubsDataStore.Filters.MyFeed.getFlow(context).firstOrNull()?.let {
 				return@let try {
 					Json.decodeFromString(it)
 				} catch (ex: Exception) {
@@ -37,17 +34,16 @@ class FilterSavingController {
 		}
 	
 		suspend fun saveArticlesFilter(context: Context, filterPreferences: ArticlesFilter) {
-			HubsDataStore.FiltersPreferences.edit(
+			HubsDataStore.Filters.Articles.edit(
 				context,
-				HubsDataStore.FiltersPreferences.Articles,
 				Json.encodeToString(filterPreferences)
 			)
 		}
 		
 		suspend fun getArticlesFilter(context: Context, defaultFilterPreferences: ArticlesFilter) : ArticlesFilter {
-			return HubsDataStore.FiltersPreferences.getValueFlow(
+			return HubsDataStore.Filters.getValueFlow(
 				context,
-				HubsDataStore.FiltersPreferences.Articles
+				HubsDataStore.Filters.Articles
 			).firstOrNull()?.let {
 				return@let try {
 					Json.decodeFromString(it)
@@ -59,17 +55,17 @@ class FilterSavingController {
 		}
 		
 		suspend fun saveNewsFilter(context: Context, filterPreferences: NewsFilter) {
-			HubsDataStore.FiltersPreferences.edit(
+			HubsDataStore.Filters.edit(
 				context,
-				HubsDataStore.FiltersPreferences.News,
+				HubsDataStore.Filters.News,
 				Json.encodeToString(filterPreferences)
 			)
 		}
 		
 		suspend fun getNewsFilter(context: Context, defaultFilterPreferences: NewsFilter) : NewsFilter {
-			return HubsDataStore.FiltersPreferences.getValueFlow(
+			return HubsDataStore.Filters.getValueFlow(
 				context,
-				HubsDataStore.FiltersPreferences.News
+				HubsDataStore.Filters.News
 			).firstOrNull()?.let {
 				return@let try {
 					Json.decodeFromString(it)

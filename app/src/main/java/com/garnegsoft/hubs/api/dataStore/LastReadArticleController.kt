@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.api.dataStore
 
 import android.content.Context
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 
 class LastReadArticleController {
