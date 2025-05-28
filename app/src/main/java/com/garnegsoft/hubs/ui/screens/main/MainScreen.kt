@@ -4,6 +4,7 @@ package com.garnegsoft.hubs.ui.screens.main
 import ArticleController
 import android.content.Context
 import android.net.ConnectivityManager
+import android.util.Log
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -53,7 +54,7 @@ fun MainScreen(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var isAuthorized by rememberSaveable { mutableStateOf(false) }
+    var isAuthorized by rememberSaveable { mutableStateOf<Boolean?>(null) }
     val authorizedState by AuthDataController.isAuthorizedFlow(context)
         .collectAsState(initial = null)
 
@@ -186,7 +187,7 @@ fun MainScreen(
             }
         }
     ) {
-        if (authorizedState != null)
+        if (isAuthorized != null)
             Column(
                 Modifier.padding(it)
             ) {
@@ -273,7 +274,7 @@ fun MainScreen(
                             )
                         }
                     )
-                    if (isAuthorized) map =
+                    if (isAuthorized == true) map =
                         mapOf<String, @Composable () -> Unit>(
                             "Моя лента" to {
                                 ArticlesListPageWithFilter(
