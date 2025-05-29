@@ -159,16 +159,11 @@ fun MainScreen(
         topBar = {
             TopAppBar(
                 elevation = 0.dp,
-                title = {
-                    Text(
-                        text = "Хабы"
-                    )
-                },
+                title = { Text(text = "Хабы") },
                 actions = {
                     IconButton(
-                        onClick = {
-                            onSearchClicked()
-                        }) {
+                        onClick = { onSearchClicked() }
+                    ) {
                         Icon(
                             modifier = Modifier
                                 .size(20.dp),
@@ -349,6 +344,7 @@ fun MainScreen(
                         })
                     HorizontalPager(
                         state = pagerState,
+                        key = { pages.keys.elementAt(it) }
                     ) {
                         pages.values.elementAt(it)()
 

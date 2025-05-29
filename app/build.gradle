@@ -61,7 +61,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion "1.5.10"
+        kotlinCompilerExtensionVersion "1.5.15"
     }
     packagingOptions {
         resources {
@@ -79,14 +79,14 @@ dependencies {
     implementation "androidx.compose.material3:material3:$m3version"
 
     // firebase
-    implementation platform('com.google.firebase:firebase-bom:33.8.0')
+    implementation platform('com.google.firebase:firebase-bom:33.14.0')
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.firebase:firebase-messaging'
     implementation 'com.google.firebase:firebase-crashlytics'
-    implementation 'com.google.firebase:firebase-crashlytics-ktx:19.4.0'
+    implementation 'com.google.firebase:firebase-crashlytics-ktx:19.4.3'
 
     // workmanager
-    implementation "androidx.work:work-runtime-ktx:2.10.0"
+    implementation "androidx.work:work-runtime-ktx:2.10.1"
 
     // glance
     implementation "androidx.glance:glance-appwidget:1.1.1"

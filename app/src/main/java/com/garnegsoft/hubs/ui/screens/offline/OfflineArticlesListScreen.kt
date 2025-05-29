@@ -123,7 +123,7 @@ fun OfflineArticlesListScreen(
 							items = articlesList,
 							key = { it.articleId }
 						) {
-							Box(modifier = Modifier.animateItemPlacement()) {
+							Box(modifier = Modifier.animateItem()) {
 								OfflineArticleCard(
 									article = it,
 									onClick = { onArticleClick(it.articleId) },
