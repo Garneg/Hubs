@@ -66,7 +66,7 @@ fun CompanyProfile(
 							.fillMaxWidth()
 							.aspectRatio(4.3f) // aspect ratio of banners (1320 / 300)
 							.clip(RoundedCornerShape(26.dp))
-							.background(MaterialTheme.colors.onBackground.copy(0.1f))
+							.background(Color.White)
 							.clickable(
 								enabled = company.branding.bannerLinkUrl != null
 							) {
