@@ -90,8 +90,7 @@ fun MainScreen(
             onNeverShowAgain = {
                 showSetOpenByDefaultDialog = false
                 coroutineScope.launch {
-                    HubsDataStore.applicationFlags.edit(context, HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog
-                        , false)
+                    HubsDataStore.applicationFlags.edit(context, HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog, false)
                 }
             },
             onRedirectedToSettings = {
@@ -201,9 +200,32 @@ fun MainScreen(
                 val companiesLazyListState = rememberLazyListState()
 
 
-                val pages = remember(key1 = isAuthorized) {
-                    var map = mapOf<String, @Composable () -> Unit>(
-                        "Статьи" to {
+                val pages = remember(isAuthorized) {
+                    buildMap<String, @Composable () -> Unit> {
+                        if (isAuthorized == true){
+                            put("Моя лента", {
+                                ArticlesListPageWithFilter(
+                                    listModel = viewModel.myFeedArticlesListModel,
+                                    collapsingContentState = myFeedFilterContentState,
+                                    lazyListState = myFeedLazyListState,
+                                    onArticleSnippetClick = onArticleClicked,
+                                    onArticleAuthorClick = onUserClicked,
+                                    onArticleCommentsClick = onCommentsClicked
+                                ) { defaultValues, onDismiss, onDone ->
+                                    MyFeedFilter(
+                                        defaultValues = defaultValues,
+                                        onDismiss = onDismiss,
+                                        onDone = {
+                                            coroutineScope.launch(Dispatchers.IO) {
+                                                FilterSavingController.saveMyFeedFilter(context, it)
+                                            }
+                                            onDone(it)
+                                        }
+                                    )
+                                }
+                            })
+                        }
+                        put("Статьи", {
                             ArticlesListPageWithFilter(
                                 listModel = viewModel.articlesListModel,
                                 lazyListState = articlesLazyListState,
@@ -224,8 +246,8 @@ fun MainScreen(
                                         })
                                 }
                             )
-                        },
-                        "Новости" to {
+                        })
+                        put("Новости", {
                             ArticlesListPageWithFilter(
                                 listModel = viewModel.newsListModel,
                                 lazyListState = newsLazyListState,
@@ -246,53 +268,29 @@ fun MainScreen(
                                     )
                                 }
                             )
-                        },
-                        "Хабы" to {
+                        })
+                        put("Хабы", {
                             HubsListPage(
                                 listModel = viewModel.hubsListModel,
                                 lazyListState = hubsLazyListState,
                                 onHubClick = onHubClicked
                             )
-                        },
-                        "Авторы" to {
+                        })
+                        put("Авторы", {
                             UsersListPage(
                                 listModel = viewModel.authorsListModel,
                                 lazyListState = authorsLazyListState,
                                 onUserClick = onUserClicked
                             )
-                        },
-                        "Компании" to {
+                        })
+                        put("Компании", {
                             CompaniesListPage(
                                 listModel = viewModel.companiesListModel,
                                 lazyListState = companiesLazyListState,
                                 onCompanyClick = onCompanyClicked
                             )
-                        }
-                    )
-                    if (isAuthorized == true) map =
-                        mapOf<String, @Composable () -> Unit>(
-                            "Моя лента" to {
-                                ArticlesListPageWithFilter(
-                                    listModel = viewModel.myFeedArticlesListModel,
-                                    collapsingContentState = myFeedFilterContentState,
-                                    lazyListState = myFeedLazyListState,
-                                    onArticleSnippetClick = onArticleClicked,
-                                    onArticleAuthorClick = onUserClicked,
-                                    onArticleCommentsClick = onCommentsClicked
-                                ) { defaultValues, onDismiss, onDone ->
-                                    MyFeedFilter(
-                                        defaultValues = defaultValues,
-                                        onDismiss = onDismiss,
-                                        onDone = {
-                                            coroutineScope.launch(Dispatchers.IO) {
-                                                FilterSavingController.saveMyFeedFilter(context, it)
-                                            }
-                                            onDone(it)
-                                        }
-                                    )
-                                }
-                            }) + map
-                    map
+                        })
+                    }
                 }
                 val pagerState = rememberPagerState { pages.size }
 
