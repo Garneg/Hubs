@@ -362,12 +362,12 @@ internal fun UserProfile(
 															append("${invite.inviteDate} по приглашению от ")
 															if (invite.inviterAlias != null) {
 																withLink(LinkAnnotation.Url(
-																	url = "https://habr.com/ru/users/$invite",
+																	url = "https://habr.com/ru/users/${invite.inviterAlias}",
 																	styles = textLinkStyles,
 																	linkInteractionListener = {
 																			val intent = Intent(
 																				Intent.ACTION_VIEW,
-																				Uri.parse("https://habr.com/ru/users/$it")
+																				Uri.parse("https://habr.com/ru/users/${invite.inviterAlias}")
 																			).apply {
 																				setPackage(BuildConfig.APPLICATION_ID)
 																			}
@@ -561,9 +561,11 @@ internal fun UserProfile(
 													verticalAlignment = Alignment.CenterVertically
 												) {
 													AsyncImage(
-														modifier = Modifier.size(24.dp).clip(
-															RoundedCornerShape(4.dp)
-														),
+														modifier = Modifier
+															.size(24.dp)
+															.clip(
+																RoundedCornerShape(4.dp)
+															),
 														model = company?.avatarUrl,
 														contentDescription = null
 													)
