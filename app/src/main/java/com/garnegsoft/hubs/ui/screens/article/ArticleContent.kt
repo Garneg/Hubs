@@ -139,29 +139,13 @@ fun ArticleContent(
             if (article.isCorporative) {
                 item {
                     DisableSelection {
-                        val companyAlias = article.hubs.find { it.isCorporative }!!.alias
 
-                        var companyTitle: String? by rememberSaveable {
-                            mutableStateOf(null)
-                        }
-                        var companyAvatarUrl: String? by rememberSaveable {
-                            mutableStateOf(null)
-                        }
-                        LaunchedEffect(key1 = Unit, block = {
-                            if (companyTitle == null) {
-                                launch(Dispatchers.IO) {
-                                    CompanyController.get(companyAlias)?.let {
-                                        companyAvatarUrl = it.avatarUrl
-                                        companyTitle = it.title
-                                    }
-                                }
-                            }
-                        })
+                        val company by viewModel.company.observeAsState()
 
                         Row(
                             modifier = Modifier
 								.clip(RoundedCornerShape(8.dp))
-								.clickable(onClick = { onCompanyClick(companyAlias) }),
+								.clickable(onClick = { onCompanyClick(company!!.alias) }),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
 
@@ -169,9 +153,9 @@ fun ArticleContent(
                                 modifier = Modifier
 									.size(38.dp)
 									.clip(RoundedCornerShape(8.dp))
-									.shimmerEffect(companyTitle == null)
+									.shimmerEffect(company == null)
 									.background(Color.White),
-                                model = companyAvatarUrl,
+                                model = company?.avatarUrl,
                                 contentDescription = ""
                             )
                             Spacer(modifier = Modifier.width(8.dp))
@@ -179,10 +163,10 @@ fun ArticleContent(
                                 modifier = Modifier
                                     .fillMaxWidth()
 									.shimmerEffect(
-                                        enabled = companyTitle == null,
+                                        enabled = company == null,
                                         shape = RoundedCornerShape(4.dp)
                                     ),
-                                text = companyTitle ?: "", fontWeight = FontWeight.W600,
+                                text = company?.title ?: "", fontWeight = FontWeight.W600,
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colors.onBackground
                             )
