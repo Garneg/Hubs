@@ -68,6 +68,9 @@ fun ArticleScreen(
     val article by viewModel.article.observeAsState()
     val company by viewModel.company.observeAsState()
 
+    var revealArticleContent by rememberSaveable { mutableStateOf(false) }
+
+
     LaunchedEffect(key1 = Unit, block = {
         if (!viewModel.article.isInitialized) {
             viewModel.loadArticle(articleId)
@@ -140,200 +143,204 @@ fun ArticleScreen(
         backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
         bottomBar = {
             article?.let { article ->
-
-                BottomAppBar(
-                    elevation = 0.dp,
-                    backgroundColor = MaterialTheme.colors.surface,
-                    modifier = Modifier
-                        .height(60.dp)
+                AnimatedVisibility(
+                    visible = revealArticleContent,
+                    enter = slideInVertically { it } + fadeIn()
                 ) {
-                    var showVotesCounter by remember {
-                        mutableStateOf(false)
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
+                    BottomAppBar(
+                        elevation = 0.dp,
+                        backgroundColor = MaterialTheme.colors.surface,
                         modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable {
-                                showVotesCounter = !showVotesCounter
-                            }
+                            .height(60.dp)
                     ) {
-
-                        VotesCountIndicator(
-                            show = showVotesCounter,
-                            stats = article.statistics,
-                            color = statisticsColor
-                        ) {
-                            showVotesCounter = false
+                        var showVotesCounter by remember {
+                            mutableStateOf(false)
                         }
-                        Icon(
-                            modifier = Modifier.size(18.dp),
-                            painter = painterResource(id = R.drawable.rating),
-                            contentDescription = "",
-                            tint = statisticsColor
-                        )
-                        Spacer(modifier = Modifier.width(1.dp))
-                        Text(
-                            if (article.statistics.score > 0)
-                                "+" + article.statistics.score.toString()
-                            else
-                                article.statistics.score.toString(),
-                            color = if (article.statistics.score > 0)
-                                RatingPositiveColor
-                            else if (article.statistics.score < 0)
-                                RatingNegativeColor
-                            else
-                                statisticsColor,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clickable {
+                                    showVotesCounter = !showVotesCounter
+                                }
+                        ) {
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(18.dp),
-                            painter = painterResource(id = R.drawable.views_icon),
-                            contentDescription = "",
-                            tint = statisticsColor
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            formatLongNumbers(article.statistics.readingCount.toInt()),
-                            color = statisticsColor,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-                    var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
-                        mutableStateOf(article.relatedData?.bookmarked ?: false)
-                    }
-                    var addedToBookmarksCount by rememberSaveable(article.statistics.bookmarksCount) {
-                        mutableStateOf(article.statistics.bookmarksCount)
-                    }
-                    val favoriteCoroutineScope = rememberCoroutineScope()
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable(
-                                enabled = userAuthenticated
+                            VotesCountIndicator(
+                                show = showVotesCounter,
+                                stats = article.statistics,
+                                color = statisticsColor
                             ) {
-                                article.relatedData?.let {
-                                    favoriteCoroutineScope.launch(Dispatchers.IO) {
-                                        if (addedToBookmarks) {
-                                            addedToBookmarks = false
-                                            addedToBookmarksCount--
-                                            addedToBookmarksCount =
-                                                addedToBookmarksCount.coerceAtLeast(0)
-                                            if (!ArticleController.removeFromBookmarks(
-                                                    article.id,
-                                                    article.postType == PostType.News
-                                                )
-                                            ) {
-                                                addedToBookmarks = true
-                                                addedToBookmarksCount++
-                                                addedToBookmarksCount =
-                                                    addedToBookmarksCount.coerceAtLeast(0)
-                                            }
+                                showVotesCounter = false
+                            }
+                            Icon(
+                                modifier = Modifier.size(18.dp),
+                                painter = painterResource(id = R.drawable.rating),
+                                contentDescription = "",
+                                tint = statisticsColor
+                            )
+                            Spacer(modifier = Modifier.width(1.dp))
+                            Text(
+                                if (article.statistics.score > 0)
+                                    "+" + article.statistics.score.toString()
+                                else
+                                    article.statistics.score.toString(),
+                                color = if (article.statistics.score > 0)
+                                    RatingPositiveColor
+                                else if (article.statistics.score < 0)
+                                    RatingNegativeColor
+                                else
+                                    statisticsColor,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
 
-                                        } else {
-                                            addedToBookmarks = true
-                                            addedToBookmarksCount++
-                                            if (!ArticleController.addToBookmarks(
-                                                    article.id,
-                                                    article.postType == PostType.News
-                                                )
-                                            ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(18.dp),
+                                painter = painterResource(id = R.drawable.views_icon),
+                                contentDescription = "",
+                                tint = statisticsColor
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                formatLongNumbers(article.statistics.readingCount.toInt()),
+                                color = statisticsColor,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
+                        var addedToBookmarks by rememberSaveable(article.relatedData?.bookmarked) {
+                            mutableStateOf(article.relatedData?.bookmarked ?: false)
+                        }
+                        var addedToBookmarksCount by rememberSaveable(article.statistics.bookmarksCount) {
+                            mutableStateOf(article.statistics.bookmarksCount)
+                        }
+                        val favoriteCoroutineScope = rememberCoroutineScope()
+
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clickable(
+                                    enabled = userAuthenticated
+                                ) {
+                                    article.relatedData?.let {
+                                        favoriteCoroutineScope.launch(Dispatchers.IO) {
+                                            if (addedToBookmarks) {
                                                 addedToBookmarks = false
                                                 addedToBookmarksCount--
                                                 addedToBookmarksCount =
                                                     addedToBookmarksCount.coerceAtLeast(0)
+                                                if (!ArticleController.removeFromBookmarks(
+                                                        article.id,
+                                                        article.postType == PostType.News
+                                                    )
+                                                ) {
+                                                    addedToBookmarks = true
+                                                    addedToBookmarksCount++
+                                                    addedToBookmarksCount =
+                                                        addedToBookmarksCount.coerceAtLeast(0)
+                                                }
+
+                                            } else {
+                                                addedToBookmarks = true
+                                                addedToBookmarksCount++
+                                                if (!ArticleController.addToBookmarks(
+                                                        article.id,
+                                                        article.postType == PostType.News
+                                                    )
+                                                ) {
+                                                    addedToBookmarks = false
+                                                    addedToBookmarksCount--
+                                                    addedToBookmarksCount =
+                                                        addedToBookmarksCount.coerceAtLeast(0)
+                                                }
                                             }
                                         }
                                     }
                                 }
-                            }
-                    ) {
-                        Icon(
-                            modifier = Modifier.size(18.dp),
-                            painter =
-                            article.relatedData?.let {
-                                if (addedToBookmarks)
-                                    painterResource(id = R.drawable.bookmark_filled)
-                                else
-                                    null
-                            } ?: painterResource(id = R.drawable.bookmark),
-                            contentDescription = "",
-                            tint = statisticsColor
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = addedToBookmarksCount.toString(),
-                            color = statisticsColor,
-                            fontWeight = FontWeight.W500
-                        )
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .clickable(onClick = onCommentsClicked)
-                    ) {
-                        BadgedBox(
-                            modifier = Modifier.align(Alignment.Center),
-                            badge = {
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(18.dp),
+                                painter =
                                 article.relatedData?.let {
-                                    if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .clip(CircleShape)
-                                                .background(RatingPositiveColor)
-                                        )
+                                    if (addedToBookmarks)
+                                        painterResource(id = R.drawable.bookmark_filled)
+                                    else
+                                        null
+                                } ?: painterResource(id = R.drawable.bookmark),
+                                contentDescription = "",
+                                tint = statisticsColor
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = addedToBookmarksCount.toString(),
+                                color = statisticsColor,
+                                fontWeight = FontWeight.W500
+                            )
+                        }
+                        Spacer(Modifier.width(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .clickable(onClick = onCommentsClicked)
+                        ) {
+                            BadgedBox(
+                                modifier = Modifier.align(Alignment.Center),
+                                badge = {
+                                    article.relatedData?.let {
+                                        if (it.unreadComments > 0 && it.unreadComments < article.statistics.commentsCount) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(8.dp)
+                                                    .clip(CircleShape)
+                                                    .background(RatingPositiveColor)
+                                            )
+                                        }
                                     }
-                                }
-                            }) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                            ) {
-                                Icon(
-                                    modifier = Modifier.size(18.dp),
-                                    painter = painterResource(id = R.drawable.comments_icon),
-                                    contentDescription = "",
-                                    tint = statisticsColor
+                                }) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
+                                ) {
+                                    Icon(
+                                        modifier = Modifier.size(18.dp),
+                                        painter = painterResource(id = R.drawable.comments_icon),
+                                        contentDescription = "",
+                                        tint = statisticsColor
 
-                                )
-                                Spacer(Modifier.width(4.dp))
-                                Text(
-                                    text = formatLongNumbers(article.statistics.commentsCount),
-                                    color = statisticsColor,
-                                    fontWeight = FontWeight.W500
-                                )
+                                    )
+                                    Spacer(Modifier.width(4.dp))
+                                    Text(
+                                        text = formatLongNumbers(article.statistics.commentsCount),
+                                        color = statisticsColor,
+                                        fontWeight = FontWeight.W500
+                                    )
+                                }
                             }
                         }
                     }
+                    Divider()
                 }
-                Divider()
+
             }
         }
     ) {
         var articleContentParsed by rememberSaveable {
             mutableStateOf(false)
         }
-        var revealArticleContent by rememberSaveable { mutableStateOf(false) }
         LaunchedEffect(Unit) {
             delay(700) // minimal amount of time for article content to wait before appearing on screen (made to avoid flickering)
             revealArticleContent = true
