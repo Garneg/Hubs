@@ -99,6 +99,9 @@ fun ArticleScreen(
     }
     val articleSaved by viewModel.articleExists(LocalContext.current, articleId)
         .collectAsState(false)
+    var articleContentParsed by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Scaffold(
         topBar = {
@@ -144,7 +147,7 @@ fun ArticleScreen(
         bottomBar = {
             article?.let { article ->
                 AnimatedVisibility(
-                    visible = revealArticleContent,
+                    visible = revealArticleContent && articleContentParsed,
                     enter = slideInVertically { it } + fadeIn()
                 ) {
                     BottomAppBar(
@@ -338,11 +341,9 @@ fun ArticleScreen(
             }
         }
     ) {
-        var articleContentParsed by rememberSaveable {
-            mutableStateOf(false)
-        }
+
         LaunchedEffect(Unit) {
-            delay(700) // minimal amount of time for article content to wait before appearing on screen (made to avoid flickering)
+            delay(400) // minimal amount of time for article content to wait before appearing on screen (made to avoid flickering)
             revealArticleContent = true
         }
         RevealContainer(

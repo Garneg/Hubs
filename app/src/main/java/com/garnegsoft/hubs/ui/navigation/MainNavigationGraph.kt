@@ -8,14 +8,27 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseInExpo
 import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseInOutCubic
+import androidx.compose.animation.core.EaseInOutExpo
+import androidx.compose.animation.core.EaseInQuart
+import androidx.compose.animation.core.EaseInSine
 import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.EaseOutExpo
+import androidx.compose.animation.core.EaseOutQuart
+import androidx.compose.animation.core.EaseOutQuint
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -264,15 +277,17 @@ fun MainNavigationGraph(
                 route = "article/{id}?offline={offline}",
                 deepLinks = ArticleNavDeepLinks,
                 enterTransition = {
-                    scaleIn(
-                        tween(150, easing = EaseInOut),
-                        0.9f
-                    ) + fadeIn(
-                        tween(durationMillis = 150, easing = EaseIn)
-                    ) + slideInVertically(
-                        tween(durationMillis = 150, easing = EaseIn),
-                        initialOffsetY = { it / 9 }
-                    )
+                    slideInVertically(
+                        tween(durationMillis = 250, easing = EaseOutExpo),
+                        initialOffsetY = { it / 1 }
+                    ) +
+                            scaleIn(
+                                tween(250, easing = EaseOutExpo),
+                                0.8f
+                            ) +
+                            fadeIn(
+                                tween(durationMillis = 240, easing = EaseOutExpo)
+                            )
                 },
                 popEnterTransition = {
                     fadeIn(
@@ -281,19 +296,25 @@ fun MainNavigationGraph(
                 },
                 exitTransition = {
                     scaleOut(
-                        tween(150, easing = EaseIn),
-                        0.9f
+                        tween(250, easing = EaseIn),
+                        0.8f
                     ) + fadeOut(
-                        tween(150, easing = EaseOut)
+                        tween(240, easing = EaseOut)
                     )
 
                 },
                 popExitTransition = {
                     scaleOut(
-                        tween(150, easing = EaseOut),
-                        0.9f
-                    ) + fadeOut(
-                        tween(150, easing = EaseOut)
+                        tween(250, easing = EaseInSine),
+                        0.8f
+                    ) +
+                            slideOutVertically(
+                                tween(250, easing = EaseInSine),
+                                targetOffsetY = { it }
+                            ) +
+                            fadeOut(
+                        tween(250, easing = EaseIn),
+
                     )
 
                 },
