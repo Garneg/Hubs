@@ -27,7 +27,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -121,12 +123,36 @@ fun MainNavigationGraph(
             .navigationBarsPadding(),
         navController = navController,
         startDestination = "articles",
+        enterTransition = {
+            slideInHorizontally(tween(250)) { it }
+        },
+        exitTransition = {
+
+
+            if (this.targetState.destination.route?.startsWith("article/") == true){
+                slideOutVertically(tween(250)) + fadeOut()
+            } else {
+                slideOutHorizontally(tween(250)) { -it } +
+                        fadeOut(tween(250))
+            }
+        },
+        popEnterTransition = {
+
+            if (this.initialState.destination.route?.startsWith("article/") == true){
+                slideInVertically(tween(250))
+            } else {
+                slideInHorizontally(tween(250)) { -it }
+            }
+
+        },
+        popExitTransition = {
+            slideOutHorizontally(tween(250)) { it  } +
+                    fadeOut(tween(250))
+        },
         builder = {
 
             composable(
                 route = "articles",
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.EmptyTransitions.enterTransition
             ) {
 
                 MainScreen(
@@ -291,7 +317,7 @@ fun MainNavigationGraph(
                 },
                 popEnterTransition = {
                     fadeIn(
-                        tween(durationMillis = 50, easing = EaseIn)
+                        tween(durationMillis = 200, easing = EaseIn)
                     )
                 },
                 exitTransition = {
@@ -313,7 +339,7 @@ fun MainNavigationGraph(
                                 targetOffsetY = { it }
                             ) +
                             fadeOut(
-                        tween(250, easing = EaseIn),
+                        tween(200, easing = EaseInQuart),
 
                     )
 
@@ -448,10 +474,6 @@ fun MainNavigationGraph(
 
             composable(
                 route = "settings",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
             ) {
                 SettingsScreen(
                     onBack = {
@@ -467,11 +489,7 @@ fun MainNavigationGraph(
             }
 
             composable(
-                route = "article_settings",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                route = "article_settings"
             ) {
                 ArticleScreenSettingsScreen(
                     onBack = { navController.popBackStack() }
@@ -479,11 +497,7 @@ fun MainNavigationGraph(
             }
 
             composable(
-                route = "feed_settings",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                route = "feed_settings"
             ) {
                 FeedSettingsScreen(
                     onBack = { navController.popBackStack() }
@@ -492,11 +506,7 @@ fun MainNavigationGraph(
 
             composable(
                 route = "comments/{postId}?commentId={commentId}",
-                deepLinks = CommentsScreenNavDeepLinks,
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                deepLinks = CommentsScreenNavDeepLinks
             ) {
                 val postId = it.arguments!!.getString("postId")!!
                 val commentId = it.arguments?.getString("commentId")
@@ -523,10 +533,6 @@ fun MainNavigationGraph(
             composable(
                 route = "user/{alias}?page={page}",
                 deepLinks = UserScreenNavDeepLinks,
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
             ) {
 
                 val page =
@@ -626,11 +632,7 @@ fun MainNavigationGraph(
 
             composable(
                 "hub/{alias}",
-                deepLinks = HubScreenNavDeepLinks,
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                deepLinks = HubScreenNavDeepLinks
             ) {
                 val alias = it.arguments?.getString("alias")
                 HubScreen(alias = alias!!, viewModelStoreOwner = it,
@@ -655,12 +657,7 @@ fun MainNavigationGraph(
                 }
             }
             composable(
-                "company/{alias}",
-                deepLinks = CompanyScreenNavDeepLinks,
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                "company/{alias}"
             ) {
                 val alias = it.arguments?.getString("alias")!!
                 CompanyScreen(
@@ -687,11 +684,7 @@ fun MainNavigationGraph(
             }
 
             composable(
-                "about",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                "about"
             ) {
                 AboutScreen {
                     navController.popBackStack()
@@ -701,10 +694,6 @@ fun MainNavigationGraph(
             composable(
                 route = "savedArticles",
                 deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" }),
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
             ) {
                 OfflineArticlesListScreen(
                     onBack = { navController.popBackStack() },
@@ -713,11 +702,7 @@ fun MainNavigationGraph(
             }
 
             composable(
-                "history",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                "history"
             ) {
                 HistoryScreen(
                     onBack = { navController.popBackStack() },
@@ -729,11 +714,7 @@ fun MainNavigationGraph(
             }
 
             composable(
-                route = "subscriptionManagement",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
+                route = "subscriptionManagement"
             ) {
                 SubscriptionManagementScreen(
                     onBack = { navController.popBackStack() },
