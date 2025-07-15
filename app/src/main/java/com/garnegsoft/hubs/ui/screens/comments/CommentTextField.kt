@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
@@ -36,9 +37,11 @@ fun EnterCommentTextField(
 	onSend: (text: String) -> Unit
 ) {
 	Row(
-		verticalAlignment = Alignment.Bottom, modifier = Modifier
+		verticalAlignment = Alignment.Bottom,
+		modifier = Modifier
 			.fillMaxWidth()
 			.background(MaterialTheme.colors.surface)
+			.navigationBarsPadding()
 			.padding(4.dp)
 	) {
 		var commentTextFieldValue by remember { mutableStateOf(TextFieldValue()) }

@@ -152,10 +152,11 @@ fun ArticleScreen(
                     enter = slideInVertically { it } + fadeIn()
                 ) {
                     BottomAppBar(
+                        windowInsets = WindowInsets.navigationBars,
                         elevation = 0.dp,
                         backgroundColor = MaterialTheme.colors.surface,
                         modifier = Modifier
-                            .height(60.dp)
+                            .heightIn(min = 60.dp)
                     ) {
                         var showVotesCounter by remember {
                             mutableStateOf(false)

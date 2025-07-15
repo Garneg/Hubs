@@ -177,7 +177,10 @@ fun MainScreen(
         },
         scaffoldState = scaffoldState,
         snackbarHost = {
-            SnackbarHost(hostState = it) {
+            SnackbarHost(
+                modifier = Modifier.navigationBarsPadding(),
+                hostState = it
+            ) {
                 ContinueReadSnackBar(data = it)
             }
         }

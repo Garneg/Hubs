@@ -61,9 +61,17 @@ fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable (
     val systemUiController = rememberSystemUiController()
     val colors = if (darkTheme) {
 //        systemUiController.setSystemBarsColor(DarkColorPalette.surface)
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            false,
+        )
         DarkColorPalette
     } else {
 //        systemUiController.setSystemBarsColor(LightColorPalette.primary)
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            true,
+        )
         LightColorPalette
     }
     
