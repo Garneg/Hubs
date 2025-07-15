@@ -46,7 +46,7 @@ fun HubScreen(
     
     Scaffold(
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 title = { Text(text = "Хаб") },
                 elevation = 0.dp,
                 navigationIcon = {

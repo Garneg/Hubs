@@ -118,9 +118,6 @@ fun MainNavigationGraph(
 
 
     NavHost(
-        modifier = Modifier
-            .statusBarsPadding()
-            .navigationBarsPadding(),
         navController = navController,
         startDestination = "articles",
         enterTransition = {
@@ -130,7 +127,7 @@ fun MainNavigationGraph(
 
 
             if (this.targetState.destination.route?.startsWith("article/") == true){
-                slideOutVertically(tween(250)) + fadeOut()
+                slideOutVertically(tween(250)) { -it / 5 } + fadeOut()
             } else {
                 slideOutHorizontally(tween(250)) { -it } +
                         fadeOut(tween(250))
@@ -139,7 +136,7 @@ fun MainNavigationGraph(
         popEnterTransition = {
 
             if (this.initialState.destination.route?.startsWith("article/") == true){
-                slideInVertically(tween(250))
+                slideInVertically(tween(250)) { -it / 5 }
             } else {
                 slideInHorizontally(tween(250)) { -it }
             }
@@ -724,17 +721,17 @@ fun MainNavigationGraph(
                 )
             }
         })
-    Box(
-        Modifier
-            .height(Dp(WindowInsets.statusBars.getTop(LocalDensity.current) / LocalDensity.current.density))
-            .fillMaxWidth()
-            .background(MaterialTheme.colors.let {
-                if (it.isLight)
-                    it.primary
-                else
-                    it.surface
-            })
-    )
+//    Box(
+//        Modifier
+//            .height(Dp(WindowInsets.statusBars.getTop(LocalDensity.current) / LocalDensity.current.density))
+//            .fillMaxWidth()
+//            .background(MaterialTheme.colors.let {
+//                if (it.isLight)
+//                    it.primary
+//                else
+//                    it.surface
+//            })
+//    )
 
     ImageViewerScreenOverlay(
         state = imageViewerState

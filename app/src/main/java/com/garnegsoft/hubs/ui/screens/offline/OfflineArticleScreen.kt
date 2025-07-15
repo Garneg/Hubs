@@ -25,7 +25,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
@@ -61,6 +60,8 @@ import com.garnegsoft.hubs.ui.screens.article.ScrollBar
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -112,7 +113,7 @@ fun OfflineArticleScreen(
 	
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			HubsTopAppBar(
 				elevation = 0.dp,
 				title = { Text(text = "Публикация") },
 				navigationIcon = {

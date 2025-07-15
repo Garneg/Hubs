@@ -30,6 +30,8 @@ import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommonPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+
 
 
 enum class UserScreenPages {
@@ -61,7 +63,7 @@ fun UserScreen(
 	
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			HubsTopAppBar(
 				elevation = 0.dp,
 				title = { Text("Пользователь") },
 				navigationIcon = {

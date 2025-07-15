@@ -88,7 +88,7 @@ fun SearchScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 title = { Text(text = "Поиск") },
                 elevation = 0.dp,
                 navigationIcon = {

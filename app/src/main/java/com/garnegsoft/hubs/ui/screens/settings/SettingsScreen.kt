@@ -19,6 +19,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
 import com.garnegsoft.hubs.ui.screens.settings.cards.OtherSettingsCard
 import kotlinx.coroutines.Dispatchers
@@ -112,7 +113,7 @@ fun SettingsScreen(
 	
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			HubsTopAppBar(
 				elevation = 0.dp,
 				title = { Text("Настройки") },
 				navigationIcon = {

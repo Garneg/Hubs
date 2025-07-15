@@ -32,6 +32,7 @@ import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.HubsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.InetSocketAddress
@@ -156,7 +157,7 @@ fun MainScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 elevation = 0.dp,
                 title = { Text(text = "Хабы") },
                 actions = {

@@ -60,10 +60,10 @@ private val LightColorPalette = lightColors(
 fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()
     val colors = if (darkTheme) {
-        systemUiController.setSystemBarsColor(DarkColorPalette.surface)
+//        systemUiController.setSystemBarsColor(DarkColorPalette.surface)
         DarkColorPalette
     } else {
-        systemUiController.setSystemBarsColor(LightColorPalette.primary)
+//        systemUiController.setSystemBarsColor(LightColorPalette.primary)
         LightColorPalette
     }
     

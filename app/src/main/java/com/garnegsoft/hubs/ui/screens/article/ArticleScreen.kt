@@ -34,6 +34,7 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
@@ -105,7 +106,7 @@ fun ArticleScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 title = { Text(text = "Публикация") },
                 elevation = 0.dp,
                 navigationIcon = {

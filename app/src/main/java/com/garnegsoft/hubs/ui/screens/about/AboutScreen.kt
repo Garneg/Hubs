@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 
 @Composable
 fun AboutScreen(
@@ -28,7 +29,7 @@ fun AboutScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 elevation = 0.dp,
                 navigationIcon = {
                     IconButton(onClick = onBackClicked) {

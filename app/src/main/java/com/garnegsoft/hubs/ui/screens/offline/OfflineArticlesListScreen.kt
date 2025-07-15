@@ -35,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import kotlinx.coroutines.flow.Flow
 
@@ -71,7 +72,7 @@ fun OfflineArticlesListScreen(
 	var showMenu by remember { mutableStateOf(false) }
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			HubsTopAppBar(
 				title = { Text("Скачанные") },
 				elevation = 0.dp,
 				navigationIcon = {

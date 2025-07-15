@@ -8,7 +8,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
@@ -20,6 +19,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.history.HistoryDatabase
 import com.garnegsoft.hubs.api.history.HistoryEntityListModel
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+
 
 
 class HistoryScreenViewModel(context: Context) : ViewModel() {
@@ -43,7 +44,7 @@ fun HistoryScreen(
 	
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			HubsTopAppBar(
 				elevation = 0.dp,
 				title = { Text(text = "История") },
 				navigationIcon = {

@@ -29,6 +29,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.HubsRow
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +75,7 @@ fun ArticleScreenSettingsScreen(
     BottomSheetScaffold(
         scaffoldState = state,
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 title = {
                     Text(text = "Публикация")
                 },

@@ -21,6 +21,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
@@ -47,7 +48,7 @@ fun CompanyScreen(
 	Scaffold(
 		topBar = {
 			val context = LocalContext.current
-			TopAppBar(
+			HubsTopAppBar(
 				title = { Text("Компания") },
 				elevation = 0.dp,
 				navigationIcon = {
