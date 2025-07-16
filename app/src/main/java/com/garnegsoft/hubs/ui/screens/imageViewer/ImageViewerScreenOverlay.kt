@@ -15,6 +15,7 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -36,8 +37,10 @@ import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
 import coil.size.Size
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.saket.telephoto.zoomable.ZoomSpec
 import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
@@ -62,14 +65,33 @@ fun ImageViewerScreenOverlay(
 	val context = LocalContext.current
 
 	val systemUiController = rememberSystemUiController()
-
+	val systemDarkThemeEnabled = isSystemInDarkTheme()
+	val isAppDarkThemeEnabled by HubsDataStore.Settings.Theme.ColorSchemeMode.getFlow(context)
+		.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+		.map { it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark ||
+				((it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined || it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined) && systemDarkThemeEnabled)}
+		.collectAsState(null)
 
 	LaunchedEffect(state.show, block = {
 		if (state.show) {
 			systemUiController.setStatusBarColor(Color.Black.copy(0.5f))
+			systemUiController.setNavigationBarColor(color = Color.Black.copy(0.5f), darkIcons = false, navigationBarContrastEnforced = false)
 		} else {
 			systemUiController.setStatusBarColor(Color.Transparent)
-
+			isAppDarkThemeEnabled?.let {
+				if (it) {
+					systemUiController.setNavigationBarColor(
+						color = Color.Transparent,
+						false,
+					)
+				} else {
+					systemUiController.setNavigationBarColor(
+						color = Color.Transparent,
+						darkIcons = true,
+						navigationBarContrastEnforced = true
+					)
+				}
+			}
 		}
 	})
 
