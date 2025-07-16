@@ -7,9 +7,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -36,6 +40,7 @@ import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.common.combine
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import kotlinx.coroutines.flow.Flow
 
@@ -119,6 +124,7 @@ fun OfflineArticlesListScreen(
 						state = lazyListState,
 						verticalArrangement = Arrangement.spacedBy(8.dp),
 						contentPadding = PaddingValues(8.dp)
+							.combine(WindowInsets.navigationBars.asPaddingValues(), LocalLayoutDirection.current)
 					) {
 						items(
 							items = articlesList,

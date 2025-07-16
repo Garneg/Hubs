@@ -4,8 +4,11 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -33,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +44,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.common.combine
 import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
@@ -105,7 +110,8 @@ fun SubscriptionManagementScreen(
             val notSubscribedIcon = rememberVectorPainter(Icons.Default.Add)
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp),
+                contentPadding = PaddingValues(start = 8.dp, end = 8.dp, bottom = 8.dp)
+                    .combine(WindowInsets.navigationBars.asPaddingValues(), LocalLayoutDirection.current),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 state = lazyListState
             ) {
