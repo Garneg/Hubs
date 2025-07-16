@@ -42,6 +42,7 @@ fun AboutScreen(
         Box(modifier = Modifier
             .fillMaxSize()
             .padding(it)
+            .navigationBarsPadding()
             .padding(12.dp)) {
             Column(
                 modifier = Modifier.fillMaxWidth(),

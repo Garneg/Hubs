@@ -51,6 +51,7 @@ fun HubProfile(
 			modifier = Modifier
 				.fillMaxSize()
 				.verticalScroll(scrollState)
+				.navigationBarsPadding()
 				.padding(8.dp),
 			verticalArrangement = Arrangement.spacedBy(8.dp)
 		) {

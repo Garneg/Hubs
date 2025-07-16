@@ -17,6 +17,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HubsLazyListItem
@@ -42,6 +44,8 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
         onScrollEnd = onScrollEnd,
         lazyList = {
             val density = LocalDensity.current
+            val layoutDirection = LocalLayoutDirection.current
+            val navBarsInsets = WindowInsets.navigationBars
             LazyColumn(
                 modifier = modifier,
                 state = it,
@@ -65,7 +69,7 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
                         return lastVelocity
                     }
                 },
-                contentPadding = contentPadding,
+                contentPadding = contentPadding.combine(navBarsInsets.asPaddingValues(), layoutDirection),
                 verticalArrangement = verticalArrangement,
                 horizontalAlignment = horizontalAlignment
             ) {
@@ -84,6 +88,15 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
         },
         lazyListState = lazyListState)
     
+}
+
+fun PaddingValues.combine(paddingValues: PaddingValues, layoutDirection: LayoutDirection): PaddingValues {
+    return PaddingValues(
+        start = this.calculateStartPadding(layoutDirection) + paddingValues.calculateStartPadding(layoutDirection),
+        end = this.calculateEndPadding(layoutDirection) + paddingValues.calculateEndPadding(layoutDirection),
+        top = this.calculateTopPadding() + paddingValues.calculateTopPadding(),
+        bottom = this.calculateBottomPadding() + paddingValues.calculateBottomPadding()
+    )
 }
 
 // Most simple lazy column that notifies about scroll end

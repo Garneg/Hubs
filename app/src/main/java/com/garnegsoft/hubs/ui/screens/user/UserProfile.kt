@@ -76,7 +76,9 @@ internal fun UserProfile(
 					.verticalScroll(scrollState)
 			) {
 				Column(
-					modifier = Modifier.padding(8.dp),
+					modifier = Modifier
+						.padding(8.dp)
+						.navigationBarsPadding(),
 					verticalArrangement = Arrangement.spacedBy(8.dp)
 				) {
 					Column(
