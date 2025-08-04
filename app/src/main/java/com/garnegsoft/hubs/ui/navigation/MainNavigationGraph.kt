@@ -8,20 +8,11 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseInExpo
 import androidx.compose.animation.core.EaseInOut
-import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.EaseInOutExpo
 import androidx.compose.animation.core.EaseInQuart
 import androidx.compose.animation.core.EaseInSine
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.EaseOutExpo
-import androidx.compose.animation.core.EaseOutQuart
-import androidx.compose.animation.core.EaseOutQuint
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -31,16 +22,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,8 +34,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -70,7 +51,6 @@ import com.garnegsoft.hubs.ArticleNavDeepLinks
 import com.garnegsoft.hubs.AuthActivityResultContract
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.CommentsScreenNavDeepLinks
-import com.garnegsoft.hubs.CompanyScreenNavDeepLinks
 import com.garnegsoft.hubs.HubScreenNavDeepLinks
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.UserScreenNavDeepLinks
@@ -510,7 +490,7 @@ fun MainNavigationGraph(
                 CommentsScreen(
                     viewModelStoreOwner = it,
                     parentPostId = postId.toInt(),
-                    commentId = commentId?.toInt(),
+                    highlightedCommentId = commentId?.toInt(),
                     onBackClicked = {
                         if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
                             parentActivity.finish()

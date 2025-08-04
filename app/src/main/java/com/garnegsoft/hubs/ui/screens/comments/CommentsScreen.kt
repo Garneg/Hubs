@@ -4,9 +4,7 @@ import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -89,7 +87,7 @@ class CommentsScreenViewModel : ViewModel() {
 fun CommentsScreen(
 	viewModelStoreOwner: ViewModelStoreOwner,
 	parentPostId: Int,
-	commentId: Int?,
+	highlightedCommentId: Int?,
 	showArticleSnippet: Boolean = true,
 	onBackClicked: () -> Unit,
 	onArticleClicked: () -> Unit,
@@ -110,8 +108,7 @@ fun CommentsScreen(
 
 	val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
 
-	var returnToCommentOffset by remember { mutableStateOf<Int?>(null) }
-	var returnToCommentIndex by remember { mutableStateOf<Int?>(null) }
+	var returnToCommentId by remember { mutableStateOf<Int?>(null) }
 	
 	LaunchedEffect(key1 = Unit) {
 		if (!viewModel.commentsData.isInitialized) {
@@ -131,7 +128,7 @@ fun CommentsScreen(
 	}
 	val itemsCountIndicator by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount > 2 } }
 	LaunchedEffect(key1 = commentsData, key2 = itemsCountIndicator, block = {
-		commentId?.let { commId ->
+		highlightedCommentId?.let { commId ->
 			if (viewModel.commentsData.isInitialized && lazyListState.layoutInfo.totalItemsCount > 2 && doScrollToComment) {
 				commentsData?.comments?.indexOf(commentsData!!.comments.find { it.id == commId })
 					?.let {
@@ -180,18 +177,14 @@ fun CommentsScreen(
 			)
 		},
 		floatingActionButton = {
-			returnToCommentIndex?.let { index ->
+			returnToCommentId?.let { id ->
 
 				FloatingActionButton(
 					modifier = Modifier.sizeIn(maxWidth = 48.dp, maxHeight = 48.dp),
 					onClick = {
 						coroutineScope.launch {
-							lazyListState.animateScrollToItem(
-								index + itemOffsetCount,
-								-articleHeaderOffset + (returnToCommentOffset ?: 0)
-							)
-							returnToCommentIndex = null
-							returnToCommentOffset = null
+							screenState.scrollToComment(id)
+							returnToCommentId = null
 						}
 					},
 					content = {
@@ -293,15 +286,15 @@ fun CommentsScreen(
 			)
 		}
 		
-		LaunchedEffect(
-			key1 = remember { derivedStateOf { lazyListState.firstVisibleItemIndex } },
-			block = {
-				returnToCommentIndex?.let {
-					if (lazyListState.firstVisibleItemIndex >= it + itemOffsetCount) {
-						returnToCommentIndex = null
-					}
-				}
-			})
+//		LaunchedEffect(
+//			key1 = remember { derivedStateOf { lazyListState.firstVisibleItemIndex } },
+//			block = {
+//				returnToCommentId?.let {
+//					if (lazyListState.firstVisibleItemIndex >= it + itemOffsetCount) {
+//						returnToCommentId = null
+//					}
+//				}
+//			})
 		
 		Box(modifier = Modifier.padding(it).fillMaxSize()) {
 			Column(
@@ -447,7 +440,7 @@ fun CommentsScreen(
 												comment = comment,
 												onAuthorClick = { onUserClicked(comment.author.alias) },
 												parentComment = parentComment,
-												highlight = comment.id == commentId,
+												highlight = comment.id == highlightedCommentId,
 												showReplyButton = commentsData!!.commentAccess.canComment,
 												menu = {
 													if (showMenu) {
@@ -487,7 +480,7 @@ fun CommentsScreen(
 													commentTextFieldFocusRequester.requestFocus()
 												},
 												onParentCommentSnippetClick = {
-													returnToCommentIndex = index
+													returnToCommentId = comment.id
 													coroutineScope.launch(Dispatchers.Main) {
 														comment.parentCommentId?.let {
 															screenState.scrollToComment(it)
