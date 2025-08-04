@@ -89,6 +89,7 @@ fun CommentsScreen(
 	parentPostId: Int,
 	highlightedCommentId: Int?,
 	showArticleSnippet: Boolean = true,
+	allowDisplayFullContent: Boolean,
 	onBackClicked: () -> Unit,
 	onArticleClicked: () -> Unit,
 	onUserClicked: (alias: String) -> Unit,
@@ -335,7 +336,7 @@ fun CommentsScreen(
 							
 						}
 					}
-					if (commentsData != null) {
+					if (commentsData != null && allowDisplayFullContent) {
 						itemsIndexed(
 							items = commentsData!!.pinnedComments,
 						) { index, commentId ->

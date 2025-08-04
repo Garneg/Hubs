@@ -104,8 +104,6 @@ fun MainNavigationGraph(
             slideInHorizontally(tween(250)) { it }
         },
         exitTransition = {
-
-
             if (this.targetState.destination.route?.startsWith("article/") == true){
                 slideOutVertically(tween(250)) { -it / 5 } + fadeOut()
             } else {
@@ -491,6 +489,7 @@ fun MainNavigationGraph(
                     viewModelStoreOwner = it,
                     parentPostId = postId.toInt(),
                     highlightedCommentId = commentId?.toInt(),
+                    allowDisplayFullContent = !this.transition.isRunning,
                     onBackClicked = {
                         if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
                             parentActivity.finish()
