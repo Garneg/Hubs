@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.MeasurePolicy
@@ -258,9 +259,15 @@ fun CommentItem(
 						targetValue = if (visible) 1f else 0.0f,
 						animationSpec = tween(150)
 					)
-					
+
+					// score indicator button
 					Box() {
-						IconButton(onClick = { showVotesCounter = !showVotesCounter }) {
+						Box(
+							modifier = Modifier
+								.clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 10.dp))
+								.clickable { showVotesCounter = !showVotesCounter }
+								.padding(horizontal = 4.dp, vertical = 8.dp)
+						) {
 							if (showVotesCounter) {
 								Popup(
 									properties = PopupProperties(focusable = true),
@@ -269,8 +276,12 @@ fun CommentItem(
 								) {
 									Surface(
 										modifier = Modifier
-											.offset(0.dp, offset.dp)
-											.alpha(alpha)
+											.offset {
+												IntOffset(0, offset.dp.roundToPx())
+											}
+											.graphicsLayer {
+												this.alpha = alpha
+											}
 											.padding(16.dp),
 										shape = RoundedCornerShape(8.dp),
 										color = MaterialTheme.colors.surface,
@@ -332,8 +343,12 @@ fun CommentItem(
 				Row(
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					
-					IconButton(onClick = onShare) {
+					Box(
+						modifier = Modifier
+							.clip(RoundedCornerShape(5.dp))
+							.clickable(onClick = onShare)
+							.padding(horizontal = 16.dp, vertical = 8.dp)
+					) {
 						Icon(
 							modifier = Modifier.size(20.dp),
 							imageVector = Icons.Outlined.Share,
@@ -343,9 +358,16 @@ fun CommentItem(
 					}
 					
 				}
-				
+
+				Spacer(modifier = Modifier.width(4.dp))
+
 				if (showReplyButton && !isPinned) {
-					IconButton(onClick = onReplyClick) {
+					Box (
+						modifier = Modifier
+							.clip(RoundedCornerShape(5.dp, 5.dp, 10.dp, 5.dp))
+							.clickable(onClick = onReplyClick)
+							.padding(horizontal = 16.dp, vertical = 8.dp)
+					) {
 						Icon(
 							painter = replyIconPainter,
 							contentDescription = "",

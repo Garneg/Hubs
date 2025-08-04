@@ -416,7 +416,7 @@ fun parseElement(
 		}
 		
 		"p" -> if (element.html().isNotEmpty()) { localSpanStyle, settings ->
-			Column(Modifier.padding(bottom = 16.dp)) {
+			Column(Modifier.padding(bottom = if (element.nextElementSibling() != null) 16.dp else 0.dp)) {
 				childrenComposables.forEach {
 					it(localSpanStyle, settings)
 				}
