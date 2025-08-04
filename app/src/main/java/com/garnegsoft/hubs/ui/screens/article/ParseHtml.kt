@@ -513,7 +513,7 @@ fun parseElement(
 		
 		"div" -> if (element.hasClass("tm-iframe_temp"))
 			{ localSpanStyle, settings ->
-				
+				// TODO: Implement reuse of iframes (maybe even pre-creation)
 				AndroidView(modifier = Modifier
 					.fillMaxWidth()
 					.aspectRatio(16f / 9f)
@@ -613,9 +613,11 @@ fun parseElement(
 					.fillMaxWidth()
 			) {
 				val blockQuoteColor =
-					if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
-						0.75f
-					)
+					if (MaterialTheme.colors.isLight)
+						SecondaryColor
+					else
+						MaterialTheme.colors.onBackground.copy(0.75f)
+
 				Column(modifier = Modifier
 					.drawWithContent {
 						drawContent()
@@ -624,9 +626,10 @@ fun parseElement(
 							size = Size(quoteWidth, size.height),
 							cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
 						)
-						
+
 					}
-					.padding(start = 12.dp)) {
+					.padding(start = 16.dp, top = 2.dp, bottom = 4.dp)
+				) {
 					childrenComposables.forEach {
 						it(
 							localSpanStyle.copy(fontStyle = FontStyle.Italic),
@@ -672,12 +675,13 @@ fun parseElement(
 								.rotate(
 									animateFloatAsState(
 										targetValue =
-									if (!showDetails) {
-										-90f
-									} else {
-										0f
-									}).value
-									
+										if (!showDetails) {
+											-90f
+										} else {
+											0f
+										}
+									).value
+
 								),
 							imageVector = Icons.Outlined.ArrowDropDown, contentDescription = ""
 						)
