@@ -6,6 +6,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -209,7 +211,7 @@ fun CommentsScreen(
 				if (commentsData?.commentAccess?.canComment == true) {
 					AnimatedVisibility(
 						visible = answeringComment != null,
-						enter = expandVertically(expandFrom = Alignment.Bottom),
+						enter = slideInVertically { it/2 },
 						exit = shrinkVertically(shrinkTowards = Alignment.Bottom)
 					) {
 						val comment = answeringComment
@@ -240,7 +242,7 @@ fun CommentsScreen(
 								Spacer(modifier = Modifier.width(8.dp))
 								Column(modifier = Modifier.weight(1f)) {
 									Text(
-										text = comment?.author?.alias ?: "",
+										text = "в ответ ${comment?.author?.alias}",
 										fontWeight = FontWeight.W500,
 										color = MaterialTheme.colors.primary.copy(0.9f)
 									)
