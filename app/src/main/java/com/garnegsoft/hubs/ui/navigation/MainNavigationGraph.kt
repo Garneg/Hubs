@@ -25,11 +25,13 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -483,11 +485,18 @@ fun MainNavigationGraph(
             ) {
                 val postId = it.arguments!!.getString("postId")!!
                 val commentId = it.arguments?.getString("commentId")
+                var showFullContent by rememberSaveable { mutableStateOf(false) }
+
+                LaunchedEffect(transition.isRunning) {
+                    if (!transition.isRunning){
+                        showFullContent = true
+                    }
+                }
                 CommentsScreen(
                     viewModelStoreOwner = it,
                     parentPostId = postId.toInt(),
                     highlightedCommentId = commentId?.toInt(),
-                    allowDisplayFullContent = !this.transition.isRunning,
+                    allowDisplayFullContent = showFullContent,
                     onBackClicked = {
                         if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
                             parentActivity.finish()

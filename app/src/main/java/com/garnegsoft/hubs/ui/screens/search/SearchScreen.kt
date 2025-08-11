@@ -120,9 +120,7 @@ fun SearchScreen(
             val companiesLazyListState = rememberLazyListState()
             val usersLazyListState = rememberLazyListState()
 
-            var doRequestFocus by rememberSaveable {
-                mutableStateOf(true)
-            }
+            var doRequestFocus by rememberSaveable { mutableStateOf(true) }
             val clipboard = LocalClipboardManager.current
 
             LaunchedEffect(key1 = Unit) {
@@ -168,8 +166,7 @@ fun SearchScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier
-                        .weight(1f),
+                    modifier = Modifier.weight(1f),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     val keyboardOptions = remember(queryIsUrlToHabr) {

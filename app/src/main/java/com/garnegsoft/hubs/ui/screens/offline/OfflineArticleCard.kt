@@ -35,6 +35,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
 
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun OfflineArticleCard(
