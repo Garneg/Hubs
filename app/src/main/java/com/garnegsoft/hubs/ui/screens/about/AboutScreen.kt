@@ -69,7 +69,7 @@ fun AboutScreen(
                 )
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(id = R.string.about_app_text) + stringResource(id = R.string.developer_email),
+                    text = stringResource(id = R.string.about_app_text),
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colors.onBackground.copy(.5f)
                 )

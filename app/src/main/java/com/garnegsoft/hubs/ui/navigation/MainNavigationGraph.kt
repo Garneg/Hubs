@@ -86,7 +86,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
-@OptIn(ExperimentalAnimationApi::class)
+
 @Composable
 fun MainNavigationGraph(
     navController: NavHostController = rememberNavController(),
@@ -94,8 +94,6 @@ fun MainNavigationGraph(
 ) {
     val imageViewerState =
         rememberImageViewerState(offlineResourcesRootPath = parentActivity.filesDir.absolutePath + "/offline_resources/")
-
-
 
     NavHost(
         navController = navController,
@@ -279,7 +277,7 @@ fun MainNavigationGraph(
                 deepLinks = ArticleNavDeepLinks,
                 enterTransition = {
                     slideInVertically(
-                        tween(durationMillis = 250, easing = EaseOutExpo),
+                        animationSpec = tween(durationMillis = 250, easing = EaseOutExpo),
                         initialOffsetY = { it / 1 }
                     ) +
                             scaleIn(

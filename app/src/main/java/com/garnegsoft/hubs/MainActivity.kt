@@ -26,9 +26,9 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.crashlytics.crashlytics
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
@@ -40,9 +40,9 @@ class MainActivity : ComponentActivity() {
 		super.onCreate(savedInstanceState)
 //		WindowCompat.setDecorFitsSystemWindows(window, false)
 		enableEdgeToEdge()
+
 		// Disable crashlytics if it's debug version
 		FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
-		
 		intent.extras?.let {
 			FcmDispatcher.dispatchExtras(
 				handleUrl = {
@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
 		
 		val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
 		val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
-		
+
 		runBlocking {
 			authStatus = isAuthorizedFlow.firstOrNull()
 			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
