@@ -108,7 +108,7 @@ fun MainNavigationGraph(
                 slideOutVertically(tween(250)) { -it / 5 } + fadeOut()
             } else {
                 slideOutHorizontally(tween(250)) { -it } +
-                        fadeOut(tween(250))
+                        fadeOut(tween(250), targetAlpha = 0.5f)
             }
         },
         popEnterTransition = {
@@ -122,7 +122,7 @@ fun MainNavigationGraph(
         },
         popExitTransition = {
             slideOutHorizontally(tween(250)) { it  } +
-                    fadeOut(tween(250))
+                    fadeOut(tween(250), targetAlpha = 0.5f)
         },
         builder = {
 
