@@ -6,7 +6,6 @@ import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseInQuart
@@ -517,11 +516,12 @@ fun MainNavigationGraph(
                 route = "user/{alias}?page={page}",
                 deepLinks = UserScreenNavDeepLinks,
             ) {
+                val pageNavArgument = it.arguments?.getString("page")
+                val page = if (pageNavArgument.isNullOrEmpty())
+                    UserScreenPages.Profile
+                else
+                    UserScreenPages.valueOf(pageNavArgument)
 
-                val page =
-                    it.arguments?.getString("page")
-                        ?.let { UserScreenPages.valueOf(it) }
-                        ?: UserScreenPages.Profile
                 val deepLinkPage =
                     it.arguments?.getString("deepLinkPage")?.let {
                         when (it) {

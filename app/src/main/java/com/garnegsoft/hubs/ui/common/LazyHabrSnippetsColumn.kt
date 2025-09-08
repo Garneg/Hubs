@@ -46,6 +46,7 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
             val density = LocalDensity.current
             val layoutDirection = LocalLayoutDirection.current
             val navBarsInsets = WindowInsets.navigationBars
+            val displayCutoutInsets = WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)
             LazyColumn(
                 modifier = modifier,
                 state = it,
@@ -69,7 +70,9 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
                         return lastVelocity
                     }
                 },
-                contentPadding = contentPadding.combine(navBarsInsets.asPaddingValues(), layoutDirection),
+                contentPadding = contentPadding
+                    .combine(navBarsInsets.asPaddingValues(), layoutDirection)
+                    .combine(displayCutoutInsets.asPaddingValues(), layoutDirection),
                 verticalArrangement = verticalArrangement,
                 horizontalAlignment = horizontalAlignment
             ) {
