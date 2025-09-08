@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -73,13 +74,14 @@ fun VotesCountIndicator(
 					.clip(RoundedCornerShape(8.dp))
 					.border(width = 0.5.dp, color = MaterialTheme.colors.onSurface.copy(0.1f), shape = RoundedCornerShape(8.dp))
 					.background(MaterialTheme.colors.surface)
-					.padding(8.dp)
+					.padding(vertical = 8.dp, horizontal = 12.dp)
 			) {
 				Text(
 					text = "Всего голосов " +
 						"${stats.votesCountMinus + stats.votesCountPlus}: " +
 						"￪${stats.votesCountPlus} и " +
 						"￬${stats.votesCountMinus}",
+					fontWeight = FontWeight.W500,
 					color = color
 				)
 			}
