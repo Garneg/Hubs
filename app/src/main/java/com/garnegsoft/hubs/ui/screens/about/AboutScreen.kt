@@ -21,12 +21,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.utils.handleUrl
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.screens.about.ForPDAButton
+import com.garnegsoft.hubs.ui.screens.about.GithubButton
 
 @Composable
 fun AboutScreen(
     onBackClicked: () -> Unit
 ) {
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
             HubsTopAppBar(
@@ -74,7 +79,6 @@ fun AboutScreen(
                     color = MaterialTheme.colors.onBackground.copy(.5f)
                 )
                 val developerEmail = stringResource(id = R.string.developer_email)
-                val context = LocalContext.current
                 OutlinedButton(
                     modifier = Modifier.padding(16.dp),
                     onClick = {
@@ -97,13 +101,35 @@ fun AboutScreen(
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colors.onBackground.copy(.5f)
                 )
-            }
-            Text(
-                modifier = Modifier.align(Alignment.BottomCenter),
-                text = "${stringResource(id = R.string.version)} ${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}",
-                color = MaterialTheme.colors.onBackground.copy(.5f),
 
-            )
+            }
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter)
+                    .padding(horizontal = 16.dp),
+            ) {
+                ForPDAButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        handleUrl(context, "https://4pda.to/forum/index.php?showtopic=1065764")
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                GithubButton (
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        handleUrl(context, "https://github.com/Garneg/Hubs")
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = "${stringResource(id = R.string.version)} ${BuildConfig.VERSION_NAME} ${BuildConfig.BUILD_TYPE}",
+                    color = MaterialTheme.colors.onBackground.copy(.5f),
+
+                    )
+            }
+
         }
     }
 }
