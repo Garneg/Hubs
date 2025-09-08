@@ -348,15 +348,15 @@ fun MainNavigationGraph(
                             navController.popBackStack()
                         }
                     },
-                    onCommentsClicked = {
+                    onCommentsClick = {
                         clearLastArticle()
                         navController.navigate("comments/${id}")
                     },
-                    onAuthorClicked = {
+                    onAuthorClick = {
                         clearLastArticle()
                         navController.navigate("user/${it}")
                     },
-                    onHubClicked = {
+                    onHubClick = {
                         clearLastArticle()
                         navController.navigate("hub/$it")
                     },
