@@ -294,9 +294,10 @@ fun CommentItem(
 							.clip(RoundedCornerShape(9.dp))
 							.clickable(onClick = onShare)
 							.padding(horizontal = 16.dp, vertical = 8.dp)
+							.padding(2.dp)
 					) {
 						Icon(
-							modifier = Modifier.size(24.dp),
+							modifier = Modifier.size(20.dp),
 							imageVector = Icons.Outlined.Share,
 							contentDescription = "Поделиться",
 							tint = statisticsColor
