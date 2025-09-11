@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.ripple
 import androidx.compose.material3.Icon
@@ -45,7 +46,7 @@ fun GithubButton(
             )
             .clip(RoundedCornerShape(8.dp))
             .background(Color(0xFF1F1F1F))
-            .border(width = 1.dp, color = Color(0xFF575757), shape = RoundedCornerShape(8.dp))
+            .border(width = 1.dp, color = if (MaterialTheme.colors.isLight) Color.Transparent else Color(0xFF575757), shape = RoundedCornerShape(8.dp))
 //                .padding(vertical = 8.dp, horizontal = 16.dp)
             .padding(vertical = 12.dp, horizontal = 16.dp)
 
