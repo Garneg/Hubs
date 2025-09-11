@@ -35,7 +35,7 @@ fun BaseMenuContainer(
 ) {
 	Box(
 		modifier = modifier
-			.padding(4.dp)
+			.padding(8.dp)
 	) {
 		Surface(
 			modifier = Modifier

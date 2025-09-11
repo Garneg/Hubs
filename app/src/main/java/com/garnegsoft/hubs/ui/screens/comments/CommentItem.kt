@@ -35,6 +35,10 @@ import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.delay
 
+
+const val COMMENT_ITEM_GREAT_PADDING = 16
+const val COMMENT_ITEM_SMALL_PADDING = 8
+
 @Composable
 fun CommentItem(
 	modifier: Modifier = Modifier,
@@ -70,8 +74,8 @@ fun CommentItem(
 			.fillMaxWidth()
 			.clip(RoundedCornerShape(26.dp))
 			.background(MaterialTheme.colors.surface)
-			.padding(16.dp)
 	) {
+		Spacer(modifier = Modifier.height(COMMENT_ITEM_GREAT_PADDING.dp))
 		if (isPinned) {
 			Row(verticalAlignment = Alignment.CenterVertically) {
 				Text(
@@ -91,6 +95,7 @@ fun CommentItem(
 		parentComment?.let {
 			Row(
 				modifier = Modifier
+					.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp)
 					.fillMaxWidth()
 					.height(IntrinsicSize.Max)
 					.clip(RoundedCornerShape(2.dp))
@@ -137,7 +142,11 @@ fun CommentItem(
 			
 			Spacer(modifier = Modifier.height(8.dp))
 		}
-		Row(verticalAlignment = Alignment.CenterVertically) {
+
+		// Author of the comment
+		Row(
+			modifier = Modifier.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp),
+			verticalAlignment = Alignment.CenterVertically) {
 			Row(
 				verticalAlignment = Alignment.CenterVertically,
 				modifier = Modifier
@@ -191,41 +200,29 @@ fun CommentItem(
 			}
 		}
 		Spacer(modifier = Modifier.height(4.dp))
-		
-		content.invoke()
-		
-		Spacer(modifier = Modifier.height(4.dp))
+		Box(modifier = Modifier.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp)) {
+			content.invoke()
+		}
+
+		//Spacer(modifier = Modifier.height(4.dp))
 		val statisticsColor =
 			if (MaterialTheme.colors.isLight)
 				MaterialTheme.colors.onSurface.copy(0.75f)
 			else
 				MaterialTheme.colors.onSurface.copy(0.5f)
+
+		// Statistics bar
 		if (comment.score != null) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
+			Row(
+				modifier = Modifier.padding(COMMENT_ITEM_SMALL_PADDING.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				Row(
 					modifier = Modifier.weight(1f),
 					verticalAlignment = Alignment.CenterVertically,
 				) {
 					
-					val densityFactor = LocalDensity.current.density
-					
-					val positionProvider = remember(densityFactor) {
-						object : PopupPositionProvider {
-							override fun calculatePosition(
-								anchorBounds: IntRect,
-								windowSize: IntSize,
-								layoutDirection: LayoutDirection,
-								popupContentSize: IntSize
-							): IntOffset {
-								return IntOffset(
-									(anchorBounds.left - (24 * densityFactor)).toInt(),
-									anchorBounds.top - popupContentSize.height + (8 * densityFactor).toInt()
-								)
-							}
-							
-						}
-					}
-					
+
 					var showVotesCounter by remember { mutableStateOf(false) }
 					var visible by remember { mutableStateOf(false) }
 					LaunchedEffect(key1 = showVotesCounter, block = {
@@ -240,22 +237,14 @@ fun CommentItem(
 						}
 						
 					})
-					val offset by animateFloatAsState(
-						targetValue = if (visible) 0f else 8f,
-						animationSpec = tween(150)
-					)
-					val alpha by animateFloatAsState(
-						targetValue = if (visible) 1f else 0.0f,
-						animationSpec = tween(150)
-					)
 
 					// score indicator button
 					Box() {
 						Box(
 							modifier = Modifier
-								.clip(RoundedCornerShape(5.dp, 5.dp, 5.dp, 10.dp))
+								.clip(RoundedCornerShape(9.dp, 9.dp, 9.dp, 18.dp))
 								.clickable { showVotesCounter = !showVotesCounter }
-								.padding(horizontal = 4.dp, vertical = 8.dp)
+								.padding(horizontal = 8.dp, vertical = 12.dp)
 						) {
 							comment.votesCount?.let {
 								VotesCountIndicator(
@@ -294,20 +283,21 @@ fun CommentItem(
 					}
 					
 				}
-				
+
+				// Share button
 				Row(
 					verticalAlignment = Alignment.CenterVertically
 				) {
 					Box(
 						modifier = Modifier
-							.clip(RoundedCornerShape(5.dp))
+							.clip(RoundedCornerShape(9.dp))
 							.clickable(onClick = onShare)
 							.padding(horizontal = 16.dp, vertical = 8.dp)
 					) {
 						Icon(
-							modifier = Modifier.size(20.dp),
+							modifier = Modifier.size(24.dp),
 							imageVector = Icons.Outlined.Share,
-							contentDescription = "",
+							contentDescription = "Поделиться",
 							tint = statisticsColor
 						)
 					}
@@ -319,7 +309,7 @@ fun CommentItem(
 				if (showReplyButton && !isPinned) {
 					Box (
 						modifier = Modifier
-							.clip(RoundedCornerShape(5.dp, 5.dp, 10.dp, 5.dp))
+							.clip(RoundedCornerShape(9.dp, 9.dp, 18.dp, 9.dp))
 							.clickable(onClick = onReplyClick)
 							.padding(horizontal = 16.dp, vertical = 8.dp)
 					) {
