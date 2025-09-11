@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.about
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -33,25 +34,39 @@ fun GithubButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    HubsTheme {
-        Row(
-            modifier = modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(onClick = onClick, interactionSource = remember { MutableInteractionSource() }, indication = ripple(color = Color.White.copy(0.1f)))
-                .background(Color(0xFF1F1F1F))
+
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(
+                onClick = onClick,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = Color.White.copy(0.1f))
+            )
+            .clip(RoundedCornerShape(8.dp))
+            .background(Color(0xFF1F1F1F))
+            .border(width = 1.dp, color = Color(0xFF575757), shape = RoundedCornerShape(8.dp))
 //                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .padding(vertical = 12.dp, horizontal = 16.dp)
+            .padding(vertical = 12.dp, horizontal = 16.dp)
 
 //                .background(),
-            ,
-            verticalAlignment = Alignment.CenterVertically
+        ,
+        verticalAlignment = Alignment.CenterVertically
 
-        ){
-            Icon(painter = painterResource(R.drawable.github_mark_white), contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "Код проекта на Github", color = Color.White, fontWeight = FontWeight.W600)
-            Spacer(Modifier.weight(1f))
-            Icon(painter = painterResource(R.drawable.arrow_outward), tint = Color.White, contentDescription = null)
-        }
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.github_mark_white),
+            contentDescription = null,
+            tint = Color.White
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = "Код проекта на Github", color = Color.White, fontWeight = FontWeight.W600)
+        Spacer(Modifier.weight(1f))
+        Icon(
+            painter = painterResource(R.drawable.arrow_outward),
+            tint = Color.White,
+            contentDescription = null
+        )
     }
+
 }

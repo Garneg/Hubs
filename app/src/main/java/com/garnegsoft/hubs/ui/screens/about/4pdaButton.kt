@@ -26,28 +26,39 @@ import com.garnegsoft.hubs.ui.theme.HubsTheme
 
 @Composable
 fun ForPDAButton(
-modifier: Modifier = Modifier,
-onClick: () -> Unit
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    HubsTheme {
-        Row(
-            modifier = modifier
-                .clip(RoundedCornerShape(8.dp))
-                .clickable(onClick = onClick, interactionSource = remember { MutableInteractionSource() }, indication = ripple(color = Color.White.copy(0.1f)))
-                .background(Color(0xFF2982CC))
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(
+                onClick = onClick,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = ripple(color = Color.White.copy(0.1f))
+            )
+            .background(Color(0xFF2982CC))
 //                .padding(vertical = 8.dp, horizontal = 16.dp)
-                .padding(vertical = 12.dp, horizontal = 16.dp)
+            .padding(vertical = 12.dp, horizontal = 16.dp)
 
 //                .background(),
-            ,
-            verticalAlignment = Alignment.CenterVertically
+        ,
+        verticalAlignment = Alignment.CenterVertically
 
-        ){
-            Icon(painter = painterResource(R.drawable.for_pda_logo), contentDescription = null, tint = Color.White)
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "Страница на 4pda", color = Color.White, fontWeight = FontWeight.W600)
-            Spacer(Modifier.weight(1f))
-            Icon(painter = painterResource(R.drawable.arrow_outward), tint = Color.White, contentDescription = null)
-        }
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.for_pda_logo),
+            contentDescription = null,
+            tint = Color.White
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(text = "Страница на 4pda", color = Color.White, fontWeight = FontWeight.W600)
+        Spacer(Modifier.weight(1f))
+        Icon(
+            painter = painterResource(R.drawable.arrow_outward),
+            tint = Color.White,
+            contentDescription = null
+        )
     }
+
 }
