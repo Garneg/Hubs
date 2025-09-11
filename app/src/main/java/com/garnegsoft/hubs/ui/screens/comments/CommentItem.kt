@@ -251,6 +251,7 @@ fun CommentItem(
 									data = remember { comment.toVotesCountIndicatorData()!! },
 									show = showVotesCounter,
 									color = statisticsColor,
+									textStyle = LocalTextStyle.current,
 									popupOffset = DpOffset((-12).dp, (-4).dp),
 									onDismiss = { showVotesCounter = false }
 								)

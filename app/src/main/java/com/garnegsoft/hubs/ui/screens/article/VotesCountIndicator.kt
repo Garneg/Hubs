@@ -17,6 +17,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -61,6 +62,7 @@ fun VotesCountIndicator(
 	show: Boolean,
 	data: VotesCountIndicatorData,
 	color: Color,
+	textStyle: TextStyle = TextStyle.Default.copy(fontWeight = FontWeight.W500),
 	onDismiss: () -> Unit,
 	popupOffset: DpOffset = DpOffset.Zero,
 ) {
@@ -112,7 +114,7 @@ fun VotesCountIndicator(
 						"${data.votesCount}: " +
 						"￪${data.votesUp} и " +
 						"￬${data.votesDown}",
-					fontWeight = FontWeight.W500,
+					style = textStyle,
 					color = color
 				)
 			}
