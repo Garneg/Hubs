@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import com.garnegsoft.hubs.api.article.Article
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -67,7 +69,9 @@ fun VotesCountIndicator(
 		) {
 			Box(
 				modifier = Modifier
-					.offset(0.dp, offset.dp)
+					.offset {
+						IntOffset(0, (offset * density).roundToInt())
+					}
 					.alpha(alpha)
 					.padding(2.dp)
 					.shadow(1.5.dp, shape = RoundedCornerShape(8.dp))
