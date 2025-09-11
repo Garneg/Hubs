@@ -62,7 +62,6 @@ fun ArticleScreenBottomBar(
             .padding(WindowInsets.navigationBars.asPaddingValues())
             .padding(AppBarDefaults.ContentPadding)
             .heightIn(max = 60.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         var showVotesCounter by remember {
             mutableStateOf(false)

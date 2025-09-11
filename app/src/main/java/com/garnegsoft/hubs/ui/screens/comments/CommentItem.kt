@@ -77,7 +77,10 @@ fun CommentItem(
 	) {
 		Spacer(modifier = Modifier.height(COMMENT_ITEM_GREAT_PADDING.dp))
 		if (isPinned) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
+			Row(
+				modifier = Modifier.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				Text(
 					text = "Закреплённый комментарий",
 					fontSize = 14.sp,
