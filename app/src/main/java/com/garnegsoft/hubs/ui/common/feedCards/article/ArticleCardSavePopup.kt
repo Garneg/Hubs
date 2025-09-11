@@ -1,11 +1,15 @@
 package com.garnegsoft.hubs.ui.common.feedCards.article
 
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateIntOffset
+import androidx.compose.animation.core.animateIntSize
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -33,6 +37,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
+import kotlin.math.roundToInt
 
 
 @Composable
@@ -60,9 +65,13 @@ fun SaveArticlePopup(
 		
 	}
 	val transition = updateTransition(targetState = show)
-	
+
+	val animatedOffset by transition.animateIntOffset {
+		if (it) IntOffset.Zero
+		else IntOffset(0, (16f * density).roundToInt())
+	}
 	val animatedSize by transition.animateFloat {
-		if (it) 1f else 0.8f
+		if (it) 1f else 0.2f
 	}
 	
 	if (show || transition.currentState) {
@@ -75,11 +84,14 @@ fun SaveArticlePopup(
 		) {
 			Box(
 				modifier = Modifier
+					.offset { animatedOffset.copy() }
 					.graphicsLayer {
-						scaleX = animatedSize
-						scaleY = animatedSize
+						//scaleX = animatedSize
+						//scaleY = animatedSize
+						shape = cardStyle.innerElementsShape
 						alpha = animatedSize
 					}
+					.padding(2.dp)
 					.size((bounds.width / density).dp, (bounds.height / density).dp)
 					.shadow(1.dp, shape = cardStyle.innerElementsShape)
 					.clip(cardStyle.innerElementsShape)

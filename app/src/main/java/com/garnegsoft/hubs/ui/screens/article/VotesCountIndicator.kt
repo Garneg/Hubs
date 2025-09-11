@@ -102,7 +102,7 @@ fun VotesCountIndicator(
 						IntOffset(popupOffset.x.roundToPx(), (offset.dp + popupOffset.y).roundToPx())
 					}
 					.alpha(alpha)
-					.padding(2.dp)
+					.padding(3.dp)
 					.shadow(1.5.dp, shape = RoundedCornerShape(8.dp))
 					.clip(RoundedCornerShape(8.dp))
 					.border(width = 0.5.dp, color = MaterialTheme.colors.onSurface.copy(0.1f), shape = RoundedCornerShape(8.dp))
