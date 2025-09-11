@@ -27,15 +27,42 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.comment.Comment
 import kotlin.math.roundToInt
+
+
+data class VotesCountIndicatorData(
+	val votesCount: Int,
+	val votesUp: Int,
+	val votesDown: Int
+)
+
+fun Article.Statistics.toVotesCountIndicatorData(): VotesCountIndicatorData {
+	return VotesCountIndicatorData(
+		votesCount = votesCountPlus + votesCountMinus,
+		votesUp = votesCountPlus,
+		votesDown = votesCountMinus
+	)
+}
+
+fun Comment.toVotesCountIndicatorData(): VotesCountIndicatorData? {
+	return votesCount?.let {
+		VotesCountIndicatorData(
+			votesCount = votesCount,
+			votesUp = votesCount - ((votesCount - score!!) / 2),
+			votesDown = (votesCount - score) / 2
+		)
+	}
+}
 
 
 @Composable
 fun VotesCountIndicator(
 	show: Boolean,
-	stats: Article.Statistics,
+	data: VotesCountIndicatorData,
 	color: Color,
 	onDismiss: () -> Unit,
+	popupOffset: DpOffset = DpOffset.Zero,
 ) {
 	val positionProvider = object : PopupPositionProvider {
 		override fun calculatePosition(
@@ -70,7 +97,7 @@ fun VotesCountIndicator(
 			Box(
 				modifier = Modifier
 					.offset {
-						IntOffset(0, (offset * density).roundToInt())
+						IntOffset(popupOffset.x.roundToPx(), (offset.dp + popupOffset.y).roundToPx())
 					}
 					.alpha(alpha)
 					.padding(2.dp)
@@ -82,9 +109,9 @@ fun VotesCountIndicator(
 			) {
 				Text(
 					text = "Всего голосов " +
-						"${stats.votesCountMinus + stats.votesCountPlus}: " +
-						"￪${stats.votesCountPlus} и " +
-						"￬${stats.votesCountMinus}",
+						"${data.votesCount}: " +
+						"￪${data.votesUp} и " +
+						"￬${data.votesDown}",
 					fontWeight = FontWeight.W500,
 					color = color
 				)

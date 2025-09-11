@@ -76,11 +76,12 @@ fun ArticleScreenBottomBar(
         ) {
             VotesCountIndicator(
                 show = showVotesCounter,
-                stats = article.statistics,
-                color = statisticsColor
-            ) {
-                showVotesCounter = false
-            }
+                data = remember { article.statistics.toVotesCountIndicatorData() },
+                color = statisticsColor,
+                onDismiss = {
+                    showVotesCounter = false
+                }
+            )
             Icon(
                 modifier = Modifier.size(18.dp),
                 painter = painterResource(id = R.drawable.rating),
@@ -108,7 +109,7 @@ fun ArticleScreenBottomBar(
             onClick = {},
             enabled = false,
 
-        ) {
+            ) {
             Icon(
                 modifier = Modifier.size(18.dp),
                 painter = painterResource(id = R.drawable.views_icon),
@@ -199,7 +200,7 @@ fun ArticleScreenBottomBar(
             modifier = Modifier.weight(1f),
             onClick = onCommentsClick,
 
-        ) {
+            ) {
             BadgedBox(
 //                modifier = Modifier.align(Alignment.Center),
                 badge = {

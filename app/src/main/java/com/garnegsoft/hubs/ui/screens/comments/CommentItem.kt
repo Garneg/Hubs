@@ -1,10 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import android.graphics.Paint.Align
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,36 +12,28 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.MeasurePolicy
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.htmlBlocksToText
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.screens.article.VotesCountIndicator
+import com.garnegsoft.hubs.ui.screens.article.toVotesCountIndicatorData
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.delay
-import org.jsoup.Jsoup
 
 @Composable
 fun CommentItem(
@@ -268,50 +257,16 @@ fun CommentItem(
 								.clickable { showVotesCounter = !showVotesCounter }
 								.padding(horizontal = 4.dp, vertical = 8.dp)
 						) {
-							if (showVotesCounter) {
-								Popup(
-									properties = PopupProperties(focusable = true),
-									popupPositionProvider = positionProvider,
-									onDismissRequest = { visible = false }
-								) {
-									Surface(
-										modifier = Modifier
-											.offset {
-												IntOffset(0, offset.dp.roundToPx())
-											}
-											.graphicsLayer {
-												this.alpha = alpha
-											}
-											.padding(16.dp),
-										shape = RoundedCornerShape(8.dp),
-										color = MaterialTheme.colors.surface,
-										elevation = 4.dp
-									) {
-										Box(
-											modifier = Modifier.padding(8.dp)
-										) {
-											comment.votesCount?.let {
-												val votesMinus =
-													(comment.votesCount - comment.score) / 2
-												val votesPlus = comment.votesCount - votesMinus
-												
-												Text(
-													text = "Всего голосов " +
-														"${comment.votesCount}: " +
-														"￪${votesPlus} и " +
-														"￬${votesMinus}",
-													color = statisticsColor
-												)
-												
-											}
-										}
-									}
-									
-									
-								}
-								
-								
+							comment.votesCount?.let {
+								VotesCountIndicator(
+									data = remember { comment.toVotesCountIndicatorData()!! },
+									show = showVotesCounter,
+									color = statisticsColor,
+									popupOffset = DpOffset((-12).dp, (-4).dp),
+									onDismiss = { showVotesCounter = false }
+								)
 							}
+
 							
 							Row(verticalAlignment = Alignment.CenterVertically) {
 								Icon(
