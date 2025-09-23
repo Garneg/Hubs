@@ -29,83 +29,86 @@ import com.garnegsoft.hubs.ui.theme.HubsTheme
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.crashlytics
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 
 
 class MainActivity : ComponentActivity() {
-	
-	@OptIn(ExperimentalAnimationApi::class)
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-//		WindowCompat.setDecorFitsSystemWindows(window, false)
-		enableEdgeToEdge()
 
-		// Disable crashlytics if it's debug version
-		FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
-		intent.extras?.let {
-			FcmDispatcher.dispatchExtras(
-				handleUrl = {
-					startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
-						this.data = Uri.parse(it)
-					}, null))
-				},
-				extras = it)
-		}
-		
-//		FirebaseMessaging.getInstance().token.addOnCompleteListener {
-//			Log.e("fcm-token", it.result)
-//		}
-		
-		
-		var authStatus: Boolean? by mutableStateOf(null)
-		
-		val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
-		val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
+    @OptIn(ExperimentalAnimationApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
-		runBlocking {
-			authStatus = isAuthorizedFlow.firstOrNull()
-			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
-			HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
-		}
-		
-		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
-			.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
-			
-			.build()
-		WorkManager.getInstance(this).enqueue(updateMeData)
-		
-		intent.dataString?.let { Log.e("intentData", it) }
-		
-		setContent {
-			val cookies by cookiesFlow.collectAsState(initial = "")
-			key(cookies) {
-				val themeMode by HubsDataStore.Settings
-					.getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
-					.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
-					.collectAsState(initial = null)
-				
-				if (themeMode != null && authStatus != null) {
-					HubsTheme(
-						darkTheme = when (themeMode) {
-							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
-							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
-							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
-							else -> false
-						}
-					) {
-						val navController = rememberNavController()
-						
-						MainNavigationGraph(
-							parentActivity = this@MainActivity,
-							navController = navController
-						)
-					}
-				}
-			}
-		}
-		
-		Log.e("ExternalLink", intent.data.toString())
-		
-	}
+        // Disable crashlytics if it's debug version
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
+        intent.extras?.let {
+            FcmDispatcher.dispatchExtras(
+                handleUrl = {
+                    startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
+                        this.data = Uri.parse(it)
+                    }, null))
+                },
+                extras = it
+            )
+        }
+        // Just to get fcm token if device runs debug version
+        if (BuildConfig.DEBUG) {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener {
+                Log.i("fcm-token", it.result)
+            }
+        }
+
+
+        var authStatus: Boolean? by mutableStateOf(null)
+
+        val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
+        val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
+
+        runBlocking {
+            authStatus = isAuthorizedFlow.firstOrNull()
+            Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
+            HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
+        }
+
+        val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
+            .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+            .build()
+        WorkManager.getInstance(this).enqueue(updateMeData)
+
+        intent.dataString?.let { Log.e("intentData", it) }
+
+        setContent {
+            val cookies by cookiesFlow.collectAsState(initial = "")
+            key(cookies) {
+                val themeMode by HubsDataStore.Settings
+                    .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
+                    .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+                    .collectAsState(initial = null)
+
+                if (themeMode != null && authStatus != null) {
+                    HubsTheme(
+                        darkTheme = when (themeMode) {
+                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
+                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
+                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
+                            else -> false
+                        }
+                    ) {
+                        val navController = rememberNavController()
+
+                        MainNavigationGraph(
+                            parentActivity = this@MainActivity,
+                            navController = navController,
+                            startDestination = intent.extras?.getString("startDestination") ?: "main"
+                        )
+                    }
+                }
+            }
+        }
+        Log.i("SHIT", intent.extras?.getString("startDestination") ?: "literally nothing bro")
+        Log.e("ExternalLink", intent.data.toString())
+
+    }
 }

@@ -91,14 +91,15 @@ import kotlinx.coroutines.launch
 @Composable
 fun MainNavigationGraph(
     navController: NavHostController = rememberNavController(),
-    parentActivity: ComponentActivity
+    parentActivity: ComponentActivity,
+    startDestination: String = "main"
 ) {
     val imageViewerState =
         rememberImageViewerState(offlineResourcesRootPath = parentActivity.filesDir.absolutePath + "/offline_resources/")
 
     NavHost(
         navController = navController,
-        startDestination = "articles",
+        startDestination = startDestination,
         enterTransition = {
             slideInHorizontally(tween(250)) { it }
         },
@@ -126,7 +127,7 @@ fun MainNavigationGraph(
         builder = {
 
             composable(
-                route = "articles",
+                route = "main",
             ) {
 
                 MainScreen(
@@ -566,7 +567,7 @@ fun MainNavigationGraph(
                             WorkManager.getInstance(context).enqueue(updateMeDataRequest)
 
                             navController.popBackStack(
-                                "articles",
+                                "main",
                                 inclusive = false
                             )
                             showLogoutConfirmationDialog = false
@@ -707,17 +708,6 @@ fun MainNavigationGraph(
                 )
             }
         })
-//    Box(
-//        Modifier
-//            .height(Dp(WindowInsets.statusBars.getTop(LocalDensity.current) / LocalDensity.current.density))
-//            .fillMaxWidth()
-//            .background(MaterialTheme.colors.let {
-//                if (it.isLight)
-//                    it.primary
-//                else
-//                    it.surface
-//            })
-//    )
 
     ImageViewerScreenOverlay(
         state = imageViewerState

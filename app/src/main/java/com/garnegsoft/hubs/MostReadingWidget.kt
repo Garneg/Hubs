@@ -19,7 +19,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.ui.theme.HubsWidgetTheme
+import com.garnegsoft.hubs.ui.theme.HubsWidgetThemeM3
 import com.garnegsoft.hubs.ui.widgets.MostReadingWidgetLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -36,7 +36,7 @@ class MostReadingWidget : GlanceAppWidget() {
 			Toast.makeText(context, "Data received, widget updated!", Toast.LENGTH_SHORT).show()
 		}
 		provideContent(content = {
-			HubsWidgetTheme {
+			HubsWidgetThemeM3 {
 				MostReadingWidgetLayout(articles.toList())
 			}
 			

@@ -17,11 +17,11 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.glance.GlanceComposable
 import androidx.glance.GlanceTheme
-import androidx.glance.material.ColorProviders
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.material3.MaterialTheme as Material3Theme
 
-private val DarkColorPalette = darkColors(
+
+private val  DarkColorPalette = darkColors(
     primary = Color(0xFFE7E7E7),
     primaryVariant = Color(0xFFE0E0E0),
     secondary = Color(0xFFD3D3D3),
@@ -108,21 +108,5 @@ fun HubsM3Theme() {
 
         }
 
-    }
-}
-
-@GlanceComposable
-@Composable
-fun HubsWidgetTheme(
-    content: @Composable () -> Unit
-) {
-    GlanceTheme(
-        
-        colors = ColorProviders(
-            light = LightColorPalette.copy(surface = Color.White),
-            dark = DarkColorPalette
-        )
-    ) {
-        content()
     }
 }
