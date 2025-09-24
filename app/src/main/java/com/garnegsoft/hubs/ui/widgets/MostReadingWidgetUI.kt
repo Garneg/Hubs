@@ -259,7 +259,7 @@ fun WidgetBar(modifier: GlanceModifier = GlanceModifier) {
 			)
 			Text(
 				text = " · читают сейчас",
-				style = TextStyle(color = ColorProvider(Color.White.copy(0.5f)))
+				style = TextStyle(color = ColorProvider(GlanceTheme.colors.onPrimary.getColor(context).copy(0.5f)))
 			)
 			Box(
 				modifier = GlanceModifier.fillMaxWidth(),
