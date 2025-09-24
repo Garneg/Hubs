@@ -62,11 +62,11 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
                             val consumed = scrollBy(delta)
                             lastValue = value
                             lastVelocity = velocity
-                    
+
                             if (consumed == 0f)
                                 cancelAnimation()
                         }
-                
+
                         return lastVelocity
                     }
                 },

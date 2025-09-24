@@ -191,7 +191,7 @@ fun WidgetArticleCard(
 				ImageProvider(R.drawable.widget_list_card_background_shape),
 				colorFilter = ColorFilter.tint(GlanceTheme.colors.primaryContainer)
 			)
-			.clickable(onClick = onClick)
+			.clickable(onClick = onClick, rippleOverride = R.drawable.rounded_corners_ripple)
 			.padding(12.dp)
 
 	

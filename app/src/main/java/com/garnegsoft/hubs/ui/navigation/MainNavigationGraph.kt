@@ -336,9 +336,9 @@ fun MainNavigationGraph(
                 DisposableEffect(key1 = id) {
                     onDispose {
                         clearLastArticle()
-                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                            parentActivity.finish()
-                        }
+//                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
+//                            parentActivity.finish()
+//                        }
                     }
                 }
 
