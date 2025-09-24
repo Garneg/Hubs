@@ -26,7 +26,7 @@ val LightColorSchemeM3 = lightColorScheme(
 fun HubsWidgetThemeM3(content: @Composable () -> Unit) {
 
     GlanceTheme(
-        colors = if (Build.VERSION.SDK_INT >= 31 && true == false){
+        colors = if (Build.VERSION.SDK_INT >= 31){
             GlanceTheme.colors
         } else {
             HubsWidgetColorProviders()
