@@ -5,6 +5,7 @@ import android.net.Uri
 import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
@@ -24,6 +25,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -330,14 +332,27 @@ fun MainNavigationGraph(
                     }
                 }
 
-                BackHandler(enabled = !imageViewerState.show) {
-                    clearLastArticle()
-                    if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                        parentActivity.finish()
-                    } else {
-                        navController.popBackStack()
+
+                DisposableEffect(key1 = id) {
+                    onDispose {
+                        clearLastArticle()
+                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
+                            parentActivity.finish()
+                        }
                     }
                 }
+
+                // Old solution that blocks predictive back gesture handling by navigation
+                // But i feel that i need to leave it too in case DisposableEffect will be improper solution
+
+//                BackHandler(enabled = !imageViewerState.show) {
+//                    clearLastArticle()
+//                    if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
+//                        parentActivity.finish()
+//                    } else {
+//                        navController.popBackStack()
+//                    }
+//                }
 
                 ArticleScreen(
                     articleId = id!!,

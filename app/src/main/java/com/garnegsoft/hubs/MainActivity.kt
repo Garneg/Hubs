@@ -100,14 +100,12 @@ class MainActivity : ComponentActivity() {
 
                         MainNavigationGraph(
                             parentActivity = this@MainActivity,
-                            navController = navController,
-                            startDestination = intent.extras?.getString("startDestination") ?: "main"
+                            navController = navController
                         )
                     }
                 }
             }
         }
-        Log.i("SHIT", intent.extras?.getString("startDestination") ?: "literally nothing bro")
         Log.e("ExternalLink", intent.data.toString())
 
     }
