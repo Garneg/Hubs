@@ -1,6 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -82,8 +86,10 @@ fun VotesCountIndicator(
 		
 	}
 	val transition = updateTransition(targetState = show)
-	val offset by transition.animateFloat{
-		if (it) 0f else 8f
+	val offset by transition.animateFloat(
+		transitionSpec = { tween(250, easing = EaseOutQuint) }
+	){
+		if (it) 0f else 12f
 	}
 
 

@@ -1,11 +1,17 @@
 package com.garnegsoft.hubs.ui.screens.main
 
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.EaseOutQuint
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
@@ -16,7 +22,6 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -96,6 +101,16 @@ fun AuthorizedMenu(
 	}
 	
 	val itemsOffset = 20
+
+	val scaleAnimatedValue by menuTransition.animateFloat(
+		transitionSpec = { tween(durationMillis = 150, easing = EaseOutQuint) }
+	) {
+		if (it) 1f else 0.5f
+	}
+
+	val roundedCornersRadiusAnimatedValue by menuTransition.animateDp {
+		if (it) 12.dp else 48.dp
+	}
 	
 	if (menuTransition.targetState || expanded || menuTransition.currentState) {
 		Popup(
@@ -117,13 +132,26 @@ fun AuthorizedMenu(
 			
 			Box(
 				modifier = Modifier
-					.alpha(alpha)
+					.graphicsLayer {
+						this.alpha = alpha
+
+						translationY = -(size.height - (size.height * scaleAnimatedValue))/2
+						translationX = (size.width - (size.width * scaleAnimatedValue))/2
+						scaleX = scaleAnimatedValue
+						scaleY = scaleAnimatedValue
+
+					}
 					.padding(4.dp)
 			) {
 				Surface(
 					modifier = Modifier
-						.shadow(4.dp, RoundedCornerShape(8.dp))
-						.clip(RoundedCornerShape(8.dp))
+						.graphicsLayer {
+							shape = RoundedCornerShape(roundedCornersRadiusAnimatedValue)
+							clip = true
+							shadowElevation = 4.dp.roundToPx().toFloat()
+						}
+//						.shadow(4.dp, RoundedCornerShape(12.dp))
+						.clip(RoundedCornerShape(roundedCornersRadiusAnimatedValue))
 						.background(MaterialTheme.colors.surface),
 					elevation = 4.dp
 				) {

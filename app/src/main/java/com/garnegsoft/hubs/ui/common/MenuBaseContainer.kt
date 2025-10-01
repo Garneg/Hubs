@@ -65,7 +65,7 @@ fun MenuItem(
 	Row(
 		modifier = modifier
 			.clickable(onClick = onClick)
-			.padding(14.dp),
+			.padding(vertical = 14.dp, horizontal = 18.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		CompositionLocalProvider(
@@ -74,12 +74,12 @@ fun MenuItem(
 		) {
 			icon()
 		}
-		Spacer(modifier = Modifier.width(14.dp))
+		Spacer(modifier = Modifier.width(18.dp))
 		Text(
 			text = title,
 			color = MaterialTheme.colors.onSurface
 		)
-		Spacer(modifier = Modifier.width(14.dp))
+		Spacer(modifier = Modifier.width(18.dp))
 		Spacer(modifier = Modifier.weight(1f))
 	}
 }
