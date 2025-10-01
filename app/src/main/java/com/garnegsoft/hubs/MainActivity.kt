@@ -99,7 +99,6 @@ class MainActivity : ComponentActivity() {
                         val navController = rememberNavController()
 
                         MainNavigationGraph(
-                            parentActivity = this@MainActivity,
                             navController = navController
                         )
                     }

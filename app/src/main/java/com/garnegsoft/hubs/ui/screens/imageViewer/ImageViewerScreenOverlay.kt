@@ -4,20 +4,30 @@ import android.os.Build
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.AnimationState
+import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.animateDecay
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateInt
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandIn
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -39,6 +49,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
@@ -108,8 +119,9 @@ fun ImageViewerScreenOverlay(
 	AnimatedVisibility(
 		modifier = Modifier.fillMaxSize(),
 		visible = state.show,
-		enter = fadeIn() + scaleIn(initialScale = 1.1f),
-		exit = fadeOut(),
+		enter = scaleIn(animationSpec = tween(250, easing = EaseOutQuart), initialScale = 0.25f) + fadeIn(tween(250)),
+		exit = scaleOut(targetScale = 0.9f)
+		+ fadeOut(animationSpec = tween(250)),
 
 	) {
 		var offset by remember {
@@ -136,7 +148,14 @@ fun ImageViewerScreenOverlay(
 		val animatedOffset by animateFloatAsState(
 			targetValue = if (isDragging) offset else 0f
 		)
+		val animatedCornerRadius by transition.animateDp {
+			when(it) {
+				EnterExitState.Visible -> 0.dp
+				else -> 20.dp
+			}
+		}
 		Box(modifier = Modifier
+			.clip(RoundedCornerShape(size = animatedCornerRadius))
 			.fillMaxSize()
 			.onGloballyPositioned {
 				viewportHeight = it.size.height

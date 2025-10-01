@@ -71,7 +71,8 @@ fun OfflineArticleScreen(
 	onSwitchToNormalMode: () -> Unit,
 	onViewImageRequest: (data: String) -> Unit,
 	onBack: () -> Unit,
-	onDelete: () -> Unit
+	onDelete: () -> Unit,
+	modifier: Modifier = Modifier
 ) {
 	val viewModel = viewModel<OfflineArticleScreenViewModel>()
 	val lazyListState = rememberLazyListState()

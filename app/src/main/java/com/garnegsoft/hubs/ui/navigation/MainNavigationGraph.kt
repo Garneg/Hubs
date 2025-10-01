@@ -2,17 +2,25 @@ package com.garnegsoft.hubs.ui.navigation
 
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterExitState
+import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.core.EaseIn
 import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.EaseInQuart
 import androidx.compose.animation.core.EaseInSine
 import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.EaseOutExpo
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,9 +32,12 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +46,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
@@ -87,18 +103,18 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
+import kotlinx.coroutines.withContext
 
 
 @Composable
 fun MainNavigationGraph(
     navController: NavHostController = rememberNavController(),
-    parentActivity: ComponentActivity,
     startDestination: String = "main"
 ) {
+    val rootCoroutineScope = rememberCoroutineScope()
     val imageViewerState =
-        rememberImageViewerState(offlineResourcesRootPath = parentActivity.filesDir.absolutePath + "/offline_resources/")
-
+        rememberImageViewerState(offlineResourcesRootPath = navController.context.filesDir.absolutePath + "/offline_resources/")
+    val factory = rememberNavComposableFactory(navController)
     NavHost(
         navController = navController,
         startDestination = startDestination,
@@ -107,28 +123,28 @@ fun MainNavigationGraph(
         },
         exitTransition = {
             if (this.targetState.destination.route?.startsWith("article/") == true){
-                slideOutVertically(tween(250)) { -it / 5 } + fadeOut()
+                slideOutVertically(tween(250)) { -it / 5 } + fadeOut(targetAlpha = 0.5f)
             } else {
-                slideOutHorizontally(tween(250)) { -it } +
-                        fadeOut(tween(250), targetAlpha = 0.5f)
+                slideOutHorizontally(tween(250)) { -it / 2 }
+                //+ fadeOut(tween(250), targetAlpha = 0.9f)
             }
         },
         popEnterTransition = {
-
             if (this.initialState.destination.route?.startsWith("article/") == true){
                 slideInVertically(tween(250)) { -it / 5 }
             } else {
-                slideInHorizontally(tween(250)) { -it }
+                slideInHorizontally(tween(250)) { -it / 2 }
             }
 
         },
         popExitTransition = {
-            slideOutHorizontally(tween(250)) { it  } +
-                    fadeOut(tween(250), targetAlpha = 0.5f)
+            slideOutHorizontally(tween(250)) { it }
+//            +
+//                    fadeOut(tween(250), targetAlpha = 0.9f)
         },
         builder = {
-
-            composable(
+            
+            hubsComposable(
                 route = "main",
             ) {
 
@@ -199,25 +215,25 @@ fun MainNavigationGraph(
                             val authActivityLauncher =
                                 rememberLauncherForActivityResult(contract = AuthActivityResultContract()) {
                                     CookieManager.getInstance().removeAllCookies(null)
-                                    parentActivity.lifecycle.coroutineScope.launch {
+                                    rootCoroutineScope.launch {
                                         it?.let { result ->
                                             HubsDataStore.Auth.edit(
-                                                context = parentActivity,
+                                                context = navController.context,
                                                 pref = HubsDataStore.Auth.Cookies,
                                                 value = result.split("; ")
                                                     .find { it.startsWith("connect_sid") }!!
                                             )
 
                                             HubsDataStore.Auth.edit(
-                                                context = parentActivity,
+                                                context = navController.context,
                                                 pref = HubsDataStore.Auth.Authorized,
                                                 value = true
                                             )
-                                            HabrApi.initializeWithCookies(parentActivity, result)
+                                            HabrApi.initializeWithCookies(navController.context, result)
                                             launch(Dispatchers.IO) {
                                                 MeController.getMe()?.let {
                                                     val shortcut = ShortcutInfoCompat.Builder(
-                                                        parentActivity,
+                                                        navController.context,
                                                         "bookmarks_shortcut"
                                                     )
                                                         .setIntent(
@@ -230,7 +246,7 @@ fun MainNavigationGraph(
                                                         )
                                                         .setIcon(
                                                             IconCompat.createWithResource(
-                                                                parentActivity,
+                                                                navController.context,
                                                                 R.drawable.bookmarks_shortcut_icon
                                                             )
                                                         )
@@ -238,7 +254,7 @@ fun MainNavigationGraph(
                                                         .setLongLabel("Закладки")
                                                         .build()
                                                     ShortcutManagerCompat.pushDynamicShortcut(
-                                                        parentActivity,
+                                                        navController.context,
                                                         shortcut
                                                     )
 
@@ -251,7 +267,7 @@ fun MainNavigationGraph(
                                                             )
                                                         )
                                                         .build()
-                                                WorkManager.getInstance(parentActivity)
+                                                WorkManager.getInstance(navController.context)
                                                     .enqueue(updateMeDataRequest)
                                             }
                                         }
@@ -276,7 +292,7 @@ fun MainNavigationGraph(
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "article/{id}?offline={offline}",
                 deepLinks = ArticleNavDeepLinks,
                 enterTransition = {
@@ -293,19 +309,20 @@ fun MainNavigationGraph(
                             )
                 },
                 popEnterTransition = {
-                    fadeIn(
-                        tween(durationMillis = 200, easing = EaseIn)
-                    )
+                    if (navController.currentBackStackEntry?.destination?.route?.startsWith("article/") == true) {
+                        slideInVertically(tween(250)) { -it / 5 }
+                    } else
+                        slideInHorizontally(tween(250)) { -it / 2 }
                 },
-                exitTransition = {
-                    scaleOut(
-                        tween(250, easing = EaseIn),
-                        0.8f
-                    ) + fadeOut(
-                        tween(240, easing = EaseOut)
-                    )
-
-                },
+//                exitTransition = {
+//                    scaleOut(
+//                        tween(250, easing = EaseIn),
+//                        0.8f
+//                    ) + fadeOut(
+//                        tween(240, easing = EaseOut)
+//                    )
+//
+//                },
                 popExitTransition = {
                     scaleOut(
                         tween(250, easing = EaseInSine),
@@ -326,8 +343,8 @@ fun MainNavigationGraph(
 
                 val clearLastArticle = remember {
                     {
-                        parentActivity.lifecycle.coroutineScope.launch(Dispatchers.IO) {
-                            LastReadArticleController.clearLastArticle(parentActivity)
+                        rootCoroutineScope.launch(Dispatchers.IO) {
+                            LastReadArticleController.clearLastArticle(navController.context)
                         }
                     }
                 }
@@ -336,8 +353,8 @@ fun MainNavigationGraph(
                 DisposableEffect(key1 = id) {
                     onDispose {
                         clearLastArticle()
-//                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-//                            parentActivity.finish()
+//                        if (navController.context.intent.data != null && navController.previousBackStackEntry == null) {
+//                            navController.context.finish()
 //                        }
                     }
                 }
@@ -347,22 +364,20 @@ fun MainNavigationGraph(
 
 //                BackHandler(enabled = !imageViewerState.show) {
 //                    clearLastArticle()
-//                    if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-//                        parentActivity.finish()
+//                    if (navController.context.intent.data != null && navController.previousBackStackEntry == null) {
+//                        navController.context.finish()
 //                    } else {
 //                        navController.popBackStack()
 //                    }
 //                }
 
+
+
                 ArticleScreen(
                     articleId = id!!,
                     onBackButtonClicked = {
                         clearLastArticle()
-                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                            parentActivity.finish()
-                        } else {
-                            navController.popBackStack()
-                        }
+                        navController.navigateBack()
                     },
                     onCommentsClick = {
                         clearLastArticle()
@@ -393,7 +408,7 @@ fun MainNavigationGraph(
 
             }
 
-            composable(
+            hubsComposable(
                 route = "offlineArticle/{articleId}",
                 enterTransition = {
                     scaleIn(
@@ -436,20 +451,16 @@ fun MainNavigationGraph(
                     articleId = articleId,
                     onSwitchToNormalMode = { navController.navigate("article/$articleId") },
                     onViewImageRequest = { imageViewerState.showImageOfflineMode(it) },
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.navigateBack() },
                     onDelete = {
-                        OfflineArticlesController.deleteArticle(articleId, parentActivity)
-                        navController.popBackStack()
+                        OfflineArticlesController.deleteArticle(articleId, navController.context)
+                        navController.navigateBack()
                     }
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "search",
-                enterTransition = Transitions.GenericTransitions.enterTransition,
-                exitTransition = Transitions.GenericTransitions.exitTransition,
-                popEnterTransition = Transitions.GenericTransitions.popEnterTransition,
-                popExitTransition = Transitions.GenericTransitions.popExitTransition
             ) {
                 SearchScreen(
                     viewModelStoreOwner = it,
@@ -462,12 +473,12 @@ fun MainNavigationGraph(
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "settings",
             ) {
                 SettingsScreen(
                     onBack = {
-                        navController.popBackStack()
+                        navController.navigateBack()
                     },
                     onArticleScreenSettings = {
                         navController.navigate("article_settings")
@@ -478,23 +489,23 @@ fun MainNavigationGraph(
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "article_settings"
             ) {
                 ArticleScreenSettingsScreen(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.navigateBack() }
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "feed_settings"
             ) {
                 FeedSettingsScreen(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.navigateBack() }
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "comments/{postId}?commentId={commentId}",
                 deepLinks = CommentsScreenNavDeepLinks
             ) {
@@ -513,11 +524,7 @@ fun MainNavigationGraph(
                     highlightedCommentId = commentId?.toInt(),
                     allowDisplayFullContent = showFullContent,
                     onBackClicked = {
-                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                            parentActivity.finish()
-                        } else {
-                            navController.popBackStack()
-                        }
+                        navController.navigateBack()
                     },
                     onArticleClicked = { navController.navigate("article/$postId") },
                     onUserClicked = { navController.navigate("user/$it") },
@@ -527,8 +534,7 @@ fun MainNavigationGraph(
             }
 
 
-
-            composable(
+            hubsComposable(
                 route = "user/{alias}?page={page}",
                 deepLinks = UserScreenNavDeepLinks,
             ) {
@@ -564,12 +570,12 @@ fun MainNavigationGraph(
                         logoutCoroutineScope.launch {
                             val shortcuts =
                                 ShortcutManagerCompat.getDynamicShortcuts(
-                                    parentActivity
+                                    navController.context
                                 ).map { it.id }
                             ShortcutManagerCompat.disableShortcuts(
-                                parentActivity,
+                                navController.context,
                                 shortcuts,
-                                "Вы вышли из приложения!"
+                                "Вы вышли из аккаунта в приложении!"
                             )
 
                             AuthDataController.clearAuthData(context)
@@ -592,17 +598,13 @@ fun MainNavigationGraph(
                     context,
                     HubsDataStore.Auth.Alias
                 ).collectAsState(initial = "")
+
                 UserScreen(
                     isAppUser = alias == userAlias,
                     initialPage = deepLinkPage ?: page,
                     alias = alias,
                     onBack = {
-
-                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                            parentActivity.finish()
-                        } else {
-                            navController.popBackStack()
-                        }
+                        navController.navigateBack()
                     },
                     onArticleClicked = { navController.navigate("article/$it") },
                     onUserClicked = { navController.navigate("user/$it") },
@@ -621,41 +623,24 @@ fun MainNavigationGraph(
                         navController.navigate("hub/$it")
                     }
                 )
-                if (this.transition.isRunning) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(this.transition.isRunning) {})
-                }
+
             }
 
-            composable(
+            hubsComposable(
                 "hub/{alias}",
                 deepLinks = HubScreenNavDeepLinks
             ) {
                 val alias = it.arguments?.getString("alias")
                 HubScreen(alias = alias!!, viewModelStoreOwner = it,
-                    onBackClick = {
-                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                            parentActivity.finish()
-                        } else {
-                            navController.popBackStack()
-                        }
-                    },
+                    onBackClick = { navController.navigateBack() },
                     onArticleClick = { navController.navigate("article/$it") },
                     onCompanyClick = { navController.navigate("company/$it") },
                     onUserClick = { navController.navigate("user/$it") },
                     onCommentsClick = { navController.navigate("comments/$it") }
                 )
 
-                if (this.transition.isRunning) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(this.transition.isRunning) {})
-                }
             }
-            composable(
+            hubsComposable(
                 "company/{alias}"
             ) {
                 val alias = it.arguments?.getString("alias")!!
@@ -663,48 +648,44 @@ fun MainNavigationGraph(
                     viewModelStoreOwner = it,
                     alias = alias,
                     onBack = {
-                        if (parentActivity.intent.data != null && navController.previousBackStackEntry == null) {
-                            parentActivity.finish()
-                        } else {
-                            navController.popBackStack()
-                        }
+//                        if (navController.context.intent.data != null && navController.previousBackStackEntry == null) {
+//                            navController.context.finish()
+//                        } else {
+//                            navController.navigateBack()
+//                        }
+                        navController.navigateBack()
                     },
                     onArticleClick = { navController.navigate("article/$it") },
                     onCommentsClick = { navController.navigate("comments/$it") },
                     onUserClick = { navController.navigate("user/$it") }
                 )
 
-                if (this.transition.isRunning) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .pointerInput(this.transition.isRunning) {})
-                }
+
             }
 
-            composable(
+            hubsComposable(
                 "about"
             ) {
                 AboutScreen {
-                    navController.popBackStack()
+                    navController.navigateBack()
                 }
             }
 
-            composable(
+            hubsComposable(
                 route = "savedArticles",
                 deepLinks = listOf(navDeepLink { uriPattern = "hubs://saved-articles" }),
             ) {
                 OfflineArticlesListScreen(
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.navigateBack() },
                     onArticleClick = { navController.navigate("offlineArticle/$it") }
                 )
             }
 
-            composable(
+            hubsComposable(
                 "history"
             ) {
                 HistoryScreen(
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.navigateBack() },
                     onArticleClick = { navController.navigate("article/$it") },
                     onUserClick = { navController.navigate("user/$it") },
                     onHubClick = { navController.navigate("hub/$it") },
@@ -712,11 +693,11 @@ fun MainNavigationGraph(
                 )
             }
 
-            composable(
+            hubsComposable(
                 route = "subscriptionManagement"
             ) {
                 SubscriptionManagementScreen(
-                    onBack = { navController.popBackStack() },
+                    onBack = { navController.navigateBack() },
                     onHubClick = { navController.navigate("hub/$it") },
                     onUserClick = { navController.navigate("user/$it") },
                     onCompanyClick = { navController.navigate("company/$it") }
@@ -729,3 +710,4 @@ fun MainNavigationGraph(
     )
 
 }
+

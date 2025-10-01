@@ -35,6 +35,7 @@ import org.jsoup.nodes.*
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ArticleScreen(
+    modifier: Modifier = Modifier,
     articleId: Int,
     onBackButtonClicked: () -> Unit,
     onCommentsClick: () -> Unit,
@@ -93,6 +94,7 @@ fun ArticleScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             HubsTopAppBar(
                 title = { Text(text = "Публикация") },

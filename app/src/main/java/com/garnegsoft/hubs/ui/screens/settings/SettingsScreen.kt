@@ -107,11 +107,13 @@ class SettingsScreenViewModel : ViewModel() {
 fun SettingsScreen(
 	onBack: () -> Unit,
 	onArticleScreenSettings: () -> Unit,
-	onFeedSettings: () -> Unit
+	onFeedSettings: () -> Unit,
+	modifier: Modifier = Modifier,
 ) {
 	val viewModel = viewModel<SettingsScreenViewModel>()
 	
 	Scaffold(
+		modifier = modifier,
 		topBar = {
 			HubsTopAppBar(
 				elevation = 0.dp,

@@ -52,6 +52,7 @@ fun MainScreen(
     onHubClicked: (alias: String) -> Unit,
     onSavedArticles: () -> Unit,
     menu: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -156,6 +157,7 @@ fun MainScreen(
     })
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             HubsTopAppBar(
                 elevation = 0.dp,

@@ -63,6 +63,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun SearchScreen(
+    modifier: Modifier = Modifier,
     viewModelStoreOwner: ViewModelStoreOwner,
     onArticleClicked: (Int) -> Unit,
     onHubClicked: (alias: String) -> Unit,
@@ -87,6 +88,7 @@ fun SearchScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             HubsTopAppBar(
                 title = { Text(text = "Поиск") },
