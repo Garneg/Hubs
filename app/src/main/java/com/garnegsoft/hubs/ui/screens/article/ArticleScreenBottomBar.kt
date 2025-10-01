@@ -37,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PostType
@@ -79,7 +80,8 @@ fun ArticleScreenBottomBar(
                 color = statisticsColor,
                 onDismiss = {
                     showVotesCounter = false
-                }
+                },
+                popupOffset = DpOffset(-2.dp, -2.dp)
             )
             Icon(
                 modifier = Modifier.size(18.dp),

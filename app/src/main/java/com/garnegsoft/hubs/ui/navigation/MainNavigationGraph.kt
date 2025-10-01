@@ -114,7 +114,7 @@ fun MainNavigationGraph(
     val rootCoroutineScope = rememberCoroutineScope()
     val imageViewerState =
         rememberImageViewerState(offlineResourcesRootPath = navController.context.filesDir.absolutePath + "/offline_resources/")
-    val factory = rememberNavComposableFactory(navController)
+
     NavHost(
         navController = navController,
         startDestination = startDestination,
