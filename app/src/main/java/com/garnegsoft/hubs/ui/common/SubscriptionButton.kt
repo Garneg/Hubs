@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.user.UserController
+import com.garnegsoft.hubs.ui.theme.subscriptionColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -48,12 +49,12 @@ fun SubscriptionButton(
     throttle: Boolean,
 ) {
     val contentColor by animateColorAsState(
-        if (subscribed) Color(0xFF4CB025)
+        if (subscribed) subscriptionColor()
         else Color.Transparent
     )
     val contentTextColor by animateColorAsState(
         if (subscribed) Color.White
-        else Color(0xFF4CB025)
+        else subscriptionColor()
     )
 
     Row(
@@ -68,9 +69,7 @@ fun SubscriptionButton(
             .border(
                 width = 1.dp,
                 shape = RoundedCornerShape(10.dp),
-                color = if (subscribed) Color.Transparent else Color(
-                    0xFF4CB025
-                )
+                color = subscriptionColor()
             )
             .clickable(enabled = !throttle, onClick = onClick, indication = null, interactionSource = null),
         verticalAlignment = Alignment.CenterVertically,
