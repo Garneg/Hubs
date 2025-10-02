@@ -47,7 +47,7 @@ fun LogoutConfirmDialog(
 			) {
 				Column(modifier = Modifier.height(IntrinsicSize.Min)) {
 					Text(
-						text = "Вы хотите выйти?",
+						text = "Хотите выйти из аккаунта?",
 						color = MaterialTheme.colors.onSurface,
 						style = MaterialTheme.typography.subtitle1
 					)

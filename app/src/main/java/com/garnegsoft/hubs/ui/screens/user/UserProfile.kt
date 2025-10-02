@@ -610,8 +610,9 @@ internal fun UserProfile(
 							) {
 								Text(
 									modifier = Modifier.align(Alignment.Center),
-									text = "Выйти",
-									color = MaterialTheme.colors.error
+									text = "Выйти из аккаунта",
+									color = MaterialTheme.colors.error,
+									fontWeight = FontWeight.W500
 								)
 							}
 						}
