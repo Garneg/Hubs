@@ -30,6 +30,7 @@ import com.garnegsoft.hubs.api.company.CompanyController
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
+import com.garnegsoft.hubs.ui.common.SubscriptionButton
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
@@ -163,36 +164,23 @@ fun CompanyProfile(
 						)
 					}
 				company.relatedData?.let {
-					var isSubscribed by rememberSaveable {
+					var subscribed by rememberSaveable {
 						mutableStateOf(it.isSubscribed)
 					}
 					val subscriptionScope = rememberCoroutineScope()
-					Box(modifier = Modifier
-						.padding(8.dp)
-						.height(45.dp)
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(10.dp))
-						.background(if (isSubscribed) Color(0xFF4CB025) else Color.Transparent)
-						.border(
-							width = 1.dp,
-							shape = RoundedCornerShape(10.dp),
-							color = if (isSubscribed) Color.Transparent else Color(
-								0xFF4CB025
-							)
-						)
-						.clickable {
+					var throttleButton by remember { mutableStateOf(false) }
+					SubscriptionButton(
+						subscribed = subscribed,
+						throttle = throttleButton,
+						onClick = {
+							throttleButton = true
+							subscribed = !subscribed
 							subscriptionScope.launch(Dispatchers.IO) {
-								isSubscribed = !isSubscribed
-								isSubscribed = CompanyController.subscription(company.alias)
+								subscribed = CompanyController.subscription(company.alias)
+								throttleButton = false
 							}
 						}
-					) {
-						Text(
-							modifier = Modifier.align(Alignment.Center),
-							text = if (isSubscribed) "Вы подписаны" else "Подписаться",
-							color = if (isSubscribed) Color.White else Color(0xFF4CB025)
-						)
-					}
+					)
 				}
 			}
 			if (delayedCompositionCounter > 0) {

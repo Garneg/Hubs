@@ -45,6 +45,7 @@ import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
+import com.garnegsoft.hubs.ui.common.SubscriptionButton
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.commonTextLinkStyles
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
@@ -209,34 +210,19 @@ internal fun UserProfile(
 								
 								val coroutineScope = rememberCoroutineScope()
 								AnimatedVisibility(visible = !blocked) {
-									Box(modifier = Modifier
-										.padding(8.dp)
-										.height(45.dp)
-										.fillMaxWidth()
-										.clip(RoundedCornerShape(10.dp))
-										.background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
-										.border(
-											width = 1.dp,
-											shape = RoundedCornerShape(10.dp),
-											color = if (subscribed) Color.Transparent else Color(
-												0xFF4CB025
-											)
-										)
-										.clickable {
+									var throttleButton by remember { mutableStateOf(false) }
+									SubscriptionButton(
+										subscribed = subscribed,
+										onClick = {
+											throttleButton = true // disable button and wait for response
+											subscribed = !subscribed
 											coroutineScope.launch(Dispatchers.IO) {
-												subscribed = !subscribed
 												subscribed = UserController.subscription(user.alias)
+												throttleButton = false
 											}
-										}
-									) {
-										Text(
-											modifier = Modifier.align(Alignment.Center),
-											text = if (subscribed) "Вы подписаны" else "Подписаться",
-											color = if (subscribed) Color.White else Color(
-												0xFF4CB025
-											)
-										)
-									}
+										},
+										throttle = throttleButton
+									)
 								}
 								BlockUserButton(blocked = blocked, onClick = {
 									coroutineScope.launch(Dispatchers.IO) {
