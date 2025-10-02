@@ -54,7 +54,7 @@ fun BlockUserButton(
 			shape = RoundedCornerShape(10.dp),
 			color = if (blocked) Color.Transparent else MaterialTheme.colors.onSurface
 		)
-		.clickable(onClick = onClick)
+		.clickable(onClick = onClick, indication = null, interactionSource = null)
 	) {
 		Row(
 			modifier = Modifier.align(Alignment.Center),
