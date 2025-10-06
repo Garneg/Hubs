@@ -9,11 +9,14 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
@@ -106,7 +109,7 @@ fun CompanyCard(
                     )
                 }
         }
-        Box(modifier = Modifier.padding(start = 4.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.padding(start = style.innerPadding), contentAlignment = Alignment.Center) {
             indicator()
         }
     }
@@ -136,9 +139,17 @@ fun DefaultCompanyIndicator(
     val rating = remember {
         String.format("%.1f", company.statistics.rating).replace(',', '.')
     }
-    Text(
-        text = rating,
-        fontWeight = FontWeight.W400,
-        color = DefaultRatingIndicatorColor
-    )
+    Row {
+        Icon(modifier = Modifier.size(18.dp).rotate(-90f),
+            imageVector = Icons.Sharp.ArrowForward,
+            tint = DefaultRatingIndicatorColor,
+            contentDescription = null)
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = rating,
+            fontWeight = FontWeight.W400,
+            color = DefaultRatingIndicatorColor
+        )
+    }
+
 }

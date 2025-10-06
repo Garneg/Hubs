@@ -9,12 +9,16 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -55,11 +59,18 @@ fun UserCard(
     modifier: Modifier = Modifier,
     style: UserCardStyle = defaultUserCardStyle(),
     indicator: @Composable () -> Unit = {
-        Text(
-            text = user.rating.toString(),
-            fontWeight = FontWeight.W400,
-            color = DefaultRatingIndicatorColor
-        )
+        Row {
+            Icon(modifier = Modifier.size(18.dp).rotate(-90f),
+                imageVector = Icons.Sharp.ArrowForward,
+                tint = DefaultRatingIndicatorColor,
+                contentDescription = null)
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(
+                text = user.rating.toString(),
+                fontWeight = FontWeight.W400,
+                color = DefaultRatingIndicatorColor
+            )
+        }
     },
     onClick: () -> Unit
 ) {
@@ -109,7 +120,7 @@ fun UserCard(
         }
         Box(
             modifier = Modifier
-                .padding(start = 4.dp)
+                .padding(start = style.padding.calculateEndPadding(LocalLayoutDirection.current))
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
