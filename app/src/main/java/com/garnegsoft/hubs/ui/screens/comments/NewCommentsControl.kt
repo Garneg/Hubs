@@ -1,6 +1,8 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.EaseInOutExpo
+import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -104,12 +106,12 @@ fun NewCommentsControl(
                         AnimatedContent(targetState = currentCommentNumber,
                             transitionSpec = {
                                 if (initialState < targetState) {
-                                    (slideInVertically(tween(delayMillis = 100)) { -it / 2 } + fadeIn(
+                                    (slideInVertically(tween(delayMillis = 100, easing = EaseOutQuad)) { -it / 2 } + fadeIn(
                                         tween(delayMillis = 100)
                                     ))
                                         .togetherWith(slideOutVertically { it / 2 } + fadeOut())
                                 } else {
-                                    (slideInVertically(tween(delayMillis = 100)) { it / 2 } + fadeIn(
+                                    (slideInVertically(tween(delayMillis = 100, easing = EaseOutQuad)) { it / 2 } + fadeIn(
                                         tween(delayMillis = 100)
                                     ))
                                         .togetherWith(slideOutVertically { -it / 2 } + fadeOut())
