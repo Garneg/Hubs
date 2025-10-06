@@ -50,26 +50,26 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
             LazyColumn(
                 modifier = modifier,
                 state = it,
-                flingBehavior = object : FlingBehavior {
-                    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
-                        var lastValue = 0f
-                        var lastVelocity = 0f
-                        AnimationState(
-                            initialValue = 0f,
-                            initialVelocity = initialVelocity * 1.3f
-                        ).animateDecay(splineBasedDecay(density)) {
-                            val delta = value - lastValue
-                            val consumed = scrollBy(delta)
-                            lastValue = value
-                            lastVelocity = velocity
-
-                            if (consumed == 0f)
-                                cancelAnimation()
-                        }
-
-                        return lastVelocity
-                    }
-                },
+//                flingBehavior = object : FlingBehavior {
+//                    override suspend fun ScrollScope.performFling(initialVelocity: Float): Float {
+//                        var lastValue = 0f
+//                        var lastVelocity = 0f
+//                        AnimationState(
+//                            initialValue = 0f,
+//                            initialVelocity = initialVelocity * 1.3f
+//                        ).animateDecay(splineBasedDecay(density)) {
+//                            val delta = value - lastValue
+//                            val consumed = scrollBy(delta)
+//                            lastValue = value
+//                            lastVelocity = velocity
+//
+//                            if (consumed == 0f)
+//                                cancelAnimation()
+//                        }
+//
+//                        return lastVelocity
+//                    }
+//                },
                 contentPadding = contentPadding
                     .combine(navBarsInsets.asPaddingValues(), layoutDirection)
                     .combine(displayCutoutInsets.asPaddingValues(), layoutDirection),
