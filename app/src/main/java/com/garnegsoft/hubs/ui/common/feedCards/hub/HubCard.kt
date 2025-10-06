@@ -41,6 +41,7 @@ fun defaultHubCardStyle(): HubCardStyle {
 @Composable
 fun HubCard(
 	hub: HubSnippet,
+    modifier: Modifier = Modifier,
 	style: HubCardStyle = defaultHubCardStyle(),
 	onClick: () -> Unit,
 	indicator: @Composable (hub: HubSnippet) -> Unit = {
@@ -52,7 +53,7 @@ fun HubCard(
     }
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             //.height(IntrinsicSize.Max)
             .clip(style.shape)
@@ -89,7 +90,7 @@ fun HubCard(
                             }
                         }
                     }},
-                    style = if (hub.relatedData?.isSubscribed == true) {
+                    style = if (hub.relatedData?.isSubscribed == true && style.showIfUserSubscribed) {
                         style.titleTextStyle.copy(color = HubSubscribedColor)
                     } else { style.titleTextStyle },
                     modifier = Modifier.wrapContentHeight(
@@ -124,7 +125,7 @@ data class HubCardStyle(
     val textColor: Color = Color.Black,
     val titleTextStyle: TextStyle = TextStyle(
         color = textColor,
-        fontWeight = FontWeight.W700,
+        fontWeight = FontWeight.W600,
         fontSize = 20.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle(
@@ -136,5 +137,6 @@ data class HubCardStyle(
     val shape: Shape = RoundedCornerShape(26.dp),
     val innerPadding: Dp = 16.dp,
     val descriptionMaxLines: Int = 1,
-    val showDescription: Boolean = false
+    val showDescription: Boolean = false,
+    val showIfUserSubscribed: Boolean = true,
 )

@@ -32,7 +32,7 @@ import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
 
 @Composable
-private fun defaultCompanyCardStyle(): CompanyCardStyle {
+fun defaultCompanyCardStyle(): CompanyCardStyle {
     return CompanyCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
         descriptionTextStyle = TextStyle.Default.copy(
@@ -93,7 +93,7 @@ fun CompanyCard(
         Column(
             modifier = Modifier.weight(1f),
             ) {
-            Text(text = company.title, style = if (company.relatedData?.isSubscribed == true) {
+            Text(text = company.title, style = if (company.relatedData?.isSubscribed == true && style.showIfUserSubscribed) {
                 style.titleTextStyle.copy(color = HubSubscribedColor)
             } else { style.titleTextStyle })
             if (style.showDescription)
@@ -119,12 +119,13 @@ data class CompanyCardStyle(
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val titleTextStyle: TextStyle = TextStyle.Default.copy(
-        fontWeight = FontWeight.W700,
+        fontWeight = FontWeight.W600,
         fontSize = 20.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle.Default.copy(color = Color.Gray),
     val indicatorValueTextStyle: TextStyle = TextStyle.Default.copy(color = Color.DarkGray),
     val showDescription: Boolean = false,
+    val showIfUserSubscribed: Boolean = true,
     val descriptionMaxLines: Int = 1
 )
 

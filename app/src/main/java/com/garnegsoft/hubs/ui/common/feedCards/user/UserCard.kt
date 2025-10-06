@@ -32,7 +32,7 @@ import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
 data class UserCardStyle(
     val backgroundColor: Color = Color.White,
-    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W700),
+    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W600),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val cardShape: Shape = RoundedCornerShape(26.dp),
@@ -52,6 +52,7 @@ fun defaultUserCardStyle(): UserCardStyle {
 @Composable
 fun UserCard(
     user: UserSnippet,
+    modifier: Modifier = Modifier,
     style: UserCardStyle = defaultUserCardStyle(),
     indicator: @Composable () -> Unit = {
         Text(
@@ -63,7 +64,7 @@ fun UserCard(
     onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
             .clip(shape = style.cardShape)

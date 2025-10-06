@@ -46,7 +46,9 @@ import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.combine
 import com.garnegsoft.hubs.ui.common.feedCards.company.CompanyCard
+import com.garnegsoft.hubs.ui.common.feedCards.company.defaultCompanyCardStyle
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
+import com.garnegsoft.hubs.ui.common.feedCards.hub.defaultHubCardStyle
 import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import kotlinx.coroutines.launch
 
@@ -197,6 +199,7 @@ fun SubscriptionManagementScreen(
                         }
                         CompanyCard(
                             company = it,
+                            style = defaultCompanyCardStyle().copy(showIfUserSubscribed = false),
                             onClick = { onCompanyClick(it.alias) }
                         ) {
                             SubscriptionSmallButton(
@@ -222,6 +225,7 @@ fun SubscriptionManagementScreen(
                         key = { it.id }
                     ) {
                         UserCard(
+                            modifier = Modifier.animateItem(),
                             user = it,
                             onClick = { onUserClick(it.alias) },
                             indicator = {
@@ -291,7 +295,7 @@ private fun LazyListScope.commonSubscriptionsHeader(
 
                 .padding(start = 8.dp, top = 16.dp, bottom = 0.dp),
             text = headerTitle,
-            fontSize = 24.sp,
+            fontSize = 20.sp,
             fontWeight = FontWeight.W600
         )
     }
@@ -320,9 +324,12 @@ private fun LazyListScope.hubSection(
     }
 
     items(
-        items
+        items = items,
+        key = { it.id }
     ) { snippet ->
         HubCard(
+            modifier = Modifier.animateItem(),
+            style = defaultHubCardStyle().copy(showIfUserSubscribed = false),
             hub = snippet,
             onClick = { onHubClick(snippet.alias) },
             indicator = {
