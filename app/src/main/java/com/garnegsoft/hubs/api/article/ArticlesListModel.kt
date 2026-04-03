@@ -1,7 +1,7 @@
 package com.garnegsoft.hubs.api.article
 
 import ArticleController
-import androidx.compose.ui.util.fastAny
+import ArticlesListController
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.PostType

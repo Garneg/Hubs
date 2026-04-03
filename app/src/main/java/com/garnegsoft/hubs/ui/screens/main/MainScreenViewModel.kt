@@ -2,8 +2,6 @@ package com.garnegsoft.hubs.ui.screens.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.garnegsoft.hubs.api.FilterPeriod
-import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.company.CompaniesListModel
 import com.garnegsoft.hubs.api.hub.HubsListModel

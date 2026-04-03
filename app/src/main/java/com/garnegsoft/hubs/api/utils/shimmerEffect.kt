@@ -1,36 +1,18 @@
 package com.garnegsoft.hubs.api.utils
 
-import androidx.compose.animation.animateColor
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.InfiniteRepeatableSpec
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateValue
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.emptyCacheFontFamilyResolver
-import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.LayoutDirection
 
 
 @Composable

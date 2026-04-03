@@ -7,9 +7,6 @@ import android.util.Log
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import com.garnegsoft.hubs.BuildConfig
-import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 
 
 /**

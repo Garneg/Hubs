@@ -1,12 +1,7 @@
 package com.garnegsoft.hubs.api.dataStore
 
 import android.content.Context
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
 import com.garnegsoft.hubs.api.dataStore.DataStorePreference.Companion.hubsBooleanPreference
 import com.garnegsoft.hubs.api.dataStore.DataStorePreference.Companion.hubsFloatPreference

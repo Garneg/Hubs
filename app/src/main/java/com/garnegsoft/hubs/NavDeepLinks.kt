@@ -1,15 +1,6 @@
 package com.garnegsoft.hubs
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
-import me.saket.telephoto.zoomable.rememberZoomableImageState
-import me.saket.telephoto.zoomable.rememberZoomableState
 
 val domain = "https://habr.com"
 

@@ -4,14 +4,11 @@ import android.os.Build
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.glance.GlanceTheme
 import androidx.glance.color.ColorProvider
 import androidx.glance.color.ColorProviders
 import androidx.glance.color.colorProviders
-import androidx.glance.material3.ColorProviders
-import com.garnegsoft.hubs.BuildConfig
 
 
 val DarkColorSchemeM3 = darkColorScheme(

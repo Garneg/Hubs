@@ -2,8 +2,8 @@ package com.garnegsoft.hubs.ui.screens.article
 
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.appendInlineContent
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager

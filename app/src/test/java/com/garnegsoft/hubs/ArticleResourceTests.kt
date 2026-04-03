@@ -6,7 +6,6 @@ import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ArticleResourceTests {

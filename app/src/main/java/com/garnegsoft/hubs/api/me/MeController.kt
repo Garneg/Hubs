@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.api.me
 
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
-import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import com.garnegsoft.hubs.api.utils.processUserAvatar
 import kotlinx.serialization.Serializable
 import okhttp3.CacheControl

@@ -1,17 +1,13 @@
 package com.garnegsoft.hubs.api.article.offline.workers
 
+import ArticleController
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
-import android.os.Looper
-import android.webkit.WebView
 import android.widget.Toast
-import androidx.core.app.NotificationChannelCompat
-import androidx.core.view.doOnPreDraw
-import androidx.core.view.drawToBitmap
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -20,7 +16,6 @@ import com.garnegsoft.hubs.api.article.offline.OfflineArticle
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController.Companion.articles_offline_resource_dir
-import com.garnegsoft.hubs.api.offlineResourcesDir
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking

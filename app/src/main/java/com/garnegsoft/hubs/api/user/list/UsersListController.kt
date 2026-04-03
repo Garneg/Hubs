@@ -1,11 +1,11 @@
 package com.garnegsoft.hubs.api.user.list
 
-import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
-import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
+import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.utils.processUserAvatar
-import kotlinx.serialization.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
 

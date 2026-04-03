@@ -3,15 +3,7 @@ package com.garnegsoft.hubs.ui.screens.history
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -37,8 +29,7 @@ import com.garnegsoft.hubs.api.utils.formatFoundationDate
 import com.garnegsoft.hubs.ui.common.BaseHubsLazyColumn
 import com.garnegsoft.hubs.ui.common.combine
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
-import java.util.Calendar
-import java.util.Date
+import java.util.*
 
 
 @OptIn(ExperimentalFoundationApi::class)

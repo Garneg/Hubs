@@ -1,19 +1,17 @@
 package com.garnegsoft.hubs
 
-import android.app.appsearch.GlobalSearchSession
+//import com.garnegsoft.hubs.api.utils.getArticleIdFromUrl
+
 import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.api.history.HistoryArticle
-//import com.garnegsoft.hubs.api.utils.getArticleIdFromUrl
 import com.garnegsoft.hubs.ui.screens.main.NewsFilter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
-import org.jsoup.Jsoup
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
-
-import org.junit.Assert.*
-import java.util.Date
 
 /**
  * Example local unit test, which will execute on the development machine (host).

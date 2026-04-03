@@ -3,7 +3,10 @@ package com.garnegsoft.hubs.ui.screens.article
 import android.content.Intent
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Transition
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -17,8 +20,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.*
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
@@ -29,7 +33,7 @@ import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
 import org.jsoup.Jsoup
-import org.jsoup.nodes.*
+import org.jsoup.nodes.Element
 
 
 @OptIn(ExperimentalLayoutApi::class)
