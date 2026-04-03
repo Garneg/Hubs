@@ -124,9 +124,11 @@ class DownloadOfflineArticleWorker(
 		
 		val newArticle = Downloader.downloadArticleResources(article, context)
 		val newArticleSnippet = Downloader.downloadArticleSnippetResources(articleSnippet, context)
-		
+
 		dao.insert(newArticle)
 		dao.insertSnippet(newArticleSnippet)
+//		dao.insert(article)
+//		dao.insertSnippet(articleSnippet)
 		return true
 	}
 	
@@ -139,7 +141,7 @@ class DownloadOfflineArticleWorker(
 			
 			var imageCounter = 0
 			val result = Jsoup.parse(article.contentHtml).forEachNode {
-				if(it is Element && it.tagName() == "img"){
+				if(it is Element && it.tagName() == "img" && (it.hasAttr("src") || it.hasAttr("data-src"))){
 					var url = if (it.attr("data-blurred") == "true"){
 						it.attr("data-src")
 					} else {
@@ -155,7 +157,7 @@ class DownloadOfflineArticleWorker(
 				
 			} as Document
 			
-			downloadImages(urls, article.articleId, context)
+			downloadImages(urls.filter { it.isNotBlank() }, article.articleId, context)
 			
 			article.authorAvatarUrl?.let { url ->
 				val request = Request.Builder().get().url(url).build()

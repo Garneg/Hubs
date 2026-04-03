@@ -14,6 +14,7 @@ static def getDate() {
     return formattedDate
 }
 
+
 android {
     namespace "com.garnegsoft.hubs"
     compileSdk 35
@@ -47,6 +48,7 @@ android {
             debuggable true
 //            applicationIdSuffix ".debug"
             versionNameSuffix "-build" + getDate()
+            ext.enableCrashlytics = false
         }
 
     }
@@ -72,6 +74,8 @@ android {
 kapt {
     generateStubs = true
 }
+
+
 
 dependencies {
     implementation 'com.google.firebase:firebase-messaging-ktx:24.1.2'

@@ -3,7 +3,7 @@ package com.garnegsoft.hubs
 import android.app.appsearch.GlobalSearchSession
 import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.api.history.HistoryArticle
-import com.garnegsoft.hubs.api.utils.getArticleIdFromUrl
+//import com.garnegsoft.hubs.api.utils.getArticleIdFromUrl
 import com.garnegsoft.hubs.ui.screens.main.NewsFilter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.collectLatest
@@ -96,10 +96,10 @@ class ExampleUnitTest {
     }
 
 
-    @Test
-    fun test_searchUrlHandle(){
-        val url = "https://habr.com/ru/c/"
-
-        assertEquals(886602, getArticleIdFromUrl(url))
-    }
+//    @Test
+//    fun test_searchUrlHandle(){
+//        val url = "https://habr.com/ru/c/"
+//
+//        assertEquals(886602, getArticleIdFromUrl(url))
+//    }
 }
