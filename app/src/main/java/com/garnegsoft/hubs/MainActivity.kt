@@ -76,6 +76,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val cookies by cookiesFlow.collectAsState(initial = "")
+
             key(cookies) {
                 val themeMode by HubsDataStore.Settings
                     .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
