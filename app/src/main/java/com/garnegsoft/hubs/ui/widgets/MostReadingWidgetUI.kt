@@ -170,8 +170,8 @@ fun WidgetArticleCard(
 			text = title,
 			style = TextStyle(
 				color = GlanceTheme.colors.onSurface,
-				fontSize = 14.sp,
-				fontWeight = FontWeight.Medium
+				fontSize = 16.sp,
+				fontWeight = FontWeight.Medium,
 			)
 		)
 	}

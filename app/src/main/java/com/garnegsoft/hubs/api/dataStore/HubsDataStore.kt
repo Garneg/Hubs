@@ -65,6 +65,18 @@ object HubsDataStore {
 			val TextSnippetMaxLines = hubsIntPreference("article_card_snippet_max_lines", 4)
 		}
 
+		object Widget {
+			val ArticleTitleFontSize = hubsIntPreference("widget_article_title_font_size", 16)
+
+			/**
+			 * Modes:
+			 * * 0 - system(Material 3 adaptive colors Android 12+)
+			 * * 1 - same as app (should pick one of app themes dark or light)
+			 * default is 0 if available
+			 */
+			val ThemeMode = hubsIntPreference("widget_theme_mode", 0)
+		}
+
 	}
 
 	/**

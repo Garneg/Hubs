@@ -1,5 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.settings
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -14,19 +16,26 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
+import com.garnegsoft.hubs.MostReadingWidget
+import com.garnegsoft.hubs.MostReadingWidgetReceiver
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
 import com.garnegsoft.hubs.ui.screens.settings.cards.OtherSettingsCard
+import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCard
+import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCardItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -146,9 +155,36 @@ fun SettingsScreen(
 				onArticleScreenSettings = onArticleScreenSettings,
 				onFeedSettings = onFeedSettings
 			)
+
+			WidgetSettingsCard()
 			
 			OtherSettingsCard(viewModel = viewModel)
 		}
 	}
 	
+}
+
+@Composable
+fun WidgetSettingsCard(modifier: Modifier = Modifier) {
+	val context = LocalContext.current
+	SettingsCard(
+		title = "Виджет \"Читают сейчас\""
+	) {
+		SettingsCardItem(
+			title = "Добавить виджет",
+			onClick = {
+				val widgetManager = AppWidgetManager.getInstance(context)
+				val widgetProvider = ComponentName(context, MostReadingWidgetReceiver::class.java)
+				if (Build.VERSION.SDK_INT >= 26 && widgetManager.isRequestPinAppWidgetSupported) {
+					widgetManager.requestPinAppWidget(widgetProvider, null, null)
+				}
+			},
+			trailingIcon = {
+				Icon(
+					imageVector = Icons.Default.Add,
+					contentDescription = null
+				)
+			}
+		)
+	}
 }
