@@ -3,6 +3,8 @@ package com.garnegsoft.hubs.ui.navigation
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -12,6 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -62,6 +65,63 @@ fun MainNavigationGraph(
     val rootCoroutineScope = rememberCoroutineScope()
     val imageViewerState =
         rememberImageViewerState(offlineResourcesRootPath = navController.context.filesDir.absolutePath + "/offline_resources/")
+    val context = LocalContext.current
+    val activity = LocalActivity.current
+
+    val authActivityLauncher =
+        rememberLauncherForActivityResult(contract = AuthActivityResultContract()) {
+            CookieManager.getInstance().removeAllCookies(null)
+            (activity as ComponentActivity).lifecycleScope.launch {
+                it?.let { result ->
+                    HubsDataStore.Auth.edit(
+                        context = navController.context,
+                        pref = HubsDataStore.Auth.Cookies,
+                        value = result.split("; ")
+                            .find { it.startsWith("connect_sid") }!!
+                    )
+
+                    HubsDataStore.Auth.edit(
+                        context = navController.context,
+                        pref = HubsDataStore.Auth.Authorized,
+                        value = true
+                    )
+                    HabrApi.initializeWithCookies(navController.context, result)
+                    val updateMeDataRequest = OneTimeWorkRequestBuilder<MeDataUpdateWorker>().build()
+                    WorkManager.getInstance(context).enqueue(updateMeDataRequest)
+                    launch(Dispatchers.IO) {
+                        MeController.getMe()?.let {
+                            val shortcut = ShortcutInfoCompat.Builder(
+                                navController.context,
+                                "bookmarks_shortcut"
+                            )
+                                .setIntent(
+                                    Intent(Intent.ACTION_VIEW).apply {
+                                        `package` =
+                                            BuildConfig.APPLICATION_ID
+                                        data =
+                                            Uri.parse("https://habr.com/users/${it.getOrNull()?.alias}/bookmarks")
+                                    }
+                                )
+                                .setIcon(
+                                    IconCompat.createWithResource(
+                                        navController.context,
+                                        R.drawable.bookmarks_shortcut_icon
+                                    )
+                                )
+                                .setShortLabel("Закладки")
+                                .setLongLabel("Закладки")
+                                .build()
+                            ShortcutManagerCompat.pushDynamicShortcut(
+                                navController.context,
+                                shortcut
+                            )
+
+                        }
+
+                    }
+                }
+            }
+        }
 
     NavHost(
         navController = navController,
@@ -160,67 +220,7 @@ fun MainNavigationGraph(
                             )
                         } else {
 
-                            val authActivityLauncher =
-                                rememberLauncherForActivityResult(contract = AuthActivityResultContract()) {
-                                    CookieManager.getInstance().removeAllCookies(null)
-                                    rootCoroutineScope.launch {
-                                        it?.let { result ->
-                                            HubsDataStore.Auth.edit(
-                                                context = navController.context,
-                                                pref = HubsDataStore.Auth.Cookies,
-                                                value = result.split("; ")
-                                                    .find { it.startsWith("connect_sid") }!!
-                                            )
 
-                                            HubsDataStore.Auth.edit(
-                                                context = navController.context,
-                                                pref = HubsDataStore.Auth.Authorized,
-                                                value = true
-                                            )
-                                            HabrApi.initializeWithCookies(navController.context, result)
-                                            launch(Dispatchers.IO) {
-                                                MeController.getMe()?.let {
-                                                    val shortcut = ShortcutInfoCompat.Builder(
-                                                        navController.context,
-                                                        "bookmarks_shortcut"
-                                                    )
-                                                        .setIntent(
-                                                            Intent(Intent.ACTION_VIEW).apply {
-                                                                `package` =
-                                                                    BuildConfig.APPLICATION_ID
-                                                                data =
-                                                                    Uri.parse("https://habr.com/users/${it.getOrNull()?.alias}/bookmarks")
-                                                            }
-                                                        )
-                                                        .setIcon(
-                                                            IconCompat.createWithResource(
-                                                                navController.context,
-                                                                R.drawable.bookmarks_shortcut_icon
-                                                            )
-                                                        )
-                                                        .setShortLabel("Закладки")
-                                                        .setLongLabel("Закладки")
-                                                        .build()
-                                                    ShortcutManagerCompat.pushDynamicShortcut(
-                                                        navController.context,
-                                                        shortcut
-                                                    )
-
-                                                }
-                                                val updateMeDataRequest =
-                                                    OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
-                                                        .setConstraints(
-                                                            Constraints(
-                                                                requiredNetworkType = NetworkType.CONNECTED
-                                                            )
-                                                        )
-                                                        .build()
-                                                WorkManager.getInstance(navController.context)
-                                                    .enqueue(updateMeDataRequest)
-                                            }
-                                        }
-                                    }
-                                }
 
                             UnauthorizedMenu(
                                 onLoginClick = {
