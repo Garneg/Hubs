@@ -14,11 +14,10 @@ import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.article.ArticlesListModel
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
+import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
-import com.garnegsoft.hubs.ui.common.FilterElement
 import com.garnegsoft.hubs.ui.common.feedCards.article.BlockedAuthorArticleCard
-import com.garnegsoft.hubs.ui.screens.main.ArticlesFilter
 
 
 private object dummyFilter : Filter {

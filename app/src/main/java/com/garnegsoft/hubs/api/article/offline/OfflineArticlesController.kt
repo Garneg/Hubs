@@ -1,11 +1,7 @@
 package com.garnegsoft.hubs.api.article.offline
 
 import android.content.Context
-import androidx.work.Constraints
-import androidx.work.Data
-import androidx.work.NetworkType
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
 import com.garnegsoft.hubs.api.article.offline.workers.DeleteOfflineArticleWorker
 import com.garnegsoft.hubs.api.article.offline.workers.DownloadOfflineArticleWorker
 import java.io.File

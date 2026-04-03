@@ -4,18 +4,14 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
-import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.Firebase
+import com.google.firebase.crashlytics.crashlytics
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.IOException
-import java.net.ConnectException
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.Socket
-import java.net.SocketTimeoutException
+import java.net.*
 import java.util.concurrent.TimeUnit
 
 class HabrApi {

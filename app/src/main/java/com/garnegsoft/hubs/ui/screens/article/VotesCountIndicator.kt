@@ -1,7 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import androidx.compose.animation.core.EaseInBounce
-import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -23,18 +21,12 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.comment.Comment
-import kotlin.math.roundToInt
 
 
 data class VotesCountIndicatorData(

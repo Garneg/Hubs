@@ -60,8 +60,9 @@ class DeleteOfflineArticleWorker(
 		
 		val thisArticleDir = File(dir, articleId.toString())
 		
-		if (!thisArticleDir.exists() || !thisArticleDir.deleteRecursively())
-			return false
+		if (thisArticleDir.exists()) {
+			thisArticleDir.deleteRecursively()
+		}
 		
 		val dao = OfflineArticlesController.getDao(context)
 		if (dao.exists(articleId)) {

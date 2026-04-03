@@ -1,10 +1,13 @@
 package com.garnegsoft.hubs.ui.common.feedCards.article
 
-import ArticleController
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -26,12 +29,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.PublicationComplexity
-import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 @OptIn(ExperimentalFoundationApi::class)

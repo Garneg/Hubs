@@ -4,9 +4,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import com.garnegsoft.hubs.api.CollapsingContentState
-import com.garnegsoft.hubs.api.article.AbstractSnippetListModel
 import com.garnegsoft.hubs.api.hub.HubsListModel
-import com.garnegsoft.hubs.api.hub.list.HubSnippet
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.ui.common.feedCards.hub.HubCard
 

@@ -13,10 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.glance.GlanceComposable
-import androidx.glance.GlanceTheme
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.material3.MaterialTheme as Material3Theme
 

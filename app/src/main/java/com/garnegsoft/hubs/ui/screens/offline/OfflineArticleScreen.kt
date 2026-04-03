@@ -2,41 +2,18 @@ package com.garnegsoft.hubs.ui.screens.offline
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,14 +31,14 @@ import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.ScrollBar
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
+import kotlinx.coroutines.delay
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
-import com.garnegsoft.hubs.ui.common.HubsTopAppBar
-
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -141,14 +118,14 @@ fun OfflineArticleScreen(
 		}
 	) {
 		
-		if (viewModel.offlineArticle.isInitialized && article != null) {
-			LaunchedEffect(key1 = Unit, block = {
-				if (!viewModel.parsedArticleContent.isInitialized && fontSize != null) {
+
+			LaunchedEffect(key1 = article, block = {
+				if (!viewModel.parsedArticleContent.isInitialized && fontSize != null && article != null) {
 					val element =
 						Jsoup.parse(article!!.contentHtml).getElementsByTag("body").first()
 							?.child(0)
 							?: Element("")
-					
+					delay(1000)
 					viewModel.parsedArticleContent.postValue(
 						parseChildElements(
 							element,
@@ -158,7 +135,7 @@ fun OfflineArticleScreen(
 					)
 				}
 			})
-		}
+
 		val elementSettings = remember() {
 			ElementSettings(20.sp, 30.sp, true)
 		}

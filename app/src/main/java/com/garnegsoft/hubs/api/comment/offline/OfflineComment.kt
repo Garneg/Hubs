@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.api.comment.offline
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.Index
 import androidx.room.PrimaryKey
 
 const val OFFLINE_COMMENTS_TABLE_NAME = "offline_comments"

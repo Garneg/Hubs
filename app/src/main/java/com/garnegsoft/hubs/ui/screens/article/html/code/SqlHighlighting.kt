@@ -3,8 +3,6 @@ package com.garnegsoft.hubs.ui.screens.article.html.code
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.toLowerCase
-import java.util.Locale
 
 
 class SqlHighlighting : LanguageHighlighting() {

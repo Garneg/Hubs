@@ -2,7 +2,6 @@ import android.util.Log
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
-import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import com.garnegsoft.hubs.api.utils.processUserAvatar
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*

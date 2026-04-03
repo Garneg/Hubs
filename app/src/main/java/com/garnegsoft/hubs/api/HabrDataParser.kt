@@ -1,7 +1,5 @@
 package com.garnegsoft.hubs.api
 
-import com.google.firebase.crashlytics.crashlytics
-import com.google.firebase.Firebase
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement

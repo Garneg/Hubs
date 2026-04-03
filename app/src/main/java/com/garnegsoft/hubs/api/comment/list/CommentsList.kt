@@ -4,8 +4,8 @@ import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Comment
+import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.ThreadSnippet
 import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.utils.formatTime
