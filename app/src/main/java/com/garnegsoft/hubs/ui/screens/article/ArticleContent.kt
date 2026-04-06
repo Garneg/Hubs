@@ -34,6 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
@@ -56,7 +58,8 @@ fun ArticleContent(
     onCompanyClick: (alias: String) -> Unit,
     onArticleClick: (id: Int) -> Unit,
     fontSize: TextUnit,
-    onViewImageRequest: (url: String) -> Unit
+    onViewImageRequest: (url: String) -> Unit,
+    lazyListState: LazyListState
 ) {
     val context = LocalContext.current
 
@@ -81,12 +84,12 @@ fun ArticleContent(
                 fitScreenWidth = false
             )
         }
-        val state = rememberLazyListState()
+
         val updatedPolls by viewModel.updatedPolls.observeAsState()
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            state = state,
+            state = lazyListState,
             contentPadding = PaddingValues(16.dp)
         ) {
             if (article.editorVersion == EditorVersion.FirstVersion) {
@@ -459,7 +462,7 @@ fun ArticleContent(
             }
         }
 
-        ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = state)
+        ScrollBar(modifier = Modifier.align(Alignment.CenterEnd), lazyListState = lazyListState)
 
     }
 

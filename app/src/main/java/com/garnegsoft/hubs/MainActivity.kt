@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.compose.rememberNavController
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -93,6 +94,7 @@ class MainActivity : ComponentActivity() {
                         }
                     ) {
                         val navController = rememberNavController()
+                        this.savedStateRegistry.consumeRestoredStateForKey("")
 
                         MainNavigationGraph(
                             navController = navController

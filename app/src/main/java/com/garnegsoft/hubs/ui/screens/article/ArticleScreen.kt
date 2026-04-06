@@ -1,12 +1,15 @@
 package com.garnegsoft.hubs.ui.screens.article
 
 import android.content.Intent
+import android.util.Log
+import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Transition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -23,7 +26,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
@@ -32,6 +37,7 @@ import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 
@@ -52,6 +58,7 @@ fun ArticleScreen(
     viewModelStoreOwner: ViewModelStoreOwner
 ) {
     val context = LocalContext.current
+    val activity = LocalActivity.current
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
     val fontSizePreference by HubsDataStore.Settings.ArticleScreen.FontSize
         .getFlow(context)
@@ -63,6 +70,25 @@ fun ArticleScreen(
     val company by viewModel.company.observeAsState()
 
     var revealArticleContent by rememberSaveable { mutableStateOf(false) }
+
+    var firstVisibleItemIndex by rememberSaveable { mutableIntStateOf(0) }
+    var firstVisibleItemOffset by rememberSaveable { mutableIntStateOf(0) }
+
+    val lazyListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState(firstVisibleItemIndex, firstVisibleItemOffset) }
+
+    Log.i("LAZYLISTSTATE", firstVisibleItemIndex.toString())
+
+    LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
+        firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
+        firstVisibleItemOffset = lazyListState.firstVisibleItemScrollOffset
+    }
+
+    LaunchedEffect(lazyListState.layoutInfo.totalItemsCount) {
+        if (lazyListState.layoutInfo.totalItemsCount > 0 && lazyListState.firstVisibleItemIndex == 0 && firstVisibleItemIndex > 0) {
+            lazyListState.scrollToItem(firstVisibleItemIndex, firstVisibleItemOffset)
+            revealArticleContent = true
+        }
+    }
 
 
     LaunchedEffect(key1 = Unit, block = {
@@ -79,6 +105,11 @@ fun ArticleScreen(
             fontSize = fontSizePreference
         }
     }
+
+
+//    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
+//
+//    }
 
 
     val shareIntent = remember(article?.title) {
@@ -155,10 +186,12 @@ fun ArticleScreen(
             }
         }
     ) {
-
-        LaunchedEffect(Unit) {
-            delay(400) // minimal amount of time for article content to wait before appearing on screen (made to avoid flickering)
-            revealArticleContent = true
+        val coroutineScope = rememberCoroutineScope()
+        LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
+            coroutineScope.launch {
+                delay(400) // minimal amount of time for article content to wait before appearing on screen (made to avoid flickering)
+                revealArticleContent = true
+            }
         }
         RevealContainer(
             hideContent = article == null || !articleContentParsed || (article?.isCorporative == true && company == null) || !revealArticleContent,
@@ -208,6 +241,7 @@ fun ArticleScreen(
                                 revealArticleContent,
                         enter = fadeIn() + scaleIn(initialScale = 0.95f)
                     ) {
+
                         SelectionContainer {
                             ArticleContent(
                                 article = article,
@@ -216,7 +250,8 @@ fun ArticleScreen(
                                 onCompanyClick = onCompanyClick,
                                 onViewImageRequest = onViewImageRequest,
                                 onArticleClick = onArticleClick,
-                                fontSize = fontSize!!.sp
+                                fontSize = fontSize!!.sp,
+                                lazyListState = lazyListState
                             )
                         }
                     }
