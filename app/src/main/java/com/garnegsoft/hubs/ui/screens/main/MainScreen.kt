@@ -7,12 +7,14 @@ import android.net.ConnectivityManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -213,8 +215,7 @@ fun MainScreen(
                 Modifier
                     .padding(it)
                     .padding(
-                        start = WindowInsets.displayCutout.asPaddingValues().calculateStartPadding(LayoutDirection.Ltr),
-                        end = WindowInsets.displayCutout.asPaddingValues().calculateEndPadding(LayoutDirection.Ltr)
+                        WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal).asPaddingValues(),
                     )
             ) {
 

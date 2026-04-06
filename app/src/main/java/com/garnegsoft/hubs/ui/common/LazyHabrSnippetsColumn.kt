@@ -44,9 +44,6 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
         onScrollEnd = onScrollEnd,
         lazyList = {
             val density = LocalDensity.current
-            val layoutDirection = LocalLayoutDirection.current
-            val navBarsInsets = WindowInsets.navigationBars
-            val displayCutoutInsets = WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)
             LazyColumn(
                 modifier = modifier,
                 state = it,
