@@ -37,6 +37,7 @@ import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.FilterSavingController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.utils.checkAppCanOpenLinks
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
@@ -85,8 +86,9 @@ fun MainScreen(
 
     // TODO: Move it to its own file so it won't bother when refactoring main screen 
     // Kinda ugly, isn't it? Have to come up with something better next time when building things
-    val showSetOpenUrlByDefaultDialogPreference by HubsDataStore
-        .applicationFlags.ShowSetOpenUrlByDefaultDialog.getFlow(context).collectAsState(null)
+    val showSetOpenUrlByDefaultDialogPreference by collectPreferenceAsState(
+        HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog
+    )
 
     // allows/disallows launched effect check values and show dialog (works as cache)
     var setOpenByDefaultDialogShown by rememberSaveable { mutableStateOf(false) }
