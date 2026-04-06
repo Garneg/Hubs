@@ -70,9 +70,7 @@ fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
                         return lastVelocity
                     }
                 },
-                contentPadding = contentPadding
-                    .combine(navBarsInsets.asPaddingValues(), layoutDirection)
-                    .combine(displayCutoutInsets.asPaddingValues(), layoutDirection),
+                contentPadding = contentPadding,
                 verticalArrangement = verticalArrangement,
                 horizontalAlignment = horizontalAlignment
             ) {

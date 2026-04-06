@@ -6,8 +6,15 @@ import android.content.Context
 import android.net.ConnectivityManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -19,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -84,7 +92,10 @@ fun MainScreen(
     // actually shows dialog
     var showSetOpenByDefaultDialog by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(showSetOpenUrlByDefaultDialogPreference) {
-        if (!setOpenByDefaultDialogShown && showSetOpenUrlByDefaultDialogPreference == true && !checkAppCanOpenLinks(context)) {
+        if (!setOpenByDefaultDialogShown && showSetOpenUrlByDefaultDialogPreference == true && !checkAppCanOpenLinks(
+                context
+            )
+        ) {
             showSetOpenByDefaultDialog = true
             setOpenByDefaultDialogShown = true
         }
@@ -98,7 +109,11 @@ fun MainScreen(
             onNeverShowAgain = {
                 showSetOpenByDefaultDialog = false
                 coroutineScope.launch {
-                    HubsDataStore.applicationFlags.edit(context, HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog, false)
+                    HubsDataStore.applicationFlags.edit(
+                        context,
+                        HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog,
+                        false
+                    )
                 }
             },
             onRedirectedToSettings = {
@@ -186,7 +201,7 @@ fun MainScreen(
         scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
-                modifier = Modifier.navigationBarsPadding(),
+                modifier = Modifier.safeDrawingPadding(),
                 hostState = it
             ) {
                 ContinueReadSnackBar(data = it)
@@ -195,7 +210,12 @@ fun MainScreen(
     ) {
         if (isAuthorized != null)
             Column(
-                Modifier.padding(it)
+                Modifier
+                    .padding(it)
+                    .padding(
+                        start = WindowInsets.displayCutout.asPaddingValues().calculateStartPadding(LayoutDirection.Ltr),
+                        end = WindowInsets.displayCutout.asPaddingValues().calculateEndPadding(LayoutDirection.Ltr)
+                    )
             ) {
 
                 val myFeedLazyListState = rememberLazyListState()
@@ -214,7 +234,7 @@ fun MainScreen(
 
                 val pages = remember(isAuthorized) {
                     buildMap<String, @Composable () -> Unit> {
-                        if (isAuthorized == true){
+                        if (isAuthorized == true) {
                             put("Моя лента", {
                                 ArticlesListPageWithFilter(
                                     listModel = viewModel.myFeedArticlesListModel,
@@ -246,7 +266,8 @@ fun MainScreen(
                                 onArticleAuthorClick = onUserClicked,
                                 onArticleCommentsClick = onCommentsClicked,
                                 filterDialog = { defVals, onDissmis, onDone ->
-                                    ArticlesFilterDialog(defVals, onDissmis,
+                                    ArticlesFilterDialog(
+                                        defVals, onDissmis,
                                         onDone = {
                                             coroutineScope.launch(Dispatchers.IO) {
                                                 FilterSavingController.saveArticlesFilter(
