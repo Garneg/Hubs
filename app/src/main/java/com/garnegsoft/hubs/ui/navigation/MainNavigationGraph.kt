@@ -246,15 +246,15 @@ fun MainNavigationGraph(
                 deepLinks = ArticleNavDeepLinks,
                 enterTransition = {
                     slideInVertically(
-                        animationSpec = tween(durationMillis = 250, easing = EaseOutExpo),
-                        initialOffsetY = { it / 1 }
+                        animationSpec = tween(durationMillis = 280, easing = EaseOutExpo),
+                        initialOffsetY = { (it * 1.2f).toInt() }
                     ) +
                             scaleIn(
-                                tween(250, easing = EaseOutExpo),
-                                0.8f
+                                tween(280, easing = EaseOutExpo),
+                                0.75f
                             ) +
                             fadeIn(
-                                tween(durationMillis = 240, easing = EaseOutExpo)
+                                tween(durationMillis = 270, easing = EaseOutExpo)
                             )
                 },
                 popEnterTransition = {

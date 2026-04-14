@@ -4,7 +4,13 @@ import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.*
+import androidx.compose.animation.core.EaseInOutSine
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutBack
+import androidx.compose.animation.core.EaseOutQuad
+import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
@@ -40,6 +47,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -74,7 +82,8 @@ fun ArticleScreen(
     var firstVisibleItemIndex by rememberSaveable { mutableIntStateOf(0) }
     var firstVisibleItemOffset by rememberSaveable { mutableIntStateOf(0) }
 
-    val lazyListState = rememberSaveable(saver = LazyListState.Saver) { LazyListState(firstVisibleItemIndex, firstVisibleItemOffset) }
+    val lazyListState =
+        rememberSaveable(saver = LazyListState.Saver) { LazyListState(firstVisibleItemIndex, firstVisibleItemOffset) }
 
     Log.i("LAZYLISTSTATE", firstVisibleItemIndex.toString())
 
@@ -101,7 +110,7 @@ fun ArticleScreen(
     })
 
     LaunchedEffect(fontSizePreference) {
-        if (fontSizePreference != null && fontSize != fontSizePreference){
+        if (fontSizePreference != null && fontSize != fontSizePreference) {
             fontSize = fontSizePreference
         }
     }
@@ -196,9 +205,11 @@ fun ArticleScreen(
         RevealContainer(
             hideContent = article == null || !articleContentParsed || (article?.isCorporative == true && company == null) || !revealArticleContent,
             overlappingContent = {
-                GenericSkeleton(modifier = Modifier
-                    .fillMaxSize()
-                    .then(if (revealArticleContent) Modifier else Modifier.pointerInput(Unit) {}), articleId)
+                GenericSkeleton(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(if (revealArticleContent) Modifier else Modifier.pointerInput(Unit) {}), articleId
+                )
 //				Box(modifier = Modifier.fillMaxSize().background(Color.Red).pointerInput(Unit) {})
             }
         ) {
@@ -231,6 +242,7 @@ fun ArticleScreen(
                         articleContentParsed = true
                     }
                 })
+                val density = LocalDensity.current
 
                 Box(modifier = Modifier.padding(it)) {
                     AnimatedVisibility(
@@ -239,7 +251,23 @@ fun ArticleScreen(
 //                                (navigationTransition.currentState == EnterExitState.Visible ) &&
                                 !(article.isCorporative == true && company == null) &&
                                 revealArticleContent,
-                        enter = fadeIn() + scaleIn(initialScale = 0.95f)
+                        enter =
+                            fadeIn(
+                            animationSpec = tween(durationMillis = 200, easing = EaseOut)
+                        ) +
+//                                    scaleIn(
+//                                        initialScale = 0.95f,
+//                                        animationSpec = tween(
+//                                            durationMillis = 200,
+//                                            easing = EaseOutQuad
+//                                        )
+//                                    ) +
+                                    slideInVertically(
+                                        animationSpec = tween(
+                                            durationMillis = 250,
+                                            easing = EaseOut
+                                        )
+                                    ) { (density.density * 32f).roundToInt() }
                     ) {
 
                         SelectionContainer {
