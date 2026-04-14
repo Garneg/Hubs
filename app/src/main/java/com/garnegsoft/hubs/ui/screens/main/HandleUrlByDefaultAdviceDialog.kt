@@ -7,16 +7,21 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
+import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.ui.common.BaseTitledDialog
 
@@ -39,36 +44,24 @@ fun HandleUrlByDefaultAdviceDialog(
             Box(modifier = Modifier.weight(1f)) {
                 Text(
                     modifier = Modifier.verticalScroll(rememberScrollState()),
+                    fontSize = 16.sp,
+                    lineHeight = 1.45.em,
                     color = MaterialTheme.colors.onSurface,
-                    text = "Начиная с 12-ой версии Android приложение не сможет по умолчанию открывать ссылки, " +
-                            "ведущие на статьи, профили, компании, хабы и т.д. \n" +
-                            "Чтобы приложение смогло снова открывать ссылки, " +
-                            "предоставьте разрешение открывать ссылки по умолчанию\n\n" +
-                            "Если Вы по какой-то причине не можете это сделать, " +
+                    text = "Добавьте ссылки на Хабр в настройках приложения, чтобы они открывались в нё м автоматически\n\n" +
                             "Вы по-прежнему можете открывать ссылки, " +
-                            "копируя их и вставляя в поиск в приложении"
+                            "вставляя их в строку поиска приложения"
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(56.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(0.dp)
             ){
-                TextButton(
-                    onClick = onNeverShowAgain
-                ) {
-                    Text(text = "Больше не показывать")
-                }
-                TextButton(
-                    onClick = onDismissRequest
-                ) {
-                    Text(text = "Позже")
-                }
-
                 val context = LocalContext.current
                 Button(
+                    modifier = Modifier.fillMaxWidth(),
                     elevation = null,
+                    contentPadding = PaddingValues(vertical = 12.dp),
                     onClick = {
 
                         if (Build.VERSION.SDK_INT >= 31) {
@@ -86,6 +79,35 @@ fun HandleUrlByDefaultAdviceDialog(
                 ) {
                     Text("Открыть настройки")
                 }
+                Row {
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                        onClick = onNeverShowAgain,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.primary.copy(0.1f),
+                            contentColor = MaterialTheme.colors.onBackground
+                        ),
+                    ) {
+                        Text(text = "Никогда")
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(vertical = 12.dp),
+                        onClick = onDismissRequest,
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.primary.copy(0.1f),
+                            contentColor = MaterialTheme.colors.onBackground
+                        ),
+
+                        ) {
+                        Text(text = "Позже")
+                    }
+                }
+
+
+
             }
         }
     }
