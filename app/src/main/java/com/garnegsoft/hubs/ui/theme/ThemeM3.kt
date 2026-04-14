@@ -4,11 +4,16 @@ import android.os.Build
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.color.ColorProvider
 import androidx.glance.color.ColorProviders
 import androidx.glance.color.colorProviders
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
+import kotlinx.coroutines.flow.first
 
 
 val DarkColorSchemeM3 = darkColorScheme(
@@ -20,10 +25,12 @@ val LightColorSchemeM3 = lightColorScheme(
 )
 
 @Composable
-fun HubsWidgetThemeM3(content: @Composable () -> Unit) {
+fun HubsWidgetThemeM3(
+    useAdaptiveColors: Boolean,
+    content: @Composable () -> Unit) {
 
     GlanceTheme(
-        colors = if (Build.VERSION.SDK_INT >= 31){
+        colors = if (Build.VERSION.SDK_INT >= 31 && useAdaptiveColors){
             GlanceTheme.colors
         } else {
             HubsWidgetColorProviders()

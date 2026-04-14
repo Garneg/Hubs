@@ -40,6 +40,7 @@ class MostReadingWidgetReceiver(
 		context?.let {
 			val wm = WorkManager.getInstance(it)
 			wm.cancelAllWorkByTag(periodicalWorkTag)
+
 		}
 		
 		super.onDisabled(context)

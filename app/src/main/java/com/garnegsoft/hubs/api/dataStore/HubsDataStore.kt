@@ -75,6 +75,7 @@ object HubsDataStore {
 			 * default is 0 if available
 			 */
 			val ThemeMode = hubsIntPreference("widget_theme_mode", 0)
+
 		}
 
 	}
