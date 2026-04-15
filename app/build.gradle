@@ -17,12 +17,12 @@ static def getDate() {
 
 android {
     namespace "com.garnegsoft.hubs"
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.garnegsoft.hubs"
         minSdk 23
-        targetSdk 34
+        targetSdk 36
         versionCode 17
         versionName "2.7.0"
 
@@ -92,6 +92,12 @@ dependencies {
 
     // workmanager
     implementation "androidx.work:work-runtime-ktx:2.10.3"
+
+    // media 3
+    def media3_version = "1.10.0"
+    implementation "androidx.media3:media3-session:$media3_version"
+    implementation "androidx.media3:media3-common-ktx:$media3_version"
+    implementation "androidx.media3:media3-datasource:$media3_version"
 
     // glance
     implementation "androidx.glance:glance-appwidget:1.1.1"

@@ -1,7 +1,13 @@
 package com.garnegsoft.hubs.ui.screens.article.tts
 
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.IBinder
 import android.speech.tts.TextToSpeech
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -11,12 +17,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
@@ -39,6 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.garnegsoft.hubs.api.tts.HubsTTSService
+import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreenViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -50,7 +61,8 @@ import java.util.Locale
 fun TtsTestDialog(
     show: Boolean,
     onDismissRequest: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    binder: TTSBinder?
 ) {
     val articleScreenViewModel = viewModel<ArticleScreenViewModel>()
     val articleHtmlDoc =
@@ -181,29 +193,69 @@ fun TtsTestDialog(
                         OutlinedButton(
                             onClick = {
                                 textToSpeech?.let { tts ->
-                                    tts.speak(
+                                    binder?.loadChunks(
                                         articleHtmlDoc.text()
-                                            .take(TextToSpeech.getMaxSpeechInputLength()),
-                                        TextToSpeech.QUEUE_FLUSH,
-                                        null,
-                                        "article"
+                                            .split(' '),
                                     )
                                 }
                             },
                             enabled = ttsCreatedSuccessfully
                         ) {
-                            Text("Озвучить статью")
+                            Text("Load")
                         }
 
                         OutlinedButton(
                             onClick = {
-                                textToSpeech?.stop()
+                                binder?.play()
                             },
                             enabled = ttsCreatedSuccessfully
                         ) {
-                            Text("Стоп")
+                            Text("Играть дальше")
                             ArticleContentSplitter.breakIntoPieces(Element("p"))
                         }
+                        Row {
+                            OutlinedButton(
+                                onClick = {
+                                    binder?.stop()
+                                },
+                                enabled = ttsCreatedSuccessfully
+                            ) {
+                                Text("Стоп")
+                                ArticleContentSplitter.breakIntoPieces(Element("p"))
+                            }
+
+                            OutlinedButton(
+                                onClick = {
+                                    binder?.pause()
+                                },
+                                enabled = ttsCreatedSuccessfully
+                            ) {
+                                Text("pause")
+                                ArticleContentSplitter.breakIntoPieces(Element("p"))
+                            }
+                        }
+
+
+
+
+                        Row {
+                            Button(
+                                onClick = {
+                                    binder?.seek(-5)
+                                }
+                            ) {
+                                Text("Seek back")
+                            }
+                            Spacer(Modifier.width(8.dp))
+                            Button(
+                                onClick = {
+                                    binder?.seek(5)
+                                }
+                            ) {
+                                Text("Seek forward")
+                            }
+                        }
+
                     }
 
                 }

@@ -1,6 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
+import android.os.IBinder
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeechService
 import android.util.Log
@@ -40,14 +44,21 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.history.HistoryController
+import com.garnegsoft.hubs.api.tts.HubsTTSService
+import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
@@ -81,6 +92,28 @@ fun ArticleScreen(
     viewModelStoreOwner: ViewModelStoreOwner
 ) {
     val context = LocalContext.current
+    var ttsMediaController by remember { mutableStateOf<MediaController?>(null) }
+    var ttsBinder by remember { mutableStateOf<TTSBinder?>(null) }
+    LaunchedEffect(Unit) {
+        Intent(context, HubsTTSService::class.java).also {
+            context.bindService(it, object : ServiceConnection {
+                override fun onServiceConnected(
+                    name: ComponentName?,
+                    service: IBinder?
+                ) {
+                    Log.i("service", "bind service connected")
+                    ttsBinder = (service as TTSBinder)
+                }
+
+                override fun onServiceDisconnected(name: ComponentName?) {
+                    Log.i("service", "bind service disconnected")
+
+                }
+            },
+                Context.BIND_AUTO_CREATE)
+        }
+    }
+
     val activity = LocalActivity.current
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
     val fontSizePreference by HubsDataStore.Settings.ArticleScreen.FontSize
@@ -115,7 +148,7 @@ fun ArticleScreen(
     }
 
     var showTtsDialog by remember { mutableStateOf(false) }
-    TtsTestDialog(showTtsDialog, {showTtsDialog = false})
+    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder)
 
 
     LaunchedEffect(key1 = Unit, block = {
@@ -193,6 +226,15 @@ fun ArticleScreen(
                         enabled = article != null
                     ) {
                         Icon(Icons.Outlined.Share, contentDescription = "")
+                    }
+
+                    IconButton(
+                        onClick = {
+                            showTtsDialog = true
+                        },
+                        enabled = true
+                    ) {
+                        Icon(painterResource(id = R.drawable.headphones), contentDescription = "text to speech")
                     }
                 })
         },
