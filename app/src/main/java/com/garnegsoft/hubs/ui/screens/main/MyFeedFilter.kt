@@ -20,7 +20,6 @@ import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 

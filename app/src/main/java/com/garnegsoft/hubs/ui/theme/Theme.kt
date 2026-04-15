@@ -13,26 +13,29 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.glance.GlanceComposable
-import androidx.glance.GlanceTheme
-import androidx.glance.material.ColorProviders
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.material3.MaterialTheme as Material3Theme
 
-private val DarkColorPalette = darkColors(
+
+private val  DarkColorPalette = darkColors(
     primary = Color(0xFFE7E7E7),
     primaryVariant = Color(0xFFE0E0E0),
     secondary = Color(0xFFD3D3D3),
     onSecondary = Color(0x88FFFFFF),
-    background = Color(32, 32, 32, 255),
-    surface = Color(49, 49, 49, 255),
+    background = Color(16, 16, 18, 255),
+    surface = Color(24, 24, 24, 255),
     onSurface = Color(0xFFDADADA),
     onBackground = Color(0xFFD8D8D8),
     secondaryVariant = Color(0xFFB4B4B4),
     onError = Color.White
 )
+
+@Composable
+fun subscriptionColor(): Color {
+    return if (MaterialTheme.colors.isLight) Color(0xFF4CB025)
+        else Color(0xFF3F8F20)
+}
 
 
 private val LightColorPalette = lightColors(
@@ -60,10 +63,18 @@ private val LightColorPalette = lightColors(
 fun HubsTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val systemUiController = rememberSystemUiController()
     val colors = if (darkTheme) {
-        systemUiController.setSystemBarsColor(DarkColorPalette.surface)
+//        systemUiController.setSystemBarsColor(DarkColorPalette.surface)
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            false,
+        )
         DarkColorPalette
     } else {
-        systemUiController.setSystemBarsColor(LightColorPalette.primary)
+//        systemUiController.setSystemBarsColor(LightColorPalette.primary)
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            true,
+        )
         LightColorPalette
     }
     
@@ -100,21 +111,5 @@ fun HubsM3Theme() {
 
         }
 
-    }
-}
-
-@GlanceComposable
-@Composable
-fun HubsWidgetTheme(
-    content: @Composable () -> Unit
-) {
-    GlanceTheme(
-        
-        colors = ColorProviders(
-            light = LightColorPalette.copy(surface = Color.White),
-            dark = DarkColorPalette
-        )
-    ) {
-        content()
     }
 }

@@ -2,29 +2,36 @@ package com.garnegsoft.hubs.ui.screens.user
 
 
 import android.content.Intent
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.Text
-import androidx.compose.material.Scaffold
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.*
-import androidx.lifecycle.*
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.comment.list.CommentSnippet
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.ui.common.*
+import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
@@ -61,7 +68,7 @@ fun UserScreen(
 	
 	Scaffold(
 		topBar = {
-			TopAppBar(
+			HubsTopAppBar(
 				elevation = 0.dp,
 				title = { Text("Пользователь") },
 				navigationIcon = {

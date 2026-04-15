@@ -4,7 +4,6 @@ import ArticleController
 import ArticlesListController
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.SpanStyle
 import androidx.lifecycle.LiveData
@@ -13,26 +12,41 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
-import com.garnegsoft.hubs.api.article.offline.OfflineArticle
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesController
 import com.garnegsoft.hubs.api.article.offline.offlineArticlesDatabase
+import com.garnegsoft.hubs.api.company.Company
+import com.garnegsoft.hubs.api.company.CompanyController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class ArticleScreenViewModel : ViewModel() {
 	private var _article = MutableLiveData<Article?>()
 	val article: LiveData<Article?> get() = _article
+
+	private var _company = MutableLiveData<Company?>()
+	val company: LiveData<Company?> get() = _company
 	
-	
+	private fun loadCompany(alias: String) {
+		viewModelScope.launch(Dispatchers.IO) {
+			CompanyController.get(alias)?.let {
+				_company.postValue(it)
+			}
+		}
+	}
 	
 	fun loadArticle(id: Int) {
 		viewModelScope.launch(Dispatchers.IO) {
 			ArticleController.get(id)?.let {
 				_article.postValue(it)
-				
+				if (it.isCorporative){
+					val companyAlias = it.hubs.find { it.isCorporative }!!.alias
+					loadCompany(companyAlias)
+				} else {
+					_company.postValue(null)
+				}
+
 			}
 		}
 	}

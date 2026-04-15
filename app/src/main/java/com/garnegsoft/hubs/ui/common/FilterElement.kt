@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -16,21 +17,29 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun FilterElement(
-	title: String,
-	onClick: () -> Unit
+    title: String,
+    onClick: () -> Unit,
+    trailingContent: (@Composable () -> Unit)? = null
 ) {
-	Box(modifier = Modifier.fillMaxWidth()) {
-		Text(
-			modifier = Modifier
-				.fillMaxWidth()
-				.background(MaterialTheme.colors.surface)
-				.clickable(onClick = onClick)
-				.padding(12.dp),
-			text = title,
-			style = MaterialTheme.typography.body2,
-			fontWeight = FontWeight.W500,
-			color = MaterialTheme.colors.onSurface.copy(0.75f)
-		)
-		Divider(modifier = Modifier.align(Alignment.BottomCenter))
-	}
+    Box(
+        modifier = Modifier
+			.fillMaxWidth()
+			.height(40.dp)
+			.clickable(onClick = onClick)
+			.background(MaterialTheme.colors.surface)
+    ) {
+        Text(
+            modifier = Modifier
+				.align(Alignment.CenterStart)
+				.padding(horizontal = 8.dp, vertical = 0.dp),
+            text = title,
+            style = MaterialTheme.typography.body2,
+            fontWeight = FontWeight.W500,
+            color = MaterialTheme.colors.onSurface.copy(0.75f)
+        )
+        trailingContent?.let {
+            Box(modifier = Modifier.align(Alignment.CenterEnd), content = { it() })
+        }
+        Divider(modifier = Modifier.align(Alignment.BottomCenter))
+    }
 }

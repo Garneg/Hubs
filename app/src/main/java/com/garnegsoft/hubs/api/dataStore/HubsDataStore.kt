@@ -1,15 +1,16 @@
 package com.garnegsoft.hubs.api.dataStore
 
 import android.content.Context
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
-import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.*
 import androidx.datastore.preferences.preferencesDataStore
+import com.garnegsoft.hubs.api.dataStore.DataStorePreference.Companion.hubsBooleanPreference
+import com.garnegsoft.hubs.api.dataStore.DataStorePreference.Companion.hubsFloatPreference
+import com.garnegsoft.hubs.api.dataStore.DataStorePreference.Companion.hubsIntPreference
+import com.garnegsoft.hubs.api.dataStore.DataStorePreference.Companion.hubsStringPreference
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 
 object HubsDataStore {
 	object Settings : SingleDataStore(name = "settings") {
@@ -26,9 +27,10 @@ object HubsDataStore {
 			object ColorSchemeMode : DataStorePreference<Int> {
 				override val key = intPreferencesKey("theme_mode")
 				override val defaultValue = ColorScheme.SystemDefined.ordinal
-				
+				override val dataStore: SingleDataStore = Settings
+
 				fun mapValues(flow: Flow<Int>): Flow<ColorScheme> {
-					return flow.map { ColorScheme.values()[it] }
+					return flow.map { ColorScheme.entries[it] }
 				}
 				
 				enum class ColorScheme {
@@ -43,93 +45,139 @@ object HubsDataStore {
 		
 		object Html {
 			object CodeElement {
-				val ShowLineNumbers = DataStorePreference.BooleanPreference("html_code_show_line_numbers", true)
-				val ShowLanguage = DataStorePreference.BooleanPreference("html_code_show_language", true)
+				val ShowLineNumbers = hubsBooleanPreference("html_code_show_line_numbers", true)
+				val ShowLanguage = hubsBooleanPreference("html_code_show_language", true)
 			}
 		}
 		
 		object ArticleScreen {
-			val FontSize = DataStorePreference.FloatPreference("article_font_size", 16f)
+			val FontSize = hubsFloatPreference("article_font_size", 16f)
 //			val LineHeightFactor = floatPreferencesKey("line_height_factor")
 //			val TextWrapMode = intPreferencesKey("article_text_wrap")
 //			val Indent = intPreferencesKey("article_indent")
 		}
 		
 		object ArticleCard {
-			val TextSnippetFontSize = DataStorePreference.FloatPreference("article_card_snippet_font_size", 16f)
-			val ShowTextSnippet = DataStorePreference.BooleanPreference("article_card_show_snippet", true)
-			val ShowImage = DataStorePreference.BooleanPreference("article_card_show_image", true)
-			val TitleFontSize = DataStorePreference.FloatPreference("article_card_title_font_size", 20f)
-			val TextSnippetMaxLines = DataStorePreference.IntPreference("article_card_snippet_max_lines", 4)
+			val TextSnippetFontSize = hubsFloatPreference("article_card_snippet_font_size", 16f)
+			val ShowTextSnippet = hubsBooleanPreference("article_card_show_snippet", true)
+			val ShowImage = hubsBooleanPreference("article_card_show_image", true)
+			val TitleFontSize = hubsFloatPreference("article_card_title_font_size", 20f)
+			val TextSnippetMaxLines = hubsIntPreference("article_card_snippet_max_lines", 4)
 		}
-		
-		object CommentsDisplayMode : DataStorePreference<Int> {
-			
-			override val key = intPreferencesKey("comment_display_mode")
-			
-			override val defaultValue = CommentsDisplayModes.Default.ordinal
-			
-			enum class CommentsDisplayModes {
-				Default,
-				Threads,
-			}
+
+		object Widget {
+			val ArticleTitleFontSize = hubsIntPreference("widget_article_title_font_size", 16)
+
+			/**
+			 * Modes:
+			 * * 0 - system(Material 3 adaptive colors Android 12+)
+			 * * 1 - same as app (should pick one of app themes dark or light)
+			 * default is 0 if available
+			 */
+			val ThemeMode = hubsIntPreference("widget_theme_mode", 0)
+
 		}
+
+	}
+
+	/**
+	 * Every preference in this data store represents various flags that define application behaviour
+	 * (non-user settings)
+	 */
+	object applicationFlags : SingleDataStore(name = "app_flags") {
+		val ShowSetOpenUrlByDefaultDialog = hubsBooleanPreference("show_set_open_url_by_default_dialog", true)
+
 	}
 	
 	object Auth : SingleDataStore(name = "auth") {
-		val Authorized = DataStorePreference.BooleanPreference("authorized", false)
-		val Cookies = DataStorePreference.StringPreference("cookies", "")
-		val Alias = DataStorePreference.StringPreference("alias", "")
-		val LastAvatarUrlDownloaded = DataStorePreference.StringPreference("last_avatar_url", "")
-		val AvatarFileName = DataStorePreference.StringPreference("avatar_filename", "")
+		val Authorized = hubsBooleanPreference("authorized", false)
+		val Cookies = hubsStringPreference("cookies", "")
+		val Alias = hubsStringPreference("alias", "")
+		val LastAvatarUrlDownloaded = hubsStringPreference("last_avatar_url", "")
+		val AvatarFileName = hubsStringPreference("avatar_filename", "")
 	}
-	
+
 	object LastRead : SingleDataStore(name = "last_read") {
 		
-		val LastArticleRead = DataStorePreference.IntPreference("last_article", 0)
+		val LastArticleRead = hubsIntPreference("last_article", 0)
 		//val LastArticleReadPosition = intPreferencesKey("last_article_position")
 		
 	}
-	
-	object FiltersPreferences : SingleDataStore(name = "filters") {
-		val MyFeed = DataStorePreference.StringPreference("my_feed", "")
-		val Articles = DataStorePreference.StringPreference("main_articles", "")
-		val News = DataStorePreference.StringPreference("main_news", "")
+
+	object Filters : SingleDataStore(name = "filters") {
+		val MyFeed = hubsStringPreference("my_feed", "")
+		val Articles = hubsStringPreference("main_articles", "")
+		val News = hubsStringPreference("main_news", "")
 	}
 	
 }
 
+
+
 interface DataStorePreference<T> {
 	val key: Preferences.Key<T>
 	val defaultValue: T
-	
+	val dataStore: SingleDataStore
+
+
+	fun getFlow(context: Context, defaultValue: T = this.defaultValue): Flow<T> {
+		return dataStore.getValueFlow(context, this, defaultValue)
+	}
+
+	suspend fun edit(context: Context, value: T) {
+		dataStore.edit(context, this, value)
+	}
+
+
+
+	companion object {
+		fun SingleDataStore.hubsStringPreference(name: String, defaultValue: String) =
+			 StringPreference(name, defaultValue, this)
+		
+		fun SingleDataStore.hubsBooleanPreference(name: String, defaultValue: Boolean) = 
+			BooleanPreference(name, defaultValue, this)
+
+		fun SingleDataStore.hubsFloatPreference(name: String, defaultValue: Float) = 
+			FloatPreference(name, defaultValue, this)
+		
+		fun SingleDataStore.hubsIntPreference(name: String, defaultValue: Int) =
+			IntPreference(name, defaultValue, this)
+
+	}
+
 	class FloatPreference(
 		name: String,
-		override val defaultValue: Float
+		override val defaultValue: Float,
+		override val dataStore: SingleDataStore
 	) : DataStorePreference<Float> {
 		override val key = floatPreferencesKey(name)
 	}
 	
 	class BooleanPreference(
 		name: String,
-		override val defaultValue: Boolean
+		override val defaultValue: Boolean,
+		override val dataStore: SingleDataStore
 	) : DataStorePreference<Boolean> {
 		override val key = booleanPreferencesKey(name)
 	}
 	
 	class StringPreference(
 		name: String,
-		override val defaultValue: String
+		override val defaultValue: String,
+		override val dataStore: SingleDataStore
 	) : DataStorePreference<String> {
 		override val key = stringPreferencesKey(name)
 	}
 	
 	class IntPreference(
 		name: String,
-		override val defaultValue: Int
+		override val defaultValue: Int,
+		override val dataStore: SingleDataStore
 	) : DataStorePreference<Int> {
 		override val key = intPreferencesKey(name)
 	}
+
+
 	
 }
 
@@ -148,7 +196,9 @@ abstract class SingleDataStore(
 	}
 	
 	suspend fun <T> edit(context: Context, pref: DataStorePreference<T>, value: T) {
-		context.store.edit { it.set(pref.key, value) }
+		withContext(Dispatchers.IO) {
+			context.store.edit { it.set(pref.key, value) }
+		}
 	}
 }
 

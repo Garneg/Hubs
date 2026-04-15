@@ -1,23 +1,12 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.*
+import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -32,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 
@@ -104,12 +93,12 @@ fun NewCommentsControl(
                         AnimatedContent(targetState = currentCommentNumber,
                             transitionSpec = {
                                 if (initialState < targetState) {
-                                    (slideInVertically(tween(delayMillis = 100)) { -it / 2 } + fadeIn(
+                                    (slideInVertically(tween(delayMillis = 100, easing = EaseOutQuad)) { -it / 2 } + fadeIn(
                                         tween(delayMillis = 100)
                                     ))
                                         .togetherWith(slideOutVertically { it / 2 } + fadeOut())
                                 } else {
-                                    (slideInVertically(tween(delayMillis = 100)) { it / 2 } + fadeIn(
+                                    (slideInVertically(tween(delayMillis = 100, easing = EaseOutQuad)) { it / 2 } + fadeIn(
                                         tween(delayMillis = 100)
                                     ))
                                         .togetherWith(slideOutVertically { -it / 2 } + fadeOut())

@@ -9,11 +9,14 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.painterResource
@@ -32,7 +35,7 @@ import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
 
 @Composable
-private fun defaultCompanyCardStyle(): CompanyCardStyle {
+fun defaultCompanyCardStyle(): CompanyCardStyle {
     return CompanyCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
         descriptionTextStyle = TextStyle.Default.copy(
@@ -47,8 +50,8 @@ private fun defaultCompanyCardStyle(): CompanyCardStyle {
 fun CompanyCard(
 	company: CompanySnippet,
 	style: CompanyCardStyle = defaultCompanyCardStyle(),
+    onClick: () -> Unit,
 	indicator: @Composable () -> Unit = { DefaultCompanyIndicator(company = company) },
-	onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -93,7 +96,7 @@ fun CompanyCard(
         Column(
             modifier = Modifier.weight(1f),
             ) {
-            Text(text = company.title, style = if (company.relatedData?.isSubscribed == true) {
+            Text(text = company.title, style = if (company.relatedData?.isSubscribed == true && style.showIfUserSubscribed) {
                 style.titleTextStyle.copy(color = HubSubscribedColor)
             } else { style.titleTextStyle })
             if (style.showDescription)
@@ -106,7 +109,7 @@ fun CompanyCard(
                     )
                 }
         }
-        Box(modifier = Modifier.padding(start = 4.dp), contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.padding(start = style.innerPadding), contentAlignment = Alignment.Center) {
             indicator()
         }
     }
@@ -119,12 +122,13 @@ data class CompanyCardStyle(
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val titleTextStyle: TextStyle = TextStyle.Default.copy(
-        fontWeight = FontWeight.W700,
+        fontWeight = FontWeight.W600,
         fontSize = 20.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle.Default.copy(color = Color.Gray),
     val indicatorValueTextStyle: TextStyle = TextStyle.Default.copy(color = Color.DarkGray),
     val showDescription: Boolean = false,
+    val showIfUserSubscribed: Boolean = true,
     val descriptionMaxLines: Int = 1
 )
 
@@ -135,9 +139,17 @@ fun DefaultCompanyIndicator(
     val rating = remember {
         String.format("%.1f", company.statistics.rating).replace(',', '.')
     }
-    Text(
-        text = rating,
-        fontWeight = FontWeight.W400,
-        color = DefaultRatingIndicatorColor
-    )
+    Row {
+        Icon(modifier = Modifier.size(18.dp).rotate(-90f),
+            imageVector = Icons.Sharp.ArrowForward,
+            tint = DefaultRatingIndicatorColor,
+            contentDescription = null)
+        Spacer(modifier = Modifier.width(2.dp))
+        Text(
+            text = rating,
+            fontWeight = FontWeight.W400,
+            color = DefaultRatingIndicatorColor
+        )
+    }
+
 }

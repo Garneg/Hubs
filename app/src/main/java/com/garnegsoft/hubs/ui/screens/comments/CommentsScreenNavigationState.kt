@@ -2,17 +2,10 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 
@@ -52,8 +45,10 @@ class CommentsScreenNavigationState(
         addCommentsToSkipList(getChildrenOfComment(commentId))
     }
 
-    fun collapseThread(childCommentId: Int) {
-        collapseComment(getRootCommentId(childCommentId))
+    suspend fun collapseThread(childCommentId: Int) {
+        val rootCommentId = getRootCommentId(childCommentId)
+        collapseComment(rootCommentId)
+        scrollToComment(rootCommentId)
     }
 
     fun getRootCommentId(childCommentId: Int): Int {

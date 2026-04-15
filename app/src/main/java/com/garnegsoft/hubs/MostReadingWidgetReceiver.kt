@@ -2,21 +2,14 @@ package com.garnegsoft.hubs
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.updateAll
-import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-class NewsWidgetReceiver(
+class MostReadingWidgetReceiver(
 	override val glanceAppWidget: GlanceAppWidget = MostReadingWidget()
 ) : GlanceAppWidgetReceiver() {
 	companion object {
@@ -26,7 +19,7 @@ class NewsWidgetReceiver(
 	override fun onEnabled(context: Context?) {
 		Log.i("most_reading_widget", "widget added")
 		val periodicalWidgetUpdateRequest =
-			PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(6, TimeUnit.HOURS)
+			PeriodicWorkRequestBuilder<MostReadingWidgetUpdateWorker>(3, TimeUnit.HOURS)
 				.addTag(periodicalWorkTag)
 				.setInitialDelay(6, TimeUnit.HOURS)
 				.build()
@@ -47,6 +40,7 @@ class NewsWidgetReceiver(
 		context?.let {
 			val wm = WorkManager.getInstance(it)
 			wm.cancelAllWorkByTag(periodicalWorkTag)
+
 		}
 		
 		super.onDisabled(context)

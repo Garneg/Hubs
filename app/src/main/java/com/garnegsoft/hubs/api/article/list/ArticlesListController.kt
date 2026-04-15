@@ -2,7 +2,7 @@ import android.util.Log
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
-import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
+import com.garnegsoft.hubs.api.utils.processUserAvatar
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import okhttp3.CacheControl
@@ -70,12 +70,8 @@ class ArticlesListController {
 				articles.articleRefs.values.forEach {
 					it.apply {
 						timePublished = formatTime(timePublished)
-						if (author?.avatarUrl.isNullOrBlank() && author != null){
-							author!!.avatarUrl = placeholderAvatarUrl(author!!.alias)
-						} else {
-							author?.avatarUrl =
-								"https:" + author?.avatarUrl?.replace("habrastorage", "hsto")
-						}
+						author?.avatarUrl = processUserAvatar(author!!.avatarUrl, author!!.alias)
+
 						if (leadData?.imageUrl == null && leadData?.textHtml!!.contains("<img"))
 							leadData?.imageUrl = Jsoup.parse(leadData!!.textHtml!!)
 								.getElementsByTag("img")[0]?.attr("src")
@@ -126,7 +122,7 @@ class ArticlesListController {
 									com.garnegsoft.hubs.api.article.Article.Author(
 										alias = it.author!!.alias,
 										fullname = it.author!!.fullname,
-										avatarUrl = it.author!!.avatarUrl,
+										avatarUrl = it.author!!.avatarUrl!!,
 									)
 								} else
 									null,
@@ -191,7 +187,7 @@ class ArticlesListController {
 									com.garnegsoft.hubs.api.article.Article.Author(
 										alias = it.author!!.alias,
 										fullname = it.author!!.fullname,
-										avatarUrl = it.author!!.avatarUrl,
+										avatarUrl = it.author!!.avatarUrl!!,
 									)
 								} else
 									null,

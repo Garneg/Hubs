@@ -2,16 +2,12 @@ package com.garnegsoft.hubs.ui.screens.hub
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -33,6 +29,7 @@ import com.garnegsoft.hubs.api.hub.HubController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
+import com.garnegsoft.hubs.ui.common.SubscriptionButton
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +48,7 @@ fun HubProfile(
 			modifier = Modifier
 				.fillMaxSize()
 				.verticalScroll(scrollState)
+				.navigationBarsPadding()
 				.padding(8.dp),
 			verticalArrangement = Arrangement.spacedBy(8.dp)
 		) {
@@ -131,30 +129,19 @@ fun HubProfile(
 						mutableStateOf(it.isSubscribed)
 					}
 					val subscriptionCoroutineScope = rememberCoroutineScope()
-					Box(modifier = Modifier
-						.padding(8.dp)
-						.height(45.dp)
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(10.dp))
-						.background(if (subscribed) Color(0xFF4CB025) else Color.Transparent)
-						.border(
-							width = 1.dp,
-							shape = RoundedCornerShape(10.dp),
-							color = if (subscribed) Color.Transparent else Color(0xFF4CB025)
-						)
-						.clickable {
+					var throttleButton by remember { mutableStateOf(false) }
+					SubscriptionButton(
+						subscribed = subscribed,
+						onClick = {
+							throttleButton = true
+							subscribed = !subscribed
 							subscriptionCoroutineScope.launch(Dispatchers.IO) {
-								subscribed = !subscribed
 								subscribed = HubController.subscription(hub.alias)
+								throttleButton = false
 							}
-						}
-					) {
-						Text(
-							modifier = Modifier.align(Alignment.Center),
-							text = if (subscribed) "Вы подписаны" else "Подписаться",
-							color = if (subscribed) Color.White else Color(0xFF4CB025)
-						)
-					}
+						},
+						throttle = throttleButton
+					)
 				}
 				
 			}

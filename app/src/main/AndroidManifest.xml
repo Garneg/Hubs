@@ -15,6 +15,7 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="false"
+        android:enableOnBackInvokedCallback="true"
         android:theme="@style/Theme.Hubs"
         tools:targetApi="34">
 
@@ -36,13 +37,14 @@
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
             android:foregroundServiceType="dataSync"
-            tools:node="merge" />
+            tools:node="merge"
+            />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/notification_default_icon" />
-        <!--        <meta-data-->
-        <!--            android:name="com.google.firebase.messaging.default_notification_color"-->
-        <!--            android:resource="@color/white" />-->
+            android:resource="@drawable/notification_default_icon"/>
+<!--        <meta-data-->
+<!--            android:name="com.google.firebase.messaging.default_notification_color"-->
+<!--            android:resource="@color/white" />-->
 
 
         <activity

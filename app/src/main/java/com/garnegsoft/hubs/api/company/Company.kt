@@ -14,6 +14,7 @@ class Company(
     val location: String?,
     val statistics: Statistics,
     val branding: Branding?,
+    val status: Status,
     val relatedData: RelatedData?
 ) {
     class Statistics(
@@ -23,6 +24,11 @@ class Company(
         val newsCount: Int,
         val employeesCount: Int,
     )
+
+    enum class Status {
+        Active,
+        Expired
+    }
 
     class RelatedData(val isSubscribed: Boolean)
 

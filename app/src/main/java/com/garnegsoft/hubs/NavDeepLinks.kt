@@ -1,28 +1,19 @@
 package com.garnegsoft.hubs
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavDeepLink
 import androidx.navigation.navDeepLink
-import me.saket.telephoto.zoomable.ZoomSpec
-import me.saket.telephoto.zoomable.coil.ZoomableAsyncImage
-import me.saket.telephoto.zoomable.rememberZoomableImageState
-import me.saket.telephoto.zoomable.rememberZoomableState
 
 val domain = "https://habr.com"
 
 val UserScreenNavDeepLinks = listOf(
     navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}" },
     navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/" },
-    navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/{deepLinkPage}" },
-    navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/{deepLinkPage}/" },
-    navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/{deepLinkPage}/{subPage}" },
+    navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/{page}" },
+    navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/{page}/" },
+    navDeepLink { uriPattern = "https://habr.com/{lang}/users/{alias}/{page}/{subPage}" },
     navDeepLink { uriPattern = "https://habr.com/users/{alias}" },
     navDeepLink { uriPattern = "https://habr.com/users/{alias}/" },
-    navDeepLink { uriPattern = "https://habr.com/users/{alias}/{deepLinkPage}" },
-    navDeepLink { uriPattern = "https://habr.com/users/{alias}/{deepLinkPage}/" },
+    navDeepLink { uriPattern = "https://habr.com/users/{alias}/{page}" },
+    navDeepLink { uriPattern = "https://habr.com/users/{alias}/{page}/" },
     navDeepLink { uriPattern = "http://habrahabr.ru/users/{alias}" },
     navDeepLink { uriPattern = "http://habrahabr.ru/users/{alias}/" },
     )

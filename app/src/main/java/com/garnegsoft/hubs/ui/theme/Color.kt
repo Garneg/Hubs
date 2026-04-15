@@ -16,3 +16,5 @@ val RatingNegativeColor = Color(0xFFC43333)
 
 val HubSubscribedColor = Color(0xE351A843)
 val TranslationLabelColor = Color(0xFF229CE6)
+
+val TextLinkColor = Color(88, 132, 185)

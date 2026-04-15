@@ -1,17 +1,14 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
-import android.widget.EditText
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.fadeIn
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.appendInlineContent
@@ -34,24 +31,19 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import coil.ImageLoader
 import coil.compose.AsyncImagePainter
-import com.garnegsoft.hubs.BuildConfig
 import com.garnegsoft.hubs.api.AsyncGifImage
+import com.garnegsoft.hubs.api.utils.handleUrl
 import com.garnegsoft.hubs.ui.common.AsyncSvgImage
 import com.garnegsoft.hubs.ui.screens.article.html.CodeElement
 import com.garnegsoft.hubs.ui.theme.SecondaryColor
@@ -415,7 +407,7 @@ fun parseElement(
 		}
 		
 		"p" -> if (element.html().isNotEmpty()) { localSpanStyle, settings ->
-			Column(Modifier.padding(bottom = 16.dp)) {
+			Column(Modifier.padding(bottom = if (element.nextElementSibling() != null) 16.dp else 0.dp)) {
 				childrenComposables.forEach {
 					it(localSpanStyle, settings)
 				}
@@ -512,21 +504,21 @@ fun parseElement(
 		
 		"div" -> if (element.hasClass("tm-iframe_temp"))
 			{ localSpanStyle, settings ->
-				
+				// TODO: Implement reuse of iframes (maybe even pre-creation)
 				AndroidView(modifier = Modifier
 					.fillMaxWidth()
 					.aspectRatio(16f / 9f)
 					.padding(vertical = 4.dp)
 					.clip(RoundedCornerShape(4.dp)),
-					factory = {
-						WebView(it).apply {
-							
-							this.settings.javaScriptEnabled = true
-							this.settings.databaseEnabled = true
-							isFocusable = true
-							isLongClickable = true
-							loadUrl(element.attr("data-src"))
-						}
+					factory = { context ->
+						WebView(context)
+					},
+					update = { webView ->
+						webView.settings.javaScriptEnabled = true
+						webView.settings.databaseEnabled = true
+						webView.isFocusable = true
+						webView.isLongClickable = true
+						webView.loadUrl(element.attr("data-src"))
 					})
 			}
 		else
@@ -612,9 +604,11 @@ fun parseElement(
 					.fillMaxWidth()
 			) {
 				val blockQuoteColor =
-					if (MaterialTheme.colors.isLight) SecondaryColor else MaterialTheme.colors.onBackground.copy(
-						0.75f
-					)
+					if (MaterialTheme.colors.isLight)
+						SecondaryColor
+					else
+						MaterialTheme.colors.onBackground.copy(0.75f)
+
 				Column(modifier = Modifier
 					.drawWithContent {
 						drawContent()
@@ -623,9 +617,10 @@ fun parseElement(
 							size = Size(quoteWidth, size.height),
 							cornerRadius = CornerRadius(quoteWidth / 2, quoteWidth / 2)
 						)
-						
+
 					}
-					.padding(start = 12.dp)) {
+					.padding(start = 16.dp, top = 2.dp, bottom = 4.dp)
+				) {
 					childrenComposables.forEach {
 						it(
 							localSpanStyle.copy(fontStyle = FontStyle.Italic),
@@ -671,12 +666,13 @@ fun parseElement(
 								.rotate(
 									animateFloatAsState(
 										targetValue =
-									if (!showDetails) {
-										-90f
-									} else {
-										0f
-									}).value
-									
+										if (!showDetails) {
+											-90f
+										} else {
+											0f
+										}
+									).value
+
 								),
 							imageVector = Icons.Outlined.ArrowDropDown, contentDescription = ""
 						)
@@ -975,19 +971,5 @@ fun Code(
 	}
 }
 
-/**
- * Handles url. If url refers to habr, opens this link via app
- */
-fun handleUrl(context: Context, url: String) {
-	Log.e(
-		"URL Clicked",
-		url
-	)
-	val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-		if (url.startsWith("https://habr.com") || url.startsWith("http://habrahabr.ru")){
-			this.`package` = BuildConfig.APPLICATION_ID
-		}
-	}
-	context.startActivity(intent)
-}
+
 

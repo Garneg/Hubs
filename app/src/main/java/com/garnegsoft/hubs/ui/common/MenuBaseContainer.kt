@@ -2,23 +2,11 @@ package com.garnegsoft.hubs.ui.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -35,7 +23,7 @@ fun BaseMenuContainer(
 ) {
 	Box(
 		modifier = modifier
-			.padding(4.dp)
+			.padding(8.dp)
 	) {
 		Surface(
 			modifier = Modifier
@@ -65,7 +53,7 @@ fun MenuItem(
 	Row(
 		modifier = modifier
 			.clickable(onClick = onClick)
-			.padding(14.dp),
+			.padding(vertical = 14.dp, horizontal = 18.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {
 		CompositionLocalProvider(
@@ -74,12 +62,12 @@ fun MenuItem(
 		) {
 			icon()
 		}
-		Spacer(modifier = Modifier.width(14.dp))
+		Spacer(modifier = Modifier.width(18.dp))
 		Text(
 			text = title,
 			color = MaterialTheme.colors.onSurface
 		)
-		Spacer(modifier = Modifier.width(14.dp))
+		Spacer(modifier = Modifier.width(18.dp))
 		Spacer(modifier = Modifier.weight(1f))
 	}
 }

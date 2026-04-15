@@ -1,8 +1,9 @@
 # Хабы 
-Неофициальный мобильный клиент для Хабра. Создан для изучения Jetpack Compose и Android. 
+Неофициальный мобильный клиент для Хабра с открытым исходным кодом. Создан для изучения Jetpack Compose и Android. 
 
-### Скриншоты
-<p><img height="420" src="main_screen_screenshot.jpg"/> <img height="420" src="hub_screen_screenshot.jpg"/> <img height="420" src="article_screen_screenshot.jpg"/> <img height="420" src="search_screen_screenshot.jpg"/></p>
-В клиенте есть авторизация, после которой вы сможете оставлять комментарии к публикациям, добавлять в закладки, подписываться на компании, хабы и пользователей
+<p><img height="450" src="First_scr.png"/> <img height="450" src="Second_scr.png"/> <img height="450" src="Third_scr.png"/></p> 
+<p><img height="450" src="Fourth_scr.png"/> <img height="450" src="Fifth_scr.png"/> <img height="450" src="Sixth_scr.png"/></p>
 
-## Установите на [4pda](https://4pda.to/forum/index.php?showtopic=1065764)
+### [Домашняя страница проекта](https://garneg.github.io/hubs)
+
+### Установите на [4pda](https://4pda.to/forum/index.php?showtopic=1065764) или через [релизы](https://github.com/Garneg/Hubs/releases)

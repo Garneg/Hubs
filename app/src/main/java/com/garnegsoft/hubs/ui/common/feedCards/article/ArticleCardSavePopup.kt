@@ -1,11 +1,14 @@
 package com.garnegsoft.hubs.ui.common.feedCards.article
 
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateIntOffset
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -22,27 +25,24 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
+import kotlin.math.roundToInt
 
 
 @Composable
 fun SaveArticlePopup(
-	show: Boolean,
-	bounds: IntSize,
-	cardStyle: ArticleCardStyle,
-	onSaveClick: () -> Unit,
-	onDeleteClick: () -> Unit,
-	onDismissRequest: () -> Unit,
-	articleId: Int
+    show: Boolean,
+    bounds: IntSize,
+    cardStyle: ArticleCardConfiguration,
+    onSaveClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    articleId: Int
 ) {
 	val density = LocalDensity.current.density
 	val context = LocalContext.current
@@ -59,9 +59,13 @@ fun SaveArticlePopup(
 		
 	}
 	val transition = updateTransition(targetState = show)
-	
+
+	val animatedOffset by transition.animateIntOffset {
+		if (it) IntOffset.Zero
+		else IntOffset(0, (16f * density).roundToInt())
+	}
 	val animatedSize by transition.animateFloat {
-		if (it) 1f else 0.8f
+		if (it) 1f else 0.2f
 	}
 	
 	if (show || transition.currentState) {
@@ -74,11 +78,14 @@ fun SaveArticlePopup(
 		) {
 			Box(
 				modifier = Modifier
-					.graphicsLayer(
-						scaleX = animatedSize,
-						scaleY = animatedSize,
+					.offset { animatedOffset.copy() }
+					.graphicsLayer {
+						//scaleX = animatedSize
+						//scaleY = animatedSize
+						shape = cardStyle.innerElementsShape
 						alpha = animatedSize
-					)
+					}
+					.padding(2.dp)
 					.size((bounds.width / density).dp, (bounds.height / density).dp)
 					.shadow(1.dp, shape = cardStyle.innerElementsShape)
 					.clip(cardStyle.innerElementsShape)

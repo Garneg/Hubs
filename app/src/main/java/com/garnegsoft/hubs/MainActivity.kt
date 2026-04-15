@@ -6,17 +6,12 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.core.view.WindowCompat
+import androidx.compose.runtime.*
+import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.compose.rememberNavController
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -27,87 +22,88 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.crashlytics.crashlytics
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
-	
-	@OptIn(ExperimentalAnimationApi::class)
-	override fun onCreate(savedInstanceState: Bundle?) {
-		super.onCreate(savedInstanceState)
-		WindowCompat.setDecorFitsSystemWindows(window, false)
-		
-		// Disable crashlytics if it's debug version
-		FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
-		
-		intent.extras?.let {
-			FcmDispatcher.dispatchExtras(
-				handleUrl = {
-					startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
-						this.data = Uri.parse(it)
-					}, null))
-				},
-				extras = it)
-		}
-		
-//		FirebaseMessaging.getInstance().token.addOnCompleteListener {
-//			Log.e("fcm-token", it.result)
-//		}
-		
-		
-		var authStatus: Boolean? by mutableStateOf(null)
-		
-		val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
-		val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
-		
-		runBlocking {
-			authStatus = isAuthorizedFlow.firstOrNull()
-			Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
-			HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
-		}
-		
-		val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
-			.setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
-			
-			.build()
-		WorkManager.getInstance(this).enqueue(updateMeData)
-		
-		intent.dataString?.let { Log.e("intentData", it) }
-		
-		setContent {
-			val cookies by cookiesFlow.collectAsState(initial = "")
-			key(cookies) {
-				val themeMode by HubsDataStore.Settings
-					.getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
-					.run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
-					.collectAsState(initial = null)
-				
-				if (themeMode != null && authStatus != null) {
-					HubsTheme(
-						darkTheme = when (themeMode) {
-							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
-							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
-							HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
-							else -> false
-						}
-					) {
-						val navController = rememberNavController()
-						
-						MainNavigationGraph(
-							parentActivity = this@MainActivity,
-							navController = navController
-						)
-					}
-				}
-			}
-		}
-		
-		Log.e("ExternalLink", intent.data.toString())
-		
-	}
+
+    @OptIn(ExperimentalAnimationApi::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
+        // Disable crashlytics if it's debug version
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
+        intent.extras?.let {
+            FcmDispatcher.dispatchExtras(
+                handleUrl = {
+                    startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
+                        this.data = Uri.parse(it)
+                    }, null))
+                },
+                extras = it
+            )
+        }
+        // Just to get fcm token if device runs debug version
+        if (BuildConfig.DEBUG) {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener {
+                Log.i("fcm-token", it.result)
+            }
+        }
+
+
+        var authStatus: Boolean? by mutableStateOf(null)
+
+        val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
+        val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
+
+        runBlocking {
+            authStatus = isAuthorizedFlow.firstOrNull()
+            Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
+            HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
+        }
+
+        val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
+            .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
+            .build()
+        WorkManager.getInstance(this).enqueue(updateMeData)
+
+        intent.dataString?.let { Log.e("intentData", it) }
+
+        setContent {
+            val cookies by cookiesFlow.collectAsState(initial = "")
+
+            key(cookies) {
+                val themeMode by HubsDataStore.Settings
+                    .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
+                    .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+                    .collectAsState(initial = null)
+
+                if (themeMode != null && authStatus != null) {
+                    HubsTheme(
+                        darkTheme = when (themeMode) {
+                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
+                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
+                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
+                            else -> false
+                        }
+                    ) {
+                        val navController = rememberNavController()
+                        this.savedStateRegistry.consumeRestoredStateForKey("")
+
+                        MainNavigationGraph(
+                            navController = navController
+                        )
+                    }
+                }
+            }
+        }
+        Log.e("ExternalLink", intent.data.toString())
+
+    }
 }

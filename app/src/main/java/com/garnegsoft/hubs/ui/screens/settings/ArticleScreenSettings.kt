@@ -2,9 +2,11 @@ package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -24,11 +25,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.HubsRow
 import kotlinx.coroutines.Dispatchers
@@ -74,7 +74,7 @@ fun ArticleScreenSettingsScreen(
     BottomSheetScaffold(
         scaffoldState = state,
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 title = {
                     Text(text = "Публикация")
                 },

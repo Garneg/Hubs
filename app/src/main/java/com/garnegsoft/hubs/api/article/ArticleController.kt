@@ -117,7 +117,7 @@ class ArticleController {
                         com.garnegsoft.hubs.api.article.Article.Author(
                             alias = it.author!!.alias,
                             fullname = it.author!!.fullname,
-                            avatarUrl = it.author!!.avatarUrl,
+                            avatarUrl = it.author!!.avatarUrl!!,
                         )
                     } else {
                         null
@@ -215,7 +215,7 @@ class ArticleController {
                         com.garnegsoft.hubs.api.article.Article.Author(
                             alias = formatted.author!!.alias,
                             fullname = formatted.author!!.fullname,
-                            avatarUrl = formatted.author!!.avatarUrl,
+                            avatarUrl = formatted.author!!.avatarUrl!!,
                         )
                     },
                     statistics = com.garnegsoft.hubs.api.article.Article.Statistics(
@@ -293,9 +293,11 @@ class ArticleController {
                 )
             )
         }
-        
-        
-        
+
+
+        /**
+         * @return true on success, otherwise false
+         */
         fun addToBookmarks(id: Int, isNews: Boolean): Boolean {
             val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
             val response = HabrApi.post(path)
@@ -304,6 +306,9 @@ class ArticleController {
             return true
         }
 
+        /**
+         * @return true on success, otherwise false
+         */
         fun removeFromBookmarks(id: Int, isNews: Boolean): Boolean {
             val path = if (isNews) "news/$id/bookmarks" else "articles/$id/bookmarks"
             

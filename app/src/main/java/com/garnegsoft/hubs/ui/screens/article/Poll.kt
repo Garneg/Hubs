@@ -15,15 +15,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.ui.theme.HubsTheme
 
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -39,7 +35,7 @@ fun Poll(
 	}
 	
 	Column(
-		verticalArrangement = Arrangement.spacedBy(16.dp),
+		verticalArrangement = Arrangement.spacedBy(12.dp),
 		modifier = Modifier.background(if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background)
 	) {
 		Text(
@@ -194,7 +190,7 @@ fun PollItem(
 				)
 				if (data.selected) {
 					Icon(
-						modifier = Modifier.size(18.dp),
+						modifier = Modifier.padding(start = 4.dp).size(18.dp),
 						imageVector = Icons.Default.Done,
 						contentDescription = null,
 						tint = colors.secondaryVariant

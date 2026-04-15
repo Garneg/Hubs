@@ -2,7 +2,6 @@ package com.garnegsoft.hubs.api.article.offline
 
 import android.content.Context
 import androidx.room.*
-import androidx.room.migration.Migration
 import kotlinx.coroutines.flow.Flow
 
 

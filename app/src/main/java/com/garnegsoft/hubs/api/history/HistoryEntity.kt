@@ -1,22 +1,12 @@
 package com.garnegsoft.hubs.api.history
 
 import android.content.Context
-import androidx.room.ColumnInfo
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Delete
-import androidx.room.Entity
-import androidx.room.Ignore
-import androidx.room.PrimaryKey
-import androidx.room.Query
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.Upsert
-import com.garnegsoft.hubs.api.HabrSnippet
+import androidx.room.*
+import com.garnegsoft.hubs.api.HubsLazyListItem
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.util.Calendar
+import java.util.*
 import kotlin.math.ceil
 
 @Entity(tableName = "history")
@@ -36,7 +26,7 @@ data class HistoryEntity(
 	
 	@PrimaryKey(autoGenerate = true)
 	override val id: Int = 0
-) : HabrSnippet
+) : HubsLazyListItem
 
 enum class HistoryActionType {
 	Undefined,

@@ -3,12 +3,7 @@ package com.garnegsoft.hubs.ui.screens.history
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,13 +13,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.history.HistoryActionType
@@ -32,9 +27,9 @@ import com.garnegsoft.hubs.api.history.HistoryEntityListModel
 import com.garnegsoft.hubs.api.history.getArticle
 import com.garnegsoft.hubs.api.utils.formatFoundationDate
 import com.garnegsoft.hubs.ui.common.BaseHubsLazyColumn
-import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
-import java.util.Calendar
-import java.util.Date
+import com.garnegsoft.hubs.ui.common.combine
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
+import java.util.*
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -56,15 +51,16 @@ fun HistoryLazyColumn(
 	list?.let { data ->
 		
 		BaseHubsLazyColumn(
-			data = data,
+			data = data.list,
 			onScrollEnd = {
 				model.loadNextPage()
 			},
 			lazyList = { state ->
-				ArticleCardStyle.defaultArticleCardStyle()?.let {
+				ArticleCardConfiguration.defaultArticleCardStyle()?.let {
 					LazyColumn(
 						state = state,
-						contentPadding = PaddingValues(8.dp),
+						contentPadding = PaddingValues(8.dp)
+							.combine(WindowInsets.navigationBars.asPaddingValues(), LocalLayoutDirection.current),
 						verticalArrangement = Arrangement.spacedBy(8.dp)
 					) {
 						var lastDay = 0

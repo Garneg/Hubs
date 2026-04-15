@@ -1,10 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import android.graphics.Paint.Align
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,35 +10,32 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.layout.MeasurePolicy
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.comment.Comment
 import com.garnegsoft.hubs.api.utils.htmlBlocksToText
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.ui.screens.article.VotesCountIndicator
+import com.garnegsoft.hubs.ui.screens.article.toVotesCountIndicatorData
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.delay
-import org.jsoup.Jsoup
+
+
+const val COMMENT_ITEM_GREAT_PADDING = 16
+const val COMMENT_ITEM_SMALL_PADDING = 8
 
 @Composable
 fun CommentItem(
@@ -80,10 +72,13 @@ fun CommentItem(
 			.fillMaxWidth()
 			.clip(RoundedCornerShape(26.dp))
 			.background(MaterialTheme.colors.surface)
-			.padding(16.dp)
 	) {
+		Spacer(modifier = Modifier.height(COMMENT_ITEM_GREAT_PADDING.dp))
 		if (isPinned) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
+			Row(
+				modifier = Modifier.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				Text(
 					text = "Закреплённый комментарий",
 					fontSize = 14.sp,
@@ -101,6 +96,7 @@ fun CommentItem(
 		parentComment?.let {
 			Row(
 				modifier = Modifier
+					.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp)
 					.fillMaxWidth()
 					.height(IntrinsicSize.Max)
 					.clip(RoundedCornerShape(2.dp))
@@ -147,7 +143,11 @@ fun CommentItem(
 			
 			Spacer(modifier = Modifier.height(8.dp))
 		}
-		Row(verticalAlignment = Alignment.CenterVertically) {
+
+		// Author of the comment
+		Row(
+			modifier = Modifier.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp),
+			verticalAlignment = Alignment.CenterVertically) {
 			Row(
 				verticalAlignment = Alignment.CenterVertically,
 				modifier = Modifier
@@ -201,41 +201,29 @@ fun CommentItem(
 			}
 		}
 		Spacer(modifier = Modifier.height(4.dp))
-		
-		content.invoke()
-		
-		Spacer(modifier = Modifier.height(4.dp))
+		Box(modifier = Modifier.padding(horizontal = COMMENT_ITEM_GREAT_PADDING.dp)) {
+			content.invoke()
+		}
+
+		//Spacer(modifier = Modifier.height(4.dp))
 		val statisticsColor =
 			if (MaterialTheme.colors.isLight)
 				MaterialTheme.colors.onSurface.copy(0.75f)
 			else
 				MaterialTheme.colors.onSurface.copy(0.5f)
+
+		// Statistics bar
 		if (comment.score != null) {
-			Row(verticalAlignment = Alignment.CenterVertically) {
+			Row(
+				modifier = Modifier.padding(COMMENT_ITEM_SMALL_PADDING.dp),
+				verticalAlignment = Alignment.CenterVertically
+			) {
 				Row(
 					modifier = Modifier.weight(1f),
 					verticalAlignment = Alignment.CenterVertically,
 				) {
 					
-					val densityFactor = LocalDensity.current.density
-					
-					val positionProvider = remember(densityFactor) {
-						object : PopupPositionProvider {
-							override fun calculatePosition(
-								anchorBounds: IntRect,
-								windowSize: IntSize,
-								layoutDirection: LayoutDirection,
-								popupContentSize: IntSize
-							): IntOffset {
-								return IntOffset(
-									(anchorBounds.left - (24 * densityFactor)).toInt(),
-									anchorBounds.top - popupContentSize.height + (8 * densityFactor).toInt()
-								)
-							}
-							
-						}
-					}
-					
+
 					var showVotesCounter by remember { mutableStateOf(false) }
 					var visible by remember { mutableStateOf(false) }
 					LaunchedEffect(key1 = showVotesCounter, block = {
@@ -250,57 +238,26 @@ fun CommentItem(
 						}
 						
 					})
-					val offset by animateFloatAsState(
-						targetValue = if (visible) 0f else 8f,
-						animationSpec = tween(150)
-					)
-					val alpha by animateFloatAsState(
-						targetValue = if (visible) 1f else 0.0f,
-						animationSpec = tween(150)
-					)
-					
+
+					// score indicator button
 					Box() {
-						IconButton(onClick = { showVotesCounter = !showVotesCounter }) {
-							if (showVotesCounter) {
-								Popup(
-									properties = PopupProperties(focusable = true),
-									popupPositionProvider = positionProvider,
-									onDismissRequest = { visible = false }
-								) {
-									Surface(
-										modifier = Modifier
-											.offset(0.dp, offset.dp)
-											.alpha(alpha)
-											.padding(16.dp),
-										shape = RoundedCornerShape(8.dp),
-										color = MaterialTheme.colors.surface,
-										elevation = 4.dp
-									) {
-										Box(
-											modifier = Modifier.padding(8.dp)
-										) {
-											comment.votesCount?.let {
-												val votesMinus =
-													(comment.votesCount - comment.score) / 2
-												val votesPlus = comment.votesCount - votesMinus
-												
-												Text(
-													text = "Всего голосов " +
-														"${comment.votesCount}: " +
-														"￪${votesPlus} и " +
-														"￬${votesMinus}",
-													color = statisticsColor
-												)
-												
-											}
-										}
-									}
-									
-									
-								}
-								
-								
+						Box(
+							modifier = Modifier
+								.clip(RoundedCornerShape(9.dp, 9.dp, 9.dp, 18.dp))
+								.clickable { showVotesCounter = !showVotesCounter }
+								.padding(horizontal = 8.dp, vertical = 12.dp)
+						) {
+							comment.votesCount?.let {
+								VotesCountIndicator(
+									data = remember { comment.toVotesCountIndicatorData()!! },
+									show = showVotesCounter,
+									color = statisticsColor,
+									textStyle = LocalTextStyle.current,
+									popupOffset = DpOffset((-12).dp, (-4).dp),
+									onDismiss = { showVotesCounter = false }
+								)
 							}
+
 							
 							Row(verticalAlignment = Alignment.CenterVertically) {
 								Icon(
@@ -328,24 +285,37 @@ fun CommentItem(
 					}
 					
 				}
-				
+
+				// Share button
 				Row(
 					verticalAlignment = Alignment.CenterVertically
 				) {
-					
-					IconButton(onClick = onShare) {
+					Box(
+						modifier = Modifier
+							.clip(RoundedCornerShape(9.dp))
+							.clickable(onClick = onShare)
+							.padding(horizontal = 16.dp, vertical = 8.dp)
+							.padding(2.dp)
+					) {
 						Icon(
 							modifier = Modifier.size(20.dp),
 							imageVector = Icons.Outlined.Share,
-							contentDescription = "",
+							contentDescription = "Поделиться",
 							tint = statisticsColor
 						)
 					}
 					
 				}
-				
+
+				Spacer(modifier = Modifier.width(4.dp))
+
 				if (showReplyButton && !isPinned) {
-					IconButton(onClick = onReplyClick) {
+					Box (
+						modifier = Modifier
+							.clip(RoundedCornerShape(9.dp, 9.dp, 18.dp, 9.dp))
+							.clickable(onClick = onReplyClick)
+							.padding(horizontal = 16.dp, vertical = 8.dp)
+					) {
 						Icon(
 							painter = replyIconPainter,
 							contentDescription = "",

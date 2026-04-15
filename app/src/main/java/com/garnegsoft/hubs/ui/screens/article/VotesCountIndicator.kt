@@ -1,6 +1,8 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -17,22 +19,49 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.comment.Comment
+
+
+data class VotesCountIndicatorData(
+	val votesCount: Int,
+	val votesUp: Int,
+	val votesDown: Int
+)
+
+fun Article.Statistics.toVotesCountIndicatorData(): VotesCountIndicatorData {
+	return VotesCountIndicatorData(
+		votesCount = votesCountPlus + votesCountMinus,
+		votesUp = votesCountPlus,
+		votesDown = votesCountMinus
+	)
+}
+
+fun Comment.toVotesCountIndicatorData(): VotesCountIndicatorData? {
+	return votesCount?.let {
+		VotesCountIndicatorData(
+			votesCount = votesCount,
+			votesUp = votesCount - ((votesCount - score!!) / 2),
+			votesDown = (votesCount - score) / 2
+		)
+	}
+}
 
 
 @Composable
 fun VotesCountIndicator(
 	show: Boolean,
-	stats: Article.Statistics,
+	data: VotesCountIndicatorData,
 	color: Color,
+	textStyle: TextStyle = TextStyle.Default.copy(fontWeight = FontWeight.W500),
 	onDismiss: () -> Unit,
+	popupOffset: DpOffset = DpOffset.Zero,
 ) {
 	val positionProvider = object : PopupPositionProvider {
 		override fun calculatePosition(
@@ -49,9 +78,13 @@ fun VotesCountIndicator(
 		
 	}
 	val transition = updateTransition(targetState = show)
-	val offset by transition.animateFloat{
-		if (it) 0f else 8f
+	val offset by transition.animateFloat(
+		transitionSpec = { tween(250, easing = EaseOutQuint) }
+	){
+		if (it) 0f else 12f
 	}
+
+
 	
 	val alpha by transition.animateFloat{
 		if (it) 1f else 0.0f
@@ -60,24 +93,33 @@ fun VotesCountIndicator(
 	if (show || transition.currentState) {
 		Popup(
 			popupPositionProvider = positionProvider,
+			properties = PopupProperties(
+				focusable = false,
+				dismissOnBackPress = false,
+				dismissOnClickOutside = true,
+				clippingEnabled = false,
+			),
 			onDismissRequest = onDismiss
 		) {
 			Box(
 				modifier = Modifier
-					.offset(0.dp, offset.dp)
+					.offset {
+						IntOffset(popupOffset.x.roundToPx(), (offset.dp + popupOffset.y).roundToPx())
+					}
 					.alpha(alpha)
-					.padding(2.dp)
+					.padding(3.dp)
 					.shadow(1.5.dp, shape = RoundedCornerShape(8.dp))
 					.clip(RoundedCornerShape(8.dp))
 					.border(width = 0.5.dp, color = MaterialTheme.colors.onSurface.copy(0.1f), shape = RoundedCornerShape(8.dp))
 					.background(MaterialTheme.colors.surface)
-					.padding(8.dp)
+					.padding(vertical = 8.dp, horizontal = 12.dp)
 			) {
 				Text(
 					text = "Всего голосов " +
-						"${stats.votesCountMinus + stats.votesCountPlus}: " +
-						"￪${stats.votesCountPlus} и " +
-						"￬${stats.votesCountMinus}",
+						"${data.votesCount}: " +
+						"￪${data.votesUp} и " +
+						"￬${data.votesDown}",
+					style = textStyle,
 					color = color
 				)
 			}

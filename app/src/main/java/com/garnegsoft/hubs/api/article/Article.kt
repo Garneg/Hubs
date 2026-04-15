@@ -2,8 +2,8 @@ package com.garnegsoft.hubs.api.article
 
 import com.garnegsoft.hubs.api.ArticleFormat
 import com.garnegsoft.hubs.api.EditorVersion
-import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.PostType
+import com.garnegsoft.hubs.api.PublicationComplexity
 
 
 /**
@@ -55,7 +55,7 @@ data class Article(
     data class Author(
         val alias: String,
         val fullname: String? = null,
-        val avatarUrl: String? = null,
+        val avatarUrl: String,
     )
 
     /**

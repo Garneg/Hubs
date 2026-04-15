@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.util.Log
-import androidx.core.app.NotificationCompat
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkerParameters
@@ -17,11 +16,10 @@ import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
-import java.util.Calendar
+import java.util.*
 
 class MeDataUpdateWorker(
 	appContext: Context,

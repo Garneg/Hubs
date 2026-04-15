@@ -1,9 +1,10 @@
 package com.garnegsoft.hubs.api.article
 
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -15,7 +16,7 @@ abstract class AbstractSnippetListModel<S>(
         open val baseArgs: Map<String, String>,
         initialFilter: Filter? = null,
         open val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.Default),
-) : HabrSnippetListModel<S> where S : HabrSnippet {
+) : HabrSnippetListModel<S> where S : HubsLazyListItem {
 
     private var _filter: MutableLiveData<Filter?> = MutableLiveData(initialFilter)
     val filter: LiveData<Filter?> get() = _filter
@@ -97,7 +98,7 @@ abstract class AbstractSnippetListModel<S>(
 }
 
 
-interface HabrSnippetListModel<T> where T : HabrSnippet {
+interface HabrSnippetListModel<T> where T : HubsLazyListItem {
     val data: LiveData<HabrList<T>?>
 
     val lastLoadedPage: LiveData<Int>

@@ -4,8 +4,8 @@ import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.HabrList
 import com.garnegsoft.hubs.api.article.Article
-import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.Comment
+import com.garnegsoft.hubs.api.comment.CommentsCollection
 import com.garnegsoft.hubs.api.comment.ThreadSnippet
 import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.utils.formatTime
@@ -23,6 +23,7 @@ class CommentsListController {
     companion object {
         private fun get(path: String, args: Map<String, String>? = null): CommentsList? {
             var response = HabrApi.get(path, args)
+
             var customJson = Json { ignoreUnknownKeys = true }
             if (response?.body != null) {
                 var responseJson = Json.parseToJsonElement(response.body!!.string())
@@ -195,7 +196,7 @@ class CommentsListController {
                     level = comment.level,
                     author = Article.Author(
                         alias = "",
-                        avatarUrl = null,
+                        avatarUrl = "",
                         fullname = null
                     ),
                     publishedTime = comment.timePublished,
@@ -216,7 +217,7 @@ class CommentsListController {
                 level = comment.level,
                 author = Article.Author(
                     alias = comment.author!!.alias!!,
-                    avatarUrl = comment.author?.avatarUrl,
+                    avatarUrl = comment.author?.avatarUrl!!,
                     fullname = comment.author!!.fullname
                 ),
                 publishedTime = comment.timePublished,
@@ -260,7 +261,7 @@ class CommentsListController {
                                     author = Article.Author(
                                         alias = it.author!!.alias!!,
                                         fullname = it.author!!.fullname,
-                                        avatarUrl = it.author!!.avatarUrl,
+                                        avatarUrl = it.author!!.avatarUrl!!,
                                     )
                                 )
                             )

@@ -17,13 +17,15 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.garnegsoft.hubs.api.HabrList
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 
 @Composable
-fun <T : HabrSnippet> LazyHabrSnippetsColumn(
-    data: HabrList<T>,
+fun <T : HubsLazyListItem> LazyHabrSnippetsColumn(
+    data: List<T>,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(8.dp),
@@ -57,11 +59,11 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
                             val consumed = scrollBy(delta)
                             lastValue = value
                             lastVelocity = velocity
-                    
+
                             if (consumed == 0f)
                                 cancelAnimation()
                         }
-                
+
                         return lastVelocity
                     }
                 },
@@ -70,10 +72,14 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
                 horizontalAlignment = horizontalAlignment
             ) {
                 items(
-                    items = data.list,
+                    items = data,
                     key = { it.id },
                 ) {
-                    snippet(it)
+                    Box(
+                        modifier = Modifier.animateItem()
+                    ) {
+                        snippet(it)
+                    }
                 }
                 nextPageLoadingIndicator?.let {
                     item {
@@ -86,10 +92,19 @@ fun <T : HabrSnippet> LazyHabrSnippetsColumn(
     
 }
 
+fun PaddingValues.combine(paddingValues: PaddingValues, layoutDirection: LayoutDirection): PaddingValues {
+    return PaddingValues(
+        start = this.calculateStartPadding(layoutDirection) + paddingValues.calculateStartPadding(layoutDirection),
+        end = this.calculateEndPadding(layoutDirection) + paddingValues.calculateEndPadding(layoutDirection),
+        top = this.calculateTopPadding() + paddingValues.calculateTopPadding(),
+        bottom = this.calculateBottomPadding() + paddingValues.calculateBottomPadding()
+    )
+}
+
 // Most simple lazy column that notifies about scroll end
 @Composable
-fun <T : HabrSnippet> BaseHubsLazyColumn(
-    data: HabrList<T>,
+fun <T : HubsLazyListItem> BaseHubsLazyColumn(
+    data: List<T>,
     onScrollEnd: () -> Unit,
     lazyList: @Composable (state: LazyListState) -> Unit,
     lazyListState: LazyListState,
@@ -98,14 +113,14 @@ fun <T : HabrSnippet> BaseHubsLazyColumn(
     val isLastDerived by remember {
         derivedStateOf {
             // will work only if controller loads more than 8 snippets per page
-            if (data.list.size > 8 && lazyListState.layoutInfo.totalItemsCount > 8)
+            if (data.size > 8 && lazyListState.layoutInfo.totalItemsCount > 8)
                 lazyListState.layoutInfo.totalItemsCount - 7 <= lazyListState.layoutInfo.visibleItemsInfo.last().index
             else
                 false
         }
     }
-    var doPageLoad by remember(data.list.firstOrNull()?.id) { mutableStateOf(true) }
-    LaunchedEffect(key1 = isLastDerived, data.list.firstOrNull()?.id) {
+    var doPageLoad by remember(data.firstOrNull()?.id) { mutableStateOf(true) }
+    LaunchedEffect(key1 = isLastDerived, data.firstOrNull()?.id) {
         if (isLastDerived && doPageLoad) {
             doPageLoad = false
             onScrollEnd()
@@ -118,9 +133,11 @@ fun <T : HabrSnippet> BaseHubsLazyColumn(
     lazyList(lazyListState)
 }
 
+
+
 @Composable
 @SuppressLint("ModifierParameter")
-fun <T : HabrSnippet> PagedHabrSnippetsColumn(
+fun <T : HubsLazyListItem> PagedHabrSnippetsColumn(
     data: HabrList<T>,
     modifier: Modifier = Modifier.fillMaxSize(),
     lazyListState: LazyListState = rememberLazyListState(),
@@ -139,7 +156,7 @@ fun <T : HabrSnippet> PagedHabrSnippetsColumn(
     snippet: @Composable (T) -> Unit,
 ) {
     LazyHabrSnippetsColumn(
-        data = data,
+        data = data.list,
         modifier = modifier,
         lazyListState = lazyListState,
         contentPadding = contentPadding,

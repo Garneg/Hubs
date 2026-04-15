@@ -8,11 +8,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -31,9 +27,10 @@ import com.garnegsoft.hubs.api.AsyncGifImage
 import com.garnegsoft.hubs.api.article.offline.OfflineArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardStyle
+import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -41,7 +38,7 @@ fun OfflineArticleCard(
 	article: OfflineArticleSnippet,
 	onClick: () -> Unit,
 	onDelete: () -> Unit,
-	style: ArticleCardStyle
+	style: ArticleCardConfiguration
 ) {
 	var showDeleteButton by rememberSaveable { mutableStateOf(false) }
 	val haptic = LocalHapticFeedback.current

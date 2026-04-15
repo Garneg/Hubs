@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.common.feedCards.user
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,13 +8,16 @@ import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,14 +27,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.api.user.list.UserSnippet
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 
 
 data class UserCardStyle(
     val backgroundColor: Color = Color.White,
-    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W700),
+    val aliasTextStyle: TextStyle = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.W600),
     val avatarSize: Dp = 40.dp,
     val avatarShape: Shape = RoundedCornerShape(10.dp),
     val cardShape: Shape = RoundedCornerShape(26.dp),
@@ -42,7 +42,7 @@ data class UserCardStyle(
 )
 
 @Composable
-private fun defaultUserCardStyle(): UserCardStyle {
+fun defaultUserCardStyle(): UserCardStyle {
     return UserCardStyle(
         backgroundColor = MaterialTheme.colors.surface,
         specialityTextStyle = TextStyle(color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled))
@@ -51,15 +51,27 @@ private fun defaultUserCardStyle(): UserCardStyle {
 
 @Composable
 fun UserCard(
-	user: UserSnippet,
-	style: UserCardStyle = defaultUserCardStyle(),
-	indicator: @Composable () -> Unit = {
-        Text(text = user.rating.toString(), fontWeight = FontWeight.W400, color = DefaultRatingIndicatorColor)
+    user: UserSnippet,
+    modifier: Modifier = Modifier,
+    style: UserCardStyle = defaultUserCardStyle(),
+    indicator: @Composable () -> Unit = {
+        Row {
+            Icon(modifier = Modifier.size(18.dp).rotate(-90f),
+                imageVector = Icons.Sharp.ArrowForward,
+                tint = DefaultRatingIndicatorColor,
+                contentDescription = null)
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(
+                text = user.rating.toString(),
+                fontWeight = FontWeight.W400,
+                color = DefaultRatingIndicatorColor
+            )
+        }
     },
-	onClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Max)
             .clip(shape = style.cardShape)
@@ -68,28 +80,14 @@ fun UserCard(
             .padding(style.padding),
         verticalAlignment = if (style.showSpeciality && user.speciality != null) Alignment.Top else Alignment.CenterVertically
     ) {
-        if (user.avatarUrl != null) {
-            AsyncImage(
-                modifier = Modifier
-                    .size(size = style.avatarSize)
-                    .clip(shape = style.avatarShape)
-                    .background(Color.White, shape = style.avatarShape),
-                model = user.avatarUrl,
-                contentDescription = ""
-            )
-        } else {
-            Icon(
-                modifier = Modifier
-                    .size(style.avatarSize)
-                    .background(Color.White, shape = style.avatarShape)
-                    .border(2.3.dp, color = placeholderColorLegacy(user.alias), shape = style.avatarShape)
-                    .padding(3.dp),
-                painter = painterResource(id = R.drawable.user_avatar_placeholder),
-                contentDescription = "",
-                tint = placeholderColorLegacy(user.alias)
-            )
-
-        }
+        AsyncImage(
+            modifier = Modifier
+                .size(size = style.avatarSize)
+                .clip(shape = style.avatarShape)
+                .background(Color.White, shape = style.avatarShape as RoundedCornerShape),
+            model = user.avatarUrl,
+            contentDescription = ""
+        )
         Spacer(modifier = Modifier.width(style.padding.calculateStartPadding(LayoutDirection.Ltr)))
         Column(modifier = Modifier.weight(1f)) {
 
@@ -108,8 +106,7 @@ fun UserCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-            }
-            else {
+            } else {
                 Text(
                     modifier = Modifier.offset(0.dp, 0.dp),
                     text = user.alias,
@@ -117,7 +114,12 @@ fun UserCard(
                 )
             }
         }
-        Box(modifier = Modifier.padding(start = 4.dp).fillMaxHeight(), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .padding(start = style.padding.calculateEndPadding(LocalLayoutDirection.current))
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
             indicator()
 
         }

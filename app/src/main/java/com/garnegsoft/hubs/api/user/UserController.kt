@@ -188,13 +188,12 @@ class UserController {
 		 * @return Whether user is blocklisted or not after this request or null if request failed
 		 */
 		fun blockListToggle(
-			alias: String,
-			args: Map<String, String>? = null
-		): Boolean? {
+			alias: String
+		): Boolean {
 			val response = HabrApi.post("users/$alias/blacklist/toggle")
 			return response?.body?.let {
 				Json.parseToJsonElement(it.string()).jsonObject["isBlocked"]?.jsonPrimitive?.boolean
-			}
+			} ?: throw UnsupportedOperationException("User is not authorized")
 		}
 		
 		

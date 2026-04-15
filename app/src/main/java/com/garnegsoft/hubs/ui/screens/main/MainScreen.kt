@@ -4,36 +4,53 @@ package com.garnegsoft.hubs.ui.screens.main
 import ArticleController
 import android.content.Context
 import android.net.ConnectivityManager
-import android.util.Log
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.displayCutout
+import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.*
-import androidx.compose.ui.draw.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.FilterSavingController
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
-import com.garnegsoft.hubs.ui.common.*
+import com.garnegsoft.hubs.api.utils.checkAppCanOpenLinks
+import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
+import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.HubsListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.InetSocketAddress
 import java.net.Socket
@@ -44,6 +61,7 @@ import java.net.Socket
 fun MainScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
     onArticleClicked: (articleId: Int) -> Unit,
+    onSubscriptionsClicked: () -> Unit,
     onSearchClicked: () -> Unit,
     onCommentsClicked: (articleId: Int) -> Unit,
     onUserClicked: (alias: String) -> Unit,
@@ -51,10 +69,11 @@ fun MainScreen(
     onHubClicked: (alias: String) -> Unit,
     onSavedArticles: () -> Unit,
     menu: @Composable () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
-    var isAuthorized by rememberSaveable { mutableStateOf(false) }
+    var isAuthorized by rememberSaveable { mutableStateOf<Boolean?>(null) }
     val authorizedState by AuthDataController.isAuthorizedFlow(context)
         .collectAsState(initial = null)
 
@@ -63,6 +82,48 @@ fun MainScreen(
             isAuthorized = it
         }
     })
+
+
+    // TODO: Move it to its own file so it won't bother when refactoring main screen 
+    // Kinda ugly, isn't it? Have to come up with something better next time when building things
+    val showSetOpenUrlByDefaultDialogPreference by collectPreferenceAsState(
+        HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog
+    )
+
+    // allows/disallows launched effect check values and show dialog (works as cache)
+    var setOpenByDefaultDialogShown by rememberSaveable { mutableStateOf(false) }
+
+    // actually shows dialog
+    var showSetOpenByDefaultDialog by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(showSetOpenUrlByDefaultDialogPreference) {
+        if (!setOpenByDefaultDialogShown && showSetOpenUrlByDefaultDialogPreference == true && !checkAppCanOpenLinks(
+                context
+            )
+        ) {
+            showSetOpenByDefaultDialog = true
+            setOpenByDefaultDialogShown = true
+        }
+    }
+
+    if (showSetOpenByDefaultDialog) {
+        HandleUrlByDefaultAdviceDialog(
+            onDismissRequest = {
+                showSetOpenByDefaultDialog = false
+            },
+            onNeverShowAgain = {
+                showSetOpenByDefaultDialog = false
+                coroutineScope.launch {
+                    HubsDataStore.applicationFlags.edit(
+                        context,
+                        HubsDataStore.applicationFlags.ShowSetOpenUrlByDefaultDialog,
+                        false
+                    )
+                }
+            },
+            onRedirectedToSettings = {
+                showSetOpenByDefaultDialog = false
+            })
+    }
 
     val viewModel = viewModel<MainScreenViewModel>(viewModelStoreOwner = viewModelStoreOwner) {
         // todo: Replace runblocking with something better as it probably slows down initialization of main screen
@@ -121,19 +182,15 @@ fun MainScreen(
     })
 
     Scaffold(
+        modifier = modifier,
         topBar = {
-            TopAppBar(
+            HubsTopAppBar(
                 elevation = 0.dp,
-                title = {
-                    Text(
-                        text = "Хабы"
-                    )
-                },
+                title = { Text(text = "Хабы") },
                 actions = {
                     IconButton(
-                        onClick = {
-                            onSearchClicked()
-                        }) {
+                        onClick = { onSearchClicked() }
+                    ) {
                         Icon(
                             modifier = Modifier
                                 .size(20.dp),
@@ -147,14 +204,21 @@ fun MainScreen(
         },
         scaffoldState = scaffoldState,
         snackbarHost = {
-            SnackbarHost(hostState = it) {
+            SnackbarHost(
+                modifier = Modifier.safeDrawingPadding(),
+                hostState = it
+            ) {
                 ContinueReadSnackBar(data = it)
             }
         }
     ) {
-        if (authorizedState != null)
+        if (isAuthorized != null)
             Column(
-                Modifier.padding(it)
+                Modifier
+                    .padding(it)
+                    .padding(
+                        WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal).asPaddingValues(),
+                    )
             ) {
 
                 val myFeedLazyListState = rememberLazyListState()
@@ -171,9 +235,32 @@ fun MainScreen(
                 val companiesLazyListState = rememberLazyListState()
 
 
-                val pages = remember(key1 = isAuthorized) {
-                    var map = mapOf<String, @Composable () -> Unit>(
-                        "Статьи" to {
+                val pages = remember(isAuthorized) {
+                    buildMap<String, @Composable () -> Unit> {
+                        if (isAuthorized == true) {
+                            put("Моя лента", {
+                                ArticlesListPageWithFilter(
+                                    listModel = viewModel.myFeedArticlesListModel,
+                                    collapsingContentState = myFeedFilterContentState,
+                                    lazyListState = myFeedLazyListState,
+                                    onArticleSnippetClick = onArticleClicked,
+                                    onArticleAuthorClick = onUserClicked,
+                                    onArticleCommentsClick = onCommentsClicked
+                                ) { defaultValues, onDismiss, onDone ->
+                                    MyFeedFilter(
+                                        defaultValues = defaultValues,
+                                        onDismiss = onDismiss,
+                                        onDone = {
+                                            coroutineScope.launch(Dispatchers.IO) {
+                                                FilterSavingController.saveMyFeedFilter(context, it)
+                                            }
+                                            onDone(it)
+                                        }
+                                    )
+                                }
+                            })
+                        }
+                        put("Статьи", {
                             ArticlesListPageWithFilter(
                                 listModel = viewModel.articlesListModel,
                                 lazyListState = articlesLazyListState,
@@ -182,7 +269,8 @@ fun MainScreen(
                                 onArticleAuthorClick = onUserClicked,
                                 onArticleCommentsClick = onCommentsClicked,
                                 filterDialog = { defVals, onDissmis, onDone ->
-                                    ArticlesFilterDialog(defVals, onDissmis,
+                                    ArticlesFilterDialog(
+                                        defVals, onDissmis,
                                         onDone = {
                                             coroutineScope.launch(Dispatchers.IO) {
                                                 FilterSavingController.saveArticlesFilter(
@@ -194,8 +282,8 @@ fun MainScreen(
                                         })
                                 }
                             )
-                        },
-                        "Новости" to {
+                        })
+                        put("Новости", {
                             ArticlesListPageWithFilter(
                                 listModel = viewModel.newsListModel,
                                 lazyListState = newsLazyListState,
@@ -216,53 +304,29 @@ fun MainScreen(
                                     )
                                 }
                             )
-                        },
-                        "Хабы" to {
+                        })
+                        put("Хабы", {
                             HubsListPage(
                                 listModel = viewModel.hubsListModel,
                                 lazyListState = hubsLazyListState,
                                 onHubClick = onHubClicked
                             )
-                        },
-                        "Авторы" to {
+                        })
+                        put("Авторы", {
                             UsersListPage(
                                 listModel = viewModel.authorsListModel,
                                 lazyListState = authorsLazyListState,
                                 onUserClick = onUserClicked
                             )
-                        },
-                        "Компании" to {
+                        })
+                        put("Компании", {
                             CompaniesListPage(
                                 listModel = viewModel.companiesListModel,
                                 lazyListState = companiesLazyListState,
                                 onCompanyClick = onCompanyClicked
                             )
-                        }
-                    )
-                    if (isAuthorized) map =
-                        mapOf<String, @Composable () -> Unit>(
-                            "Моя лента" to {
-                                ArticlesListPageWithFilter(
-                                    listModel = viewModel.myFeedArticlesListModel,
-                                    collapsingContentState = myFeedFilterContentState,
-                                    lazyListState = myFeedLazyListState,
-                                    onArticleSnippetClick = onArticleClicked,
-                                    onArticleAuthorClick = onUserClicked,
-                                    onArticleCommentsClick = onCommentsClicked
-                                ) { defaultValues, onDismiss, onDone ->
-                                    MyFeedFilter(
-                                        defaultValues = defaultValues,
-                                        onDismiss = onDismiss,
-                                        onDone = {
-                                            coroutineScope.launch(Dispatchers.IO) {
-                                                FilterSavingController.saveMyFeedFilter(context, it)
-                                            }
-                                            onDone(it)
-                                        }
-                                    )
-                                }
-                            }) + map
-                    map
+                        })
+                    }
                 }
                 val pagerState = rememberPagerState { pages.size }
 
@@ -314,6 +378,7 @@ fun MainScreen(
                         })
                     HorizontalPager(
                         state = pagerState,
+                        key = { pages.keys.elementAt(it) }
                     ) {
                         pages.values.elementAt(it)()
 

@@ -1,7 +1,5 @@
 package com.garnegsoft.hubs.api
 
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -19,6 +17,24 @@ class HabrDataParser<T> {
 
         inline fun <reified T> parseJson(jsonElement: JsonElement, json: Json): T {
             return json.decodeFromJsonElement(jsonElement)
+
+        }
+
+        inline fun <reified T> parseJsonOrNull(json: String): T? {
+            return try {
+                parseJson(json)
+            } catch (ex: Exception) {
+                null
+            }
+        }
+
+        inline fun <reified T> parseJsonResult(json: String): Result<T> {
+            return try {
+                val result = parseJson<T>(json)
+                Result.success(result)
+            } catch (ex: Exception) {
+                Result.failure(ex)
+            }
         }
     }
 }

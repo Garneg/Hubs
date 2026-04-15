@@ -4,15 +4,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.sharp.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.SpanStyle
@@ -41,18 +45,26 @@ fun defaultHubCardStyle(): HubCardStyle {
 @Composable
 fun HubCard(
 	hub: HubSnippet,
+    modifier: Modifier = Modifier,
 	style: HubCardStyle = defaultHubCardStyle(),
 	onClick: () -> Unit,
 	indicator: @Composable (hub: HubSnippet) -> Unit = {
-        Text(
-            text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
-            fontWeight = FontWeight.W400,
-            color = DefaultRatingIndicatorColor
-        )
+        Row {
+            Icon(modifier = Modifier.size(18.dp).rotate(-90f),
+                imageVector = Icons.Sharp.ArrowForward,
+                tint = DefaultRatingIndicatorColor,
+                contentDescription = null)
+            Spacer(modifier = Modifier.width(2.dp))
+            Text(
+                text = String.format("%.1f", hub.statistics.rating).replace(',', '.'),
+                fontWeight = FontWeight.W400,
+                color = DefaultRatingIndicatorColor
+            )
+        }
     }
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             //.height(IntrinsicSize.Max)
             .clip(style.shape)
@@ -89,7 +101,7 @@ fun HubCard(
                             }
                         }
                     }},
-                    style = if (hub.relatedData?.isSubscribed == true) {
+                    style = if (hub.relatedData?.isSubscribed == true && style.showIfUserSubscribed) {
                         style.titleTextStyle.copy(color = HubSubscribedColor)
                     } else { style.titleTextStyle },
                     modifier = Modifier.wrapContentHeight(
@@ -124,7 +136,7 @@ data class HubCardStyle(
     val textColor: Color = Color.Black,
     val titleTextStyle: TextStyle = TextStyle(
         color = textColor,
-        fontWeight = FontWeight.W700,
+        fontWeight = FontWeight.W600,
         fontSize = 20.sp
     ),
     val descriptionTextStyle: TextStyle = TextStyle(
@@ -136,5 +148,6 @@ data class HubCardStyle(
     val shape: Shape = RoundedCornerShape(26.dp),
     val innerPadding: Dp = 16.dp,
     val descriptionMaxLines: Int = 1,
-    val showDescription: Boolean = false
+    val showDescription: Boolean = false,
+    val showIfUserSubscribed: Boolean = true,
 )

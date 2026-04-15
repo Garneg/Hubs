@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.api.company.list
 
-import com.garnegsoft.hubs.api.HabrSnippet
+import com.garnegsoft.hubs.api.HubsLazyListItem
 
 data class CompanySnippet(
 
@@ -18,7 +18,7 @@ data class CompanySnippet(
     
     val relatedData: RelatedData?
 
-) : HabrSnippet {
+) : HubsLazyListItem {
     data class Statistics(
         val rating: Float,
 

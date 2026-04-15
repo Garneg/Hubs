@@ -2,7 +2,7 @@ package com.garnegsoft.hubs.api.me
 
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
-import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
+import com.garnegsoft.hubs.api.utils.processUserAvatar
 import kotlinx.serialization.Serializable
 import okhttp3.CacheControl
 
@@ -17,9 +17,7 @@ class MeController {
             return response.body?.string()?.let {
                 if (it == "null") return Result.success(null) // this means that request were successful, but user is not authorized, so data about them is null
                 val me = HabrDataParser.parseJson<Me>(it)
-                me.avatarUrl = me.avatarUrl?.let {
-                    it.replace("//habrastorage", "https://hsto")
-                } ?: placeholderAvatarUrl(me.alias)
+                me.avatarUrl = processUserAvatar(me.avatarUrl, me.alias)
                 return Result.success(me)
             } ?: Result.failure(Exception("Body was null"))
         }

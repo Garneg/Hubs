@@ -1,0 +1,80 @@
+package com.garnegsoft.hubs.ui.screens.subscriptions
+
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.unit.dp
+import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+
+@Composable
+fun SubscriptionSmallButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
+    subscribed: Boolean,
+    subscribedIcon: Painter = rememberVectorPainter(Icons.Default.Done),
+    notSubscribedIcon: Painter = rememberVectorPainter(Icons.Default.Add)
+) {
+    var buttonClickable by remember {
+        mutableStateOf(true)
+    }
+    val coroutineScope = rememberCoroutineScope()
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(10.dp))
+            .background(animateColorAsState(if (subscribed) HubSubscribedColor else Color.Transparent).value)
+            .border(
+                width = animateDpAsState(if (subscribed) 0.dp else 1.dp).value,
+                color = HubSubscribedColor,
+                shape = RoundedCornerShape(10.dp)
+            )
+            .size(40.dp)
+            .clickable(onClick = {
+                onClick()
+                buttonClickable = false
+                coroutineScope.launch {
+                    delay(200) // just a way of throttle :)
+                    buttonClickable = true
+                }
+            }, enabled = buttonClickable),
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedContent(
+            targetState = subscribed
+        ) {
+            if (it) {
+                Icon(
+                    painter = subscribedIcon,
+                    tint = Color.White,
+                    contentDescription = null
+                )
+            } else {
+                Icon(
+                    painter = notSubscribedIcon,
+                    tint = HubSubscribedColor,
+                    contentDescription = null
+                )
+            }
+        }
+
+    }
+}

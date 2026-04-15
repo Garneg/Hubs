@@ -1,11 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.main
 
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,30 +12,21 @@ import androidx.compose.material.icons.outlined.ExitToApp
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.MenuItem
 
 @Composable
@@ -49,6 +36,7 @@ fun AuthorizedMenu(
 	onArticlesClick: () -> Unit,
 	onCommentsClick: () -> Unit,
 	onBookmarksClick: () -> Unit,
+	onSubscriptionsClick: () -> Unit,
 	onSavedArticlesClick: () -> Unit,
 	onHistoryClick: () -> Unit,
 	onSettingsClick: () -> Unit,
@@ -100,6 +88,16 @@ fun AuthorizedMenu(
 	}
 	
 	val itemsOffset = 20
+
+	val scaleAnimatedValue by menuTransition.animateFloat(
+		transitionSpec = { tween(durationMillis = 150, easing = EaseOutQuint) }
+	) {
+		if (it) 1f else 0.5f
+	}
+
+	val roundedCornersRadiusAnimatedValue by menuTransition.animateDp {
+		if (it) 12.dp else 48.dp
+	}
 	
 	if (menuTransition.targetState || expanded || menuTransition.currentState) {
 		Popup(
@@ -121,13 +119,26 @@ fun AuthorizedMenu(
 			
 			Box(
 				modifier = Modifier
-					.alpha(alpha)
+					.graphicsLayer {
+						this.alpha = alpha
+
+						translationY = -(size.height - (size.height * scaleAnimatedValue))/2
+						translationX = (size.width - (size.width * scaleAnimatedValue))/2
+						scaleX = scaleAnimatedValue
+						scaleY = scaleAnimatedValue
+
+					}
 					.padding(4.dp)
 			) {
 				Surface(
 					modifier = Modifier
-						.shadow(4.dp, RoundedCornerShape(8.dp))
-						.clip(RoundedCornerShape(8.dp))
+						.graphicsLayer {
+							shape = RoundedCornerShape(roundedCornersRadiusAnimatedValue)
+							clip = true
+							shadowElevation = 4.dp.roundToPx().toFloat()
+						}
+//						.shadow(4.dp, RoundedCornerShape(12.dp))
+						.clip(RoundedCornerShape(roundedCornersRadiusAnimatedValue))
 						.background(MaterialTheme.colors.surface),
 					elevation = 4.dp
 				) {
@@ -216,6 +227,22 @@ fun AuthorizedMenu(
 								)
 							}, onClick = {
 								onBookmarksClick()
+								expanded = false
+							}
+						)
+
+						MenuItem(
+							modifier = Modifier.graphicsLayer {
+								this.translationY = -itemsOffset + itemsOffset * itemsAnimation
+								this.alpha = itemsAnimation + 0.35f
+							},
+							title = "Подписки", icon = {
+								Icon(
+									painter = painterResource(id = R.drawable.group),
+									contentDescription = "",
+								)
+							}, onClick = {
+								onSubscriptionsClick()
 								expanded = false
 							}
 						)

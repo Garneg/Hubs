@@ -4,18 +4,14 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.util.Log
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.google.firebase.crashlytics.crashlytics
 import okhttp3.*
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.IOException
-import java.net.ConnectException
-import java.net.InetAddress
-import java.net.InetSocketAddress
-import java.net.Socket
-import java.net.SocketTimeoutException
+import java.net.*
 import java.util.concurrent.TimeUnit
 
 class HabrApi {
@@ -43,11 +39,18 @@ class HabrApi {
                         .build()
                     it.proceed(req)
                 })
+                .addInterceptor {
+                    if (it.request().method != "GET"){
+                        HttpClient.cache?.evictAll()
+                    }
+                    it.proceed(it.request())
+                }
                 .addInterceptor(NoConnectionInterceptor(context))
                 .addInterceptor {
                     Firebase.crashlytics.log("HABRAPI ${it.request().method} url:${it.request().url} requestBody:${it.request().body}")
                     it.proceed(it.request())
                 }
+
                 .build()
 
         }
@@ -61,7 +64,7 @@ class HabrApi {
             path: String,
             args: Map<String, String>? = null, version: Int = 2,
             cacheControl: CacheControl = CacheControl.Builder()
-                .maxStale(1, TimeUnit.MINUTES)
+                .maxStale(3, TimeUnit.MINUTES)
                 .build()
         ): Response? {
             val finalArgs = mutableMapOf("hl" to "ru", "fl" to "ru")
@@ -112,6 +115,7 @@ class HabrApi {
                 .url("$baseAddress/kek/v$version/$path")
                 .addHeader("csrf-token", token ?: "")
                 .build()
+
             try {
                 return HttpClient.newCall(request).execute()
             } catch (ex: Exception) {

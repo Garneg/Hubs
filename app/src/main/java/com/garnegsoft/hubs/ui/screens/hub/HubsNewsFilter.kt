@@ -20,7 +20,6 @@ import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.ui.common.BaseFilterDialog
 import com.garnegsoft.hubs.ui.common.HubsFilterChip
 import com.garnegsoft.hubs.ui.common.TitledColumn
-import java.lang.StringBuilder
 
 @Composable
 fun HubsNewsFilterDialog(

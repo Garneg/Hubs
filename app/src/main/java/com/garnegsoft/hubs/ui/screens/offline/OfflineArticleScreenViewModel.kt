@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.offline
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.SpanStyle
@@ -29,6 +30,7 @@ class OfflineArticleScreenViewModel : ViewModel() {
 			if (dao.exists(id)) {
 				val article = dao.getArticleById(id)
 				_offlineArticle.postValue(article)
+				Log.d("OFFLINE ARTICLE", "Article $id loaded to offline article screen view model")
 				
 			} else {
 				withContext(Dispatchers.Main) {
