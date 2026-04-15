@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
@@ -235,8 +236,8 @@ fun WidgetSettingsCard(modifier: Modifier = Modifier) {
 			if (Build.VERSION.SDK_INT >= 31) {
 				val themeMode by collectPreferenceAsState(HubsDataStore.Settings.Widget.ThemeMode)
 				SettingsCardItemPicker(
-					title = "Тема:",
-					items = listOf("Адаптивная", "Как в приложении"),
+					title = "Темы:",
+					items = listOf("Адаптивная (Material You)", "Как в приложении"),
 					pickedItemIndex = themeMode ?: 0,
 					onItemPicked = {
 						coroutineScope.launch(Dispatchers.IO) {
@@ -289,6 +290,7 @@ fun SettingsCardItemPicker(
 			) {
 				Text(
 					text = items[pickedItemIndex],
+					textAlign = TextAlign.End
 				)
 				Spacer(modifier = Modifier.width(4.dp))
 				val rotationAnimated by showMenuTransition.animateFloat { if (it) 180f else 0f }
