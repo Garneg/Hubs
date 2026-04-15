@@ -236,7 +236,7 @@ fun WidgetSettingsCard(modifier: Modifier = Modifier) {
 			if (Build.VERSION.SDK_INT >= 31) {
 				val themeMode by collectPreferenceAsState(HubsDataStore.Settings.Widget.ThemeMode)
 				SettingsCardItemPicker(
-					title = "Темы:",
+					title = "Тема:",
 					items = listOf("Адаптивная (Material You)", "Как в приложении"),
 					pickedItemIndex = themeMode ?: 0,
 					onItemPicked = {
