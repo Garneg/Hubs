@@ -4,6 +4,7 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.os.Build
 import android.os.IBinder
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeechService
@@ -69,10 +70,13 @@ import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.screens.article.tts.TtsTestDialog
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
+import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 
@@ -95,23 +99,28 @@ fun ArticleScreen(
     var ttsMediaController by remember { mutableStateOf<MediaController?>(null) }
     var ttsBinder by remember { mutableStateOf<TTSBinder?>(null) }
     LaunchedEffect(Unit) {
-        Intent(context, HubsTTSService::class.java).also {
-            context.bindService(it, object : ServiceConnection {
-                override fun onServiceConnected(
-                    name: ComponentName?,
-                    service: IBinder?
-                ) {
-                    Log.i("service", "bind service connected")
-                    ttsBinder = (service as TTSBinder)
-                }
-
-                override fun onServiceDisconnected(name: ComponentName?) {
-                    Log.i("service", "bind service disconnected")
-
-                }
-            },
-                Context.BIND_AUTO_CREATE)
+        if (Build.VERSION.SDK_INT >= 26) {
+            context.startForegroundService(
+                Intent(context, HubsTTSService::class.java)
+            )
         }
+//        Intent(context, HubsTTSService::class.java).also {
+//            context.bindService(it, object : ServiceConnection {
+//                override fun onServiceConnected(
+//                    name: ComponentName?,
+//                    service: IBinder?
+//                ) {
+//                    Log.i("service", "bind service connected")
+//                    ttsBinder = (service as TTSBinder)
+//                }
+//
+//                override fun onServiceDisconnected(name: ComponentName?) {
+//                    Log.i("service", "bind service disconnected")
+//
+//                }
+//            },
+//                Context.BIND_AUTO_CREATE)
+//        }
     }
 
     val activity = LocalActivity.current
@@ -147,8 +156,19 @@ fun ArticleScreen(
         }
     }
 
+    var sessionToken = remember { SessionToken(context, ComponentName(context, HubsTTSService::class.java))}
+    var mediaController: MediaController? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(Unit) {
+        delay(2000)
+        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
+        controllerFuture.addListener({
+            mediaController = controllerFuture.get()
+        }, MoreExecutors.directExecutor())
+    }
+
     var showTtsDialog by remember { mutableStateOf(false) }
-    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder)
+    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = mediaController)
 
 
     LaunchedEffect(key1 = Unit, block = {

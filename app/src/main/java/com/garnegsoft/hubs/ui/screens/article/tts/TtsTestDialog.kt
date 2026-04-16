@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.session.MediaController
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreenViewModel
@@ -62,7 +64,8 @@ fun TtsTestDialog(
     show: Boolean,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    binder: TTSBinder?
+    binder: TTSBinder?,
+    mediaController: MediaController?
 ) {
     val articleScreenViewModel = viewModel<ArticleScreenViewModel>()
     val articleHtmlDoc =
@@ -192,12 +195,17 @@ fun TtsTestDialog(
                     ) {
                         OutlinedButton(
                             onClick = {
-                                textToSpeech?.let { tts ->
-                                    binder?.loadChunks(
-                                        articleHtmlDoc.text()
-                                            .split(' '),
-                                    )
-                                }
+//                                textToSpeech?.let { tts ->
+//                                    binder?.loadChunks(
+//                                        articleHtmlDoc.text()
+//                                            .split(' '),
+//                                    )
+//                                }
+
+                                val mediaItem = MediaItem.Builder()
+                                    .setMediaId("huynya")
+                                    .build()
+                                mediaController?.addMediaItem(mediaItem)
                             },
                             enabled = ttsCreatedSuccessfully
                         ) {
@@ -206,7 +214,8 @@ fun TtsTestDialog(
 
                         OutlinedButton(
                             onClick = {
-                                binder?.play()
+                                mediaController?.play()
+                                Log.i("ttss", "media controller $mediaController")
                             },
                             enabled = ttsCreatedSuccessfully
                         ) {
@@ -216,7 +225,7 @@ fun TtsTestDialog(
                         Row {
                             OutlinedButton(
                                 onClick = {
-                                    binder?.stop()
+                                    mediaController?.stop()
                                 },
                                 enabled = ttsCreatedSuccessfully
                             ) {
@@ -226,7 +235,8 @@ fun TtsTestDialog(
 
                             OutlinedButton(
                                 onClick = {
-                                    binder?.pause()
+                                    mediaController?.pause()
+
                                 },
                                 enabled = ttsCreatedSuccessfully
                             ) {
