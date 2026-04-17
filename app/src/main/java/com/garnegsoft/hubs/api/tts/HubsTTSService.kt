@@ -245,6 +245,7 @@ class TTSPlayer(
         return true
     }
 
+    @OptIn(UnstableApi::class)
     override fun getAvailableCommands(): Player.Commands {
         return Player.Commands.Builder()
             .add(COMMAND_PLAY_PAUSE)
