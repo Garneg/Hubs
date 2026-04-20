@@ -50,8 +50,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionCommand.COMMAND_CODE_CUSTOM
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.TTSBinder
+import com.garnegsoft.hubs.api.tts.TTSServiceCommands
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreenViewModel
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -195,17 +198,11 @@ fun TtsTestDialog(
                     ) {
                         OutlinedButton(
                             onClick = {
-//                                textToSpeech?.let { tts ->
-//                                    binder?.loadChunks(
-//                                        articleHtmlDoc.text()
-//                                            .split(' '),
-//                                    )
-//                                }
-
-                                val mediaItem = MediaItem.Builder()
-                                    .setMediaId("huynya")
-                                    .build()
-                                mediaController?.addMediaItem(mediaItem)
+//
+                                mediaController?.sendCustomCommand(
+                                    SessionCommand(TTSServiceCommands.ACTION_LOAD_ARTICLE, Bundle.EMPTY),
+                                    Bundle().apply { putInt("id", 1024774) }
+                                )
                             },
                             enabled = ttsCreatedSuccessfully
                         ) {

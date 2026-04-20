@@ -4,11 +4,14 @@ import android.os.Binder
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.crashlytics.crashlytics
 import kotlin.math.ceil
 
 class TTSBinder(
     val tts: TextToSpeech,
 ) : Binder() {
+
     fun speak(message: String) {
         tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, message.take(5).hashCode().toString())
     }
@@ -42,6 +45,7 @@ class TTSBinder(
 
                 override fun onError(utteranceId: String?) {
                     Log.e("ttss", "onError:$utteranceId")
+                    Firebase.crashlytics.log("text to speech error occured:$utteranceId")
                 }
 
                 override fun onStart(utteranceId: String?) {
