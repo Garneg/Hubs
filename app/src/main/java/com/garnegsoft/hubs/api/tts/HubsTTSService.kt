@@ -1,10 +1,14 @@
 package com.garnegsoft.hubs.api.tts
 
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.graphics.BitmapFactory
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.os.IInterface
 import android.os.Looper
@@ -21,9 +25,13 @@ import android.view.TextureView
 import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import androidx.core.app.NotificationChannelCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.BasePlayer
+import androidx.media3.common.C
 import androidx.media3.common.DeviceInfo
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
@@ -54,6 +62,7 @@ import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import androidx.media3.session.MediaStyleNotificationHelper
 import com.garnegsoft.hubs.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -61,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.io.FileDescriptor
+import java.util.Date
 import java.util.Locale
 
 class HubsTTSService : MediaSessionService() {
@@ -87,14 +97,36 @@ class HubsTTSService : MediaSessionService() {
                 ttsInitialized = true
 
                 player = TTSPlayer(tts!!)
-                player?.loadChunks(buildList { LoremIpsum(200).values.first().split(" ").forEach { add(it) } })
-
+                player?.loadChunks(buildList { addAll(LoremIpsum(200).values.first().split(" ")) })
+                player?.addMediaItem(
+                    MediaItem.Builder()
+                        .setMediaId("lorem ipsum")
+                        .build()
+                )
 
                 mediaSession = MediaSession.Builder(this@HubsTTSService, player!!)
-                    .setCallback(object : MediaSession.Callback {
-                    })
-                    .setId("hubs_article_tts")
+                    .setId("hubs_article_tts" + System.currentTimeMillis().toString())
                     .build()
+
+                NotificationManagerCompat.from(this@HubsTTSService).createNotificationChannel(
+                    NotificationChannelCompat.Builder("hubs_article_tts", NotificationManager.IMPORTANCE_LOW)
+                        .setName("Hubs text to speech")
+                        .build()
+                )
+
+                val notification = NotificationCompat.Builder(this@HubsTTSService, "hubs_article_tts")
+                    .setSmallIcon(R.drawable.notification_default_icon)
+                    .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.logo2))
+                    .setContentTitle("Pending TTS...")
+                    .setContentText("by hubs")
+                    .setStyle(MediaStyleNotificationHelper.MediaStyle(mediaSession!!))
+                    .build()
+
+                if (Build.VERSION.SDK_INT >= 29) {
+                    startForeground(1, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
+                }
+
+
 
                 Toast.makeText(this@HubsTTSService, "Service created!", Toast.LENGTH_SHORT).show()
                 tts?.let {
@@ -106,7 +138,6 @@ class HubsTTSService : MediaSessionService() {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(this)
         )
-
 
     }
 
@@ -132,6 +163,7 @@ class HubsTTSService : MediaSessionService() {
     }
 }
 
+@OptIn(UnstableApi::class)
 class TTSPlayer(
     val tts: TextToSpeech
 ) : Player {
@@ -141,6 +173,16 @@ class TTSPlayer(
 
     private val listeners: MutableList<Player.Listener> = mutableListOf()
     private val mediaItems: MutableList<MediaItem> = mutableListOf()
+
+    private val availableCommandsList = listOf(
+        COMMAND_PLAY_PAUSE,
+        COMMAND_STOP,
+        COMMAND_GET_METADATA,
+        COMMAND_GET_CURRENT_MEDIA_ITEM,
+
+        //COMMAND_PREPARE,
+        //COMMAND_SET_MEDIA_ITEM
+    )
 
     /**
      * Loading chunks that tts will play. Each chunk's length must be less than maximum chars number for TextToSpeech engine
@@ -164,7 +206,8 @@ class TTSPlayer(
     }
 
     override fun setMediaItems(mediaItems: List<MediaItem>) {
-
+        this.mediaItems.clear()
+        this.mediaItems.addAll(mediaItems)
     }
 
     override fun setMediaItems(
@@ -181,6 +224,8 @@ class TTSPlayer(
     }
 
     override fun setMediaItem(mediaItem: MediaItem) {
+        mediaItems.clear()
+        mediaItems.add(mediaItem)
     }
 
     override fun setMediaItem(mediaItem: MediaItem, startPositionMs: Long) {
@@ -225,44 +270,54 @@ class TTSPlayer(
     }
 
     override fun removeMediaItem(index: Int) {
+        mediaItems.removeAt(index)
     }
 
     override fun removeMediaItems(fromIndex: Int, toIndex: Int) {
+
     }
 
     override fun clearMediaItems() {
+        mediaItems.clear()
     }
 
     override fun isCommandAvailable(command: Int): Boolean {
-        return when (command) {
-            COMMAND_PLAY_PAUSE -> true
-            COMMAND_STOP -> true
-            else -> false
+        Log.i("TTS_SERVICE", "command available check $command command")
+
+        if (availableCommandsList.contains(command)) {
+            return true
+        } else {
+            Log.i("TTS_SERVICE", "Unsupported command availability checked $command")
+            return false
         }
     }
 
     override fun canAdvertiseSession(): Boolean {
+        Log.i("TTS_SERVICE", "can advertise session command")
+
         return true
     }
 
     @OptIn(UnstableApi::class)
     override fun getAvailableCommands(): Player.Commands {
         return Player.Commands.Builder()
-            .add(COMMAND_PLAY_PAUSE)
-            .add(COMMAND_STOP)
-            .add(COMMAND_GET_METADATA)
-            .add(COMMAND_PREPARE)
-            .add(COMMAND_SET_MEDIA_ITEM)
-            .add(COMMAND_GET_CURRENT_MEDIA_ITEM)
+            .apply {
+                availableCommandsList.forEach { command ->
+                    add(command)
+                }
+            }
 //            .add(COMMAND_SET_SPEED_AND_PITCH)
             .build()
     }
 
     override fun prepare() {
+        Log.i("TTS_SERVICE", "prepare command")
 
     }
 
     override fun getPlaybackState(): Int {
+        Log.i("TTS_SERVICE", "Get Playback state command")
+
         return Player.STATE_READY
     }
 
@@ -271,22 +326,27 @@ class TTSPlayer(
     }
 
     override fun isPlaying(): Boolean {
+        Log.i("TTS_SERVICE", "isPlaying command -> ${tts.isSpeaking}")
+
         return tts.isSpeaking
     }
 
     override fun getPlayerError(): PlaybackException? {
+        Log.i("TTS_SERVICE", "get player error command")
+
         return null
     }
 
     override fun play() {
-
+        Log.i("TTS_SERVICE", "Play command")
         if (chunks.isNotEmpty()) {
             if (currentChunkIndex >= chunks.lastIndex)
                 currentChunkIndex = 0
+
+            tts.speak(chunks[currentChunkIndex], TextToSpeech.QUEUE_ADD, null, currentChunkIndex.toString())
             listeners.forEach {
                 it.onIsPlayingChanged(true)
             }
-            tts.speak(chunks[currentChunkIndex], TextToSpeech.QUEUE_ADD, null, currentChunkIndex.toString())
             tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onDone(utteranceId: String?) {
                     Log.i("ttss", "onDone index:$utteranceId")
@@ -299,6 +359,14 @@ class TTSPlayer(
                             null,
                             chunks.toString()
                         )
+                    } else {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            delay(500)
+                            listeners.forEach {
+                                it.onIsPlayingChanged(false)
+                            }
+                        }
+
                     }
                 }
 
@@ -314,17 +382,30 @@ class TTSPlayer(
     }
 
     override fun pause() {
-        tts.stop()
-        listeners.forEach {
-            it.onIsPlayingChanged(false)
+        Log.i("TTS_SERVICE", "pause command")
+        if (tts.isSpeaking) {
+            tts.stop()
+            listeners.forEach {
+                it.onIsPlayingChanged(false)
+            }
+        } else {
+            play()
         }
+
     }
 
     override fun setPlayWhenReady(playWhenReady: Boolean) {
-
+        Log.i("TTS_SERVICE", "set play when ready command")
+        if (playWhenReady) {
+            play()
+        } else {
+            pause()
+        }
     }
 
     override fun getPlayWhenReady(): Boolean {
+        Log.i("TTS_SERVICE", "get play when ready command")
+
         return true
     }
 
@@ -345,10 +426,14 @@ class TTSPlayer(
     }
 
     override fun isLoading(): Boolean {
+        Log.i("TTS_SERVICE", "is loading command")
+
         return false
     }
 
     override fun seekToDefaultPosition() {
+        Log.i("TTS_SERVICE", "seek to default position command")
+
         stop()
         play()
     }
@@ -358,6 +443,7 @@ class TTSPlayer(
     }
 
     override fun seekTo(positionMs: Long) {
+        Log.i("TTS_SERVICE", "seek to $positionMs command")
 
     }
 
@@ -418,22 +504,30 @@ class TTSPlayer(
     }
 
     override fun getPlaybackParameters(): PlaybackParameters {
+        Log.i("TTS_SERVICE", "get playback params command")
+
         return PlaybackParameters.DEFAULT
     }
 
     override fun stop() {
+        Log.i("TTS_SERVICE", "stop command")
+
         tts.stop()
         currentChunkIndex = 0
     }
 
     override fun release() {
+        Log.i("TTS_SERVICE", "release command")
+
         tts.shutdown()
     }
 
     override fun getCurrentTracks(): Tracks {
+        Log.i("TTS_SERVICE", "getCurrentTracks command")
         return Tracks.EMPTY
     }
 
+    @OptIn(UnstableApi::class)
     override fun getTrackSelectionParameters(): TrackSelectionParameters {
         return TrackSelectionParameters.DEFAULT
     }
@@ -465,14 +559,17 @@ class TTSPlayer(
     override fun getCurrentPeriodIndex(): Int {
         return 0
     }
+
     @Deprecated("")
     override fun getCurrentWindowIndex(): Int {
         return 0
     }
+
     @Deprecated("")
     override fun getCurrentMediaItemIndex(): Int {
         return 0
     }
+
     @Deprecated("")
     override fun getNextWindowIndex(): Int {
         return 0
@@ -482,6 +579,7 @@ class TTSPlayer(
         return 0
 
     }
+
     @Deprecated("")
     override fun getPreviousWindowIndex(): Int {
         return 0
@@ -521,13 +619,14 @@ class TTSPlayer(
     }
 
     override fun getBufferedPercentage(): Int {
-        return 100
+        return 0
 
     }
 
     override fun getTotalBufferedDuration(): Long {
-        return 100
+        return 0
     }
+
     @Deprecated("")
     override fun isCurrentWindowDynamic(): Boolean {
         return false
@@ -536,6 +635,7 @@ class TTSPlayer(
     override fun isCurrentMediaItemDynamic(): Boolean {
         return false
     }
+
     @Deprecated("")
     override fun isCurrentWindowLive(): Boolean {
         return false
@@ -546,8 +646,9 @@ class TTSPlayer(
     }
 
     override fun getCurrentLiveOffset(): Long {
-        return 100
+        return C.TIME_UNSET
     }
+
     @Deprecated("")
     override fun isCurrentWindowSeekable(): Boolean {
         return false
@@ -562,11 +663,11 @@ class TTSPlayer(
     }
 
     override fun getCurrentAdGroupIndex(): Int {
-        return 100
+        return C.INDEX_UNSET
     }
 
     override fun getCurrentAdIndexInAdGroup(): Int {
-        return 100
+        return C.INDEX_UNSET
     }
 
     override fun getContentDuration(): Long {
@@ -586,17 +687,23 @@ class TTSPlayer(
     }
 
     override fun setVolume(volume: Float) {
+        Log.i("TTS_SERVICE", "set $volume volume command")
+
     }
 
     override fun getVolume(): Float {
+        Log.i("TTS_SERVICE", "get volume command")
+
         return 0.5f
     }
 
     override fun mute() {
+        Log.i("TTS_SERVICE", "mute command")
 
     }
 
     override fun unmute() {
+        Log.i("TTS_SERVICE", "unmute command")
 
     }
 
@@ -659,6 +766,7 @@ class TTSPlayer(
     override fun isDeviceMuted(): Boolean {
         return false
     }
+
     @Deprecated("")
     override fun setDeviceVolume(volume: Int) {
 
@@ -667,6 +775,7 @@ class TTSPlayer(
     override fun setDeviceVolume(volume: Int, flags: Int) {
 
     }
+
     @Deprecated("")
     override fun increaseDeviceVolume() {
 
@@ -675,6 +784,7 @@ class TTSPlayer(
     override fun increaseDeviceVolume(flags: Int) {
 
     }
+
     @Deprecated("")
     override fun decreaseDeviceVolume() {
 
@@ -683,6 +793,7 @@ class TTSPlayer(
     override fun decreaseDeviceVolume(flags: Int) {
 
     }
+
     @Deprecated("")
     override fun setDeviceMuted(muted: Boolean) {
 
