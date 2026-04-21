@@ -98,30 +98,6 @@ fun ArticleScreen(
     val context = LocalContext.current
     var ttsMediaController by remember { mutableStateOf<MediaController?>(null) }
     var ttsBinder by remember { mutableStateOf<TTSBinder?>(null) }
-    LaunchedEffect(Unit) {
-        if (Build.VERSION.SDK_INT >= 26) {
-            context.startForegroundService(
-                Intent(context, HubsTTSService::class.java)
-            )
-        }
-//        Intent(context, HubsTTSService::class.java).also {
-//            context.bindService(it, object : ServiceConnection {
-//                override fun onServiceConnected(
-//                    name: ComponentName?,
-//                    service: IBinder?
-//                ) {
-//                    Log.i("service", "bind service connected")
-//                    ttsBinder = (service as TTSBinder)
-//                }
-//
-//                override fun onServiceDisconnected(name: ComponentName?) {
-//                    Log.i("service", "bind service disconnected")
-//
-//                }
-//            },
-//                Context.BIND_AUTO_CREATE)
-//        }
-    }
 
     val activity = LocalActivity.current
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
@@ -187,9 +163,6 @@ fun ArticleScreen(
     }
 
 
-//    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
-//
-//    }
 
 
     val shareIntent = remember(article?.title) {

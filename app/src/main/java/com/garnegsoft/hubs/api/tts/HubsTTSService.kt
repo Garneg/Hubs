@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.BitmapFactory
+import android.media.AudioManager
 import android.os.Binder
 import android.os.Build
 import android.os.Bundle
@@ -58,6 +59,9 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
+import androidx.media3.common.audio.AudioFocusRequestCompat
+import androidx.media3.common.audio.AudioManagerCompat
+import androidx.media3.common.audio.AudioManagerCompat.AUDIOFOCUS_GAIN
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
@@ -70,15 +74,21 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionCommands
 import androidx.media3.session.SessionResult
 import com.garnegsoft.hubs.R
+import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.withContext
+import okhttp3.internal.wait
 import java.io.FileDescriptor
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.FutureTask
 
 
 data object TTSServiceCommands {
@@ -93,9 +103,11 @@ class HubsTTSService : MediaSessionService() {
     var player: TTSPlayer? = null
 
     var mediaSession: MediaSession? = null
+
+
+
     override fun onBind(p0: Intent?): IBinder? {
         return super.onBind(p0)
-//        return TTSBinder(tts!!)
     }
 
     @OptIn(UnstableApi::class)
@@ -103,65 +115,11 @@ class HubsTTSService : MediaSessionService() {
         super.onCreate()
         setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_ALWAYS)
 
+
+
         tts = TextToSpeech(applicationContext) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                Log.i("TTS", "TTS Initialized")
-                ttsInitialized = true
 
-                player = TTSPlayer(tts!!)
-                player?.loadChunks(buildList { addAll(LoremIpsum(200).values.first().split(" ")) })
-                player?.addMediaItem(
-                    MediaItem.Builder()
-                        .setMediaId("lorem ipsum")
-                        .build()
-                )
-
-                mediaSession = MediaSession.Builder(this@HubsTTSService, player!!)
-                    .setId("hubs_article_tts" + System.currentTimeMillis().toString())
-                    .setCallback(
-                        object : MediaSession.Callback {
-
-                            override fun onConnect(
-                                session: MediaSession,
-                                controller: MediaSession.ControllerInfo
-                            ): MediaSession.ConnectionResult {
-                                val customCommands =
-                                    SessionCommands.Builder()
-                                        .apply { player!!.availableCommandsList.forEach { add(it) } }
-                                        .add(SessionCommand(TTSServiceCommands.ACTION_LOAD_ARTICLE, Bundle.EMPTY))
-                                        .build()
-                                return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
-                                    .setAvailableSessionCommands(customCommands)
-                                    .build()
-                            }
-
-                            override fun onCustomCommand(
-                                session: MediaSession,
-                                controller: MediaSession.ControllerInfo,
-                                customCommand: SessionCommand,
-                                args: Bundle
-                            ): ListenableFuture<SessionResult> {
-                                if (customCommand.customAction == TTSServiceCommands.ACTION_LOAD_ARTICLE) {
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        val article = ArticleController.get(args.getInt("id"))
-                                        val snippet = ArticleController.getSnippet(args.getInt("id"))
-                                        article?.let {
-                                            player?.loadChunks(listOf(article.title))
-                                            player?.articleMetadata = TTSPlayer.ArticleMetadata(
-                                                title = it.title,
-                                                author = it.author?.alias ?: "Unknown",
-                                                thumbnailUri = snippet?.imageUrl
-                                            )
-                                        }
-
-                                    }
-                                }
-
-                                return super.onCustomCommand(session, controller, customCommand, args)
-                            }
-                        }
-                    )
-                    .build()
 
 //                NotificationManagerCompat.from(this@HubsTTSService).createNotificationChannel(
 //                    NotificationChannelCompat.Builder("hubs_article_tts", NotificationManager.IMPORTANCE_LOW)
@@ -188,6 +146,68 @@ class HubsTTSService : MediaSessionService() {
             }
         }
 
+        Log.i("TTS", "TTS Initialized")
+        ttsInitialized = true
+                val audioManager = AudioManagerCompat.getAudioManager(this)
+
+        player = TTSPlayer(tts!!, audioManager)
+        player?.loadChunks(buildList { addAll(LoremIpsum(200).values.first().split(" ")) })
+        player?.addMediaItem(
+            MediaItem.Builder()
+                .setMediaId("lorem ipsum")
+                .build()
+        )
+
+        mediaSession = MediaSession.Builder(this@HubsTTSService, player!!)
+            .setId("hubs_article_tts" + System.currentTimeMillis().toString())
+            .setCallback(
+                object : MediaSession.Callback {
+
+                    override fun onConnect(
+                        session: MediaSession,
+                        controller: MediaSession.ControllerInfo
+                    ): MediaSession.ConnectionResult {
+                        val customCommands =
+                            SessionCommands.Builder()
+                                .apply { player!!.availableCommandsList.forEach { add(it) } }
+                                .add(SessionCommand(TTSServiceCommands.ACTION_LOAD_ARTICLE, Bundle.EMPTY))
+                                .build()
+                        return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                            .setAvailableSessionCommands(customCommands)
+                            .build()
+                    }
+
+                    override fun onCustomCommand(
+                        session: MediaSession,
+                        controller: MediaSession.ControllerInfo,
+                        customCommand: SessionCommand,
+                        args: Bundle
+                    ): ListenableFuture<SessionResult> {
+                        if (customCommand.customAction == TTSServiceCommands.ACTION_LOAD_ARTICLE) {
+                            lifecycleScope.launch(Dispatchers.IO) {
+                                val article = ArticleController.get(args.getInt("id"))
+                                val snippet = ArticleController.getSnippet(args.getInt("id"))
+                                withContext(Dispatchers.Main) {
+                                    article?.let {
+                                        player?.loadChunks(listOf(article.title))
+                                        player?.setMediaMetadata(
+                                            TTSPlayer.ArticleMetadata(
+                                                title = it.title,
+                                                author = it.author?.alias ?: "Unknown",
+                                                thumbnailUri = snippet?.imageUrl
+                                            )
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        return super.onCustomCommand(session, controller, customCommand, args)
+                    }
+                }
+            )
+            .build()
+
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(this).apply { setSmallIcon(R.drawable.logo2) }
         )
@@ -206,11 +226,13 @@ class HubsTTSService : MediaSessionService() {
 
     override fun onGetSession(p0: MediaSession.ControllerInfo): MediaSession? {
         Log.i("media_session_controller", p0.packageName)
+
         return mediaSession
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        player?.release()
         Toast.makeText(this@HubsTTSService, "Service destroyed!", Toast.LENGTH_SHORT).show()
         tts?.speak("i will be back", TextToSpeech.QUEUE_FLUSH, null, "42")
     }

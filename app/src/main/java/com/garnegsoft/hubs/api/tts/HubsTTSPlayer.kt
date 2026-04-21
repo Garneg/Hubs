@@ -1,6 +1,8 @@
 package com.garnegsoft.hubs.api.tts
 
+import android.media.AudioManager
 import android.os.Looper
+import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
@@ -12,6 +14,8 @@ import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH
+import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.common.DeviceInfo
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -27,6 +31,10 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
+import androidx.media3.common.audio.AudioFocusManager
+import androidx.media3.common.audio.AudioFocusRequestCompat
+import androidx.media3.common.audio.AudioManagerCompat
+import androidx.media3.common.audio.AudioManagerCompat.AUDIOFOCUS_GAIN
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
@@ -39,7 +47,8 @@ import kotlin.collections.forEach
 
 @OptIn(UnstableApi::class)
 class TTSPlayer(
-    val tts: TextToSpeech
+    val tts: TextToSpeech,
+    val audioManager: AudioManager,
 ) : Player {
 
     private var chunks: List<String> = emptyList()
@@ -48,7 +57,7 @@ class TTSPlayer(
     private val listeners: MutableList<Player.Listener> = mutableListOf()
     private val mediaItems: MutableList<MediaItem> = mutableListOf()
 
-    var articleMetadata: ArticleMetadata? = null
+    private var articleMetadata: ArticleMetadata? = null
 
     val availableCommandsList = listOf(
         COMMAND_PLAY_PAUSE,
@@ -59,6 +68,17 @@ class TTSPlayer(
         //COMMAND_PREPARE,
         //COMMAND_SET_MEDIA_ITEM
     )
+
+    private var mediaMetadata = MediaMetadata.Builder().setTitle("").setAuthor("").build()
+
+    private val audioFocusRequest = AudioFocusRequestCompat.Builder(AUDIOFOCUS_GAIN)
+        .setOnAudioFocusChangeListener {
+            Log.i("TTS_SERIVCE", "Audio focus changed: $it")
+            if (it != AUDIOFOCUS_GAIN) {
+                pause()
+            }
+        }
+        .build()
 
     /**
      * Loading chunks that tts will play. Each chunk's length must be less than maximum chars number for TextToSpeech engine
@@ -260,6 +280,16 @@ class TTSPlayer(
 
                 override fun onStart(utteranceId: String?) {
                     Log.i("ttss", "playing chunk $currentChunkIndex")
+                    val response = AudioManagerCompat.requestAudioFocus(
+                        audioManager,
+                        audioFocusRequest
+                    )
+                    Log.i(
+                        "TTS_SERVICE", "audio focus request ended up with: $response"
+                    )
+                    response == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+
+
                 }
             })
         }
@@ -272,11 +302,11 @@ class TTSPlayer(
             listeners.forEach {
                 it.onIsPlayingChanged(false)
             }
-        } else {
-            play()
         }
 
     }
+
+
 
     override fun setPlayWhenReady(playWhenReady: Boolean) {
         Log.i("TTS_SERVICE", "set play when ready command")
@@ -395,14 +425,20 @@ class TTSPlayer(
 
     override fun stop() {
         Log.i("TTS_SERVICE", "stop command")
-
+        AudioManagerCompat.abandonAudioFocusRequest(
+            audioManager,
+            audioFocusRequest
+        )
         tts.stop()
         currentChunkIndex = 0
     }
 
     override fun release() {
         Log.i("TTS_SERVICE", "release command")
-
+        AudioManagerCompat.abandonAudioFocusRequest(
+            audioManager,
+            audioFocusRequest
+        )
         tts.shutdown()
     }
 
@@ -420,24 +456,28 @@ class TTSPlayer(
 
     }
 
+    fun setMediaMetadata(articleMetadata: ArticleMetadata) {
+        this.articleMetadata = articleMetadata
+
+        mediaMetadata = MediaMetadata.Builder()
+            .setTitle(articleMetadata.title)
+            .setAuthor(articleMetadata.author)
+            .setArtist(articleMetadata.author)
+            .setArtworkUri(articleMetadata.thumbnailUri?.toUri())
+            .build()
+
+        listeners.forEach {
+            it.onMediaMetadataChanged(mediaMetadata)
+        }
+    }
+
     override fun getMediaMetadata(): MediaMetadata {
         Log.i("TTS_SERVICE", "getMediaMetadata command")
-        return MediaMetadata.Builder()
-            .setTitle("plain")
-            .apply {
-                if (articleMetadata != null) {
-                    setTitle(articleMetadata!!.title)
-                    setAuthor(articleMetadata!!.author)
-                    if (articleMetadata?.thumbnailUri != null) {
-                        setArtworkUri(articleMetadata!!.thumbnailUri!!.toUri())
-                    }
-                }
-            }
-            .build()
+        return mediaMetadata
     }
 
     override fun getPlaylistMetadata(): MediaMetadata {
-        return MediaMetadata.Builder().setTitle("TTSaaaa").setArtist("habr").build()
+        return MediaMetadata.Builder().setTitle("Статья").setArtist("Habr").build()
     }
 
     override fun setPlaylistMetadata(mediaMetadata: MediaMetadata) {
