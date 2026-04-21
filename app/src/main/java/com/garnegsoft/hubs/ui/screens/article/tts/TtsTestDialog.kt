@@ -11,31 +11,42 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +54,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.fastForEach
@@ -56,6 +68,7 @@ import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.api.tts.TTSServiceCommands
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreenViewModel
+import org.checkerframework.checker.units.qual.min
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import java.util.Locale
@@ -191,6 +204,37 @@ fun TtsTestDialog(
 
 
                     }
+                    var mediaPlaybackSpeed by rememberSaveable { mutableFloatStateOf(1f) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(
+                            onClick = {
+                                mediaPlaybackSpeed -= 0.1f
+                                mediaPlaybackSpeed = mediaPlaybackSpeed.coerceAtLeast(0.1f)
+                                mediaController?.setPlaybackSpeed(mediaPlaybackSpeed)
+
+                        }) {
+                            Text("-", fontSize = 32.sp)
+                        }
+
+                        Text(
+                            modifier = Modifier.clip(CircleShape).weight(1f).fillMaxHeight().background(MaterialTheme.colors.onSurface.copy(0.1f)),
+                            text = mediaPlaybackSpeed.toString(),
+                            textAlign = TextAlign.Center,
+                        )
+
+                        IconButton(onClick = {
+                            mediaPlaybackSpeed += 0.1f
+                            mediaPlaybackSpeed = mediaPlaybackSpeed.coerceAtMost(3f)
+                            mediaController?.setPlaybackSpeed(mediaPlaybackSpeed)
+
+                        }) {
+                            Text("+", fontSize = 24.sp)
+                        }
+                    }
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -201,7 +245,7 @@ fun TtsTestDialog(
 //
                                 mediaController?.sendCustomCommand(
                                     SessionCommand(TTSServiceCommands.ACTION_LOAD_ARTICLE, Bundle.EMPTY),
-                                    Bundle().apply { putInt("id", 1024774) }
+                                    Bundle().apply { putInt("id", articleScreenViewModel.article.value!!.id) }
                                 )
                             },
                             enabled = ttsCreatedSuccessfully

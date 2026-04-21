@@ -57,6 +57,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.TTSBinder
@@ -101,9 +102,7 @@ fun ArticleScreen(
 
     val activity = LocalActivity.current
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
-    val fontSizePreference by HubsDataStore.Settings.ArticleScreen.FontSize
-        .getFlow(context)
-        .collectAsState(initial = null)
+    val fontSizePreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontSize)
     var fontSize by rememberSaveable { mutableStateOf<Float?>(null) }
 
     val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
@@ -115,8 +114,9 @@ fun ArticleScreen(
     var firstVisibleItemIndex by rememberSaveable { mutableIntStateOf(0) }
     var firstVisibleItemOffset by rememberSaveable { mutableIntStateOf(0) }
 
-    val lazyListState =
-        rememberSaveable(saver = LazyListState.Saver) { LazyListState(firstVisibleItemIndex, firstVisibleItemOffset) }
+    val lazyListState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState(firstVisibleItemIndex, firstVisibleItemOffset)
+    }
 
     Log.i("LAZYLISTSTATE", firstVisibleItemIndex.toString())
 

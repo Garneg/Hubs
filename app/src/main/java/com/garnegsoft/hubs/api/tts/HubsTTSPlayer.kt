@@ -25,6 +25,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.Player.COMMAND_GET_CURRENT_MEDIA_ITEM
 import androidx.media3.common.Player.COMMAND_GET_METADATA
 import androidx.media3.common.Player.COMMAND_PLAY_PAUSE
+import androidx.media3.common.Player.COMMAND_SET_SPEED_AND_PITCH
 import androidx.media3.common.Player.COMMAND_STOP
 import androidx.media3.common.Player.PLAYBACK_SUPPRESSION_REASON_NONE
 import androidx.media3.common.Timeline
@@ -64,10 +65,13 @@ class TTSPlayer(
         COMMAND_STOP,
         COMMAND_GET_METADATA,
         COMMAND_GET_CURRENT_MEDIA_ITEM,
+        COMMAND_SET_SPEED_AND_PITCH
 
         //COMMAND_PREPARE,
         //COMMAND_SET_MEDIA_ITEM
     )
+
+    private var currentPlayerState = Player.STATE_READY
 
     private var mediaMetadata = MediaMetadata.Builder().setTitle("").setAuthor("").build()
 
@@ -220,9 +224,9 @@ class TTSPlayer(
     }
 
     override fun getPlaybackState(): Int {
-        Log.i("TTS_SERVICE", "Get Playback state command")
+        Log.i("TTS_SERVICE", "Get Playback state command -> $currentPlayerState")
 
-        return Player.STATE_READY
+        return currentPlayerState
     }
 
     override fun getPlaybackSuppressionReason(): Int {
@@ -244,12 +248,15 @@ class TTSPlayer(
     override fun play() {
         Log.i("TTS_SERVICE", "Play command")
         if (chunks.isNotEmpty()) {
+            currentPlayerState = Player.STATE_READY
+
             if (currentChunkIndex >= chunks.lastIndex)
                 currentChunkIndex = 0
 
             tts.speak(chunks[currentChunkIndex], TextToSpeech.QUEUE_ADD, null, currentChunkIndex.toString())
             listeners.forEach {
                 it.onIsPlayingChanged(true)
+                it.onPlaybackStateChanged(Player.STATE_READY)
             }
             tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onDone(utteranceId: String?) {
@@ -287,7 +294,6 @@ class TTSPlayer(
                     Log.i(
                         "TTS_SERVICE", "audio focus request ended up with: $response"
                     )
-                    response == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
 
 
                 }
@@ -414,7 +420,8 @@ class TTSPlayer(
     }
 
     override fun setPlaybackSpeed(speed: Float) {
-
+        val result = tts.setSpeechRate(speed)
+        Log.i("TTS_SERVICE", "setSpeechRate to $speed; result: $result")
     }
 
     override fun getPlaybackParameters(): PlaybackParameters {
@@ -430,15 +437,16 @@ class TTSPlayer(
             audioFocusRequest
         )
         tts.stop()
+        currentPlayerState = Player.STATE_IDLE
+        listeners.forEach {
+            it.onPlaybackStateChanged(Player.STATE_IDLE)
+        }
         currentChunkIndex = 0
     }
 
     override fun release() {
         Log.i("TTS_SERVICE", "release command")
-        AudioManagerCompat.abandonAudioFocusRequest(
-            audioManager,
-            audioFocusRequest
-        )
+        stop()
         tts.shutdown()
     }
 

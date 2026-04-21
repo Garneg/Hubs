@@ -74,6 +74,7 @@ import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionCommands
 import androidx.media3.session.SessionResult
 import com.garnegsoft.hubs.R
+import com.garnegsoft.hubs.api.HabrDataParser
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
@@ -85,6 +86,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
 import okhttp3.internal.wait
+import org.jsoup.Jsoup
 import java.io.FileDescriptor
 import java.util.Date
 import java.util.Locale
@@ -113,7 +115,7 @@ class HubsTTSService : MediaSessionService() {
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
-        setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_ALWAYS)
+//        setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_ALWAYS)
 
 
 
@@ -189,7 +191,19 @@ class HubsTTSService : MediaSessionService() {
                                 val snippet = ArticleController.getSnippet(args.getInt("id"))
                                 withContext(Dispatchers.Main) {
                                     article?.let {
-                                        player?.loadChunks(listOf(article.title))
+                                        val articleText = buildList {
+                                            add(article.title)
+
+                                            Jsoup.parse(article.contentHtml).body()
+                                                .child(0)
+                                                .children()
+                                                .forEach {
+                                                    if (it.tagName() == "p") {
+                                                        this.add(it.text())
+                                                    }
+                                                }
+                                        }
+                                        player?.loadChunks(articleText)
                                         player?.setMediaMetadata(
                                             TTSPlayer.ArticleMetadata(
                                                 title = it.title,
@@ -214,15 +228,6 @@ class HubsTTSService : MediaSessionService() {
 
     }
 
-    @UnstableApi
-    class CustomPlayer() : SimpleBasePlayer(Looper.getMainLooper()) {
-        override fun getState(): State {
-            return State.Builder()
-                .setPlayWhenReady(true, PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
-                .build()
-        }
-
-    }
 
     override fun onGetSession(p0: MediaSession.ControllerInfo): MediaSession? {
         Log.i("media_session_controller", p0.packageName)
