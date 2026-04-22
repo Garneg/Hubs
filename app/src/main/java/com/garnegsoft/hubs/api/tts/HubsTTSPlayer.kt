@@ -71,7 +71,7 @@ class TTSPlayer(
         //COMMAND_SET_MEDIA_ITEM
     )
 
-    private var currentPlayerState = Player.STATE_READY
+    private var currentPlayerState = Player.STATE_IDLE
 
     private var mediaMetadata = MediaMetadata.Builder().setTitle("").setAuthor("").build()
 
