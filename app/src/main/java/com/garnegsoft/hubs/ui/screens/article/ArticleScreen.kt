@@ -60,6 +60,7 @@ import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.tts.HubsTTSService
+import com.garnegsoft.hubs.api.tts.LocalMediaController
 import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
@@ -132,19 +133,8 @@ fun ArticleScreen(
         }
     }
 
-    var sessionToken = remember { SessionToken(context, ComponentName(context, HubsTTSService::class.java))}
-    var mediaController: MediaController? by remember { mutableStateOf(null) }
-
-    LaunchedEffect(Unit) {
-        delay(2000)
-        val controllerFuture = MediaController.Builder(context, sessionToken).buildAsync()
-        controllerFuture.addListener({
-            mediaController = controllerFuture.get()
-        }, MoreExecutors.directExecutor())
-    }
-
     var showTtsDialog by remember { mutableStateOf(false) }
-    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = mediaController)
+    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = LocalMediaController.current)
 
 
     LaunchedEffect(key1 = Unit, block = {

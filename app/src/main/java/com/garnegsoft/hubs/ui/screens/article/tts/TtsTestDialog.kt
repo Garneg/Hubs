@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -38,16 +39,20 @@ import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.material.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,9 +66,12 @@ import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionCommand.COMMAND_CODE_CUSTOM
+import androidx.media3.ui.compose.buttons.PlayPauseButton
+import androidx.media3.ui.compose.state.PlayPauseButtonState
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.api.tts.TTSServiceCommands
@@ -240,6 +248,31 @@ fun TtsTestDialog(
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                         horizontalAlignment = Alignment.End
                     ) {
+
+                        val isPlaying by remember(mediaController) { derivedStateOf { mediaController?.isPlaying() ?: false } }
+                        var isLoading by remember(mediaController) { mutableStateOf(mediaController?.isLoading ?: false) }
+                        var isConnected by remember(mediaController) { mutableStateOf(mediaController?.isConnected ?: false) }
+
+
+                        Text(text = "isPlaying: $isPlaying")
+                        Text(text = "isLoading: $isLoading")
+                        Text(text = "isConnected: $isConnected")
+
+                        LaunchedEffect(mediaController) {
+                            mediaController?.addListener(
+                                object : Player.Listener {
+                                    override fun onIsPlayingChanged(isPlaying: Boolean) {
+                                        Log.e("TTS_SERVICEEEEEEEE", "isPlaying: $isPlaying")
+                                        super.onIsPlayingChanged(isPlaying)
+                                    }
+                                }
+                            )
+                        }
+
+                        PlayPauseButton(mediaController) {
+                            Text(text = "$isEnabled $showPlay")
+                        }
+
                         OutlinedButton(
                             onClick = {
 //

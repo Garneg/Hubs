@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs
 
+import android.content.ComponentName
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -10,7 +11,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.*
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.SavedStateHandle
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import androidx.navigation.compose.rememberNavController
 import androidx.work.Constraints
 import androidx.work.NetworkType
@@ -20,8 +24,11 @@ import com.garnegsoft.hubs.api.FcmDispatcher
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
+import com.garnegsoft.hubs.api.tts.HubsTTSService
+import com.garnegsoft.hubs.api.tts.LocalMediaController
 import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
+import com.google.common.util.concurrent.MoreExecutors
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.crashlytics
@@ -75,30 +82,44 @@ class MainActivity : ComponentActivity() {
 
         intent.dataString?.let { Log.e("intentData", it) }
 
+        val sessionToken = SessionToken(this, ComponentName(this, HubsTTSService::class.java))
+        val mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
+        val mediaController = mutableStateOf<MediaController?>(null)
+
+        mediaControllerFuture.addListener({
+            mediaController.value = mediaControllerFuture.get()
+        }, ContextCompat.getMainExecutor(this))
+
+
         setContent {
             val cookies by cookiesFlow.collectAsState(initial = "")
 
-            key(cookies) {
-                val themeMode by HubsDataStore.Settings
-                    .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
-                    .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
-                    .collectAsState(initial = null)
+            CompositionLocalProvider(
+                LocalMediaController provides mediaController.value,
+            ) {
 
-                if (themeMode != null && authStatus != null) {
-                    HubsTheme(
-                        darkTheme = when (themeMode) {
-                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
-                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
-                            HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
-                            else -> false
+                key(cookies) {
+                    val themeMode by HubsDataStore.Settings
+                        .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
+                        .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+                        .collectAsState(initial = null)
+
+                    if (themeMode != null && authStatus != null) {
+                        HubsTheme(
+                            darkTheme = when (themeMode) {
+                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined -> isSystemInDarkTheme()
+                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined -> isSystemInDarkTheme()
+                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> true
+                                else -> false
+                            }
+                        ) {
+                            val navController = rememberNavController()
+                            this.savedStateRegistry.consumeRestoredStateForKey("")
+
+                            MainNavigationGraph(
+                                navController = navController
+                            )
                         }
-                    ) {
-                        val navController = rememberNavController()
-                        this.savedStateRegistry.consumeRestoredStateForKey("")
-
-                        MainNavigationGraph(
-                            navController = navController
-                        )
                     }
                 }
             }

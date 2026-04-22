@@ -24,10 +24,13 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Player.COMMAND_GET_CURRENT_MEDIA_ITEM
 import androidx.media3.common.Player.COMMAND_GET_METADATA
+import androidx.media3.common.Player.COMMAND_GET_TIMELINE
 import androidx.media3.common.Player.COMMAND_PLAY_PAUSE
 import androidx.media3.common.Player.COMMAND_SET_SPEED_AND_PITCH
 import androidx.media3.common.Player.COMMAND_STOP
 import androidx.media3.common.Player.PLAYBACK_SUPPRESSION_REASON_NONE
+import androidx.media3.common.Player.PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM
+import androidx.media3.common.Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST
 import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
@@ -65,10 +68,8 @@ class TTSPlayer(
         COMMAND_STOP,
         COMMAND_GET_METADATA,
         COMMAND_GET_CURRENT_MEDIA_ITEM,
-        COMMAND_SET_SPEED_AND_PITCH
+        COMMAND_SET_SPEED_AND_PITCH,
 
-        //COMMAND_PREPARE,
-        //COMMAND_SET_MEDIA_ITEM
     )
 
     private var currentPlayerState = Player.STATE_IDLE
@@ -83,6 +84,8 @@ class TTSPlayer(
             }
         }
         .build()
+
+    private var ttsInProgress = false
 
     /**
      * Loading chunks that tts will play. Each chunk's length must be less than maximum chars number for TextToSpeech engine
@@ -257,6 +260,7 @@ class TTSPlayer(
             listeners.forEach {
                 it.onIsPlayingChanged(true)
                 it.onPlaybackStateChanged(Player.STATE_READY)
+                it.onPlayWhenReadyChanged(true, PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
             }
             tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onDone(utteranceId: String?) {
@@ -273,8 +277,11 @@ class TTSPlayer(
                     } else {
                         CoroutineScope(Dispatchers.Main).launch {
                             delay(500)
+                            ttsInProgress = false
                             listeners.forEach {
                                 it.onIsPlayingChanged(false)
+                                it.onPlayWhenReadyChanged(false, PLAY_WHEN_READY_CHANGE_REASON_END_OF_MEDIA_ITEM)
+
                             }
                         }
 
@@ -287,6 +294,7 @@ class TTSPlayer(
 
                 override fun onStart(utteranceId: String?) {
                     Log.i("ttss", "playing chunk $currentChunkIndex")
+                    ttsInProgress = true
                     val response = AudioManagerCompat.requestAudioFocus(
                         audioManager,
                         audioFocusRequest
@@ -304,9 +312,11 @@ class TTSPlayer(
     override fun pause() {
         Log.i("TTS_SERVICE", "pause command")
         if (tts.isSpeaking) {
+            ttsInProgress = false
             tts.stop()
             listeners.forEach {
                 it.onIsPlayingChanged(false)
+                it.onPlayWhenReadyChanged(false, Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
             }
         }
 
@@ -440,6 +450,8 @@ class TTSPlayer(
         currentPlayerState = Player.STATE_IDLE
         listeners.forEach {
             it.onPlaybackStateChanged(Player.STATE_IDLE)
+            it.onIsPlayingChanged(false)
+            it.onPlayWhenReadyChanged(false, Player.PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
         }
         currentChunkIndex = 0
     }
@@ -469,8 +481,8 @@ class TTSPlayer(
 
         mediaMetadata = MediaMetadata.Builder()
             .setTitle(articleMetadata.title)
-            .setAuthor(articleMetadata.author)
-            .setArtist(articleMetadata.author)
+            .setAuthor('@' + articleMetadata.author)
+            .setArtist('@' + articleMetadata.author)
             .setArtworkUri(articleMetadata.thumbnailUri?.toUri())
             .build()
 
