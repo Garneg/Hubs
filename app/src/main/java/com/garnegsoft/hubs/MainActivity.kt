@@ -30,6 +30,8 @@ import com.garnegsoft.hubs.ui.navigation.MainNavigationGraph
 import com.garnegsoft.hubs.ui.theme.HubsTheme
 import com.google.common.util.concurrent.MoreExecutors
 import com.google.firebase.Firebase
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.messaging.FirebaseMessaging
@@ -61,6 +63,7 @@ class MainActivity : ComponentActivity() {
             FirebaseMessaging.getInstance().token.addOnCompleteListener {
                 Log.i("fcm-token", it.result)
             }
+            FirebaseAnalytics.getInstance(this).setAnalyticsCollectionEnabled(false)
         }
 
 
@@ -79,6 +82,7 @@ class MainActivity : ComponentActivity() {
             .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
             .build()
         WorkManager.getInstance(this).enqueue(updateMeData)
+
 
         intent.dataString?.let { Log.e("intentData", it) }
 

@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.api.tts
 
 import android.media.AudioManager
+import android.os.Bundle
 import android.os.Looper
 import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
@@ -70,7 +71,7 @@ class TTSPlayer(
         COMMAND_GET_CURRENT_MEDIA_ITEM,
         COMMAND_SET_SPEED_AND_PITCH,
 
-    )
+        )
 
     private var currentPlayerState = Player.STATE_IDLE
 
@@ -99,7 +100,9 @@ class TTSPlayer(
     data class ArticleMetadata(
         val title: String,
         val author: String,
-        val thumbnailUri: String?
+        val thumbnailUri: String?,
+        val articleId: Int,
+        val offline: Boolean,
     )
 
 
@@ -323,7 +326,6 @@ class TTSPlayer(
     }
 
 
-
     override fun setPlayWhenReady(playWhenReady: Boolean) {
         Log.i("TTS_SERVICE", "set play when ready command")
         if (playWhenReady) {
@@ -484,6 +486,11 @@ class TTSPlayer(
             .setAuthor('@' + articleMetadata.author)
             .setArtist('@' + articleMetadata.author)
             .setArtworkUri(articleMetadata.thumbnailUri?.toUri())
+            .setExtras(
+                Bundle().apply {
+                    putInt("articleId", articleMetadata.articleId)
+                    putBoolean("offline", articleMetadata.offline)
+                })
             .build()
 
         listeners.forEach {

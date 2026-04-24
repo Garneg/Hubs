@@ -67,11 +67,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionCommand.COMMAND_CODE_CUSTOM
 import androidx.media3.ui.compose.buttons.PlayPauseButton
 import androidx.media3.ui.compose.state.PlayPauseButtonState
+import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.api.tts.TTSServiceCommands
@@ -82,6 +84,7 @@ import org.jsoup.nodes.Element
 import java.util.Locale
 
 // TODO: REMOVE THIS GARBAGE ASAP
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TtsTestDialog(
@@ -192,7 +195,8 @@ fun TtsTestDialog(
 
                             textToSpeech?.let { tts ->
                                 var voiceSelected by remember { mutableStateOf(tts.voice.name) }
-                                tts.voices.filter { it.locale.language == Locale("ru").language }
+                                tts.voices
+                                    .filter { it.locale.language == Locale("ru").language }
                                     .forEach {
                                         Text(
                                             modifier = Modifier
@@ -210,11 +214,12 @@ fun TtsTestDialog(
                             }
                         }
 
-
                     }
                     var mediaPlaybackSpeed by rememberSaveable { mutableFloatStateOf(1f) }
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -224,12 +229,17 @@ fun TtsTestDialog(
                                 mediaPlaybackSpeed = mediaPlaybackSpeed.coerceAtLeast(0.1f)
                                 mediaController?.setPlaybackSpeed(mediaPlaybackSpeed)
 
-                        }) {
+                            }) {
                             Text("-", fontSize = 32.sp)
                         }
 
+
                         Text(
-                            modifier = Modifier.clip(CircleShape).weight(1f).fillMaxHeight().background(MaterialTheme.colors.onSurface.copy(0.1f)),
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .weight(1f)
+                                .fillMaxHeight()
+                                .background(MaterialTheme.colors.onSurface.copy(0.1f)),
                             text = mediaPlaybackSpeed.toString(),
                             textAlign = TextAlign.Center,
                         )
@@ -249,9 +259,21 @@ fun TtsTestDialog(
                         horizontalAlignment = Alignment.End
                     ) {
 
-                        val isPlaying by remember(mediaController) { derivedStateOf { mediaController?.isPlaying() ?: false } }
-                        var isLoading by remember(mediaController) { mutableStateOf(mediaController?.isLoading ?: false) }
-                        var isConnected by remember(mediaController) { mutableStateOf(mediaController?.isConnected ?: false) }
+                        val isPlaying by remember(mediaController) {
+                            mutableStateOf(
+                                mediaController?.isPlaying() ?: false
+                            )
+                        }
+                        var isLoading by remember(mediaController) {
+                            mutableStateOf(
+                                mediaController?.isLoading ?: false
+                            )
+                        }
+                        var isConnected by remember(mediaController) {
+                            mutableStateOf(
+                                mediaController?.isConnected ?: false
+                            )
+                        }
 
 
                         Text(text = "isPlaying: $isPlaying")
@@ -264,6 +286,17 @@ fun TtsTestDialog(
                                     override fun onIsPlayingChanged(isPlaying: Boolean) {
                                         Log.e("TTS_SERVICEEEEEEEE", "isPlaying: $isPlaying")
                                         super.onIsPlayingChanged(isPlaying)
+                                    }
+
+                                    override fun onPlayWhenReadyChanged(playWhenReady: Boolean, reason: Int) {
+                                        Log.e("TTS_SERVICEEEEEEEE", "playWhenReady: $playWhenReady")
+
+                                        super.onPlayWhenReadyChanged(playWhenReady, reason)
+                                    }
+
+                                    override fun onPlaybackStateChanged(playbackState: Int) {
+                                        Log.e("TTS_SERVICEEEEEEEE", "playbackState: $playbackState")
+                                        super.onPlaybackStateChanged(playbackState)
                                     }
                                 }
                             )

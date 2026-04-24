@@ -44,7 +44,8 @@ fun ContinueReadSnackBar(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .clip(RoundedCornerShape(4.dp))
-                        .clickable { data.dismiss() },
+                        .clickable { data.dismiss() }
+                        .padding(4.dp),
                     imageVector = Icons.Default.Close, contentDescription = "")
             }
             Spacer(modifier = Modifier.height(6.dp))

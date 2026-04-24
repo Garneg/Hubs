@@ -208,7 +208,9 @@ class HubsTTSService : MediaSessionService() {
                                             TTSPlayer.ArticleMetadata(
                                                 title = it.title,
                                                 author = it.author?.alias ?: "Unknown",
-                                                thumbnailUri = snippet?.imageUrl
+                                                thumbnailUri = snippet?.imageUrl,
+                                                articleId = it.id,
+                                                offline = false
                                             )
                                         )
                                     }
