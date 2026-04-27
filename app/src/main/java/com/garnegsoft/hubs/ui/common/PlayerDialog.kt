@@ -41,7 +41,7 @@ fun PlayerDialog(
     show: Boolean,
     onDismissRequest: () -> Unit,
     mediaController: MediaController,
-    article: Article
+    article: Article?
 ) {
     if (show) {
         Dialog(
@@ -67,7 +67,7 @@ fun PlayerDialog(
 
                     AsyncImage(
                         modifier = Modifier.fillMaxWidth(),
-                        model = null,
+                        model = mediaController.mediaMetadata.artworkUri,
                         contentDescription = null,
                         )
 
@@ -77,7 +77,7 @@ fun PlayerDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .basicMarquee(),
-                        text = article.title,
+                        text = article?.title ?: mediaController.mediaMetadata.title.toString(),
                         fontSize = 20.sp,
                         color = MaterialTheme.colors.onSurface,
                         fontWeight = FontWeight.W700,

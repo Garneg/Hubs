@@ -27,6 +27,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.*
@@ -45,6 +46,9 @@ import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -67,8 +71,10 @@ import kotlinx.coroutines.delay
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.api.utils.formatTime
+import com.garnegsoft.hubs.ui.common.BaseMenuContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.common.MenuItem
 import com.garnegsoft.hubs.ui.screens.article.tts.TtsTestDialog
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
@@ -183,41 +189,86 @@ fun ArticleScreen(
                     }
                 },
                 actions = {
-                    if (articleSaved) {
+                    Box {
+                        var showMoreMenu by remember { mutableStateOf(false) }
                         IconButton(
-                            onClick = {
-                                viewModel.deleteSavedArticle(
-                                    id = articleId,
-                                    context = context
-                                )
-                            },
-                            enabled = true
+                            onClick = { showMoreMenu = true }
                         ) {
-                            Icon(Icons.Outlined.Delete, contentDescription = "")
+                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
                         }
-                    } else {
-                        IconButton(
-                            onClick = { viewModel.saveArticle(id = articleId, context = context) },
-                            enabled = true
-                        ) {
-                            Icon(painterResource(id = R.drawable.download), contentDescription = "")
+                        if (showMoreMenu) {
+                            Popup(
+                                properties = PopupProperties(
+                                    focusable = false,
+                                    dismissOnBackPress = true,
+                                    dismissOnClickOutside = true
+                                ),
+                                popupPositionProvider = object : PopupPositionProvider {
+                                    override fun calculatePosition(
+                                        anchorBounds: IntRect,
+                                        windowSize: IntSize,
+                                        layoutDirection: LayoutDirection,
+                                        popupContentSize: IntSize
+                                    ): IntOffset {
+                                        return IntOffset(x = anchorBounds.right, y = anchorBounds.bottom)
+                                    }
+
+                                },
+                                onDismissRequest = { showMoreMenu = false }
+                            ) {
+                                BaseMenuContainer {
+                                    MenuItem(
+                                        title = "Поделиться",
+                                        icon = {
+                                            Icon(Icons.Outlined.Share, contentDescription = "")
+                                        },
+                                        onClick = {
+                                            if (article != null) context.startActivity(shareIntent)
+                                            showMoreMenu = false
+                                        }
+                                    )
+                                    if (articleSaved) {
+                                        MenuItem(
+                                            title = "Удалить из загруженных",
+                                            icon = {
+                                                Icon(Icons.Outlined.Delete, contentDescription = "")
+                                            },
+                                            onClick = {
+                                                viewModel.deleteSavedArticle(
+                                                    id = articleId,
+                                                    context = context
+                                                )
+                                                showMoreMenu = false
+
+                                            }
+                                        )
+                                    } else {
+                                        MenuItem(
+                                            title = "Загрузить",
+                                            icon = {
+                                                Icon(painterResource(R.drawable.download), contentDescription = "")
+                                            },
+                                            onClick = {
+                                                viewModel.saveArticle(id = articleId, context = context)
+                                                showMoreMenu = false
+                                            }
+                                        )
+                                    }
+
+                                    MenuItem(
+                                        title = "Послушать",
+                                        icon = {
+                                            Icon(painterResource(id = R.drawable.headphones), contentDescription = "")
+                                        },
+                                        onClick = {
+                                            showTtsDialog = true
+                                            showMoreMenu = false
+                                        }
+                                    )
+
+                                }
+                            }
                         }
-                    }
-
-                    IconButton(
-                        onClick = { context.startActivity(shareIntent) },
-                        enabled = article != null
-                    ) {
-                        Icon(Icons.Outlined.Share, contentDescription = "")
-                    }
-
-                    IconButton(
-                        onClick = {
-                            showTtsDialog = true
-                        },
-                        enabled = true
-                    ) {
-                        Icon(painterResource(id = R.drawable.headphones), contentDescription = "text to speech")
                     }
                 })
         },
