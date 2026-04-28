@@ -42,6 +42,7 @@ import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.text.contains
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -394,7 +395,13 @@ internal fun UserProfile(
 																	.padding(12.dp),
 																verticalAlignment = Alignment.CenterVertically
 															) {
-																if (it.faviconUrl != null && it.faviconUrl.isNotBlank()) {
+																var favicon = it.faviconUrl
+																var title = it.title
+																if (favicon == null && (it.url.contains("linkedin.com") || it.url.contains("linked.in"))){
+																	favicon = "https://static.licdn.com/aero-v1/sc/h/al2o9zrvru7aqj8e1x2rzsrca"
+																	title = "LinkedIn"
+																}
+																if (favicon != null && favicon.isNotBlank()) {
 																	AsyncSvgImage(
 																		modifier = Modifier
 																			.size(24.dp)
@@ -402,7 +409,7 @@ internal fun UserProfile(
 																				RoundedCornerShape(4.dp)
 																			)
 																			.background(if (MaterialTheme.colors.isLight) Color.Transparent else MaterialTheme.colors.onSurface),
-																		data = it.faviconUrl,
+																		data = favicon,
 																		revertColorsOnDarkTheme = false,
 																		contentDescription = it.title,
 																		contentScale = ContentScale.Fit
@@ -420,7 +427,7 @@ internal fun UserProfile(
 																
 																Spacer(modifier = Modifier.width(12.dp))
 																
-																Text(it.title)
+																Text(title)
 															}
 														}
 													}
