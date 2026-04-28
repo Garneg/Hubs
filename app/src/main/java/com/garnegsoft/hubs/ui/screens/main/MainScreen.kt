@@ -74,6 +74,7 @@ import com.garnegsoft.hubs.api.tts.LocalMediaController
 import com.garnegsoft.hubs.api.utils.checkAppCanOpenLinks
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.common.PlayerDialog
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
@@ -252,6 +253,26 @@ fun MainScreen(
                     }
                 )
             }
+            var showPlayerDialog by remember { mutableStateOf(false) }
+
+            PlayerDialog(
+                show = showPlayerDialog,
+                onDismissRequest = { showPlayerDialog = false },
+                mediaController = mediaController,
+                onAuthorClick = {
+                    mediaController?.mediaMetadata?.author?.let {
+                        onUserClicked(it.drop(1).toString())
+                    }
+                },
+                onTitleClick = {
+                    mediaController?.mediaMetadata?.extras?.getInt("articleId")?.let {
+                                if (it != 0) {
+                                    onArticleClicked(it)
+                                }
+                            }
+                },
+                article = null
+            )
 
             if (showPlaybackSnackElement) {
 
@@ -270,11 +291,12 @@ fun MainScreen(
                         .shadow(4.dp, shape = RoundedCornerShape(12.dp))
                         .clip(RoundedCornerShape(8.dp))
                         .clickable {
-                            mediaController?.mediaMetadata?.extras?.getInt("articleId")?.let {
-                                if (it != 0) {
-                                    onArticleClicked(it)
-                                }
-                            }
+//                            mediaController?.mediaMetadata?.extras?.getInt("articleId")?.let {
+//                                if (it != 0) {
+//                                    onArticleClicked(it)
+//                                }
+//                            }
+                            showPlayerDialog = true
                         }
                         .background(MaterialTheme.colors.surface.run {
                             if (MaterialTheme.colors.isLight)
@@ -325,6 +347,7 @@ fun MainScreen(
                         Spacer(modifier = Modifier.width(8.dp))
 
                         IconButton(
+
                             onClick = {
                                 playPauseButtonState.onClick()
                             }

@@ -100,6 +100,8 @@ dependencies {
     implementation "androidx.media3:media3-datasource:$media3_version"
     implementation "androidx.media3:media3-ui-compose:$media3_version"
 
+    implementation 'androidx.palette:palette-ktx:1.0.0'
+
     // glance
     implementation "androidx.glance:glance-appwidget:1.1.1"
     implementation "androidx.glance:glance-material3:1.1.1"
