@@ -37,6 +37,7 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
+import androidx.core.net.toUri
 
 
 class MainActivity : ComponentActivity() {
@@ -52,7 +53,7 @@ class MainActivity : ComponentActivity() {
             FcmDispatcher.dispatchExtras(
                 handleUrl = {
                     startActivity(Intent.createChooser(Intent(Intent.ACTION_VIEW).apply {
-                        this.data = Uri.parse(it)
+                        this.data = it.toUri()
                     }, null))
                 },
                 extras = it

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
@@ -28,10 +29,12 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.sharp.Menu
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,6 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.buttons.PlayPauseButton
@@ -58,6 +63,7 @@ import coil.compose.AsyncImage
 import coil.intercept.Interceptor
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.tts.articleMetadata
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Runnable
 import kotlin.coroutines.CoroutineContext
@@ -71,7 +77,8 @@ fun PlayerDialog(
     mediaController: MediaController?,
     onTitleClick: () -> Unit,
     onAuthorClick: () -> Unit,
-    article: Article?
+    onCurrentPlayingClick: (() -> Unit)? = null,
+    article: Article? = null
 ) {
     if (show) {
         var palette by remember { mutableStateOf<Palette?>(null) }
@@ -177,11 +184,68 @@ fun PlayerDialog(
                                     .size(64.dp)
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colors.primary)
-                                    .clickable(onClick = { onClick() }),
+                                    .clickable(
+
+                                        onClick = { onClick() }
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
-                                when {
-                                    isEnabled && showPlay -> {
+
+
+
+                                if (
+                                    (article != null && article.id == mediaController?.articleMetadata?.articleId) ||
+                                    article == null
+                                ) {
+                                    when {
+
+
+                                        isEnabled && showPlay -> {
+                                            Icon(
+                                                modifier = Modifier.size(28.dp),
+                                                imageVector = Icons.Filled.PlayArrow,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colors.onPrimary
+                                            )
+                                        }
+
+                                        isEnabled && !showPlay -> {
+                                            Icon(
+                                                modifier = Modifier.size(28.dp),
+                                                painter = painterResource(R.drawable.pause_icon),
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colors.onPrimary
+                                            )
+                                        }
+
+                                        else -> CircularProgressIndicator()
+                                    }
+                                } else {
+
+                                    var isLoading by remember { mutableStateOf(false) }
+
+                                    LaunchedEffect(Unit) {
+                                        mediaController?.addListener(
+                                            object : Player.Listener {
+                                                override fun onIsLoadingChanged(playerLoading: Boolean) {
+                                                    isLoading = playerLoading
+                                                    super.onIsLoadingChanged(isLoading)
+                                                }
+
+                                                override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+                                                    // TODO: add handling media metadata changes
+                                                    super.onMediaMetadataChanged(mediaMetadata)
+                                                }
+                                            }
+                                        )
+                                    }
+
+                                    if (isLoading) {
+                                        CircularProgressIndicator(
+                                            modifier = Modifier.size(28.dp),
+                                            color = MaterialTheme.colors.onPrimary
+                                        )
+                                    } else {
                                         Icon(
                                             modifier = Modifier.size(28.dp),
                                             imageVector = Icons.Filled.PlayArrow,
@@ -190,19 +254,39 @@ fun PlayerDialog(
                                         )
                                     }
 
-                                    isEnabled && !showPlay -> {
-                                        Icon(
-                                            modifier = Modifier.size(28.dp),
-                                            painter = painterResource(R.drawable.pause_icon),
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colors.onPrimary
-                                        )
-                                    }
-
-                                    else -> CircularProgressIndicator()
                                 }
                             }
 
+                        }
+
+                    }
+
+                    if (article != null && article.id != mediaController?.articleMetadata?.articleId) {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .clickable(
+                                    enabled = onCurrentPlayingClick != null
+                                ) {
+                                    onCurrentPlayingClick?.invoke()
+                                }
+                                .background(MaterialTheme.colors.onSurface)
+                                .padding(vertical = 4.dp, horizontal = 12.dp)
+                        ) {
+                            Text(
+                                text = "Сейчас воспроизводится другая статья",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.W700,
+
+                                )
+                            Spacer(modifier = Modifier.width(4.dp))
+
+                            Icon(
+                                imageVector = Icons.Default.ArrowForward,
+                                contentDescription = "go to article that is playing now"
+                            )
                         }
 
                     }
