@@ -90,20 +90,23 @@ fun PlayerDialog(
                     }
 
                     override fun onIsLoadingChanged(isLoading: Boolean) {
+                        if (isPlayerLoading && isLoading == false) {
+                            mediaController.play()
+                        }
                         isPlayerLoading = isLoading
                         super.onIsLoadingChanged(isPlayerLoading)
                     }
 
-                    var previousPlaybackState = mediaController.playbackState
-
-                    override fun onPlaybackStateChanged(playbackState: Int) {
-                        if (previousPlaybackState == Player.STATE_BUFFERING && playbackState == Player.STATE_READY) {
-                            mediaController.play()
-                        }
-                        previousPlaybackState = playbackState
-
-                        super.onPlaybackStateChanged(playbackState)
-                    }
+//                    var previousPlaybackState = mediaController.playbackState
+//
+//                    override fun onPlaybackStateChanged(playbackState: Int) {
+//                        if (previousPlaybackState == Player.STATE_BUFFERING && playbackState == Player.STATE_READY) {
+//
+//                        }
+//                        previousPlaybackState = playbackState
+//
+//                        super.onPlaybackStateChanged(playbackState)
+//                    }
                 }
             )
         }
