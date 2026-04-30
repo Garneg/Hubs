@@ -75,6 +75,7 @@ import com.garnegsoft.hubs.ui.common.BaseMenuContainer
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.common.MenuItem
+import com.garnegsoft.hubs.ui.common.PlayerDialog
 import com.garnegsoft.hubs.ui.screens.article.tts.TtsTestDialog
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
@@ -140,8 +141,16 @@ fun ArticleScreen(
     }
 
     var showTtsDialog by remember { mutableStateOf(false) }
-    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = LocalMediaController.current)
+//    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = LocalMediaController.current)
 
+    PlayerDialog(
+        show = showTtsDialog,
+        onDismissRequest = { showTtsDialog = false },
+        mediaController = LocalMediaController.current,
+        onTitleClick = {},
+        onAuthorClick = {},
+        article = article
+    )
 
     LaunchedEffect(key1 = Unit, block = {
         if (!viewModel.article.isInitialized) {

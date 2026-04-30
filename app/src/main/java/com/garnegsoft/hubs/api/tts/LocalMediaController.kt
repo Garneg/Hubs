@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.api.tts
 
 import android.os.Bundle
 import androidx.compose.runtime.compositionLocalOf
+import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 
@@ -15,11 +16,12 @@ fun MediaController.loadArticle(articleId: Int) {
     )
 }
 
-val MediaController.articleMetadata: TTSPlayer.ArticleMetadata
-    get() = TTSPlayer.ArticleMetadata(
-        title = mediaMetadata.title.toString(),
-        author = mediaMetadata.author.toString(),
-        thumbnailUri = mediaMetadata.artworkUri.toString(),
-        articleId = mediaMetadata.extras?.getInt("articleId") ?: 0,
-        offline = mediaMetadata.extras?.getBoolean("offline") ?: false
+
+fun MediaMetadata.toArticleMetadata(): TTSPlayer.ArticleMetadata =
+    TTSPlayer.ArticleMetadata(
+        title = title.toString(),
+        author = artist.toString(),
+        thumbnailUri = artworkUri.toString(),
+        articleId = extras?.getInt("articleId") ?: 0,
+        offline = extras?.getBoolean("offline") ?: false
     )

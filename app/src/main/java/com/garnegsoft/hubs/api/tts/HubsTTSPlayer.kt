@@ -3,7 +3,6 @@ package com.garnegsoft.hubs.api.tts
 import android.media.AudioManager
 import android.os.Bundle
 import android.os.Looper
-import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import android.util.Log
@@ -15,8 +14,6 @@ import androidx.annotation.OptIn
 import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
-import androidx.media3.common.C.AUDIO_CONTENT_TYPE_SPEECH
-import androidx.media3.common.C.USAGE_MEDIA
 import androidx.media3.common.DeviceInfo
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -25,7 +22,6 @@ import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Player.COMMAND_GET_CURRENT_MEDIA_ITEM
 import androidx.media3.common.Player.COMMAND_GET_METADATA
-import androidx.media3.common.Player.COMMAND_GET_TIMELINE
 import androidx.media3.common.Player.COMMAND_PLAY_PAUSE
 import androidx.media3.common.Player.COMMAND_SET_SPEED_AND_PITCH
 import androidx.media3.common.Player.COMMAND_STOP
@@ -36,7 +32,6 @@ import androidx.media3.common.Timeline
 import androidx.media3.common.TrackSelectionParameters
 import androidx.media3.common.Tracks
 import androidx.media3.common.VideoSize
-import androidx.media3.common.audio.AudioFocusManager
 import androidx.media3.common.audio.AudioFocusRequestCompat
 import androidx.media3.common.audio.AudioManagerCompat
 import androidx.media3.common.audio.AudioManagerCompat.AUDIOFOCUS_GAIN
@@ -59,7 +54,8 @@ class TTSPlayer(
     private var chunks: List<String> = emptyList()
     private var currentChunkIndex: Int = 0
 
-    private val listeners: MutableList<Player.Listener> = mutableListOf()
+    val listeners: MutableList<Player.Listener> = mutableListOf()
+    var isPlayerLoading: Boolean = false
     private val mediaItems: MutableList<MediaItem> = mutableListOf()
 
     private var articleMetadata: ArticleMetadata? = null
@@ -357,10 +353,27 @@ class TTSPlayer(
         return false
     }
 
+    fun prepareToLoading() {
+        stop()
+        isPlayerLoading = true
+        listeners.forEach {
+            it.onIsLoadingChanged(true)
+        }
+        currentPlayerState = Player.STATE_BUFFERING
+    }
+
+    fun endLoading() {
+        isPlayerLoading = false
+        listeners.forEach {
+            it.onIsLoadingChanged(false)
+        }
+        currentPlayerState = Player.STATE_READY
+    }
+
     override fun isLoading(): Boolean {
         Log.i("TTS_SERVICE", "is loading command")
 
-        return false
+        return isPlayerLoading
     }
 
     override fun seekToDefaultPosition() {

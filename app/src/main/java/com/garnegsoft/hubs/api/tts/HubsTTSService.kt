@@ -186,6 +186,7 @@ class HubsTTSService : MediaSessionService() {
                         args: Bundle
                     ): ListenableFuture<SessionResult> {
                         if (customCommand.customAction == TTSServiceCommands.ACTION_LOAD_ARTICLE) {
+                            player!!.prepareToLoading()
                             lifecycleScope.launch(Dispatchers.IO) {
                                 val article = ArticleController.get(args.getInt("id"))
                                 val snippet = ArticleController.getSnippet(args.getInt("id"))
@@ -214,6 +215,7 @@ class HubsTTSService : MediaSessionService() {
                                             )
                                         )
                                     }
+                                    player!!.endLoading()
                                 }
                             }
                         }
