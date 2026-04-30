@@ -1,12 +1,14 @@
+package com.garnegsoft.hubs.api.article.list
+
 import android.util.Log
 import com.garnegsoft.hubs.api.*
-import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.processUserAvatar
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.*
 import okhttp3.CacheControl
 import org.jsoup.Jsoup
+import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 
@@ -29,7 +31,7 @@ class ArticlesListController {
 			
 			if (response?.body != null) {
 				var responseJson = Json.parseToJsonElement(response!!.body!!.string())
-				var articles = kotlin.run {
+				var articles = run {
 					var articlesIds =
 						HabrDataParser.parseJson<List<Int>>((responseJson.jsonObject["publicationIds"] ?: responseJson.jsonObject["articleIds"])!!.jsonArray)
 							.toSet()
@@ -47,7 +49,7 @@ class ArticlesListController {
 								)
 							)
 							articleIdsfinal.add(it)
-						} catch (ex: java.lang.Exception) {
+						} catch (ex: Exception) {
 							Log.e("ARTCL_PARS_ERR", "UNABLE TO PARSE ARTICLE")
 
 //                            if (BuildConfig.DEBUG) {

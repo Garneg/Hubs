@@ -1,7 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.article
 
 import ArticleController
-import ArticlesListController
+import com.garnegsoft.hubs.api.article.list.ArticlesListController
 import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Composable

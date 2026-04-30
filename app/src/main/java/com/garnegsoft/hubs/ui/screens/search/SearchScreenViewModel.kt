@@ -1,7 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.search
 
 import ArticleController
-import ArticlesListController
+import com.garnegsoft.hubs.api.article.list.ArticlesListController
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
