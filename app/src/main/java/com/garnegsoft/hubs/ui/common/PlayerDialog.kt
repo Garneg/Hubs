@@ -174,6 +174,7 @@ fun PlayerDialog(
                     Text(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .clip(RoundedCornerShape(4.dp))
                             .clickable {
                                 onTitleClick()
                             }
@@ -185,17 +186,19 @@ fun PlayerDialog(
                         fontWeight = FontWeight.W700,
                         maxLines = 1
                     )
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(4.dp))
+                                .clickable(onClick = onAuthorClick)
+                                .padding(4.dp),
+                            text = article?.author?.alias?.let { "@$it" } ?: mediaMetadata?.author.toString(),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.W500,
+                            color = MaterialTheme.colors.onSurface.copy(0.5f)
+                        )
+                    }
 
-                    Text(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .clickable(onClick = onAuthorClick)
-                            .fillMaxWidth(),
-                        text = article?.author?.alias?.let { "@$it" } ?: mediaMetadata?.author.toString(),
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.W500,
-                        color = MaterialTheme.colors.onSurface.copy(0.5f)
-                    )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
@@ -280,7 +283,7 @@ fun PlayerDialog(
 
                     }
 
-                    if (article != null && article.id != articleMediaMetadata?.articleId) {
+                    if (article != null && articleMediaMetadata?.articleId != null && articleMediaMetadata.articleId != 0 && article.id != articleMediaMetadata?.articleId) {
                         Spacer(modifier = Modifier.height(12.dp))
 
                         Row(
@@ -300,7 +303,7 @@ fun PlayerDialog(
                                 modifier = Modifier.weight(1f),
                                 text = "Воспроизводится другая статья",
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.W700,
+                                fontWeight = FontWeight.W500,
                                 color = MaterialTheme.colors.onPrimary,
                                 textAlign = TextAlign.Center
                                 )
@@ -308,7 +311,8 @@ fun PlayerDialog(
 
                             Icon(
                                 imageVector = Icons.Default.ArrowForward,
-                                contentDescription = "go to article that is playing now"
+                                contentDescription = "go to article that is playing now",
+                                tint = MaterialTheme.colors.onPrimary
                             )
                         }
 
