@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs
 
-import ArticlesListController
+import com.garnegsoft.hubs.api.article.list.ArticlesListController
 import android.content.Context
 import android.util.Log
 import android.widget.Toast

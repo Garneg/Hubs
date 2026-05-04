@@ -24,6 +24,10 @@ class CommentsListController {
         private fun get(path: String, args: Map<String, String>? = null): CommentsList? {
             var response = HabrApi.get(path, args)
 
+            if (response?.code != 200) {
+                return null
+            }
+
             var customJson = Json { ignoreUnknownKeys = true }
             if (response?.body != null) {
                 var responseJson = Json.parseToJsonElement(response.body!!.string())

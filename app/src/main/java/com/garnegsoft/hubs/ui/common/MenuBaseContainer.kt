@@ -13,12 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
 
 
 @Composable
 fun BaseMenuContainer(
 	modifier: Modifier = Modifier,
+	shape: Shape = RoundedCornerShape(8.dp),
 	content: @Composable ColumnScope.() -> Unit
 ) {
 	Box(
@@ -28,9 +30,9 @@ fun BaseMenuContainer(
 		Surface(
 			modifier = Modifier
 				.shadow(4.dp, RoundedCornerShape(8.dp))
-				.clip(RoundedCornerShape(8.dp))
 				.background(MaterialTheme.colors.surface),
-			elevation = 4.dp
+			elevation = 4.dp,
+			shape = shape,
 		) {
 			Column(
 				modifier = Modifier
