@@ -47,11 +47,10 @@ fun ArticleStats(
 	Row(
 		modifier = Modifier
 			.padding(horizontal = style.innerPadding)
-			.height(38.dp + style.innerPadding * 2)
 			.fillMaxWidth()
 			.clip(style.innerElementsShape),
 		verticalAlignment = Alignment.CenterVertically,
-		horizontalArrangement = Arrangement.Center
+		horizontalArrangement = Arrangement.spacedBy(4.dp)
 	) {
 		
 		//Rating
@@ -121,9 +120,8 @@ fun ArticleStats(
 		Row(
 			verticalAlignment = Alignment.CenterVertically,
 			modifier = Modifier
-				.padding(vertical = style.innerPadding)
+				.padding(vertical = style.innerPadding / 2f)
 				.weight(1f)
-				.fillMaxHeight()
 				.clip(style.innerElementsShape)
 				.combinedClickable(
 					onClick = onAddToBookmarksClicked,
@@ -135,7 +133,8 @@ fun ArticleStats(
 				)
 				.onGloballyPositioned {
 					bounds = it.size
-				},
+				}
+				.padding(vertical = style.innerPadding * 0.75f),
 			horizontalArrangement = Arrangement.Center
 		) {
 			Icon(
@@ -170,14 +169,13 @@ fun ArticleStats(
 					enabled = style.commentsButtonEnabled,
 					onClick = onCommentsClick
 				)
-				.padding(vertical = style.innerPadding)
-				.fillMaxHeight()
-				.absolutePadding(4.dp)
+				.padding(vertical = style.innerPadding / 2f)
 				.clip(style.innerElementsShape)
 				.clickable(
 					enabled = style.commentsButtonEnabled,
 					onClick = onCommentsClick
 				)
+				.padding(vertical = style.innerPadding * 0.75f)
 		) {
 			
 			BadgedBox(
