@@ -255,6 +255,7 @@ class TTSPlayer(
 
             if (currentChunkIndex >= chunks.lastIndex)
                 currentChunkIndex = 0
+            tts.setSpeechRate(2f )
 
             tts.speak(chunks[currentChunkIndex], TextToSpeech.QUEUE_ADD, null, currentChunkIndex.toString())
             listeners.forEach {

@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.api.tts
 
 import android.app.Notification
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -73,6 +74,7 @@ import androidx.media3.session.MediaStyleNotificationHelper
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionCommands
 import androidx.media3.session.SessionResult
+import com.garnegsoft.hubs.MainActivity
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HabrDataParser
 import com.google.common.util.concurrent.Futures
@@ -160,8 +162,13 @@ class HubsTTSService : MediaSessionService() {
                 .build()
         )
 
+        val activityPendingIntent = PendingIntent.getActivity(this, 676767, Intent(Intent.ACTION_VIEW).apply { setClass(this@HubsTTSService,
+            MainActivity::class.java) }, PendingIntent.FLAG_IMMUTABLE)
+
         mediaSession = MediaSession.Builder(this@HubsTTSService, player!!)
             .setId("hubs_article_tts" + System.currentTimeMillis().toString())
+            .setSessionActivity(activityPendingIntent)
+
             .setCallback(
                 object : MediaSession.Callback {
 
@@ -199,8 +206,13 @@ class HubsTTSService : MediaSessionService() {
                                                 .child(0)
                                                 .children()
                                                 .forEach {
-                                                    if (it.tagName() == "p") {
-                                                        this.add(it.text())
+                                                    when {
+                                                        it.tagName() == "p" -> add(it.text())
+                                                        it.tagName().startsWith("h") && it.tagName().length == 2 -> add(it.text())
+                                                        it.tagName() == "ol" -> add(it.text())
+                                                        it.tagName() == "ul" -> add(it.text())
+                                                        it.tagName() == "blockquote" -> add("Цитата — " + it.text())
+                                                        it.tagName() == "div" && it.child(0).className() == "table" -> add("Таблица пропущена")
                                                     }
                                                 }
                                         }
@@ -227,8 +239,10 @@ class HubsTTSService : MediaSessionService() {
             .build()
 
         setMediaNotificationProvider(
-            DefaultMediaNotificationProvider(this).apply { setSmallIcon(R.drawable.logo2) }
+            DefaultMediaNotificationProvider(this).apply { setSmallIcon(R.drawable.pin) }
         )
+
+
 
     }
 
