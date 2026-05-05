@@ -15,6 +15,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.DeviceInfo
+import androidx.media3.common.FlagSet
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
@@ -61,12 +62,12 @@ class TTSPlayer(
     private var articleMetadata: ArticleMetadata? = null
 
     val availableCommandsList = listOf(
-        COMMAND_PLAY_PAUSE,
-        COMMAND_STOP,
-        COMMAND_GET_METADATA,
-        COMMAND_GET_CURRENT_MEDIA_ITEM,
-        COMMAND_SET_SPEED_AND_PITCH,
-
+        Player.COMMAND_PLAY_PAUSE,
+        Player.COMMAND_STOP,
+        Player.COMMAND_GET_METADATA,
+        Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
+        Player.COMMAND_SET_SPEED_AND_PITCH,
+        Player.COMMAND_GET_TIMELINE
         )
 
     private var currentPlayerState = Player.STATE_IDLE
@@ -261,6 +262,7 @@ class TTSPlayer(
                 it.onPlaybackStateChanged(Player.STATE_READY)
                 it.onPlayWhenReadyChanged(true, PLAY_WHEN_READY_CHANGE_REASON_USER_REQUEST)
             }
+            val discontinuityEvent = Player.Events(FlagSet.Builder().add(Player.EVENT_POSITION_DISCONTINUITY).build())
             tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
                 override fun onDone(utteranceId: String?) {
                     Log.i("ttss", "onDone index:$utteranceId")
@@ -301,6 +303,10 @@ class TTSPlayer(
                     Log.i(
                         "TTS_SERVICE", "audio focus request ended up with: $response"
                     )
+
+                    listeners.forEach {
+                        it.onEvents(this@TTSPlayer, discontinuityEvent)
+                    }
 
 
                 }
@@ -452,7 +458,7 @@ class TTSPlayer(
     override fun getPlaybackParameters(): PlaybackParameters {
         Log.i("TTS_SERVICE", "get playback params command")
 
-        return PlaybackParameters.DEFAULT
+        return PlaybackParameters.DEFAULT.withSpeed(0.00001f)
     }
 
     override fun stop() {
@@ -529,7 +535,61 @@ class TTSPlayer(
     }
 
     override fun getCurrentTimeline(): Timeline {
-        return Timeline.EMPTY
+        return TTSTimeline(mediaItems.first(), chunks.size.toLong())
+    }
+
+    /**
+     * Pretty much the same as SinglePeriodTimeline class from ExoPlayer artifact.
+     * It is here just to not import exoplayer
+     */
+    internal class TTSTimeline(
+        val mediaItem: MediaItem,
+        val length: Long
+    ) : Timeline() {
+        override fun getWindowCount(): Int = 1
+
+        override fun getWindow(
+            windowIndex: Int,
+            window: Window,
+            defaultPositionProjectionUs: Long
+        ): Window {
+            return window.set(
+                Window.SINGLE_WINDOW_UID,
+                mediaItem,
+                null,
+                0L,
+                0L,
+                0L,
+                false,
+                false,
+                null,
+                0L,
+                length,
+                0,
+                0,
+                0L
+            )
+        }
+
+        override fun getPeriodCount(): Int = 1
+
+        override fun getPeriod(
+            periodIndex: Int,
+            period: Period,
+            setIds: Boolean
+        ): Period {
+            return period.set(
+                null,
+                0,
+                0,
+                length,
+                0L
+            )
+        }
+
+        override fun getIndexOfPeriod(uid: Any): Int = 0
+        override fun getUidOfPeriod(periodIndex: Int): Any = 0
+
     }
 
     override fun getCurrentPeriodIndex(): Int {
@@ -580,13 +640,20 @@ class TTSPlayer(
         return mediaItems[index]
     }
 
+    /**
+     * Get amount of text chunks that player will speak
+     * @since TTSPlayer
+     */
     override fun getDuration(): Long {
-        return C.TIME_UNSET
-
+        return chunks.size.toLong()
     }
 
+    /**
+     * Get index of currently playing chunk
+     * @since TTSPlayer
+     */
     override fun getCurrentPosition(): Long {
-        return 0
+        return currentChunkIndex.toLong()
     }
 
     override fun getBufferedPosition(): Long {
@@ -595,7 +662,7 @@ class TTSPlayer(
     }
 
     override fun getBufferedPercentage(): Int {
-        return 0
+        return 100
 
     }
 
@@ -622,7 +689,7 @@ class TTSPlayer(
     }
 
     override fun getCurrentLiveOffset(): Long {
-        return C.TIME_UNSET
+        return 0
     }
 
     @Deprecated("")
@@ -647,15 +714,15 @@ class TTSPlayer(
     }
 
     override fun getContentDuration(): Long {
-        return 100
+        return duration
     }
 
     override fun getContentPosition(): Long {
-        return 100
+        return currentPosition
     }
 
     override fun getContentBufferedPosition(): Long {
-        return 100
+        return bufferedPosition
     }
 
     override fun getAudioAttributes(): AudioAttributes {
@@ -675,7 +742,6 @@ class TTSPlayer(
 
     override fun mute() {
         Log.i("TTS_SERVICE", "mute command")
-
     }
 
     override fun unmute() {

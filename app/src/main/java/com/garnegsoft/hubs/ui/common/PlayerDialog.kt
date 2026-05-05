@@ -31,7 +31,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +52,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.core.graphics.drawable.toBitmap
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.buttons.PlayPauseButton
@@ -61,6 +64,9 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.tts.loadArticle
 import com.garnegsoft.hubs.api.tts.toArticleMetadata
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.sync.Mutex
 
 
 @OptIn(UnstableApi::class)
@@ -81,21 +87,37 @@ fun PlayerDialog(
         val articleMediaMetadata = remember(mediaMetadata) { mediaMetadata?.toArticleMetadata() }
         var isPlayerLoading by remember { mutableStateOf(false) }
 
-        LaunchedEffect(mediaController) {
-            mediaController?.addListener(
-                object : Player.Listener {
-                    override fun onMediaMetadataChanged(playerMediaMetadata: MediaMetadata) {
-                        mediaMetadata = playerMediaMetadata
-                        super.onMediaMetadataChanged(playerMediaMetadata)
-                    }
+        DisposableEffect(mediaController) {
+            val listener = object : Player.Listener {
+                override fun onMediaMetadataChanged(playerMediaMetadata: MediaMetadata) {
+                    mediaMetadata = playerMediaMetadata
+                    super.onMediaMetadataChanged(playerMediaMetadata)
+                }
 
-                    override fun onIsLoadingChanged(isLoading: Boolean) {
-                        if (isPlayerLoading && isLoading == false) {
-                            mediaController.play()
-                        }
-                        isPlayerLoading = isLoading
-                        super.onIsLoadingChanged(isPlayerLoading)
+                var playerWasLoading = false
+
+                val mutex = Mutex()
+
+                override fun onIsLoadingChanged(isLoading: Boolean) {
+                    if (playerWasLoading && !isLoading && !mutex.isLocked) {
+                        mutex.tryLock()
+                        playerWasLoading = isLoading
+                        mediaController?.play()
+                        mutex.unlock()
                     }
+                    playerWasLoading = isLoading
+                    super.onIsLoadingChanged(isPlayerLoading)
+                }
+
+                override fun onTimelineChanged(timeline: Timeline, reason: Int) {
+
+                    super.onTimelineChanged(timeline, reason)
+                }
+
+                override fun onEvents(player: Player, events: Player.Events) {
+
+                    super.onEvents(player, events)
+                }
 
 //                    var previousPlaybackState = mediaController.playbackState
 //
@@ -107,8 +129,11 @@ fun PlayerDialog(
 //
 //                        super.onPlaybackStateChanged(playbackState)
 //                    }
-                }
-            )
+            }
+            mediaController?.addListener(listener)
+            onDispose {
+                mediaController?.removeListener(listener)
+            }
         }
 
         Dialog(
@@ -201,6 +226,12 @@ fun PlayerDialog(
 
 
                     Spacer(modifier = Modifier.height(8.dp))
+
+                    val positionFlow by remember { flow { while (true) { emit(mediaController?.getCurrentPosition()); delay(1000)
+                    }} }.collectAsState(initial = 0)
+
+                    Text("Position: $positionFlow")
+
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
