@@ -8,6 +8,7 @@ import androidx.annotation.OptIn
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -169,7 +171,7 @@ fun PlayerDialog(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-
+                    val fallbackColor = MaterialTheme.colors.onSurface.copy(0.1f)
 
                     AsyncImage(
                         imageLoader = ImageLoader.Builder(LocalContext.current)
@@ -186,12 +188,18 @@ fun PlayerDialog(
                                     result
                                 })
                             }
+                            .crossfade(true)
                             .build(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(MaterialTheme.colors.onSurface.copy(0.1f)),
+                            .drawBehind {
+                                drawRect(palette?.let { Color(it.getVibrantColor(fallbackColor.toArgb())) } ?: fallbackColor)
+                                drawRect(Color.Black.copy(0.25f))
+                            }
+                            .border(width = 0.5.dp, color = MaterialTheme.colors.onSurface.copy(0.1f), shape = RoundedCornerShape(8.dp))
+                            ,
                         model = mediaMetadata?.artworkUri,
                         contentDescription = null,
                     )
