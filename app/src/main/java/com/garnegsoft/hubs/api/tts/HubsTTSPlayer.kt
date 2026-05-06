@@ -67,7 +67,11 @@ class TTSPlayer(
         Player.COMMAND_GET_METADATA,
         Player.COMMAND_GET_CURRENT_MEDIA_ITEM,
         Player.COMMAND_SET_SPEED_AND_PITCH,
-        Player.COMMAND_GET_TIMELINE
+        Player.COMMAND_GET_TIMELINE,
+        Player.COMMAND_SEEK_FORWARD,
+        Player.COMMAND_SEEK_BACK,
+        Player.COMMAND_SEEK_TO_DEFAULT_POSITION,
+        Player.COMMAND_SEEK_IN_CURRENT_MEDIA_ITEM
         )
 
     private var currentPlayerState = Player.STATE_IDLE
@@ -237,9 +241,9 @@ class TTSPlayer(
     }
 
     override fun isPlaying(): Boolean {
-        Log.i("TTS_SERVICE", "isPlaying command -> ${tts.isSpeaking}")
+        Log.i("TTS_SERVICE", "isPlaying command -> ${ttsInProgress}")
 
-        return tts.isSpeaking
+        return ttsInProgress
     }
 
     override fun getPlayerError(): PlaybackException? {
@@ -255,7 +259,7 @@ class TTSPlayer(
 
             if (currentChunkIndex >= chunks.lastIndex)
                 currentChunkIndex = 0
-            tts.setSpeechRate(2f )
+
 
             tts.speak(chunks[currentChunkIndex], TextToSpeech.QUEUE_ADD, null, currentChunkIndex.toString())
             listeners.forEach {
@@ -339,9 +343,9 @@ class TTSPlayer(
     }
 
     override fun getPlayWhenReady(): Boolean {
-        Log.i("TTS_SERVICE", "get play when ready command")
+        Log.i("TTS_SERVICE", "get play when ready command -> ${ttsInProgress}")
 
-        return tts.isSpeaking
+        return ttsInProgress
     }
 
     override fun setRepeatMode(repeatMode: Int) {
@@ -391,12 +395,16 @@ class TTSPlayer(
     }
 
     override fun seekToDefaultPosition(mediaItemIndex: Int) {
-
+        stop()
+        play()
     }
 
     override fun seekTo(positionMs: Long) {
         Log.i("TTS_SERVICE", "seek to $positionMs command")
-
+        tts.stop()
+        currentChunkIndex = positionMs.toInt().coerceIn(0, chunks.lastIndex)
+        listeners.forEach { it.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK) }
+        play()
     }
 
     override fun seekTo(mediaItemIndex: Int, positionMs: Long) {
@@ -408,7 +416,9 @@ class TTSPlayer(
     }
 
     override fun seekBack() {
-
+        pause()
+        currentChunkIndex = (currentChunkIndex - 1).coerceAtLeast(0)
+        play()
     }
 
     override fun getSeekForwardIncrement(): Long {
@@ -416,7 +426,9 @@ class TTSPlayer(
     }
 
     override fun seekForward() {
-
+        pause()
+        currentChunkIndex = (currentChunkIndex + 1).coerceAtMost(chunks.lastIndex)
+        play()
     }
 
     override fun hasPreviousMediaItem(): Boolean {
@@ -432,7 +444,7 @@ class TTSPlayer(
     }
 
     override fun seekToPrevious() {
-
+        throw UnsupportedOperationException()
     }
 
     override fun hasNextMediaItem(): Boolean {
@@ -440,10 +452,11 @@ class TTSPlayer(
     }
 
     override fun seekToNextMediaItem() {
-
+        throw UnsupportedOperationException()
     }
 
     override fun seekToNext() {
+        throw UnsupportedOperationException()
 
     }
 
@@ -727,6 +740,7 @@ class TTSPlayer(
     }
 
     override fun getAudioAttributes(): AudioAttributes {
+
         return AudioAttributes.DEFAULT
     }
 

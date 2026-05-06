@@ -25,9 +25,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
@@ -238,6 +240,14 @@ fun PlayerDialog(
                         horizontalArrangement = Arrangement.Center,
                     ) {
 
+                        IconButton(
+                            onClick = {
+                                mediaController?.seekBack()
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        }
+
                         PlayPauseButton(
                             mediaController
                         ) {
@@ -310,6 +320,14 @@ fun PlayerDialog(
                                 }
                             }
 
+                        }
+
+                        IconButton(
+                            onClick = {
+                                mediaController?.seekForward()
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.ArrowForward, contentDescription = null)
                         }
 
                     }

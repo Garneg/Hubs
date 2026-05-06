@@ -25,3 +25,18 @@ fun MediaMetadata.toArticleMetadata(): TTSPlayer.ArticleMetadata =
         articleId = extras?.getInt("articleId") ?: 0,
         offline = extras?.getBoolean("offline") ?: false
     )
+
+private var _ttsSpeed = 1f
+
+var MediaController.ttsSpeed: Float
+    get() = _ttsSpeed
+    set(value) { _ttsSpeed = value}
+
+fun MediaController.setTTSSpeed(newSpeed: Float) {
+    ttsSpeed = newSpeed
+    setPlaybackSpeed(newSpeed)
+}
+
+fun MediaController.getTTSSpeed(): Float {
+    return _ttsSpeed
+}
