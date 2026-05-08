@@ -223,7 +223,7 @@ class HubsTTSService : MediaSessionService() {
                                                         it.tagName() == "ol" -> add(it.text())
                                                         it.tagName() == "ul" -> add(it.text())
                                                         it.tagName() == "blockquote" -> add("Цитата — " + it.text())
-                                                        it.tagName() == "div" && it.child(0)
+                                                        it.tagName() == "div" && it.childrenSize() == 1 && it.child(0)
                                                             .className() == "table" -> add("Таблица пропущена")
                                                     }
                                                 }

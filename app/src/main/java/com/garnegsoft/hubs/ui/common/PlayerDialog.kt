@@ -28,6 +28,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -38,6 +39,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -71,6 +73,7 @@ import com.garnegsoft.hubs.api.tts.toArticleMetadata
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
+import kotlin.math.roundToLong
 
 
 @OptIn(UnstableApi::class)
@@ -240,21 +243,30 @@ fun PlayerDialog(
                     val positionFlow by remember { flow { while (true) { emit(mediaController?.getCurrentPosition()); delay(1000)
                     }} }.collectAsState(initial = 0)
 
-                    Text("Position: $positionFlow")
+                    val durationFlow by remember() { flow { while (true) { emit(mediaController?.getDuration()); delay(1000)
+                    }} }.collectAsState(initial = 0)
+
+                    var sliderValue by remember { mutableStateOf<Float?>(null)}
+
+                    Slider(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = sliderValue ?: positionFlow!!.toFloat(),
+                        onValueChange = {
+                            sliderValue = it
+                        },
+                        enabled = true,
+                        valueRange = 0f..durationFlow!!.toFloat(),
+                        onValueChangeFinished = {
+                            mediaController?.seekTo(sliderValue!!.roundToLong())
+                            sliderValue = null
+                        }
+                    )
 
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                     ) {
-
-                        IconButton(
-                            onClick = {
-                                mediaController?.seekBack()
-                            }
-                        ) {
-                            Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
-                        }
 
                         PlayPauseButton(
                             mediaController
@@ -329,15 +341,6 @@ fun PlayerDialog(
                             }
 
                         }
-
-                        IconButton(
-                            onClick = {
-                                mediaController?.seekForward()
-                            }
-                        ) {
-                            Icon(imageVector = Icons.Default.ArrowForward, contentDescription = null)
-                        }
-
                     }
 
                     if (article != null && articleMediaMetadata?.articleId != null && articleMediaMetadata.articleId != 0 && article.id != articleMediaMetadata?.articleId) {
