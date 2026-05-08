@@ -31,6 +31,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
@@ -68,7 +69,9 @@ import coil.compose.AsyncImage
 import coil.intercept.Interceptor
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.tts.getTTSSpeed
 import com.garnegsoft.hubs.api.tts.loadArticle
+import com.garnegsoft.hubs.api.tts.setTTSSpeed
 import com.garnegsoft.hubs.api.tts.toArticleMetadata
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
@@ -340,6 +343,40 @@ fun PlayerDialog(
                                 }
                             }
 
+                        }
+                    }
+
+                    var speechRate by remember(mediaController) { mutableFloatStateOf(mediaController!!.getTTSSpeed()) }
+
+
+                    Row(
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background((palette?.getVibrantColor(fallbackColor.toArgb())?.let { Color(it) } ?: MaterialTheme.colors.onSurface).copy(0.1f))
+                        ,
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IconButton(
+                            onClick = {
+                                mediaController?.setTTSSpeed((speechRate - 0.25f).coerceAtLeast(0.25f))
+                            }
+                        ) {
+                            Icon(painter = painterResource(R.drawable.remove), contentDescription = "slow down")
+                        }
+
+                        Text(
+                            text = "%.1f".format(speechRate) + "x",
+                            fontWeight = FontWeight.W700,
+                            fontSize = 18.sp,
+                        )
+
+                        IconButton(
+                            onClick = {
+                                mediaController?.setTTSSpeed((speechRate + 0.25f).coerceAtMost(2.5f))
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Speed up")
                         }
                     }
 
