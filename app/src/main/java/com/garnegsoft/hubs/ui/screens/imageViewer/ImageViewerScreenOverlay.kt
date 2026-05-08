@@ -1,6 +1,9 @@
 package com.garnegsoft.hubs.ui.screens.imageViewer
 
 import android.os.Build
+import android.util.Log
+import android.window.BackEvent
+import androidx.activity.BackEventCompat
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.PredictiveBackHandler
 import androidx.compose.animation.*
@@ -24,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -56,24 +60,40 @@ import kotlin.math.roundToInt
 fun ImageViewerScreenOverlay(
     state: ImageViewerState
 ) {
-    BackHandler(state.show) {
-        state.close()
-    }
-
-//    PredictiveBackHandler { progressFlow ->
+//    BackHandler(state.show) {
 //
 //    }
+
+    var backProgress by remember { mutableStateOf<BackEventCompat?>(null) }
+
+
+    PredictiveBackHandler(
+        enabled = state.show
+    ) { progressFlow ->
+        progressFlow.collect { progress ->
+            Log.i("back progress", "${progress.progress}")
+            Log.i("back progress", "side: ${progress.swipeEdge}")
+            backProgress = progress
+        }
+        state.close()
+
+    }
+
+
+
 
     val context = LocalContext.current
 
     val systemUiController = rememberSystemUiController()
     val systemDarkThemeEnabled = isSystemInDarkTheme()
-    val isAppDarkThemeEnabled by HubsDataStore.Settings.Theme.ColorSchemeMode.getFlow(context)
-        .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
-        .map {
-            it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark ||
-                    ((it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined || it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined) && systemDarkThemeEnabled)
-        }
+    val isAppDarkThemeEnabled by remember {
+        HubsDataStore.Settings.Theme.ColorSchemeMode.getFlow(context)
+            .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+            .map {
+                it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark ||
+                        ((it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined || it == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined) && systemDarkThemeEnabled)
+            }
+    }
         .collectAsState(null)
 
     LaunchedEffect(state.show, block = {
@@ -114,6 +134,11 @@ fun ImageViewerScreenOverlay(
                 + fadeOut(animationSpec = tween(250)),
 
         ) {
+        DisposableEffect(Unit) {
+            onDispose {
+                backProgress = null
+            }
+        }
         var offset by remember {
             mutableStateOf(0f)
         }
@@ -123,7 +148,7 @@ fun ImageViewerScreenOverlay(
         }
 
         val backgroundAlpha by remember {
-            derivedStateOf { 1f - abs(offset) / viewportHeight }
+            derivedStateOf { 1f - (abs(offset) / viewportHeight) - ((backProgress?.progress ?: 0f) * 0.5f) }
         }
         var isDragging by remember { mutableStateOf(false) }
 
@@ -199,7 +224,21 @@ fun ImageViewerScreenOverlay(
                 ZoomableAsyncImage(
                     modifier = Modifier
                         .fillMaxSize()
-                        .offset { IntOffset(0, (if (isDragging) offset else animatedOffset).roundToInt()) },
+                        .offset {
+                            IntOffset(0, (if (isDragging) offset else animatedOffset).roundToInt())
+                        }
+                        .graphicsLayer {
+                            scaleX = 1f - (backProgress?.progress ?: 0f) * 0.4f
+                            scaleY = 1f - (backProgress?.progress ?: 0f) * 0.4f
+                            translationX = backProgress?.swipeEdge?.let {
+                                if (it == 0) {
+                                    (backProgress?.progress ?: 0f) * (size.width * 0.5f)
+                                } else {
+                                    (backProgress?.progress ?: 0f) * (-size.width * 0.5f)
+                                }
+                            } ?: 0f
+
+                        },
                     state = zoomableImageState,
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(state.imageModel)
