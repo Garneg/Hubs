@@ -744,6 +744,15 @@ fun parseElement(
                                             table-layout: fixed;
                                             width: auto;
                                         }
+										a {
+											color: rgb(88, 132, 185);
+											text-decoration: none;
+										}
+										a:hover {
+											background-color: transparent;
+											-webkit-tap-highlight-color: transparent;
+										}
+										
                                     """.trimIndent()
 								)
 							)
