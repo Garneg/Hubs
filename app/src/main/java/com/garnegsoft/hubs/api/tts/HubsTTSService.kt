@@ -109,7 +109,6 @@ class HubsTTSService : MediaSessionService() {
     var mediaSession: MediaSession? = null
 
 
-
     override fun onBind(p0: Intent?): IBinder? {
         return super.onBind(p0)
     }
@@ -152,7 +151,7 @@ class HubsTTSService : MediaSessionService() {
 
         Log.i("TTS", "TTS Initialized")
         ttsInitialized = true
-                val audioManager = AudioManagerCompat.getAudioManager(this)
+        val audioManager = AudioManagerCompat.getAudioManager(this)
 
         player = TTSPlayer(tts!!, audioManager)
         player?.loadChunks(buildList { addAll(LoremIpsum(200).values.first().split(" ")) })
@@ -162,8 +161,17 @@ class HubsTTSService : MediaSessionService() {
                 .build()
         )
 
-        val activityPendingIntent = PendingIntent.getActivity(this, 676767, Intent(Intent.ACTION_VIEW).apply { setClass(this@HubsTTSService,
-            MainActivity::class.java) }, PendingIntent.FLAG_IMMUTABLE)
+        val activityPendingIntent = PendingIntent.getActivity(
+            this, 676767,
+            Intent(Intent.ACTION_VIEW).apply {
+                setClass(
+                    this@HubsTTSService,
+                    MainActivity::class.java
+                )
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_IMMUTABLE
+        )
 
         mediaSession = MediaSession.Builder(this@HubsTTSService, player!!)
             .setId("hubs_article_tts" + System.currentTimeMillis().toString())
@@ -208,11 +216,15 @@ class HubsTTSService : MediaSessionService() {
                                                 .forEach {
                                                     when {
                                                         it.tagName() == "p" -> add(it.text())
-                                                        it.tagName().startsWith("h") && it.tagName().length == 2 -> add(it.text())
+                                                        it.tagName().startsWith("h") && it.tagName().length == 2 -> add(
+                                                            it.text()
+                                                        )
+
                                                         it.tagName() == "ol" -> add(it.text())
                                                         it.tagName() == "ul" -> add(it.text())
                                                         it.tagName() == "blockquote" -> add("Цитата — " + it.text())
-                                                        it.tagName() == "div" && it.child(0).className() == "table" -> add("Таблица пропущена")
+                                                        it.tagName() == "div" && it.child(0)
+                                                            .className() == "table" -> add("Таблица пропущена")
                                                     }
                                                 }
                                         }
@@ -241,7 +253,6 @@ class HubsTTSService : MediaSessionService() {
         setMediaNotificationProvider(
             DefaultMediaNotificationProvider(this).apply { setSmallIcon(R.drawable.pin) }
         )
-
 
 
     }
