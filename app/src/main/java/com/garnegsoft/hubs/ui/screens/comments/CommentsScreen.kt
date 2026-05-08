@@ -3,6 +3,8 @@ package com.garnegsoft.hubs.ui.screens.comments
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInCubic
+import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -56,6 +58,8 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 
@@ -119,7 +123,8 @@ fun CommentsScreen(
         if (!viewModel.commentsData.isInitialized) {
             launch(Dispatchers.IO) {
                 viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
-
+            }
+            launch(Dispatchers.IO) {
                 CommentsListController.getComments(parentPostId)?.let {
                     viewModel.commentsData.postValue(it)
                 }
@@ -215,27 +220,28 @@ fun CommentsScreen(
                         val comment = answeringComment
                         Column {
                             Divider()
-                            Row(modifier = Modifier
-								.clickable {
-									val index =
-										commentsData?.comments?.indexOf(answeringComment) ?: 0
-									coroutineScope.launch {
-										lazyListState.animateScrollToItem(index)
-									}
-								}
-								.background(MaterialTheme.colors.surface)
-								.padding(4.dp)
-								.padding(start = 4.dp)
-								.height(IntrinsicSize.Min),
+                            Row(
+                                modifier = Modifier
+                                    .clickable {
+                                        val index =
+                                            commentsData?.comments?.indexOf(answeringComment) ?: 0
+                                        coroutineScope.launch {
+                                            lazyListState.animateScrollToItem(index)
+                                        }
+                                    }
+                                    .background(MaterialTheme.colors.surface)
+                                    .padding(4.dp)
+                                    .padding(start = 4.dp)
+                                    .height(IntrinsicSize.Min),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
                                 Spacer(
                                     modifier = Modifier
-										.width(4.dp)
-										.fillMaxHeight()
-										.clip(CircleShape)
-										.background(MaterialTheme.colors.secondary)
+                                        .width(4.dp)
+                                        .fillMaxHeight()
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colors.secondary)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
@@ -301,9 +307,11 @@ fun CommentsScreen(
 //				}
 //			})
 
-        Box(modifier = Modifier
-			.padding(it)
-			.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
             Column(
                 modifier = Modifier
 
@@ -326,29 +334,32 @@ fun CommentsScreen(
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
 
-                    if (articleSnippet != null) {
+                    if (articleSnippet != null && articleCardConfiguration != null) {
                         item {
 
-                            articleCardConfiguration?.let {
 
-                                Box(
-                                    modifier = Modifier.animateItem()
-                                ) {
-                                    ArticleCard(
-                                        cardData = articleSnippet,
-                                        onClick = onArticleClicked,
-                                        configuration = it,
-                                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-                                        onCommentsClick = { },
+                            Box(
+                                modifier = Modifier.animateItem(
+                                    tween(
+                                        durationMillis = 150,
+                                        delayMillis = 0,
+                                        easing = EaseInCubic
                                     )
-                                }
-                                Spacer(modifier = Modifier.height(8.dp))
-
+                                )
+                            ) {
+                                ArticleCard(
+                                    cardData = articleSnippet,
+                                    onClick = onArticleClicked,
+                                    configuration = articleCardConfiguration,
+                                    onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+                                    onCommentsClick = { },
+                                )
                             }
+                            Spacer(modifier = Modifier.height(8.dp))
 
                         }
                     }
-                    if (allowDisplayFullContent) {
+                    if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet)) {
                         itemsIndexed(
                             items = commentsData?.pinnedComments ?: emptyList(),
                         ) { index, commentId ->
@@ -421,14 +432,18 @@ fun CommentsScreen(
                         ) { index, comment ->
                             Box(
                                 modifier = Modifier
-                                    .animateItem(tween(5000))
+                                    .animateItem(
+                                        tween(
+                                            durationMillis = 150,
+                                            delayMillis = index * 50,
+                                            easing = EaseInCubic
+                                        )
+                                    )
                             ) {
                                 if (!screenState.collapsedComments.contains(comment.id)) {
                                     if (screenState.collapsedCommentsParents.contains(comment.id)) {
                                         CollapsedThreadHeaderComment(
                                             modifier = Modifier
-
-                                                .animateItem(tween(5000))
                                                 .padding(start = 20.dp * comment.level.coerceAtMost(5))
                                                 .padding(bottom = 8.dp),
                                             onExpandClick = { screenState.expandThread(comment.id) },
@@ -564,7 +579,7 @@ fun CommentsScreen(
             }
             val articleHeaderOffsetAnimation by animateFloatAsState(
                 targetValue =
-                if (showArticleHeader) 0f else 1f
+                    if (showArticleHeader) 0f else 1f
             )
             articleSnippet?.let {
                 Layout(
@@ -572,16 +587,16 @@ fun CommentsScreen(
                         Box {
                             Row(
                                 modifier = Modifier
-									.clickable {
-										coroutineScope.launch {
-											lazyListState.animateShortScrollToItem(0)
-										}
-									}
-									.background(MaterialTheme.colors.surface)
-									.fillMaxWidth()
+                                    .clickable {
+                                        coroutineScope.launch {
+                                            lazyListState.animateShortScrollToItem(0)
+                                        }
+                                    }
+                                    .background(MaterialTheme.colors.surface)
+                                    .fillMaxWidth()
 //                    .height(50.dp)
                                     .height(IntrinsicSize.Min)
-									.padding(8.dp),
+                                    .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
@@ -623,11 +638,12 @@ fun CommentsScreen(
 
             }
             screenState.newCommentsNavigationControlState?.let {
-                Box(modifier = Modifier
-					.align(Alignment.BottomCenter)
-					.pointerInput(Unit) {}
-					.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-					.padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .pointerInput(Unit) {}
+                        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                        .padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
                 ) {
 
                     NewCommentsControl(state = screenState.newCommentsNavigationControlState!!)

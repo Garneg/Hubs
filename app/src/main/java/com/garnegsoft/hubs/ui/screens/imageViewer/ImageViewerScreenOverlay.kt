@@ -60,6 +60,10 @@ fun ImageViewerScreenOverlay(
         state.close()
     }
 
+//    PredictiveBackHandler { progressFlow ->
+//
+//    }
+
     val context = LocalContext.current
 
     val systemUiController = rememberSystemUiController()
