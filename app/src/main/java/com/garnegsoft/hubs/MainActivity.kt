@@ -89,7 +89,7 @@ class MainActivity : ComponentActivity() {
         val ttsSpeechRate = HubsDataStore.Settings.TextToSpeech.SpeechRate.getFlow(this)
 
 
-        lifecycleScope.launch(Dispatchers.IO) {
+        runBlocking(Dispatchers.IO) {
             launch(Dispatchers.IO) {
                 authStatus = isAuthorizedFlow.firstOrNull()
                 Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
