@@ -66,6 +66,7 @@ import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.LocalMediaController
 import com.garnegsoft.hubs.api.tts.TTSBinder
+import com.garnegsoft.hubs.api.tts.toArticleMetadata
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
@@ -143,14 +144,18 @@ fun ArticleScreen(
     var showTtsDialog by remember { mutableStateOf(false) }
 //    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = LocalMediaController.current)
 
-    PlayerDialog(
-        show = showTtsDialog,
-        onDismissRequest = { showTtsDialog = false },
-        mediaController = LocalMediaController.current,
-        onTitleClick = {},
-        onAuthorClick = {},
-        article = article
-    )
+    val mediaController = LocalMediaController.current
+    mediaController?.let {
+        PlayerDialog(
+            show = showTtsDialog,
+            onDismissRequest = { showTtsDialog = false },
+            mediaController = mediaController,
+            onTitleClick = {},
+            onAuthorClick = { onAuthorClick(mediaController.mediaMetadata.toArticleMetadata().author)},
+            article = article,
+            onCurrentPlayingClick = { onArticleClick(mediaController.mediaMetadata.toArticleMetadata().articleId) }
+        )
+    }
 
     LaunchedEffect(key1 = Unit, block = {
         if (!viewModel.article.isInitialized) {

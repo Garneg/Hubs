@@ -465,7 +465,9 @@ class TTSPlayer(
     }
 
     override fun setPlaybackSpeed(speed: Float) {
+        pause()
         val result = tts.setSpeechRate(speed)
+        play()
         Log.i("TTS_SERVICE", "setSpeechRate to $speed; result: $result")
     }
 

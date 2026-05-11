@@ -146,6 +146,12 @@ fun PlayerDialog(
             }
         }
 
+        LaunchedEffect(Unit) {
+            if (article?.id != null && articleMediaMetadata?.articleId != article.id){
+                mediaController?.loadArticle(article.id)
+            }
+        }
+
         Dialog(
             onDismissRequest = onDismissRequest,
         ) {
@@ -169,6 +175,7 @@ fun PlayerDialog(
                             MaterialTheme.colors.onSurface.copy(0.5f)
                         }
                     )
+
                     Text(
                         text = "Прослушивание публикации",
                         color = fooColor,
@@ -346,74 +353,86 @@ fun PlayerDialog(
                         }
                     }
 
+                    Spacer(modifier = Modifier.height(16.dp))
+
                     var speechRate by remember(mediaController) { mutableFloatStateOf(mediaController!!.getTTSSpeed()) }
 
 
                     Row(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background((palette?.getVibrantColor(fallbackColor.toArgb())?.let { Color(it) } ?: MaterialTheme.colors.onSurface).copy(0.1f))
-                        ,
+                            .background((palette?.getVibrantColor(fallbackColor.toArgb())?.let { Color(it) } ?: MaterialTheme.colors.onSurface).copy(0.15f)),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         IconButton(
                             onClick = {
-                                mediaController?.setTTSSpeed((speechRate - 0.25f).coerceAtLeast(0.25f))
+                                speechRate = (speechRate - 0.25f).coerceAtLeast(0.25f)
+                                mediaController?.setTTSSpeed(speechRate)
                             }
                         ) {
-                            Icon(painter = painterResource(R.drawable.remove), contentDescription = "slow down")
+                            Icon(
+                                painter = painterResource(R.drawable.remove),
+                                contentDescription = "slow down",
+                                tint = MaterialTheme.colors.onSurface
+                            )
                         }
 
                         Text(
-                            text = "%.1f".format(speechRate) + "x",
+                            text = "%.2f".format(speechRate) + "x",
                             fontWeight = FontWeight.W700,
                             fontSize = 18.sp,
+                            color = MaterialTheme.colors.onSurface
                         )
 
                         IconButton(
                             onClick = {
-                                mediaController?.setTTSSpeed((speechRate + 0.25f).coerceAtMost(2.5f))
+                                speechRate = (speechRate + 0.25f).coerceAtMost(2.5f)
+                                mediaController?.setTTSSpeed(speechRate)
                             }
                         ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Speed up")
-                        }
-                    }
-
-                    if (article != null && articleMediaMetadata?.articleId != null && articleMediaMetadata.articleId != 0 && article.id != articleMediaMetadata?.articleId) {
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Row(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .clickable(
-                                    enabled = onCurrentPlayingClick != null
-                                ) {
-                                    onCurrentPlayingClick?.invoke()
-                                }
-                                .background(MaterialTheme.colors.primary)
-                                .padding(vertical = 4.dp, horizontal = 12.dp)
-                                .width(IntrinsicSize.Min),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = "Воспроизводится другая статья",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.W500,
-                                color = MaterialTheme.colors.onPrimary,
-                                textAlign = TextAlign.Center
-                                )
-                            Spacer(modifier = Modifier.width(4.dp))
-
                             Icon(
-                                imageVector = Icons.Default.ArrowForward,
-                                contentDescription = "go to article that is playing now",
-                                tint = MaterialTheme.colors.onPrimary
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Speed up",
+                                tint = MaterialTheme.colors.onSurface
                             )
                         }
-
                     }
+
+//                    if (article != null && articleMediaMetadata?.articleId != null && articleMediaMetadata.articleId != 0 && article.id != articleMediaMetadata?.articleId) {
+//                        Spacer(modifier = Modifier.height(12.dp))
+//
+//                        Row(
+//                            modifier = Modifier
+//                                .clip(CircleShape)
+//                                .clickable(
+//                                    enabled = onCurrentPlayingClick != null
+//                                ) {
+//                                    onCurrentPlayingClick?.invoke()
+//                                }
+//                                .background(MaterialTheme.colors.primary)
+//                                .padding(vertical = 4.dp, horizontal = 12.dp)
+//                                .width(IntrinsicSize.Min),
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+//                            Text(
+//                                modifier = Modifier.weight(1f),
+//                                text = "Воспроизводится другая статья",
+//                                fontSize = 14.sp,
+//                                fontWeight = FontWeight.W500,
+//                                color = MaterialTheme.colors.onPrimary,
+//                                textAlign = TextAlign.Center
+//                                )
+//                            Spacer(modifier = Modifier.width(4.dp))
+//
+//                            Icon(
+//                                imageVector = Icons.Default.ArrowForward,
+//                                contentDescription = "go to article that is playing now",
+//                                tint = MaterialTheme.colors.onPrimary
+//                            )
+//                        }
+//
+//                    }
                 }
 
 

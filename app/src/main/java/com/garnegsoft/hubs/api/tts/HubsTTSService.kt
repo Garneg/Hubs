@@ -210,7 +210,9 @@ class HubsTTSService : MediaSessionService() {
                                         val articleText = buildList {
                                             add(article.title)
 
-                                            Jsoup.parse(article.contentHtml).body()
+
+
+                                            Jsoup.parse(filterText(Jsoup.parse(article.contentHtml).html())).body()
                                                 .child(0)
                                                 .children()
                                                 .forEach {
@@ -255,6 +257,11 @@ class HubsTTSService : MediaSessionService() {
         )
 
 
+    }
+
+
+    fun filterText(text: String): String {
+        return text.filter { it.category != CharCategory.SURROGATE }
     }
 
 
