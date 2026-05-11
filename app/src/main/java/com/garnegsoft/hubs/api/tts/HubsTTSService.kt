@@ -118,8 +118,6 @@ class HubsTTSService : MediaSessionService() {
         super.onCreate()
         setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_NEVER)
 
-
-
         tts = TextToSpeech(applicationContext) { status ->
             if (status == TextToSpeech.SUCCESS) {
 

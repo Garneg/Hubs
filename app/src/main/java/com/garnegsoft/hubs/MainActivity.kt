@@ -38,6 +38,10 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
+import com.garnegsoft.hubs.api.tts.setTTSSpeed
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 
 class MainActivity : ComponentActivity() {
@@ -72,6 +76,7 @@ class MainActivity : ComponentActivity() {
 
         val cookiesFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Cookies)
         val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
+        val ttsSpeechRate = HubsDataStore.Settings.TextToSpeech.SpeechRate.getFlow(this)
 
         runBlocking {
             authStatus = isAuthorizedFlow.firstOrNull()
@@ -93,6 +98,9 @@ class MainActivity : ComponentActivity() {
 
         mediaControllerFuture.addListener({
             mediaController.value = mediaControllerFuture.get()
+            lifecycleScope.launch {
+                mediaController.value?.setTTSSpeed(ttsSpeechRate.first())
+            }
         }, ContextCompat.getMainExecutor(this))
 
 

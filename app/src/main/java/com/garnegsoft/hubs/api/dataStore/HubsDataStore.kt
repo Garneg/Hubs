@@ -56,6 +56,10 @@ object HubsDataStore {
 //			val TextWrapMode = intPreferencesKey("article_text_wrap")
 //			val Indent = intPreferencesKey("article_indent")
 		}
+
+		object TextToSpeech {
+			val SpeechRate = hubsFloatPreference("tts_speech_rate", 1f)
+		}
 		
 		object ArticleCard {
 			val TextSnippetFontSize = hubsFloatPreference("article_card_snippet_font_size", 16f)

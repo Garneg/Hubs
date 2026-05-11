@@ -43,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,12 +70,15 @@ import coil.compose.AsyncImage
 import coil.intercept.Interceptor
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.tts.getTTSSpeed
 import com.garnegsoft.hubs.api.tts.loadArticle
 import com.garnegsoft.hubs.api.tts.setTTSSpeed
 import com.garnegsoft.hubs.api.tts.toArticleMetadata
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlin.math.roundToLong
 
@@ -90,6 +94,8 @@ fun PlayerDialog(
     onCurrentPlayingClick: (() -> Unit)? = null,
     article: Article? = null
 ) {
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     if (show) {
         var palette by remember { mutableStateOf<Palette?>(null) }
 
@@ -369,6 +375,11 @@ fun PlayerDialog(
                             onClick = {
                                 speechRate = (speechRate - 0.25f).coerceAtLeast(0.25f)
                                 mediaController?.setTTSSpeed(speechRate)
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    HubsDataStore.Settings.edit(context, HubsDataStore.Settings.TextToSpeech.SpeechRate, speechRate)
+                                }
+
+
                             }
                         ) {
                             Icon(
@@ -389,6 +400,9 @@ fun PlayerDialog(
                             onClick = {
                                 speechRate = (speechRate + 0.25f).coerceAtMost(2.5f)
                                 mediaController?.setTTSSpeed(speechRate)
+                                coroutineScope.launch(Dispatchers.IO) {
+                                    HubsDataStore.Settings.edit(context, HubsDataStore.Settings.TextToSpeech.SpeechRate, speechRate)
+                                }
                             }
                         ) {
                             Icon(
