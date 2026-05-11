@@ -374,7 +374,10 @@ fun PlayerDialog(
                         IconButton(
                             onClick = {
                                 speechRate = (speechRate - 0.25f).coerceAtLeast(0.25f)
+                                mediaController?.pause()
                                 mediaController?.setTTSSpeed(speechRate)
+                                mediaController?.play()
+
                                 coroutineScope.launch(Dispatchers.IO) {
                                     HubsDataStore.Settings.edit(context, HubsDataStore.Settings.TextToSpeech.SpeechRate, speechRate)
                                 }
@@ -399,7 +402,10 @@ fun PlayerDialog(
                         IconButton(
                             onClick = {
                                 speechRate = (speechRate + 0.25f).coerceAtMost(2.5f)
+                                mediaController?.pause()
                                 mediaController?.setTTSSpeed(speechRate)
+                                mediaController?.play()
+
                                 coroutineScope.launch(Dispatchers.IO) {
                                     HubsDataStore.Settings.edit(context, HubsDataStore.Settings.TextToSpeech.SpeechRate, speechRate)
                                 }

@@ -256,7 +256,7 @@ class TTSPlayer(
         Log.i("TTS_SERVICE", "Play command")
         if (chunks.isNotEmpty()) {
             currentPlayerState = Player.STATE_READY
-
+            ttsInProgress = true
             if (currentChunkIndex >= chunks.lastIndex)
                 currentChunkIndex = 0
 
@@ -296,6 +296,10 @@ class TTSPlayer(
 
                 override fun onError(utteranceId: String?) {
                     Log.e("ttss", "onError:$utteranceId")
+                    ttsInProgress = false
+                    listeners.forEach {
+                        it.onPlayerError(PlaybackException("TTS error", null, PlaybackException.ERROR_CODE_DECODING_FAILED))
+                    }
                 }
 
                 override fun onStart(utteranceId: String?) {
@@ -465,15 +469,8 @@ class TTSPlayer(
     }
 
     override fun setPlaybackSpeed(speed: Float) {
-        if (isPlaying) {
-            pause()
-            val result = tts.setSpeechRate(speed)
-            play()
-            Log.i("TTS_SERVICE", "setSpeechRate to $speed; result: $result")
-        } else {
-            tts.setSpeechRate(speed)
-        }
-
+        val result = tts.setSpeechRate(speed)
+        Log.i("TTS_SERVICE", "setSpeechRate to $speed; result: $result")
     }
 
     override fun getPlaybackParameters(): PlaybackParameters {
