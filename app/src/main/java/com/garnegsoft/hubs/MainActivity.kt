@@ -40,17 +40,24 @@ import kotlinx.coroutines.runBlocking
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import com.garnegsoft.hubs.api.tts.setTTSSpeed
+import com.google.common.base.Stopwatch
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        val stopwatch = Stopwatch.createStarted()
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        Log.i("Runblocking", "after onCreate: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
 
+        enableEdgeToEdge()
         // Disable crashlytics if it's debug version
         FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(!BuildConfig.DEBUG)
         intent.extras?.let {
@@ -71,6 +78,9 @@ class MainActivity : ComponentActivity() {
             FirebaseAnalytics.getInstance(this).setAnalyticsCollectionEnabled(false)
         }
 
+        Log.i("Runblocking", "after firebase: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
+
+
 
         var authStatus: Boolean? by mutableStateOf(null)
 
@@ -78,31 +88,40 @@ class MainActivity : ComponentActivity() {
         val isAuthorizedFlow = HubsDataStore.Auth.getValueFlow(this, HubsDataStore.Auth.Authorized)
         val ttsSpeechRate = HubsDataStore.Settings.TextToSpeech.SpeechRate.getFlow(this)
 
-        runBlocking {
-            authStatus = isAuthorizedFlow.firstOrNull()
-            Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
-            HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            launch(Dispatchers.IO) {
+                authStatus = isAuthorizedFlow.firstOrNull()
+                Firebase.crashlytics.setCustomKey("authorized", authStatus ?: false)
+            }
+            launch(Dispatchers.IO) {
+                HabrApi.initializeWithCookies(this@MainActivity, cookiesFlow.firstOrNull() ?: "")
+            }
         }
+
+        Log.i("Runblocking", "after launches: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
+
+
 
         val updateMeData = OneTimeWorkRequestBuilder<MeDataUpdateWorker>()
             .setConstraints(Constraints(requiredNetworkType = NetworkType.CONNECTED))
             .build()
         WorkManager.getInstance(this).enqueue(updateMeData)
 
+        Log.i("Runblocking", "after workmanager: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
 
         intent.dataString?.let { Log.e("intentData", it) }
 
-        val sessionToken = SessionToken(this, ComponentName(this, HubsTTSService::class.java))
-        val mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
+        Log.i("Runblocking", "before media controller builder: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
+
+
         val mediaController = mutableStateOf<MediaController?>(null)
 
-        mediaControllerFuture.addListener({
-            mediaController.value = mediaControllerFuture.get()
-            lifecycleScope.launch {
-                mediaController.value?.setTTSSpeed(ttsSpeechRate.first())
-            }
-        }, ContextCompat.getMainExecutor(this))
 
+
+        val elsapsed = stopwatch.stop().elapsed(TimeUnit.MILLISECONDS)
+
+        Log.i("Runblocking", "elapsed time: $elsapsed")
 
         setContent {
             val cookies by cookiesFlow.collectAsState(initial = "")
@@ -112,9 +131,11 @@ class MainActivity : ComponentActivity() {
             ) {
 
                 key(cookies) {
-                    val themeMode by HubsDataStore.Settings
-                        .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
-                        .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+                    val themeMode by remember {
+                        HubsDataStore.Settings
+                            .getValueFlow(this, HubsDataStore.Settings.Theme.ColorSchemeMode)
+                            .run { HubsDataStore.Settings.Theme.ColorSchemeMode.mapValues(this) }
+                    }
                         .collectAsState(initial = null)
 
                     if (themeMode != null && authStatus != null) {
@@ -137,6 +158,15 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+        val sessionToken = SessionToken(this, ComponentName(this, HubsTTSService::class.java))
+        val mediaControllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
+        mediaControllerFuture.addListener({
+            mediaController.value = mediaControllerFuture.get()
+            lifecycleScope.launch {
+                mediaController.value?.setTTSSpeed(ttsSpeechRate.first())
+            }
+        }, ContextCompat.getMainExecutor(this))
+
         Log.e("ExternalLink", intent.data.toString())
 
     }
