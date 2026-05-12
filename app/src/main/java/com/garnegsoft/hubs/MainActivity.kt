@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.Player
 import com.garnegsoft.hubs.api.tts.setTTSSpeed
 import com.google.common.base.Stopwatch
 import kotlinx.coroutines.Dispatchers
@@ -165,6 +166,18 @@ class MainActivity : ComponentActivity() {
             lifecycleScope.launch {
                 mediaController.value?.setTTSSpeed(ttsSpeechRate.first())
             }
+            mediaController.value?.addListener(
+                object : Player.Listener {
+                    override fun onEvents(player: Player, events: Player.Events) {
+                        for (i in 0..<events.size()) {
+                            Log.i("Player event", "${events[i]}")
+                            Player.EVENT_PLAYBACK_STATE_CHANGED
+                        }
+                        super.onEvents(player, events)
+                    }
+                }
+
+            )
         }, ContextCompat.getMainExecutor(this))
 
         Log.e("ExternalLink", intent.data.toString())

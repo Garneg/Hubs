@@ -4,11 +4,13 @@ import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.graphics.BitmapFactory
 import android.media.AudioManager
+import android.net.Uri
 import android.os.Binder
 import android.os.Build
 import android.os.Bundle
@@ -66,6 +68,7 @@ import androidx.media3.common.audio.AudioManagerCompat.AUDIOFOCUS_GAIN
 import androidx.media3.common.text.CueGroup
 import androidx.media3.common.util.Size
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.DefaultMediaNotificationProvider
 import androidx.media3.session.MediaNotification
 import androidx.media3.session.MediaSession
@@ -159,6 +162,15 @@ class HubsTTSService : MediaSessionService() {
                 .build()
         )
 
+
+        val exoplayer = ExoPlayer.Builder(this)
+            .setName("silent")
+            .build()
+
+        val mediaItem = MediaItem.fromUri(Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.silent.toString()).build())
+
+
+
         val activityPendingIntent = PendingIntent.getActivity(
             this, 676767,
             Intent(Intent.ACTION_VIEW).apply {
@@ -178,6 +190,15 @@ class HubsTTSService : MediaSessionService() {
             .setCallback(
                 object : MediaSession.Callback {
 
+                    override fun onMediaButtonEvent(
+                        session: MediaSession,
+                        controllerInfo: MediaSession.ControllerInfo,
+                        intent: Intent
+                    ): Boolean {
+                        Log.i("MediaButtonEvent", controllerInfo.packageName)
+                        return super.onMediaButtonEvent(session, controllerInfo, intent)
+                    }
+
                     override fun onConnect(
                         session: MediaSession,
                         controller: MediaSession.ControllerInfo
@@ -191,6 +212,8 @@ class HubsTTSService : MediaSessionService() {
                             .setAvailableSessionCommands(customCommands)
                             .build()
                     }
+
+
 
                     override fun onCustomCommand(
                         session: MediaSession,

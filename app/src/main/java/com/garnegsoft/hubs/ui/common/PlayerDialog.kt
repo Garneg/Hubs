@@ -131,7 +131,6 @@ fun PlayerDialog(
                 }
 
                 override fun onEvents(player: Player, events: Player.Events) {
-
                     super.onEvents(player, events)
                 }
 
