@@ -3,6 +3,10 @@ package com.garnegsoft.hubs.ui.screens.user
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -55,6 +60,17 @@ internal fun UserProfile(
 	viewModel: UserScreenViewModel
 ) {
 	val user by viewModel.user.observeAsState()
+	val userTransition = updateTransition(user != null)
+	val userCardAlphaAnimated by userTransition.animateFloat(
+		{ tween(durationMillis = 300) }
+	) {
+		if (it) 1f else 0f
+	}
+	val userCardOffsetAnimated by userTransition.animateDp(
+		{ tween(durationMillis = 300) }
+	) {
+		if (it) 0.dp else (-12).dp
+	}
 	val isRefreshing by viewModel.isRefreshingUser.observeAsState(false)
 	RefreshableContainer(onRefresh = viewModel::refreshUser, refreshing = isRefreshing) {
 		user?.let { user ->
@@ -65,6 +81,10 @@ internal fun UserProfile(
 			) {
 				Column(
 					modifier = Modifier
+						.graphicsLayer {
+							alpha = userCardAlphaAnimated
+							translationY = userCardOffsetAnimated.toPx()
+						}
 						.padding(8.dp)
 						.navigationBarsPadding(),
 					verticalArrangement = Arrangement.spacedBy(8.dp)
