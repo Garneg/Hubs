@@ -10,6 +10,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -111,7 +112,7 @@ fun CommentsScreen(
 
     val commentsData by viewModel.commentsData.observeAsState()
     val articleSnippet =
-        viewModel.parentPostSnippet.map { it.toArticleCardData() }.observeAsState().value
+        viewModel.parentPostSnippet.map { it?.toArticleCardData() }.observeAsState().value
     val lazyListState = rememberLazyListState()
 
     val screenState =
@@ -192,7 +193,7 @@ fun CommentsScreen(
                 elevation = 0.dp,
                 title = {
                     Text("Комментарии")
-                    var commentsCountSize by remember { mutableStateOf(IntSize.Zero)}
+                    var commentsCountSize by remember { mutableStateOf(IntSize.Zero) }
                     val transition = updateTransition(viewModel.parentPostSnippet.isInitialized)
                     val commentsCountOffset by transition.animateFloat(
                         transitionSpec = { tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad) }
@@ -359,7 +360,6 @@ fun CommentsScreen(
         ) {
             Column(
                 modifier = Modifier
-
                     .imePadding()
             ) {
                 val articleCardConfiguration =
@@ -379,32 +379,32 @@ fun CommentsScreen(
                     verticalArrangement = Arrangement.spacedBy(0.dp)
                 ) {
 
-                    if (articleSnippet != null && articleCardConfiguration != null) {
-                        item {
 
+                    item {
 
-                            Box(
-                                modifier = Modifier.animateItem(
-                                    tween(
-                                        durationMillis = 150,
-                                        delayMillis = 0,
-                                        easing = EaseInCubic
-                                    )
-                                )
+                        if (articleCardConfiguration != null) {
+
+                            androidx.compose.animation.AnimatedVisibility(
+                                visible = articleSnippet != null,
+                                enter = fadeIn(tween(durationMillis = 250, easing = EaseInCubic)),
+                                exit = fadeOut()
                             ) {
-                                ArticleCard(
-                                    cardData = articleSnippet,
-                                    onClick = onArticleClicked,
-                                    configuration = articleCardConfiguration,
-                                    onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-                                    onCommentsClick = { },
-                                )
+                                articleSnippet?.let {
+                                    ArticleCard(
+                                        cardData = articleSnippet,
+                                        onClick = onArticleClicked,
+                                        configuration = articleCardConfiguration,
+                                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+                                        onCommentsClick = { },
+                                    )
+                                }
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+
                     }
-                    if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet)) {
+
+                    if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && articleCardConfiguration != null) {
                         itemsIndexed(
                             items = commentsData?.pinnedComments ?: emptyList(),
                         ) { index, commentId ->
@@ -479,25 +479,26 @@ fun CommentsScreen(
                                 modifier = Modifier
                                     .animateItem(
                                         tween(
-                                            durationMillis = 150,
-                                            delayMillis = index * 50,
+                                            durationMillis = 180,
+                                            delayMillis = index * 70,
                                             easing = EaseInCubic
                                         )
                                     )
-                            ) {if (!screenState.collapsedComments.contains(comment.id)) {
-                                if (screenState.collapsedCommentsParents.contains(comment.id)) {
-                                    CollapsedThreadHeaderComment(
-                                        modifier = Modifier
-                                            .padding(start = 20.dp * comment.level.coerceAtMost(5))
-                                            .padding(bottom = 8.dp),
-                                        onExpandClick = { screenState.expandThread(comment.id) },
-                                        comment = comment
-                                    )
-                                } else {
-                                    Column(horizontalAlignment = Alignment.End) {
-                                        val parentComment = remember {
-                                            commentsData!!.comments.firstOrNull { com -> com.id == comment.parentCommentId }
-                                        }
+                            ) {
+                                if (!screenState.collapsedComments.contains(comment.id)) {
+                                    if (screenState.collapsedCommentsParents.contains(comment.id)) {
+                                        CollapsedThreadHeaderComment(
+                                            modifier = Modifier
+                                                .padding(start = 20.dp * comment.level.coerceAtMost(5))
+                                                .padding(bottom = 8.dp),
+                                            onExpandClick = { screenState.expandThread(comment.id) },
+                                            comment = comment
+                                        )
+                                    } else {
+                                        Column(horizontalAlignment = Alignment.End) {
+                                            val parentComment = remember {
+                                                commentsData!!.comments.firstOrNull { com -> com.id == comment.parentCommentId }
+                                            }
 //										val parentCommentIndex = remember {
 //											parentComment?.let {
 //												return@remember commentsData!!.comments.indexOf(it)
