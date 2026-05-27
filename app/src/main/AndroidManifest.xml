@@ -1,110 +1,126 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+          xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
 
-    
     <application
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:supportsRtl="false"
-        android:enableOnBackInvokedCallback="true"
-        android:theme="@style/Theme.Hubs"
-        tools:targetApi="34">
+            android:allowBackup="true"
+            android:dataExtractionRules="@xml/data_extraction_rules"
+            android:fullBackupContent="@xml/backup_rules"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:supportsRtl="false"
+            android:enableOnBackInvokedCallback="true"
+            android:theme="@style/Theme.Hubs"
+            tools:targetApi="34">
 
-        <receiver android:name=".MostReadingWidgetReceiver"
-            android:label="@string/most_reading_widget_description"
-            android:exported="true">
+        <receiver
+                android:name=".MostReadingWidgetReceiver"
+                android:exported="true"
+                android:label="@string/most_reading_widget_description">
             <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
             </intent-filter>
             <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/most_readig_widget_info" />
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/most_readig_widget_info"/>
         </receiver>
 
         <profileable
-            android:shell="true"
-            tools:targetApi="29" />
+                android:shell="true"
+                tools:targetApi="29"/>
         <service
-            android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:node="merge"
-            />
+                android:name="androidx.work.impl.foreground.SystemForegroundService"
+                android:foregroundServiceType="dataSync"
+                tools:node="merge"
+        />
         <meta-data
-            android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/notification_default_icon"/>
-<!--        <meta-data-->
-<!--            android:name="com.google.firebase.messaging.default_notification_color"-->
-<!--            android:resource="@color/white" />-->
+                android:name="com.google.firebase.messaging.default_notification_icon"
+                android:resource="@drawable/notification_default_icon"/>
+        <!--        <meta-data-->
+        <!--            android:name="com.google.firebase.messaging.default_notification_color"-->
+        <!--            android:resource="@color/white" />-->
 
 
         <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Hubs"
-            android:windowSoftInputMode="adjustResize">
+                android:name=".MainActivity"
+                android:exported="true"
+                android:theme="@style/Theme.Hubs"
+                android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
 
             <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
+                    android:name="android.app.lib_name"
+                    android:value=""/>
 
             <meta-data
-                android:name="android.app.shortcuts"
-                android:resource="@xml/shortcuts"/>
-
+                    android:name="android.app.shortcuts"
+                    android:resource="@xml/shortcuts"/>
 
 
             <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
+                <action android:name="android.intent.action.VIEW"/>
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data android:scheme="hubs"/>
-                <data android:scheme="https" />
-                <data android:scheme="http" />
-                <data android:host="habrahabr.ru" />
-                <data android:host="habr.com" />
-                <data android:host="m.habr.com" />
+                <data android:scheme="https"/>
+                <data android:scheme="http"/>
+                <data android:host="habrahabr.ru"/>
+                <data android:host="habr.com"/>
+                <data android:host="m.habr.com"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".AuthActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Hubs.Auth" />
+                android:name=".AuthActivity"
+                android:exported="false"
+                android:theme="@style/Theme.Hubs.Auth"/>
 
         <provider
-            android:name=".ui.screens.settings.LogFileProvider"
-            android:authorities="com.garnegsoft.hubs.fileprovider"
-            android:exported="false"
-            android:grantUriPermissions="true">
+                android:name=".ui.screens.settings.LogFileProvider"
+                android:authorities="com.garnegsoft.hubs.fileprovider"
+                android:exported="false"
+                android:grantUriPermissions="true">
             <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/log_file_path" />
+                    android:name="android.support.FILE_PROVIDER_PATHS"
+                    android:resource="@xml/log_file_path"/>
         </provider>
 
         <service
-            android:name=".HubsFCMService"
-            android:exported="false">
+                android:name=".HubsFCMService"
+                android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT"/>
             </intent-filter>
         </service>
 
+        <service
+                android:name=".api.tts.HubsTTSService"
+                android:exported="true"
+                android:foregroundServiceType="mediaPlayback">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
+                <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+
     </application>
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
+    </queries>
 
 </manifest>

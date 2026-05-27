@@ -1,6 +1,13 @@
 package com.garnegsoft.hubs.ui.screens.article
 
+import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
+import android.content.ServiceConnection
+import android.os.Build
+import android.os.IBinder
+import android.speech.tts.TextToSpeech
+import android.speech.tts.TextToSpeechService
 import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.*
@@ -20,6 +27,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.*
@@ -34,19 +42,51 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
+import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.*
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.history.HistoryController
+import com.garnegsoft.hubs.api.tts.HubsTTSService
+import com.garnegsoft.hubs.api.tts.LocalMediaController
+import com.garnegsoft.hubs.api.tts.TTSBinder
+import com.garnegsoft.hubs.api.tts.toArticleMetadata
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
+import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
+import com.garnegsoft.hubs.api.utils.formatTime
+import com.garnegsoft.hubs.ui.common.BaseMenuContainer
+import com.garnegsoft.hubs.ui.common.TitledColumn
+import com.garnegsoft.hubs.ui.common.HubChip
+import com.garnegsoft.hubs.ui.common.MenuItem
+import com.garnegsoft.hubs.ui.common.PlayerDialog
+import com.garnegsoft.hubs.ui.screens.article.tts.TtsTestDialog
+import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
+import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
+import com.google.common.util.concurrent.MoreExecutors
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 
@@ -66,11 +106,12 @@ fun ArticleScreen(
     viewModelStoreOwner: ViewModelStoreOwner
 ) {
     val context = LocalContext.current
+    var ttsMediaController by remember { mutableStateOf<MediaController?>(null) }
+    var ttsBinder by remember { mutableStateOf<TTSBinder?>(null) }
+
     val activity = LocalActivity.current
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
-    val fontSizePreference by HubsDataStore.Settings.ArticleScreen.FontSize
-        .getFlow(context)
-        .collectAsState(initial = null)
+    val fontSizePreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontSize)
     var fontSize by rememberSaveable { mutableStateOf<Float?>(null) }
 
     val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
@@ -82,8 +123,9 @@ fun ArticleScreen(
     var firstVisibleItemIndex by rememberSaveable { mutableIntStateOf(0) }
     var firstVisibleItemOffset by rememberSaveable { mutableIntStateOf(0) }
 
-    val lazyListState =
-        rememberSaveable(saver = LazyListState.Saver) { LazyListState(firstVisibleItemIndex, firstVisibleItemOffset) }
+    val lazyListState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState(firstVisibleItemIndex, firstVisibleItemOffset)
+    }
 
     Log.i("LAZYLISTSTATE", firstVisibleItemIndex.toString())
 
@@ -99,6 +141,21 @@ fun ArticleScreen(
         }
     }
 
+    var showTtsDialog by remember { mutableStateOf(false) }
+//    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = LocalMediaController.current)
+
+    val mediaController = LocalMediaController.current
+    mediaController?.let {
+        PlayerDialog(
+            show = showTtsDialog,
+            onDismissRequest = { showTtsDialog = false },
+            mediaController = mediaController,
+            onTitleClick = {},
+            onAuthorClick = { onAuthorClick(mediaController.mediaMetadata.toArticleMetadata().author)},
+            article = article,
+            onCurrentPlayingClick = { onArticleClick(mediaController.mediaMetadata.toArticleMetadata().articleId) }
+        )
+    }
 
     LaunchedEffect(key1 = Unit, block = {
         if (!viewModel.article.isInitialized) {
@@ -116,9 +173,6 @@ fun ArticleScreen(
     }
 
 
-//    LifecycleEventEffect(Lifecycle.Event.ON_PAUSE) {
-//
-//    }
 
 
     val shareIntent = remember(article?.title) {
@@ -149,32 +203,86 @@ fun ArticleScreen(
                     }
                 },
                 actions = {
-                    if (articleSaved) {
+                    Box {
+                        var showMoreMenu by remember { mutableStateOf(false) }
                         IconButton(
-                            onClick = {
-                                viewModel.deleteSavedArticle(
-                                    id = articleId,
-                                    context = context
-                                )
-                            },
-                            enabled = true
+                            onClick = { showMoreMenu = true }
                         ) {
-                            Icon(Icons.Outlined.Delete, contentDescription = "")
+                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
                         }
-                    } else {
-                        IconButton(
-                            onClick = { viewModel.saveArticle(id = articleId, context = context) },
-                            enabled = true
-                        ) {
-                            Icon(painterResource(id = R.drawable.download), contentDescription = "")
-                        }
-                    }
+                        if (showMoreMenu) {
+                            Popup(
+                                properties = PopupProperties(
+                                    focusable = false,
+                                    dismissOnBackPress = true,
+                                    dismissOnClickOutside = true
+                                ),
+                                popupPositionProvider = object : PopupPositionProvider {
+                                    override fun calculatePosition(
+                                        anchorBounds: IntRect,
+                                        windowSize: IntSize,
+                                        layoutDirection: LayoutDirection,
+                                        popupContentSize: IntSize
+                                    ): IntOffset {
+                                        return IntOffset(x = anchorBounds.right, y = anchorBounds.bottom)
+                                    }
 
-                    IconButton(
-                        onClick = { context.startActivity(shareIntent) },
-                        enabled = article != null
-                    ) {
-                        Icon(Icons.Outlined.Share, contentDescription = "")
+                                },
+                                onDismissRequest = { showMoreMenu = false }
+                            ) {
+                                BaseMenuContainer {
+                                    MenuItem(
+                                        title = "Поделиться",
+                                        icon = {
+                                            Icon(Icons.Outlined.Share, contentDescription = "")
+                                        },
+                                        onClick = {
+                                            if (article != null) context.startActivity(shareIntent)
+                                            showMoreMenu = false
+                                        }
+                                    )
+                                    if (articleSaved) {
+                                        MenuItem(
+                                            title = "Удалить из загруженных",
+                                            icon = {
+                                                Icon(Icons.Outlined.Delete, contentDescription = "")
+                                            },
+                                            onClick = {
+                                                viewModel.deleteSavedArticle(
+                                                    id = articleId,
+                                                    context = context
+                                                )
+                                                showMoreMenu = false
+
+                                            }
+                                        )
+                                    } else {
+                                        MenuItem(
+                                            title = "Загрузить",
+                                            icon = {
+                                                Icon(painterResource(R.drawable.download), contentDescription = "")
+                                            },
+                                            onClick = {
+                                                viewModel.saveArticle(id = articleId, context = context)
+                                                showMoreMenu = false
+                                            }
+                                        )
+                                    }
+
+                                    MenuItem(
+                                        title = "Послушать",
+                                        icon = {
+                                            Icon(painterResource(id = R.drawable.headphones), contentDescription = "")
+                                        },
+                                        onClick = {
+                                            showTtsDialog = true
+                                            showMoreMenu = false
+                                        }
+                                    )
+
+                                }
+                            }
+                        }
                     }
                 })
         },
