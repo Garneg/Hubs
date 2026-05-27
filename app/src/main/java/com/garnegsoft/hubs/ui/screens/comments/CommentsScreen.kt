@@ -201,7 +201,7 @@ fun CommentsScreen(
                         if (it) {
                             0f
                         } else {
-                            0.75f
+                            0.25f
                         }
                     }
                     val commentsCountAlpha by animateFloatAsState(
