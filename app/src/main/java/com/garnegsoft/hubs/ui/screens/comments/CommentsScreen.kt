@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.screens.comments
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -66,6 +67,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.jsoup.Jsoup
 
 
@@ -125,13 +128,17 @@ fun CommentsScreen(
     var returnToCommentId by remember { mutableStateOf<Int?>(null) }
 
     LaunchedEffect(key1 = Unit) {
+        val mutex = Mutex(locked = true)
         if (!viewModel.commentsData.isInitialized) {
             launch(Dispatchers.IO) {
                 viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
+                mutex.unlock()
             }
             launch(Dispatchers.IO) {
                 CommentsListController.getComments(parentPostId)?.let {
-                    viewModel.commentsData.postValue(it)
+                    mutex.withLock {
+                        viewModel.commentsData.postValue(it)
+                    }
                 }
 
             }
@@ -298,6 +305,7 @@ fun CommentsScreen(
 
                                 }
                                 Spacer(modifier = Modifier.width(4.dp))
+
                                 IconButton(onClick = { answeringComment = null }) {
                                     Icon(
                                         imageVector = Icons.Outlined.Close,
