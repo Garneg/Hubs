@@ -54,10 +54,10 @@ internal fun UserProfile(
 	scrollState: ScrollState,
 	viewModel: UserScreenViewModel
 ) {
-	val userState by viewModel.user.observeAsState()
+	val user by viewModel.user.observeAsState()
 	val isRefreshing by viewModel.isRefreshingUser.observeAsState(false)
 	RefreshableContainer(onRefresh = viewModel::refreshUser, refreshing = isRefreshing) {
-		userState?.let { user ->
+		user?.let { user ->
 			Column(
 				modifier = Modifier
 					.fillMaxSize()
@@ -111,30 +111,11 @@ internal fun UserProfile(
 									textAlign = TextAlign.Center
 								)
 						}
-						if (user.isReadonly)
+						if (user.speciality != null) {
 							Box(
 								modifier = Modifier
 									.fillMaxWidth()
-									.padding(0.dp)
-							) {
-								Text(
-									modifier = Modifier.align(Alignment.Center),
-									text = "Read Only",
-									fontWeight = FontWeight.W400,
-									color = MaterialTheme.colors.onSurface.copy(0.2f),
-									textAlign = TextAlign.Center
-								)
-							}
-						if (user.speciality != null)
-							Box(
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(
-										bottom = 8.dp,
-										start = 8.dp,
-										end = 8.dp,
-										top = 8.dp
-									)
+									.padding(8.dp)
 							) {
 								Text(
 									modifier = Modifier.align(Alignment.Center),
@@ -144,6 +125,22 @@ internal fun UserProfile(
 									textAlign = TextAlign.Center
 								)
 							}
+						}
+						if (user.isReadonly) {
+							Box(
+								modifier = Modifier
+									.fillMaxWidth()
+									.padding(4.dp)
+							) {
+								Text(
+									modifier = Modifier.align(Alignment.Center),
+									text = "Read Only",
+									fontWeight = FontWeight.W500,
+									color = MaterialTheme.colors.onSurface.copy(0.5f),
+									textAlign = TextAlign.Center
+								)
+							}
+						}
 						Row(
 							modifier = Modifier
 								.fillMaxWidth()
@@ -188,10 +185,10 @@ internal fun UserProfile(
 						}
 						if (!isAppUser && !user.isReadonly) {
 							user.relatedData?.let {
-								var subscribed by rememberSaveable(userState?.relatedData?.isSubscribed) {
+								var subscribed by rememberSaveable(user?.relatedData?.isSubscribed) {
 									mutableStateOf(it.isSubscribed)
 								}
-								var blocked by rememberSaveable(userState?.isInBlockList) {
+								var blocked by rememberSaveable(user?.isInBlockList) {
 									mutableStateOf(user.isInBlockList)
 								}
 								
@@ -615,7 +612,7 @@ internal fun UserProfile(
 			}
 		}
 	}
-	if (userState == null) {
+	if (user == null) {
 		Box(modifier = Modifier.fillMaxSize()) {
 			CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 		}
