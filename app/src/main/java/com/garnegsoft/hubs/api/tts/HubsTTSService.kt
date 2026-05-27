@@ -274,6 +274,7 @@ class HubsTTSService : MediaSessionService() {
             .build()
 
         setMediaNotificationProvider(
+            // TODO: Add special icon for tts media service
             DefaultMediaNotificationProvider(this).apply { setSmallIcon(R.drawable.pin) }
         )
 

@@ -17,7 +17,10 @@ import androidx.compose.animation.core.EaseOutBack
 import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.Transition
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +37,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -203,17 +207,36 @@ fun ArticleScreen(
                     }
                 },
                 actions = {
+                    var showMoreMenu by remember { mutableStateOf(false) }
+
+                    val showMoreTransition = updateTransition(showMoreMenu)
+                    val showMoreMenuAlphaAnimated by showMoreTransition.animateFloat(
+                        { tween(durationMillis = 150) }
+                    ) {
+                        if (it) 1f else 0f
+                    }
+                    val showMoreMenuScaleAnimated by showMoreTransition.animateFloat(
+                        { tween(durationMillis = 150) }
+                    ) {
+                        if (it) 1f else 0.9f
+                    }
+                    val showMoreMenuOffsetAnimated by showMoreTransition.animateDp(
+                        { tween(durationMillis = 200) }
+                    ) {
+                        if (it) 0.dp else (-2).dp
+                    }
+
                     Box {
-                        var showMoreMenu by remember { mutableStateOf(false) }
+
                         IconButton(
                             onClick = { showMoreMenu = true }
                         ) {
                             Icon(imageVector = Icons.Default.MoreVert, contentDescription = "more")
                         }
-                        if (showMoreMenu) {
+                        if (showMoreMenu || showMoreTransition.currentState) {
                             Popup(
                                 properties = PopupProperties(
-                                    focusable = false,
+                                    focusable = true,
                                     dismissOnBackPress = true,
                                     dismissOnClickOutside = true
                                 ),
@@ -230,7 +253,16 @@ fun ArticleScreen(
                                 },
                                 onDismissRequest = { showMoreMenu = false }
                             ) {
-                                BaseMenuContainer {
+                                BaseMenuContainer(
+                                    modifier = Modifier
+                                        .graphicsLayer {
+                                            alpha = showMoreMenuAlphaAnimated
+//                                            translationX = (((1f - showMoreMenuScaleAnimated) * size.width))
+                                            translationY = showMoreMenuOffsetAnimated.toPx() - (((1f - showMoreMenuScaleAnimated) * size.height))
+                                            scaleY = showMoreMenuScaleAnimated
+//                                            scaleX = showMoreMenuScaleAnimated
+                                        }
+                                ) {
                                     MenuItem(
                                         title = "Поделиться",
                                         icon = {
