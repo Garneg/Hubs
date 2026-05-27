@@ -137,18 +137,6 @@ fun UserScreen(
                         profilePageScrollState,
                         viewModel,
                     )
-                    LaunchedEffect(key1 = Unit, block = {
-                        if (!viewModel.note.isInitialized) {
-                            viewModel.loadNote()
-                        }
-                        if (!viewModel.subscribedHubs.isInitialized) {
-                            viewModel.loadSubscribedHubs()
-                        }
-                        if (!viewModel.whoIs.isInitialized) {
-                            viewModel.loadWhoIs()
-                        }
-                    })
-
 
                 })
                 user?.let { user ->
