@@ -86,7 +86,7 @@ fun CompanyProfile(
 								.fillMaxWidth()
 								.aspectRatio(4.3f) // aspect ratio of banners (1320 / 300)
 								.clip(RoundedCornerShape(26.dp))
-								.background(Color.White)
+								.background(MaterialTheme.colors.onSurface.copy(0.75f), shape = RoundedCornerShape(27.dp))
 								.clickable(
 									enabled = company.branding.bannerLinkUrl != null
 								) {
@@ -120,13 +120,14 @@ fun CompanyProfile(
 							AsyncImage(
 								model = company.avatarUrl,
 								modifier = Modifier
-									.size(65.dp)
+									.size(68.dp)
 									.align(Alignment.Center)
 									.clip(
 										RoundedCornerShape(12.dp)
 									)
 									.background(
-										color = Color.White
+										color = Color.White,
+										shape = RoundedCornerShape(13.dp)
 									),
 
 

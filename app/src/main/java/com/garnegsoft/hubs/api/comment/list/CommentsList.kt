@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.api.comment.list
 
+import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrDataParser
 import com.garnegsoft.hubs.api.HabrList
@@ -10,6 +11,7 @@ import com.garnegsoft.hubs.api.comment.ThreadSnippet
 import com.garnegsoft.hubs.api.comment.Threads
 import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.api.utils.placeholderAvatarUrl
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -28,36 +30,43 @@ class CommentsListController {
                 return null
             }
 
-            var customJson = Json { ignoreUnknownKeys = true }
-            if (response?.body != null) {
-                var responseJson = Json.parseToJsonElement(response.body!!.string())
-                var commentsList = customJson.decodeFromJsonElement<CommentsList>(responseJson)
-                commentsList.comments.values.forEach {
-                    it.apply {
-                        timePublished = formatTime(timePublished)
-                        author?.let {
-                            if (it.avatarUrl == null) {
-                                it.alias?.let {
-                                    author!!.avatarUrl = placeholderAvatarUrl(it)
-                                    
+            try {
+
+
+                var customJson = Json { ignoreUnknownKeys = true }
+                if (response?.body != null) {
+                    var responseJson = Json.parseToJsonElement(response.body!!.string())
+                    var commentsList = customJson.decodeFromJsonElement<CommentsList>(responseJson)
+                    commentsList.comments.values.forEach {
+                        it.apply {
+                            timePublished = formatTime(timePublished)
+                            author?.let {
+                                if (it.avatarUrl == null) {
+                                    it.alias?.let {
+                                        author!!.avatarUrl = placeholderAvatarUrl(it)
+
+                                    }
+                                } else {
+                                    it.avatarUrl = "https:" + author?.avatarUrl
                                 }
-                            } else {
-                                it.avatarUrl = "https:" + author?.avatarUrl
                             }
                         }
                     }
-                }
-                commentsList.moderated?.values?.forEach {
-                    it.apply {
-                        timePublished = formatTime(timePublished)
-                        author?.avatarUrl?.let {
-                            author?.avatarUrl = "https:" + author?.avatarUrl
+                    commentsList.moderated?.values?.forEach {
+                        it.apply {
+                            timePublished = formatTime(timePublished)
+                            author?.avatarUrl?.let {
+                                author?.avatarUrl = "https:" + author?.avatarUrl
+                            }
                         }
                     }
+                    return commentsList
                 }
-                return commentsList
+            } catch (e: Exception) {
+                Log.e("parsing error", e.message.toString())
+                FirebaseCrashlytics.getInstance().log("Error while getting comments: ${e.message}")
+                return null
             }
-
             return null
         }
 
@@ -79,7 +88,7 @@ class CommentsListController {
             }
 
 
-            if (commentsList.size > 0) {
+            if (commentsList.isNotEmpty()) {
 
                 var maxLevel = commentsList.maxByOrNull { it.level }?.level ?: 0
 
