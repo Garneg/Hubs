@@ -2,6 +2,10 @@ package com.garnegsoft.hubs.ui.screens.company
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -26,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.ImageLoader
 import coil.compose.AsyncImage
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.company.Company
@@ -42,153 +48,205 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun CompanyProfile(
-	company: Company,
+	viewModel: CompanyScreenViewModel,
 	scrollState: ScrollState
 ) {
 	val context = LocalContext.current
-	val viewModel = viewModel { CompanyScreenViewModel(company.alias) }
+	val company by viewModel.companyProfile.observeAsState()
+	val companyTransition = updateTransition(company != null)
+	val companyCardAlphaAnimated by companyTransition.animateFloat { if (it) 1f else 0f }
+	val companyCardOffsetAnimated by companyTransition.animateDp { if (it) 0.dp else (-16).dp }
 	val refreshing by viewModel.isRefreshing.observeAsState(false)
+
 	RefreshableContainer(onRefresh = viewModel::refreshCompany, refreshing = refreshing) {
-		Column(
-			modifier = Modifier
-				.fillMaxSize()
-				.verticalScroll(scrollState)
-				.navigationBarsPadding()
-				.padding(8.dp),
-			verticalArrangement = Arrangement.spacedBy(8.dp)
-		) {
-			var delayedCompositionCounter by rememberSaveable { mutableIntStateOf(0) }
-			LaunchedEffect(key1 = Unit, block = {
-				while(delayedCompositionCounter < 1) {
-					withFrameNanos {  }
-					delayedCompositionCounter++
-				}
-			})
-			if (delayedCompositionCounter >= 0) {
-				company.branding?.bannerImageUrl?.let {
-					AsyncImage(
-						modifier = Modifier
-							.fillMaxWidth()
-							.aspectRatio(4.3f) // aspect ratio of banners (1320 / 300)
-							.clip(RoundedCornerShape(26.dp))
-							.background(Color.White)
-							.clickable(
-								enabled = company.branding.bannerLinkUrl != null
-							) {
-								context.startActivity(
-									Intent(
-										Intent.ACTION_VIEW,
-										Uri.parse(company.branding.bannerLinkUrl!!)
-									)
-								)
-							},
-						model = it,
-						contentScale = ContentScale.Crop,
-						contentDescription = "${company.title} branding banner"
-					)
-				}
-			}
+		company?.let { company ->
 			Column(
 				modifier = Modifier
-					.fillMaxWidth()
-					.clip(RoundedCornerShape(26.dp))
-					.background(MaterialTheme.colors.surface)
-					.padding(12.dp)
+					.graphicsLayer {
+						translationY = companyCardOffsetAnimated.toPx()
+						alpha = companyCardAlphaAnimated
+					}
+					.fillMaxSize()
+					.verticalScroll(scrollState)
+					.navigationBarsPadding()
+					.padding(8.dp),
+				verticalArrangement = Arrangement.spacedBy(8.dp)
 			) {
-				Box(
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(12.dp)
-				) {
-					if (company.avatarUrl != null) {
+				var delayedCompositionCounter by rememberSaveable { mutableIntStateOf(0) }
+				LaunchedEffect(key1 = Unit, block = {
+					while (delayedCompositionCounter < 1) {
+						withFrameNanos { }
+						delayedCompositionCounter++
+					}
+				})
+				if (delayedCompositionCounter >= 0) {
+					company.branding?.bannerImageUrl?.let {
 						AsyncImage(
-							model = company.avatarUrl,
 							modifier = Modifier
-								.size(65.dp)
-								.align(Alignment.Center)
-								.clip(
-									RoundedCornerShape(12.dp)
-								)
-								.background(
-									color = Color.White
-								),
-							
-							
-							contentDescription = ""
-						)
-					} else {
-						Icon(
-							modifier = Modifier
-								.size(65.dp)
-								.background(
-									color = Color.White,
-									shape = RoundedCornerShape(12.dp)
-								)
-								.border(
-									width = 4.dp,
-									color = placeholderColorLegacy(company.alias),
-									shape = RoundedCornerShape(12.dp)
-								)
-								.align(Alignment.Center)
-								.padding(5.dp),
-							painter = painterResource(id = R.drawable.company_avatar_placeholder),
-							contentDescription = "",
-							tint = placeholderColorLegacy(company.alias)
+								.fillMaxWidth()
+								.aspectRatio(4.3f) // aspect ratio of banners (1320 / 300)
+								.clip(RoundedCornerShape(26.dp))
+								.background(Color.White)
+								.clickable(
+									enabled = company.branding.bannerLinkUrl != null
+								) {
+									context.startActivity(
+										Intent(
+											Intent.ACTION_VIEW,
+											Uri.parse(company.branding.bannerLinkUrl!!)
+										)
+									)
+								},
+							model = it,
+							imageLoader = ImageLoader.Builder(context).crossfade(true).build(),
+							contentScale = ContentScale.Crop,
+							contentDescription = "${company.title} branding banner"
 						)
 					}
 				}
-				Text(
-					modifier = Modifier.fillMaxWidth(),
-					text = company.title,
-					fontSize = 20.sp,
-					fontWeight = FontWeight.W700,
-					textAlign = TextAlign.Center
-				)
-				Box(modifier = Modifier.fillMaxWidth()) {
-					
-				}
-				if (company.description != null)
+				Column(
+					modifier = Modifier
+						.fillMaxWidth()
+						.clip(RoundedCornerShape(26.dp))
+						.background(MaterialTheme.colors.surface)
+						.padding(12.dp)
+				) {
 					Box(
 						modifier = Modifier
 							.fillMaxWidth()
-							.padding(
-								bottom = 8.dp,
-								start = 8.dp,
-								end = 8.dp,
-								top = 8.dp
-							)
+							.padding(12.dp)
 					) {
-						Text(
-							modifier = Modifier.align(Alignment.Center),
-							text = company.description,
-							fontWeight = FontWeight.W500,
-							color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
-							textAlign = TextAlign.Center
+						if (company.avatarUrl != null) {
+							AsyncImage(
+								model = company.avatarUrl,
+								modifier = Modifier
+									.size(65.dp)
+									.align(Alignment.Center)
+									.clip(
+										RoundedCornerShape(12.dp)
+									)
+									.background(
+										color = Color.White
+									),
+
+
+								contentDescription = ""
+							)
+						} else {
+							Icon(
+								modifier = Modifier
+									.size(65.dp)
+									.background(
+										color = Color.White,
+										shape = RoundedCornerShape(12.dp)
+									)
+									.border(
+										width = 4.dp,
+										color = placeholderColorLegacy(company.alias),
+										shape = RoundedCornerShape(12.dp)
+									)
+									.align(Alignment.Center)
+									.padding(5.dp),
+								painter = painterResource(id = R.drawable.company_avatar_placeholder),
+								contentDescription = "",
+								tint = placeholderColorLegacy(company.alias)
+							)
+						}
+					}
+					Text(
+						modifier = Modifier.fillMaxWidth(),
+						text = company.title,
+						fontSize = 20.sp,
+						fontWeight = FontWeight.W700,
+						textAlign = TextAlign.Center
+					)
+					Box(modifier = Modifier.fillMaxWidth()) {
+
+					}
+					if (company.description != null)
+						Box(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(
+									bottom = 8.dp,
+									start = 8.dp,
+									end = 8.dp,
+									top = 8.dp
+								)
+						) {
+							Text(
+								modifier = Modifier.align(Alignment.Center),
+								text = company.description,
+								fontWeight = FontWeight.W500,
+								color = MaterialTheme.colors.onSurface.copy(ContentAlpha.disabled),
+								textAlign = TextAlign.Center
+							)
+						}
+					company.relatedData?.let {
+						var subscribed by rememberSaveable {
+							mutableStateOf(it.isSubscribed)
+						}
+						val subscriptionScope = rememberCoroutineScope()
+						var throttleButton by remember { mutableStateOf(false) }
+						SubscriptionButton(
+							subscribed = subscribed,
+							throttle = throttleButton,
+							onClick = {
+								throttleButton = true
+								subscribed = !subscribed
+								subscriptionScope.launch(Dispatchers.IO) {
+									subscribed = CompanyController.subscription(company.alias)
+									throttleButton = false
+								}
+							}
 						)
 					}
-				company.relatedData?.let {
-					var subscribed by rememberSaveable {
-						mutableStateOf(it.isSubscribed)
-					}
-					val subscriptionScope = rememberCoroutineScope()
-					var throttleButton by remember { mutableStateOf(false) }
-					SubscriptionButton(
-						subscribed = subscribed,
-						throttle = throttleButton,
-						onClick = {
-							throttleButton = true
-							subscribed = !subscribed
-							subscriptionScope.launch(Dispatchers.IO) {
-								subscribed = CompanyController.subscription(company.alias)
-								throttleButton = false
+				}
+				if (delayedCompositionCounter > 0) {
+					val whoIs by viewModel.companyWhoIs.observeAsState()
+					if (!whoIs?.aboutHtml.isNullOrBlank()) {
+						Column(
+							modifier = Modifier
+								.fillMaxWidth()
+								.clip(RoundedCornerShape(26.dp))
+								.background(MaterialTheme.colors.surface)
+								.padding(8.dp)
+						) {
+							BasicTitledColumn(title = {
+								Text(
+									modifier = Modifier.padding(12.dp),
+									text = "Описание", style = MaterialTheme.typography.subtitle1
+								)
+							}, divider = {}
+							) {
+								Column(
+									modifier = Modifier.padding(
+										start = 12.dp,
+										end = 12.dp,
+										bottom = 12.dp,
+										top = 4.dp
+									),
+									verticalArrangement = Arrangement.spacedBy(20.dp)
+								) {
+									whoIs?.aboutHtml?.let {
+										if (it.isNotBlank()) {
+											TitledColumn(title = "О Компании") {
+												RenderHtml(html = it, elementSettings = remember {
+													ElementSettings(
+														fontSize = 16.sp,
+														lineHeight = 16.sp,
+														fitScreenWidth = false
+													)
+												})
+											}
+										}
+									}
+
+								}
 							}
 						}
-					)
-				}
-			}
-			if (delayedCompositionCounter > 0) {
-				val whoIs by viewModel.companyWhoIs.observeAsState()
-				if (!whoIs?.aboutHtml.isNullOrBlank()) {
+					}
+
 					Column(
 						modifier = Modifier
 							.fillMaxWidth()
@@ -196,137 +254,96 @@ fun CompanyProfile(
 							.background(MaterialTheme.colors.surface)
 							.padding(8.dp)
 					) {
-						BasicTitledColumn(title = {
-							Text(
-								modifier = Modifier.padding(12.dp),
-								text = "Описание", style = MaterialTheme.typography.subtitle1
-							)
-						}, divider = {}
+						BasicTitledColumn(
+							title = {
+								Text(
+									modifier = Modifier.padding(12.dp),
+									text = "Информация", style = MaterialTheme.typography.subtitle1
+								)
+							},
+							divider = { }
 						) {
+
 							Column(
 								modifier = Modifier.padding(
-									start = 12.dp,
-									end = 12.dp,
+									top = 4.dp,
 									bottom = 12.dp,
-									top = 4.dp
+									start = 12.dp,
+									end = 12.dp
 								),
 								verticalArrangement = Arrangement.spacedBy(20.dp)
 							) {
-								whoIs?.aboutHtml?.let {
-									if (it.isNotBlank()) {
-										TitledColumn(title = "О Компании") {
-											RenderHtml(html = it, elementSettings = remember {
-												ElementSettings(
-													fontSize = 16.sp,
-													lineHeight = 16.sp,
-													fitScreenWidth = false
-												)
-											})
-										}
+
+								TitledColumn(title = "Рейтинг") {
+									Text(
+										text = company.statistics.rating.toString(),
+									)
+								}
+								company.registrationDate?.let {
+									TitledColumn(title = "Дата регистрации") {
+										Text(
+											text = it,
+										)
 									}
 								}
-								
+								if (company.foundationDate != null) {
+									TitledColumn(title = "Дата основания") {
+										Text(
+											text = company.foundationDate,
+										)
+									}
+								}
+								company.staffNumber?.let {
+									TitledColumn(title = "Численность") {
+										Text(
+											text = it,
+										)
+									}
+								}
+
+								company.location?.let {
+									TitledColumn(title = "Местоположение") {
+										Text(
+											text = company.location
+										)
+									}
+								}
 							}
 						}
+
 					}
-				}
-				
-				Column(
-					modifier = Modifier
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(26.dp))
-						.background(MaterialTheme.colors.surface)
-						.padding(8.dp)
-				) {
-					BasicTitledColumn(
-						title = {
-							Text(
-								modifier = Modifier.padding(12.dp),
-								text = "Информация", style = MaterialTheme.typography.subtitle1
-							)
-						},
-						divider = { }
-					) {
-						
-						Column(
-							modifier = Modifier.padding(
-								top = 4.dp,
-								bottom = 12.dp,
-								start = 12.dp,
-								end = 12.dp
-							),
-							verticalArrangement = Arrangement.spacedBy(20.dp)
+					if (company.siteUrl != null) {
+						Row(
+							modifier = Modifier
+								.fillMaxWidth()
+								.clip(
+									RoundedCornerShape(26.dp)
+								)
+								.background(MaterialTheme.colors.surface)
+								.clickable {
+									context.startActivity(
+										Intent(
+											Intent.ACTION_VIEW,
+											Uri.parse(company.siteUrl)
+										)
+									)
+								}
+								.padding(16.dp),
+							verticalAlignment = Alignment.CenterVertically,
+							horizontalArrangement = Arrangement.Center
 						) {
-							
-							TitledColumn(title = "Рейтинг") {
-								Text(
-									text = company.statistics.rating.toString(),
-								)
-							}
-							company.registrationDate?.let {
-							TitledColumn(title = "Дата регистрации") {
-									Text(
-										text = it,
-									)
-								}
-							}
-							if (company.foundationDate != null) {
-								TitledColumn(title = "Дата основания") {
-									Text(
-										text = company.foundationDate,
-									)
-								}
-							}
-							company.staffNumber?.let {
-							TitledColumn(title = "Численность") {
-									Text(
-										text = it,
-									)
-								}
-							}
-							
-							company.location?.let {
-								TitledColumn(title = "Местоположение") {
-									Text(
-										text = company.location
-									)
-								}
-							}
+							Text(text = "Перейти на сайт", color = MaterialTheme.colors.onSurface)
+							Spacer(modifier = Modifier.width(4.dp))
+							Icon(
+								imageVector = Icons.Outlined.ArrowForward,
+								contentDescription = "",
+								tint = MaterialTheme.colors.onSurface
+							)
 						}
 					}
-					
 				}
-				if (company.siteUrl != null) {
-					Row(
-						modifier = Modifier
-							.fillMaxWidth()
-							.clip(
-								RoundedCornerShape(26.dp)
-							)
-							.background(MaterialTheme.colors.surface)
-							.clickable {
-								context.startActivity(
-									Intent(
-										Intent.ACTION_VIEW,
-										Uri.parse(company.siteUrl)
-									)
-								)
-							}
-							.padding(16.dp),
-						verticalAlignment = Alignment.CenterVertically,
-						horizontalArrangement = Arrangement.Center
-					) {
-						Text(text = "Перейти на сайт", color = MaterialTheme.colors.onSurface)
-						Spacer(modifier = Modifier.width(4.dp))
-						Icon(
-							imageVector = Icons.Outlined.ArrowForward,
-							contentDescription = "",
-							tint = MaterialTheme.colors.onSurface
-						)
-					}
-				}
+
 			}
-			
 		}
 	}
 }

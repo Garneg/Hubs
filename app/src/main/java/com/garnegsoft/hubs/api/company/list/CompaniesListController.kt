@@ -1,7 +1,10 @@
 package com.garnegsoft.hubs.api.company.list
 
+import android.util.Log
 import com.garnegsoft.hubs.api.HabrApi
 import com.garnegsoft.hubs.api.HabrList
+import com.google.firebase.Firebase
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -14,18 +17,23 @@ class CompaniesListController {
             val response = HabrApi.get(path, args)
 
             var result: CompaniesList? = null
-
-            response?.body?.let {
-                var customJson = Json { ignoreUnknownKeys = true }
-                result = customJson.decodeFromJsonElement<CompaniesList>(customJson.parseToJsonElement(it.string()))
-                result?.companyRefs?.forEach{
-                    it.value.imageUrl?.let { _ ->
-                        it.value.imageUrl = "https://" + it.value.imageUrl
+            try {
+                response?.body?.let {
+                    var customJson = Json { ignoreUnknownKeys = true }
+                    result = customJson.decodeFromJsonElement<CompaniesList>(customJson.parseToJsonElement(it.string()))
+                    result?.companyRefs?.forEach {
+                        it.value.imageUrl?.let { _ ->
+                            it.value.imageUrl = "https://" + it.value.imageUrl
+                        }
+                        it.value.descriptionHtml =
+                            it.value.descriptionHtml?.let { it1 -> Jsoup.parse(it1).text() }
+                        it.value.titleHtml = Jsoup.parse(it.value.titleHtml).text()
                     }
-                    it.value.descriptionHtml =
-                        it.value.descriptionHtml?.let { it1 -> Jsoup.parse(it1).text() }
-                    it.value.titleHtml = Jsoup.parse(it.value.titleHtml).text()
                 }
+            } catch (e: Exception) {
+                FirebaseCrashlytics.getInstance().log("Error while parsing json of companies list")
+                Log.e("Json error", "Error while parsing json of companies list")
+                return null
             }
 
             return result
