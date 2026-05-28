@@ -18,6 +18,7 @@ import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
@@ -339,11 +340,18 @@ fun ArticleScreen(
                 revealArticleContent = true
             }
         }
+        val hideContent by remember { derivedStateOf { article == null || !articleContentParsed || (article?.isCorporative == true && company == null) || !revealArticleContent } }
+        val skeletonOffsetAnimated by animateDpAsState(
+            if (hideContent) 0.dp else -16.dp
+        )
         RevealContainer(
-            hideContent = article == null || !articleContentParsed || (article?.isCorporative == true && company == null) || !revealArticleContent,
+            hideContent = hideContent,
             overlappingContent = {
                 GenericSkeleton(
                     modifier = Modifier
+                        .graphicsLayer {
+                            translationY = skeletonOffsetAnimated.toPx()
+                        }
                         .fillMaxSize()
                         .then(if (revealArticleContent) Modifier else Modifier.pointerInput(Unit) {}), articleId
                 )
