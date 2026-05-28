@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.rememberCollapsingContentState
 import com.garnegsoft.hubs.api.utils.SearchUrlHandler
@@ -48,6 +49,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.user.UserCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.screens.article.ArticleShort
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
@@ -97,7 +99,6 @@ fun SearchScreen(
                     searchTextValue.trimStart().startsWith("https://habr.com")
                 }
             }
-            var showClearAllButton by rememberSaveable { mutableStateOf(false) }
             val focusRequester by remember { mutableStateOf(FocusRequester()) }
             val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -125,362 +126,333 @@ fun SearchScreen(
                 }
 
                 delay(1000)
-                    if (clipboard.getText() != null && clipboard.getText()!!.trimStart()
-                            .startsWith("https://habr.com/")
-                    ) {
-                        val copiedLink = clipboard.getText()!!.text
-                        val result = SearchUrlHandler.recongnizeUrlDataTypeAndIdentifier(copiedLink)
-                        if (result.first != SearchUrlHandler.UrlDataType.Unknown) {
-                            showCopiedLinkSuggestSnippet = true
-                            viewModel.loadCopiedLinkSnippetData(copiedLink)
-                            copiedLinkSuggestSnippetDataIdentifier = result.second!!
-                        }
-                    } else {
-                        showCopiedLinkSuggestSnippet = false
+                if (clipboard.getText() != null && clipboard.getText()!!.trimStart()
+                        .startsWith("https://habr.com/")
+                ) {
+                    val copiedLink = clipboard.getText()!!.text
+                    val result = SearchUrlHandler.recongnizeUrlDataTypeAndIdentifier(copiedLink)
+                    if (result.first != SearchUrlHandler.UrlDataType.Unknown) {
+                        showCopiedLinkSuggestSnippet = true
+                        viewModel.loadCopiedLinkSnippetData(copiedLink)
+                        copiedLinkSuggestSnippetDataIdentifier = result.second!!
                     }
+                } else {
+                    showCopiedLinkSuggestSnippet = false
+                }
 
 
             }
 
-            Row(
-                modifier = Modifier
-                    .background(if (currentQuery.isNotEmpty()) MaterialTheme.colors.surface else MaterialTheme.colors.background)
-                    .padding(8.dp)
-                    .padding(horizontal = 4.dp)
-                    .clip(shape = RoundedCornerShape(8.dp))
-                    .border(
-                        width = 1.5.dp,
-                        color = MaterialTheme.colors.secondary,
-                        shape = RoundedCornerShape(8.dp)
+            val keyboardOptions = remember(queryIsUrlToHabr) {
+                if (queryIsUrlToHabr) {
+                    KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        autoCorrectEnabled = false,
+                        imeAction = ImeAction.Go
                     )
-                    .padding(top = 8.dp, bottom = 8.dp, start = 8.dp)
-                    .height(20.dp),
-                verticalAlignment = Alignment.CenterVertically
+                } else {
+                    KeyboardOptions(
+                        capitalization = KeyboardCapitalization.Sentences,
+                        autoCorrectEnabled = false,
+                        imeAction = ImeAction.Search
+                    )
+                }
+
+            }
+            Box(
+                modifier = Modifier
+                    .background(animateColorAsState(if (currentQuery.isNotEmpty()) MaterialTheme.colors.surface else MaterialTheme.colors.background).value)
+                    .padding(12.dp)
             ) {
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    val keyboardOptions = remember(queryIsUrlToHabr) {
-                        if (queryIsUrlToHabr) {
-                            KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Sentences,
-                                autoCorrectEnabled = false,
-                                imeAction = ImeAction.Go
-                            )
-                        } else {
-                            KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Sentences,
-                                autoCorrectEnabled = false,
-                                imeAction = ImeAction.Search
-                            )
-                        }
-
-                    }
-                    BasicTextField(
-                        modifier = Modifier
-                            .focusRequester(focusRequester)
-                            .onFocusEvent {
-                                if (it.isCaptured) {
-                                    keyboardController?.show()
-                                }
+                var searchBarEnabled by remember { mutableStateOf(true) }
+                val searchTextFieldCoroutineScope = rememberCoroutineScope()
+                SearchTextField(
+                    modifier = Modifier
+                        .focusRequester(focusRequester)
+                        .onFocusEvent {
+                            if (it.isCaptured) {
+                                keyboardController?.show()
                             }
-                            .fillMaxWidth(),
-                        value = searchTextValue,
-                        onValueChange = {
-                            searchTextValue = it
-                            showClearAllButton = it.isNotEmpty()
-                        },
-                        textStyle = TextStyle(color = MaterialTheme.colors.onBackground),
-                        keyboardOptions = keyboardOptions,
-                        keyboardActions = KeyboardActions {
-                            if (searchTextValue.isNotBlank()) {
-                                keyboardController?.hide()
+                        }
+                        .fillMaxWidth(),
+                    value = searchTextValue,
+                    enabled = searchBarEnabled,
+                    onValueChange = {
+                        searchTextValue = it
+                    },
+                    keyboardOptions = keyboardOptions,
+                    keyboardActions = KeyboardActions {
+                        if (searchTextValue.isNotBlank()) {
+                            keyboardController?.hide()
+                            searchBarEnabled = false
+                            searchTextFieldCoroutineScope.launch {
+                                delay(100)
+                                searchBarEnabled = true
+                            }
+                            when {
+                                searchTextValue.startsWith(".id") -> {
+                                    if (searchTextValue.drop(3).isDigitsOnly())
+                                        onArticleClicked(searchTextValue.drop(3).toInt())
+                                }
 
-                                when {
-                                    searchTextValue.startsWith(".id") -> {
-                                        if (searchTextValue.drop(3).isDigitsOnly())
-                                            onArticleClicked(searchTextValue.drop(3).toInt())
-                                    }
+                                queryIsUrlToHabr -> {
+                                    viewModel.parseUrl(searchTextValue.trimStart())
+                                        .let { data ->
+                                            val type = data.first
+                                            val identifier = data.second
 
-                                    queryIsUrlToHabr -> {
-                                        viewModel.parseUrl(searchTextValue.trimStart())
-                                            .let { data ->
-                                                val type = data.first
-                                                val identifier = data.second
+                                            when (type) {
+                                                SearchUrlHandler.UrlDataType.Article -> onArticleClicked(
+                                                    identifier!!.toInt()
+                                                )
 
-                                                when (type) {
-                                                    SearchUrlHandler.UrlDataType.Article -> onArticleClicked(
-                                                        identifier!!.toInt()
-                                                    )
+                                                SearchUrlHandler.UrlDataType.User -> onUserClicked(
+                                                    identifier!!
+                                                )
 
-                                                    SearchUrlHandler.UrlDataType.User -> onUserClicked(
-                                                        identifier!!
-                                                    )
+                                                SearchUrlHandler.UrlDataType.Hub -> onHubClicked(
+                                                    identifier!!
+                                                )
 
-                                                    SearchUrlHandler.UrlDataType.Hub -> onHubClicked(
-                                                        identifier!!
-                                                    )
+                                                SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(
+                                                    identifier!!
+                                                )
 
-                                                    SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(
-                                                        identifier!!
-                                                    )
-
-                                                    else -> {
-                                                        Toast.makeText(
-                                                            context,
-                                                            "Не удалось перейти по ссылке.",
-                                                            Toast.LENGTH_SHORT
-                                                        ).show()
-                                                    }
+                                                else -> {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Не удалось перейти по ссылке.",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
                                                 }
                                             }
-                                    }
+                                        }
+                                }
 
-                                    else -> {
-                                        currentQuery = searchTextValue
+                                else -> {
+                                    currentQuery = searchTextValue
 
 
-                                        viewModel.articlesListModel.editFilter(
-                                            ArticlesSearchFilter(
-                                                order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
-                                                query = currentQuery
-                                            )
+                                    viewModel.articlesListModel.editFilter(
+                                        ArticlesSearchFilter(
+                                            order = (viewModel.articlesListModel.filter.value as ArticlesSearchFilter).order,
+                                            query = currentQuery
                                         )
-                                        showPages = true
-                                    }
+                                    )
+                                    showPages = true
                                 }
                             }
-                        },
-                        singleLine = true,
-                        cursorBrush = SolidColor(MaterialTheme.colors.secondary)
-                    )
-                    if (searchTextValue.isEmpty()) {
-                        Text(
-                            text = "Введите запрос или ссылку",
-                            color = MaterialTheme.colors.secondary.copy(0.5f)
-                        )
-                    }
-                }
-                AnimatedVisibility(
-                    visible = showClearAllButton,
-                    enter = slideInHorizontally { it } + fadeIn(),
-                    exit = slideOutHorizontally { it } + fadeOut()
-                ) {
-                    IconButton(
-                        onClick = {
-                            searchTextValue = ""
-                            showClearAllButton = false
-                        },
 
-                        ) {
-                        Icon(
-                            tint = MaterialTheme.colors.secondary,
-                            imageVector = Icons.Outlined.Clear,
-                            contentDescription = "clear input"
+                        }
+                    }
+                )
+            }
+
+    val pagerState = rememberPagerState { 4 }
+    if (showPages) {
+        val tabs = remember {
+            listOf(
+                "Публикации",
+                "Хабы",
+                "Компании",
+                "Пользователи"
+            )
+        }
+
+        HabrScrollableTabRow(
+            pagerState = pagerState, tabs = tabs
+        ) { index, title ->
+            when {
+                title.startsWith("Публикации") -> {
+                    articlesFilterContentState.show()
+                    ScrollUpMethods.scrollLazyList(articlesLazyListState)
+                }
+
+                title.startsWith("Хабы") -> {
+                    ScrollUpMethods.scrollLazyList(hubsLazyListState)
+                }
+
+                title.startsWith("Компании") -> {
+                    ScrollUpMethods.scrollLazyList(companiesLazyListState)
+                }
+
+                title.startsWith("Пользователи") -> {
+                    ScrollUpMethods.scrollLazyList(usersLazyListState)
+                }
+
+            }
+        }
+        HorizontalPager(state = pagerState) {
+            when (it) {
+                0 -> {
+
+                    ArticlesListPageWithFilter(
+                        listModel = viewModel.articlesListModel,
+                        lazyListState = articlesLazyListState,
+                        collapsingContentState = articlesFilterContentState,
+                        onArticleSnippetClick = onArticleClicked,
+                        onArticleAuthorClick = onUserClicked,
+                        onArticleCommentsClick = onCommentsClicked,
+                        doInitialLoading = false
+                    ) { defaultValues, onDismiss, onDone ->
+                        ArticlesSearchFilter(
+                            defaultValues = defaultValues,
+                            onDismiss = onDismiss,
+                            onDone = onDone
                         )
                     }
+
+                }
+
+                1 -> {
+                    val hubs by viewModel.hubs.observeAsState()
+                    if (hubs != null) {
+
+                        PagedHabrSnippetsColumn(
+                            modifier = Modifier.fillMaxHeight(),
+                            data = hubs!!,
+                            lazyListState = hubsLazyListState,
+                            contentPadding = PaddingValues(8.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.Start,
+                            onNextPageLoad = { viewModel.loadHubs(currentQuery, it) }
+                        ) {
+                            HubCard(hub = it, onClick = { onHubClicked(it.alias) })
+                        }
+                    }
+                    LaunchedEffect(key1 = currentQuery, block = {
+                        viewModel.loadHubs(currentQuery, 1)
+                    })
+                }
+
+                2 -> {
+                    val companies by viewModel.companies.observeAsState()
+
+                    if (companies != null) {
+                        PagedHabrSnippetsColumn(
+                            modifier = Modifier.fillMaxHeight(),
+                            data = companies!!,
+                            lazyListState = companiesLazyListState,
+                            onNextPageLoad = {
+                                viewModel.loadCompanies(currentQuery, it)
+                            }
+                        ) {
+                            CompanyCard(
+                                company = it,
+                                onClick = { onCompanyClicked(it.alias) })
+                        }
+
+                    }
+                    LaunchedEffect(key1 = currentQuery, block = {
+                        viewModel.loadCompanies(currentQuery, 1)
+                    })
+                }
+
+                3 -> {
+                    val users by viewModel.users.observeAsState()
+
+                    if (users != null) {
+                        PagedHabrSnippetsColumn(
+                            lazyListState = usersLazyListState,
+                            data = users!!,
+                            onNextPageLoad = {
+                                viewModel.loadUsers(currentQuery, it)
+                            }
+                        ) {
+                            UserCard(user = it, onClick = { onUserClicked(it.alias) })
+                        }
+                    }
+                    LaunchedEffect(key1 = currentQuery, block = {
+                        viewModel.loadUsers(currentQuery, 1)
+                    })
+
+                }
+
+            }
+        }
+
+    } else {
+
+
+        var firstCardHeight by remember() { mutableIntStateOf(0) }
+        BoxWithConstraints(
+            modifier = Modifier
+                .imePadding()
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp)
+        ) {
+            Box {
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = showCopiedLinkSuggestSnippet,
+                    enter = slideInVertically { -it }
+                ) {
+                    ClipboardLinkSnippet(
+                        data = copiedLinkSuggestSnippetData,
+                        onClick = {
+                            copiedLinkSuggestSnippetData?.let { data ->
+                                when (copiedLinkSuggestSnippetData?.type) {
+                                    SearchUrlHandler.UrlDataType.Article -> onArticleClicked(
+                                        copiedLinkSuggestSnippetDataIdentifier.toInt()
+                                    )
+
+                                    SearchUrlHandler.UrlDataType.User -> onUserClicked(
+                                        copiedLinkSuggestSnippetDataIdentifier
+                                    )
+
+                                    SearchUrlHandler.UrlDataType.Hub -> onHubClicked(
+                                        copiedLinkSuggestSnippetDataIdentifier
+                                    )
+
+                                    SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(
+                                        copiedLinkSuggestSnippetDataIdentifier
+                                    )
+
+                                    else -> {}
+                                }
+                            }
+
+                        }
+                    )
                 }
 
             }
 
-
-            val pagerState = rememberPagerState { 4 }
-            if (showPages) {
-                val tabs = remember {
-                    listOf(
-                        "Публикации",
-                        "Хабы",
-                        "Компании",
-                        "Пользователи"
-                    )
-                }
-
-                HabrScrollableTabRow(
-                    pagerState = pagerState, tabs = tabs
-                ) { index, title ->
-                    when {
-                        title.startsWith("Публикации") -> {
-                            articlesFilterContentState.show()
-                            ScrollUpMethods.scrollLazyList(articlesLazyListState)
-                        }
-
-                        title.startsWith("Хабы") -> {
-                            ScrollUpMethods.scrollLazyList(hubsLazyListState)
-                        }
-
-                        title.startsWith("Компании") -> {
-                            ScrollUpMethods.scrollLazyList(companiesLazyListState)
-                        }
-
-                        title.startsWith("Пользователи") -> {
-                            ScrollUpMethods.scrollLazyList(usersLazyListState)
-                        }
-
-                    }
-                }
-                HorizontalPager(state = pagerState) {
-                    when (it) {
-                        0 -> {
-
-                            ArticlesListPageWithFilter(
-                                listModel = viewModel.articlesListModel,
-                                lazyListState = articlesLazyListState,
-                                collapsingContentState = articlesFilterContentState,
-                                onArticleSnippetClick = onArticleClicked,
-                                onArticleAuthorClick = onUserClicked,
-                                onArticleCommentsClick = onCommentsClicked,
-                                doInitialLoading = false
-                            ) { defaultValues, onDismiss, onDone ->
-                                ArticlesSearchFilter(
-                                    defaultValues = defaultValues,
-                                    onDismiss = onDismiss,
-                                    onDone = onDone
-                                )
-                            }
-
-                        }
-
-                        1 -> {
-                            val hubs by viewModel.hubs.observeAsState()
-                            if (hubs != null) {
-
-                                PagedHabrSnippetsColumn(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    data = hubs!!,
-                                    lazyListState = hubsLazyListState,
-                                    contentPadding = PaddingValues(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                                    horizontalAlignment = Alignment.Start,
-                                    onNextPageLoad = { viewModel.loadHubs(currentQuery, it) }
-                                ) {
-                                    HubCard(hub = it, onClick = { onHubClicked(it.alias) })
-                                }
-                            }
-                            LaunchedEffect(key1 = currentQuery, block = {
-                                viewModel.loadHubs(currentQuery, 1)
-                            })
-                        }
-
-                        2 -> {
-                            val companies by viewModel.companies.observeAsState()
-
-                            if (companies != null) {
-                                PagedHabrSnippetsColumn(
-                                    modifier = Modifier.fillMaxHeight(),
-                                    data = companies!!,
-                                    lazyListState = companiesLazyListState,
-                                    onNextPageLoad = {
-                                        viewModel.loadCompanies(currentQuery, it)
-                                    }
-                                ) {
-                                    CompanyCard(
-                                        company = it,
-                                        onClick = { onCompanyClicked(it.alias) })
-                                }
-
-                            }
-                            LaunchedEffect(key1 = currentQuery, block = {
-                                viewModel.loadCompanies(currentQuery, 1)
-                            })
-                        }
-
-                        3 -> {
-                            val users by viewModel.users.observeAsState()
-
-                            if (users != null) {
-                                PagedHabrSnippetsColumn(
-                                    lazyListState = usersLazyListState,
-                                    data = users!!,
-                                    onNextPageLoad = {
-                                        viewModel.loadUsers(currentQuery, it)
-                                    }
-                                ) {
-                                    UserCard(user = it, onClick = { onUserClicked(it.alias) })
-                                }
-                            }
-                            LaunchedEffect(key1 = currentQuery, block = {
-                                viewModel.loadUsers(currentQuery, 1)
-                            })
-
-                        }
-
-                    }
-                }
-
-            } else {
-
-
-                var firstCardHeight by remember() { mutableIntStateOf(0) }
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .imePadding()
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp)
+            androidx.compose.animation.AnimatedVisibility(
+                visible = mostReadingArticles != null,
+                enter = slideInVertically { it / 2 }
+            ) {
+                Box(
+                    modifier = Modifier.padding(top = with(LocalDensity.current) {
+                        (this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp).coerceAtLeast(
+                            0.dp
+                        ) // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
+                    })
                 ) {
-                    Box {
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = showCopiedLinkSuggestSnippet,
-                            enter = slideInVertically { -it }
-                            ) {
-                            ClipboardLinkSnippet(
-                                modifier = Modifier.padding(top = 8.dp),
-                                data = copiedLinkSuggestSnippetData,
-                                onClick = {
-                                    copiedLinkSuggestSnippetData?.let { data ->
-                                        when(copiedLinkSuggestSnippetData?.type) {
-                                            SearchUrlHandler.UrlDataType.Article -> onArticleClicked(copiedLinkSuggestSnippetDataIdentifier.toInt())
-                                            SearchUrlHandler.UrlDataType.User -> onUserClicked(copiedLinkSuggestSnippetDataIdentifier)
-                                            SearchUrlHandler.UrlDataType.Hub -> onHubClicked(copiedLinkSuggestSnippetDataIdentifier)
-                                            SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(copiedLinkSuggestSnippetDataIdentifier)
-                                            else -> {}
-                                        }
-                                    }
-
-                                }
+                    TitledColumn(
+                        title = "Читают сейчас",
+                        titleStyle = MaterialTheme.typography.subtitle2.copy(
+                            color = MaterialTheme.colors.onBackground.copy(
+                                0.5f
                             )
-                        }
-
-                    }
-
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = mostReadingArticles != null,
-                        enter = slideInVertically { it / 2 }
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.padding(bottom = 16.dp)
                     ) {
-                        Box(
-                            modifier = Modifier.padding(top = with(LocalDensity.current) {
-                                (this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp).coerceAtLeast(
-                                    0.dp
-                                ) // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
-                            })
-                        ) {
-                            TitledColumn(
-                                title = "Читают сейчас",
-                                titleStyle = MaterialTheme.typography.subtitle2.copy(
-                                    color = MaterialTheme.colors.onBackground.copy(
-                                        0.5f
-                                    )
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(8.dp),
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            ) {
-                                mostReadingArticles?.let { mostReading ->
-                                    mostReading.forEachIndexed() { index, it ->
-                                        Box(
-                                            modifier = if (index == 0) Modifier
-                                                .onGloballyPositioned {
-                                                    firstCardHeight = it.size.height
-                                                } else Modifier
-                                        ) {
-                                            ArticleShort(
-                                                article = it,
-                                                onClick = {
-                                                    onArticleClicked(it.id)
-                                                }
-                                            )
+                        mostReadingArticles?.let { mostReading ->
+                            mostReading.forEachIndexed() { index, it ->
+                                Box(
+                                    modifier = if (index == 0) Modifier
+                                        .onGloballyPositioned {
+                                            firstCardHeight = it.size.height
+                                        } else Modifier
+                                ) {
+                                    ArticleShort(
+                                        article = it,
+                                        onClick = {
+                                            onArticleClicked(it.id)
                                         }
-                                    }
+                                    )
                                 }
                             }
                         }
@@ -488,7 +460,9 @@ fun SearchScreen(
                 }
             }
         }
-
     }
+}
+
+}
 
 }

@@ -49,7 +49,7 @@ fun ClipboardLinkSnippet(
                     enabled = data != null
                 )
                 .background(MaterialTheme.colors.surface)
-                .padding(8.dp)
+                .padding(12.dp)
                 .height(IntrinsicSize.Min)
         ) {
             var showShimmer by remember {
