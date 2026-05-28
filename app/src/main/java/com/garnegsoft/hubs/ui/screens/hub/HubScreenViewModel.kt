@@ -29,6 +29,14 @@ class HubScreenViewModel(val alias: String) : ViewModel() {
 			isRefreshing.postValue(false)
 		}
 	}
+
+	fun loadHub() {
+		viewModelScope.launch(Dispatchers.IO) {
+			HubController.get(alias)?.let {
+				hub.postValue(it)
+			}
+		}
+	}
 	
 	val articlesListModel = ArticlesListModel(
 		path = "articles",

@@ -177,8 +177,6 @@ fun ArticleScreen(
     }
 
 
-
-
     val shareIntent = remember(article?.title) {
         val sendIntent = Intent(Intent.ACTION_SEND)
 
@@ -189,8 +187,7 @@ fun ArticleScreen(
         sendIntent.setType("text/plain")
         Intent.createChooser(sendIntent, null)
     }
-    val articleSaved by viewModel.articleExists(LocalContext.current, articleId)
-        .collectAsState(false)
+    val articleSaved by viewModel.articleExists(LocalContext.current, articleId).collectAsState(false)
     var articleContentParsed by rememberSaveable {
         mutableStateOf(false)
     }

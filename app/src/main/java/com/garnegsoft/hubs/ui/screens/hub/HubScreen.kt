@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
 import com.garnegsoft.hubs.ui.theme.HubInvestmentIndicatorColor
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 
@@ -49,7 +51,7 @@ fun HubScreen(
     onBackClick: () -> Unit
 ) {
     val viewModel = viewModel() { HubScreenViewModel(alias) }
-    
+
     Scaffold(
         topBar = {
             HubsTopAppBar(
@@ -64,15 +66,15 @@ fun HubScreen(
                     val context = LocalContext.current
                     IconButton(
                         onClick = {
-                        val sendIntent = Intent(Intent.ACTION_SEND)
-                        sendIntent.putExtra(
-                            Intent.EXTRA_TEXT,
-                            "${viewModel.hub.value?.title} — https://habr.com/ru/hub/${alias}/"
-                        )
-                        sendIntent.setType("text/plain")
-                        val shareIntent = Intent.createChooser(sendIntent, null)
-                        context.startActivity(shareIntent)
-                    }) {
+                            val sendIntent = Intent(Intent.ACTION_SEND)
+                            sendIntent.putExtra(
+                                Intent.EXTRA_TEXT,
+                                "${viewModel.hub.value?.title} — https://habr.com/ru/hub/${alias}/"
+                            )
+                            sendIntent.setType("text/plain")
+                            val shareIntent = Intent.createChooser(sendIntent, null)
+                            context.startActivity(shareIntent)
+                        }) {
                         Icon(imageVector = Icons.Outlined.Share, contentDescription = "")
                     }
                 }
@@ -93,10 +95,10 @@ fun HubScreen(
             val newsLazyListState = rememberLazyListState()
             val authorsLazyListState = rememberLazyListState()
             val companiesLazyListState = rememberLazyListState()
-            
+
             val pagerState = rememberPagerState { 5 }
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs) { index, title ->
-                when(index) {
+                when (index) {
                     0 -> ScrollUpMethods.scrollNormalList(profilePageScrollState)
                     1 -> ScrollUpMethods.scrollLazyList(articlesLazyListState)
                     2 -> ScrollUpMethods.scrollLazyList(newsLazyListState)
@@ -104,23 +106,18 @@ fun HubScreen(
                     4 -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
                 }
             }
+            val hub by viewModel.hub.observeAsState()
             HorizontalPager(state = pagerState) {
                 when (it) {
                     0 -> {
-                        if (viewModel.hub.observeAsState().value != null) {
-                            HubProfile(
-                                hub = viewModel.hub.observeAsState().value!!,
-                                scrollState = profilePageScrollState
-                            )
-                        } else {
-                            LaunchedEffect(key1 = Unit, block = {
-                                launch(Dispatchers.IO) {
-                                    viewModel.hub.postValue(
-                                        HubController.get(alias = alias)
-                                    )
-                                }
-                            })
-
+                        HubProfile(
+                            viewModel = viewModel,
+                            scrollState = profilePageScrollState
+                        )
+                        LaunchedEffect(key1 = Unit) {
+                            if (hub == null) {
+                                viewModel.loadHub()
+                            }
                         }
                     }
                     // articles
