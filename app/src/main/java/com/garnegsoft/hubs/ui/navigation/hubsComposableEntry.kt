@@ -11,6 +11,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
@@ -61,9 +62,9 @@ fun NavGraphBuilder.hubsComposable(
             transitionSpec = { tween(durationMillis = 150, easing = EaseOutQuint) }
         ) {
             when (it) {
-                EnterExitState.PreEnter -> 24.dp
+                EnterExitState.PreEnter -> 32.dp
                 EnterExitState.Visible -> 0.dp
-                EnterExitState.PostExit -> 24.dp
+                EnterExitState.PostExit -> 32.dp
             }
         }
 
@@ -78,6 +79,10 @@ fun NavGraphBuilder.hubsComposable(
             modifier = Modifier
                 .shadow(16.dp, shape = RoundedCornerShape(cornerRadius))
                 .clip(RoundedCornerShape(cornerRadius))
+//                .graphicsLayer {
+//                    shadowElevation = 16.dp.toPx()
+//                    shape = RoundedCornerShape(cornerRadius)
+//                }
 //                .drawWithContent {
 //                    drawContent()
 //                    drawRect(color = Color.Black.copy(scrimAnimatedAlpha))

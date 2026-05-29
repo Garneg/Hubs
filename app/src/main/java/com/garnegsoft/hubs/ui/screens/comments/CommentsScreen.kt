@@ -395,7 +395,7 @@ fun CommentsScreen(
 
                         }
 
-                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet)) {
+                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) ) {
                             itemsIndexed(
                                 items = commentsData?.pinnedComments ?: emptyList(),
                             ) { index, commentId ->
