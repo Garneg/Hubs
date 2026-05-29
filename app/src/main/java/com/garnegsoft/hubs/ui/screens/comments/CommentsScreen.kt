@@ -197,13 +197,7 @@ fun CommentsScreen(
                     val transition = updateTransition(viewModel.parentPostSnippet.isInitialized)
                     val commentsCountOffset by transition.animateFloat(
                         transitionSpec = { tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad) }
-                    ) {
-                        if (it) {
-                            0f
-                        } else {
-                            0.25f
-                        }
-                    }
+                    ) { if (it) { 0f } else { 0.25f } }
                     val commentsCountAlpha by animateFloatAsState(
                         if (viewModel.parentPostSnippet.isInitialized) 1f else 0f,
                         animationSpec = tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad)
@@ -371,18 +365,15 @@ fun CommentsScreen(
 
                 val ratingIconPainter = painterResource(id = R.drawable.rating)
                 val replyIconPainter = painterResource(id = R.drawable.reply)
+                if (articleCardConfiguration != null) {
+                    LazyColumn(
+                        state = lazyListState,
+                        modifier = Modifier.weight(1f),
+                        contentPadding = PaddingValues(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        item {
 
-                LazyColumn(
-                    state = lazyListState,
-                    modifier = Modifier.weight(1f),
-                    contentPadding = PaddingValues(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(0.dp)
-                ) {
-
-
-                    item {
-
-                        if (articleCardConfiguration != null) {
 
                             androidx.compose.animation.AnimatedVisibility(
                                 visible = articleSnippet != null,
@@ -399,227 +390,227 @@ fun CommentsScreen(
                                     )
                                 }
                             }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
 
-                    }
+                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet)) {
+                            itemsIndexed(
+                                items = commentsData?.pinnedComments ?: emptyList(),
+                            ) { index, commentId ->
+                                val comment = commentsData!!.comments.find { it.id == commentId }!!
 
-                    if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && articleCardConfiguration != null) {
-                        itemsIndexed(
-                            items = commentsData?.pinnedComments ?: emptyList(),
-                        ) { index, commentId ->
-                            val comment = commentsData!!.comments.find { it.id == commentId }!!
-
-                            CommentItem(
-                                modifier = Modifier.animateItem(),
-                                comment = comment,
-                                onAuthorClick = { onUserClicked(comment.author.alias) },
-                                highlight = false,
-                                showReplyButton = commentsData!!.commentAccess.canComment,
-                                onShare = {
-                                    val intent = Intent(Intent.ACTION_SEND)
-                                    intent.putExtra(
-                                        Intent.EXTRA_TEXT,
-                                        "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
-                                    )
-                                    intent.setType("text/plain")
-                                    context.startActivity(
-                                        Intent.createChooser(
-                                            intent,
-                                            null
+                                CommentItem(
+                                    modifier = Modifier.animateItem(),
+                                    comment = comment,
+                                    onAuthorClick = { onUserClicked(comment.author.alias) },
+                                    highlight = false,
+                                    showReplyButton = commentsData!!.commentAccess.canComment,
+                                    onShare = {
+                                        val intent = Intent(Intent.ACTION_SEND)
+                                        intent.putExtra(
+                                            Intent.EXTRA_TEXT,
+                                            "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
                                         )
-                                    )
-                                },
-                                onReplyClick = {},
-                                isPinned = true,
-                                onGoToPinnedComment = {
-                                    coroutineScope.launch {
-                                        lazyListState.animateScrollToItem(
-                                            commentsData!!.comments.indexOf(
-                                                comment
-                                            ) + itemOffsetCount, (-articleHeaderOffset).toInt()
+                                        intent.setType("text/plain")
+                                        context.startActivity(
+                                            Intent.createChooser(
+                                                intent,
+                                                null
+                                            )
                                         )
-                                    }
-                                },
+                                    },
+                                    onReplyClick = {},
+                                    isPinned = true,
+                                    onGoToPinnedComment = {
+                                        coroutineScope.launch {
+                                            lazyListState.animateScrollToItem(
+                                                commentsData!!.comments.indexOf(
+                                                    comment
+                                                ) + itemOffsetCount, (-articleHeaderOffset).toInt()
+                                            )
+                                        }
+                                    },
 
-                                ) {
-                                Column {
-                                    it.let {
-                                        SelectionContainer {
-                                            ((parseChildElements(
-                                                Jsoup.parse(comment.message).body(), SpanStyle(
-                                                    fontSize = 16.sp,
-                                                    color = MaterialTheme.colors.onSurface
-                                                ),
-                                                onViewImageRequest = onImageClick
-                                            ).second)?.let { it1 ->
-                                                it1.forEach {
-                                                    it?.invoke(
-                                                        SpanStyle(
-                                                            fontSize = 16.sp,
-                                                            color = MaterialTheme.colors.onSurface
-                                                        ),
-                                                        elementsSettings
-                                                    )
-                                                }
+                                    ) {
+                                    Column {
+                                        it.let {
+                                            SelectionContainer {
+                                                ((parseChildElements(
+                                                    Jsoup.parse(comment.message).body(), SpanStyle(
+                                                        fontSize = 16.sp,
+                                                        color = MaterialTheme.colors.onSurface
+                                                    ),
+                                                    onViewImageRequest = onImageClick
+                                                ).second)?.let { it1 ->
+                                                    it1.forEach {
+                                                        it?.invoke(
+                                                            SpanStyle(
+                                                                fontSize = 16.sp,
+                                                                color = MaterialTheme.colors.onSurface
+                                                            ),
+                                                            elementsSettings
+                                                        )
+                                                    }
 
-                                            })
+                                                })
+                                            }
                                         }
                                     }
                                 }
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
 
-                        itemsIndexed(
-                            items = commentsData?.comments ?: emptyList(),
-                            key = { index, it -> it.id }
-                        ) { index, comment ->
-                            Box(
-                                modifier = Modifier
-                                    .animateItem(
-                                        tween(
-                                            durationMillis = 180,
-                                            delayMillis = index * 70,
-                                            easing = EaseInCubic
+                            itemsIndexed(
+                                items = commentsData?.comments ?: emptyList(),
+                                key = { index, it -> it.id }
+                            ) { index, comment ->
+                                Box(
+                                    modifier = Modifier
+                                        .animateItem(
+                                            tween(
+                                                durationMillis = 180,
+                                                delayMillis = index * 70,
+                                                easing = EaseInCubic
+                                            )
                                         )
-                                    )
-                            ) {
-                                if (!screenState.collapsedComments.contains(comment.id)) {
-                                    if (screenState.collapsedCommentsParents.contains(comment.id)) {
-                                        CollapsedThreadHeaderComment(
-                                            modifier = Modifier
-                                                .padding(start = 20.dp * comment.level.coerceAtMost(5))
-                                                .padding(bottom = 8.dp),
-                                            onExpandClick = { screenState.expandThread(comment.id) },
-                                            comment = comment
-                                        )
-                                    } else {
-                                        Column(horizontalAlignment = Alignment.End) {
-                                            val parentComment = remember {
-                                                commentsData!!.comments.firstOrNull { com -> com.id == comment.parentCommentId }
-                                            }
+                                ) {
+                                    if (!screenState.collapsedComments.contains(comment.id)) {
+                                        if (screenState.collapsedCommentsParents.contains(comment.id)) {
+                                            CollapsedThreadHeaderComment(
+                                                modifier = Modifier
+                                                    .padding(start = 20.dp * comment.level.coerceAtMost(5))
+                                                    .padding(bottom = 8.dp),
+                                                onExpandClick = { screenState.expandThread(comment.id) },
+                                                comment = comment
+                                            )
+                                        } else {
+                                            Column(horizontalAlignment = Alignment.End) {
+                                                val parentComment = remember {
+                                                    commentsData!!.comments.firstOrNull { com -> com.id == comment.parentCommentId }
+                                                }
 //										val parentCommentIndex = remember {
 //											parentComment?.let {
 //												return@remember commentsData!!.comments.indexOf(it)
 //											} ?: 0
 //										}
-                                            if (comment.deleted) {
-                                                DeletedCommentItem(
-                                                    modifier = Modifier.padding(
-                                                        start = 20.dp * comment.level.coerceAtMost(
-                                                            5
-                                                        )
-                                                    )
-                                                )
-                                            } else {
-                                                var showMenu by remember { mutableStateOf(false) }
-                                                CommentItem(
-                                                    modifier = Modifier
-                                                        .padding(
+                                                if (comment.deleted) {
+                                                    DeletedCommentItem(
+                                                        modifier = Modifier.padding(
                                                             start = 20.dp * comment.level.coerceAtMost(
                                                                 5
                                                             )
-                                                        ),
-                                                    comment = comment,
-                                                    onAuthorClick = { onUserClicked(comment.author.alias) },
-                                                    parentComment = parentComment,
-                                                    highlight = comment.id == highlightedCommentId,
-                                                    showReplyButton = commentsData!!.commentAccess.canComment,
-                                                    menu = {
+                                                        )
+                                                    )
+                                                } else {
+                                                    var showMenu by remember { mutableStateOf(false) }
+                                                    CommentItem(
+                                                        modifier = Modifier
+                                                            .padding(
+                                                                start = 20.dp * comment.level.coerceAtMost(
+                                                                    5
+                                                                )
+                                                            ),
+                                                        comment = comment,
+                                                        onAuthorClick = { onUserClicked(comment.author.alias) },
+                                                        parentComment = parentComment,
+                                                        highlight = comment.id == highlightedCommentId,
+                                                        showReplyButton = commentsData!!.commentAccess.canComment,
+                                                        menu = {
 
-                                                        CommentItemMenu(
-                                                            onCollapseCommentClick = {
-                                                                screenState.collapseComment(comment.id)
-                                                                showMenu = false
-                                                            },
-                                                            onCollapseThreadClick = {
-                                                                coroutineScope.launch {
-                                                                    screenState.collapseThread(
-                                                                        comment.id
-                                                                    )
-                                                                }
-                                                                showMenu = false
-                                                            },
-                                                            onDismiss = { showMenu = false },
-                                                            show = showMenu
-                                                        )
-                                                    },
-                                                    onMenuButtonClick = { showMenu = true },
-                                                    onShare = {
-                                                        val intent = Intent(Intent.ACTION_SEND)
-                                                        intent.putExtra(
-                                                            Intent.EXTRA_TEXT,
-                                                            "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
-                                                        )
-                                                        intent.setType("text/plain")
-                                                        context.startActivity(
-                                                            Intent.createChooser(
-                                                                intent,
-                                                                null
-                                                            )
-                                                        )
-                                                    },
-                                                    onReplyClick = {
-                                                        answeringComment = comment
-                                                        commentTextFieldFocusRequester.requestFocus()
-                                                    },
-                                                    onParentCommentSnippetClick = {
-                                                        returnToCommentId = comment.id
-                                                        coroutineScope.launch(Dispatchers.Main) {
-                                                            comment.parentCommentId?.let {
-                                                                screenState.scrollToComment(it)
-                                                            }
-                                                        }
-                                                    },
-                                                    ratingIconPainter = ratingIconPainter,
-                                                    replyIconPainter = replyIconPainter
-                                                ) {
-                                                    Column {
-                                                        comment.let {
-                                                            SelectionContainer {
-                                                                ((parseChildElements(
-                                                                    Jsoup.parse(it.message).body(),
-                                                                    SpanStyle(
-                                                                        fontSize = 16.sp,
-                                                                        color = MaterialTheme.colors.onSurface
-                                                                    ),
-                                                                    onViewImageRequest = onImageClick
-                                                                ).second)?.let { it1 ->
-                                                                    it1.forEach {
-                                                                        it?.invoke(
-                                                                            SpanStyle(
-                                                                                fontSize = 16.sp,
-                                                                                color = MaterialTheme.colors.onSurface
-                                                                            ),
-                                                                            elementsSettings
+                                                            CommentItemMenu(
+                                                                onCollapseCommentClick = {
+                                                                    screenState.collapseComment(comment.id)
+                                                                    showMenu = false
+                                                                },
+                                                                onCollapseThreadClick = {
+                                                                    coroutineScope.launch {
+                                                                        screenState.collapseThread(
+                                                                            comment.id
                                                                         )
                                                                     }
+                                                                    showMenu = false
+                                                                },
+                                                                onDismiss = { showMenu = false },
+                                                                show = showMenu
+                                                            )
+                                                        },
+                                                        onMenuButtonClick = { showMenu = true },
+                                                        onShare = {
+                                                            val intent = Intent(Intent.ACTION_SEND)
+                                                            intent.putExtra(
+                                                                Intent.EXTRA_TEXT,
+                                                                "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
+                                                            )
+                                                            intent.setType("text/plain")
+                                                            context.startActivity(
+                                                                Intent.createChooser(
+                                                                    intent,
+                                                                    null
+                                                                )
+                                                            )
+                                                        },
+                                                        onReplyClick = {
+                                                            answeringComment = comment
+                                                            commentTextFieldFocusRequester.requestFocus()
+                                                        },
+                                                        onParentCommentSnippetClick = {
+                                                            returnToCommentId = comment.id
+                                                            coroutineScope.launch(Dispatchers.Main) {
+                                                                comment.parentCommentId?.let {
+                                                                    screenState.scrollToComment(it)
+                                                                }
+                                                            }
+                                                        },
+                                                        ratingIconPainter = ratingIconPainter,
+                                                        replyIconPainter = replyIconPainter
+                                                    ) {
+                                                        Column {
+                                                            comment.let {
+                                                                SelectionContainer {
+                                                                    ((parseChildElements(
+                                                                        Jsoup.parse(it.message).body(),
+                                                                        SpanStyle(
+                                                                            fontSize = 16.sp,
+                                                                            color = MaterialTheme.colors.onSurface
+                                                                        ),
+                                                                        onViewImageRequest = onImageClick
+                                                                    ).second)?.let { it1 ->
+                                                                        it1.forEach {
+                                                                            it?.invoke(
+                                                                                SpanStyle(
+                                                                                    fontSize = 16.sp,
+                                                                                    color = MaterialTheme.colors.onSurface
+                                                                                ),
+                                                                                elementsSettings
+                                                                            )
+                                                                        }
 
-                                                                })
+                                                                    })
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
+                                                Spacer(modifier = Modifier.height(if (index != commentsData!!.comments.lastIndex) 8.dp else 0.dp))
                                             }
-                                            Spacer(modifier = Modifier.height(if (index != commentsData!!.comments.lastIndex) 8.dp else 0.dp))
                                         }
                                     }
                                 }
                             }
-                        }
-                    } else if (commentsData == null) {
-                        item {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
+                        } else if (commentsData == null) {
+                            item {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator()
+                                }
                             }
                         }
                     }
                 }
-
 
             }
             val articleHeaderOffsetAnimation by animateFloatAsState(
