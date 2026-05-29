@@ -23,14 +23,14 @@ fun SettingsCardItem(
 ) {
 	Row(modifier = Modifier
 		.fillMaxWidth()
-		.clip(RoundedCornerShape(10.dp))
+		.clip(RoundedCornerShape(8.dp))
 		.clickable(
 			interactionSource = interactionSource,
 			indication = ripple(),
 			enabled = enabled,
 			onClick = onClick
 		)
-		.padding(start = 4.dp)
+		.padding(start = 12.dp)
 		.height(48.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {

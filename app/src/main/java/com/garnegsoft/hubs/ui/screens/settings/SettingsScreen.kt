@@ -267,13 +267,10 @@ fun SettingsCardItemPicker(
 ) {
 	var showSelectThemeMenu by remember { mutableStateOf(false) }
 	Row(
-		modifier = Modifier
+		modifier = modifier
 			.fillMaxWidth()
 			.clip(RoundedCornerShape(10.dp))
-//				.clickable {
-//					showSelectThemeMenu = true
-//				}
-			.padding(start = 4.dp)
+			.padding(horizontal = 12.dp)
 			.height(48.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {
@@ -358,12 +355,15 @@ fun SettingsCardItemPicker(
 										text = item,
 										style = MaterialTheme.typography.body1
 									)
+									Spacer(modifier = Modifier.width(12.dp))
 									if (index == pickedItemIndex) {
 										Icon(
 											modifier = Modifier.size(20.dp),
 											imageVector = Icons.Default.Done,
 											contentDescription = "Выбрано"
 										)
+									} else {
+										Box(modifier = Modifier.size(20.dp))
 									}
 								}
 							}

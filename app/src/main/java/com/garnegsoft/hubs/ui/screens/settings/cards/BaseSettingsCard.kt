@@ -23,13 +23,13 @@ fun SettingsCard(
 		modifier = Modifier
 			.clip(RoundedCornerShape(26.dp))
 			.background(MaterialTheme.colors.surface)
-			.padding(16.dp),
+			.padding(horizontal = 6.dp, vertical = 10.dp),
 		verticalArrangement = Arrangement.spacedBy(4.dp)
 	) {
 		BasicTitledColumn(
 			title = {
 				Text(
-					modifier = Modifier.padding(bottom = 12.dp),
+					modifier = Modifier.padding(bottom = 12.dp, start = 12.dp, top = 12.dp),
 					text = title, style = MaterialTheme.typography.subtitle1
 				)
 			},

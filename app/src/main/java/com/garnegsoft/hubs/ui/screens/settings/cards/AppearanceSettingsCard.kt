@@ -26,6 +26,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.ui.common.BaseMenuContainer
+import com.garnegsoft.hubs.ui.screens.settings.SettingsCardItemPicker
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreenViewModel
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -39,183 +40,46 @@ fun AppearanceSettingsCard(
     val theme by viewModel.getTheme(context).collectAsState(initial = null)
     theme.let { themeMode ->
         SettingsCard(title = "Внешний вид") {
-            var showSelectThemeMenu by remember { mutableStateOf(false) }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-//				.clickable {
-//					showSelectThemeMenu = true
-//				}
-                    .padding(start = 4.dp)
-                    .height(48.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val showMenuTransition = updateTransition(showSelectThemeMenu)
-                Text(modifier = Modifier.weight(1f), text = "Тема:")
-                Box {
-                    Row(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { showSelectThemeMenu = true }
-                            .padding(vertical = 6.dp)
-                            .padding(start = 12.dp, end = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = when (themeMode) {
-                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light -> "Светлая"
-                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> "Тёмная"
-                                else -> "Системная"
-                            }
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        val rotationAnimated by showMenuTransition.animateFloat { if (it) 180f else 0f }
-                        Icon(
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    rotationZ = rotationAnimated
-                                },
-                            imageVector = Icons.Default.ArrowDropDown, contentDescription = null
-                        )
+            SettingsCardItemPicker(
+                title = "Тема:",
+                items = listOf("Светлая", "Тёмная", "Системная"),
+                pickedItemIndex = when (themeMode) {
+                    HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light -> 0
+                    HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark -> 1
+                    else -> 2
+                },
+                onItemPicked = { index ->
+                    when (index) {
+                        0 -> {
+                            viewModel.setTheme(
+                                context,
+                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light
+                            )
+                        }
 
-                    }
+                        1 -> {
+                            viewModel.setTheme(
+                                context,
+                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
+                            )
+                        }
 
-                    val scaleFactor by showMenuTransition.animateFloat { if (it) 1f else 0f }
-                    val offsetFactor by showMenuTransition.animateFloat { if (it) 0f else 1f }
-                    if (showSelectThemeMenu || showMenuTransition.currentState || showMenuTransition.targetState) {
-                        Popup(
-                            popupPositionProvider = object : PopupPositionProvider {
-                                override fun calculatePosition(
-                                    anchorBounds: IntRect,
-                                    windowSize: IntSize,
-                                    layoutDirection: LayoutDirection,
-                                    popupContentSize: IntSize
-                                ): IntOffset {
-                                    return IntOffset(
-                                        anchorBounds.right - popupContentSize.width,
-                                        anchorBounds.bottom
-                                    )
-                                }
-
-                            },
-                            onDismissRequest = {
-                                showSelectThemeMenu = false
-                            },
-                            properties = PopupProperties(true)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .offset {
-                                        IntOffset(x = 8.dp.roundToPx(), y = -8.dp.roundToPx())
-                                    }
-                                    .graphicsLayer {
-                                        alpha = scaleFactor
-                                        translationY = -8.dp.roundToPx() * offsetFactor
-//										scaleY = scaleFactor
-                                    }
-                            ) {
-                                BaseMenuContainer() {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(48.dp)
-                                            .clickable {
-                                                viewModel.setTheme(
-                                                    context,
-                                                    HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined
-                                                )
-                                                showSelectThemeMenu = false
-                                            }
-                                            .padding(horizontal = 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.weight(1f),
-                                            text = "Системная",
-                                            style = MaterialTheme.typography.body1
-                                        )
-                                        if (themeMode == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined ||
-                                            themeMode == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Undetermined
-                                        ) {
-                                            Icon(
-                                                modifier = Modifier.size(20.dp),
-                                                imageVector = Icons.Default.Done,
-                                                contentDescription = "Выбрано"
-                                            )
-                                        }
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(48.dp)
-                                            .clickable {
-                                                viewModel.setTheme(
-                                                    context,
-                                                    HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light
-                                                )
-                                                showSelectThemeMenu = false
-                                            }
-                                            .padding(horizontal = 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.weight(1f),
-                                            text = "Светлая",
-                                            style = MaterialTheme.typography.body1
-                                        )
-
-                                        if (themeMode == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Light) {
-                                            Icon(
-                                                modifier = Modifier.size(20.dp),
-                                                imageVector = Icons.Default.Done,
-                                                contentDescription = "Выбрано"
-                                            )
-                                        }
-                                    }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(48.dp)
-                                            .clickable {
-                                                viewModel.setTheme(
-                                                    context,
-                                                    HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark
-                                                )
-                                                showSelectThemeMenu = false
-                                            }
-                                            .padding(horizontal = 16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            modifier = Modifier.weight(1f),
-                                            text = "Тёмная",
-                                            style = MaterialTheme.typography.body1
-                                        )
-
-                                        if (themeMode == HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.Dark) {
-                                            Icon(
-                                                modifier = Modifier.size(20.dp),
-                                                imageVector = Icons.Default.Done,
-                                                contentDescription = "Выбрано"
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-
+                        else -> {
+                            viewModel.setTheme(
+                                context,
+                                HubsDataStore.Settings.Theme.ColorSchemeMode.ColorScheme.SystemDefined
+                            )
                         }
                     }
                 }
-            }
-
+            )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(10.dp))
                     .clickable(onClick = onArticleScreenSettings)
-                    .padding(start = 4.dp)
+                    .padding(start = 12.dp)
                     .heightIn(min = 48.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
