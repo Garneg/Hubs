@@ -48,7 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
@@ -387,6 +389,7 @@ fun ArticleScreen(
                     }
                 })
                 val density = LocalDensity.current
+
 
                 Box(modifier = Modifier.padding(it)) {
                     AnimatedVisibility(

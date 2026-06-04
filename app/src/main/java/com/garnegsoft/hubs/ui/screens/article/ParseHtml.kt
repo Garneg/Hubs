@@ -32,9 +32,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.AndroidFont
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -311,7 +313,8 @@ fun parseElement(
 								lineHeight = localSpanStyle.fontSize.times(
 									LINE_HEIGHT_FACTOR
 								),
-								color = MaterialTheme.colors.onBackground
+								color = MaterialTheme.colors.onBackground,
+								fontFamily = FontFamily()
 
 							),
 							onClick = {
