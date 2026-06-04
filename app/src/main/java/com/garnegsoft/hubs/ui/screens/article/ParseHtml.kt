@@ -85,7 +85,10 @@ fun RenderHtml(
 			if (text.isNotBlank()) {
 				ClickableText(
 					text = text,
-					style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
+					style = LocalTextStyle.current.copy(
+						lineHeight = LocalTextStyle.current.fontSize * 1.5f,
+						color = MaterialTheme.colors.onBackground
+					),
 					onClick = {
 						text.getStringAnnotations(it, it)
 							.find { it.tag == "url" }
@@ -308,7 +311,8 @@ fun parseElement(
 								lineHeight = localSpanStyle.fontSize.times(
 									LINE_HEIGHT_FACTOR
 								),
-								color = localSpanStyle.color
+								color = MaterialTheme.colors.onBackground
+
 							),
 							onClick = {
 								focusManager.clearFocus(true)
@@ -363,7 +367,7 @@ fun parseElement(
 				lineHeight = localSpanStyle.fontSize.times(
 					LINE_HEIGHT_FACTOR
 				),
-				color = localSpanStyle.color
+				color = MaterialTheme.colors.onBackground
 			)
 			val focusManager = LocalFocusManager.current
 			ClickableText(

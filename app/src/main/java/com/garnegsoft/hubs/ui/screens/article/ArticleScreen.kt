@@ -362,7 +362,6 @@ fun ArticleScreen(
                 val color = MaterialTheme.colors.onSurface
                 val spanStyle = remember(fontSize, color) {
                     SpanStyle(
-                        color = color,
                         fontSize = fontSize?.sp ?: 16.sp
                     )
                 }

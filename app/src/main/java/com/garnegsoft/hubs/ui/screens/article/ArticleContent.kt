@@ -73,7 +73,7 @@ fun ArticleContent(
         val color = MaterialTheme.colors.onSurface
         val spanStyle = remember(fontSize, color) {
             SpanStyle(
-                color = color,
+                //color = color,
                 fontSize = fontSize
             )
         }
