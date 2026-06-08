@@ -51,7 +51,7 @@ class ArticleScreenSettingsScreenViewModel : ViewModel() {
         get() {
             return HubsDataStore.Settings
                 .getValueFlow(this, HubsDataStore.Settings.ArticleScreen.FontSize)
-    }
+        }
 
     /**
      * Sets font family in preferences. To set default system font family, set familyName to empty string
@@ -82,7 +82,7 @@ fun ArticleScreenSettingsScreen(
     val viewModel = viewModel<ArticleScreenSettingsScreenViewModel>()
 
     val context = LocalContext.current
-    
+
     val defaultFontSize = MaterialTheme.typography.body1.fontSize.value
     val originalFontSize: Float? by with(viewModel) { context.fontSize.collectAsState(initial = defaultFontSize) }
     var fontSize: Float? by remember { mutableStateOf(null) }
@@ -134,9 +134,7 @@ fun ArticleScreenSettingsScreen(
                             .height(4.dp)
                             .width(32.dp)
                             .clip(RoundedCornerShape(50))
-                            .background(
-                                MaterialTheme.colors.onBackground.copy(0.15f)
-                            )
+                            .background(MaterialTheme.colors.onBackground.copy(0.15f))
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
@@ -160,7 +158,7 @@ fun ArticleScreenSettingsScreen(
                                 }
                             },
                             onValueChangeFinished = {
-                                    viewModel.setFontSize(context, fontSize!!)
+                                viewModel.setFontSize(context, fontSize!!)
                             },
                             colors = ArticleScreenSettingsSliderColors
                         )
@@ -178,7 +176,8 @@ fun ArticleScreenSettingsScreen(
                     SettingsCardItemPicker(
                         title = "Шрифт",
                         items = fontsList.keys.toList(),
-                        pickedItemIndex = fontsList.values.indexOf(fontFamilyPreference).coerceIn(0, fontsList.size - 1),
+                        pickedItemIndex = fontsList.values.indexOf(fontFamilyPreference)
+                            .coerceIn(0, fontsList.size - 1),
                         onItemPicked = {
                             viewModel.setFontFamily(context, fontsList.values.elementAtOrNull(it) ?: "")
                         }
@@ -291,8 +290,9 @@ fun ArticleScreenSettingsScreen(
                     modifier = Modifier
                         .size(34.dp)
                         .clip(RoundedCornerShape(8.dp)),
-                    model = "https://assets.habr.com/habr-web/img/avatars/012.png", contentDescription = null)
-                
+                    model = "https://assets.habr.com/habr-web/img/avatars/012.png", contentDescription = null
+                )
+
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = "squada", fontWeight = FontWeight.W600,
@@ -335,12 +335,12 @@ fun ArticleScreenSettingsScreen(
                     Article.Hub("", true, false, "Программирование", Article.Hub.RelatedData(true)),
                     Article.Hub("", false, false, "Habr", null),
                     Article.Hub("", true, false, "Jetpack Compose", null)
-                    
+
                 ),
-                onHubClicked = {  },
-                onCompanyClicked = {  }
+                onHubClicked = { },
+                onCompanyClicked = { }
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
 
             val animatedLineHeightFactor by animateFloatAsState(targetValue = lineHeightFactor)
@@ -352,9 +352,11 @@ fun ArticleScreenSettingsScreen(
             }
 
             Text(
-                text = AnnotatedString.fromHtml("Представьте, что у вас есть задача проиллюстрировать читателю, как будет выглядеть тот или иной шрифт. Самое простое, что может прийти на ум это написать все 33 или 26 букв нужного вам алфавита в ряд - абвгдеёж.. или abcdefg.. И хоть такой пример может в целом продемонстрировать, как будут выглядеть буквы заданного шрифта, у читателя может совсем не появится понимание, как этот шрифт будет выглядеть в <i><u>реальном</u></i> тексте и насколько удобно будет читать, используя его. \n" +
-                        "И тут мы приходим к тому, что нам нужно продемонстрировать как будут выглядеть буквы и лигатуры шрифта и одновременно с этим показать, каков будет опыт пользователя, использующего этот шрифт. Для решения этой задачи человечество придумало <b>\"панограммы\"</b> - небольшой отрывок текста, содержащий все или как можно больше букв алфавита, призванный показать читателю, каково пользоваться этим шрифтом. \n" +
-                        "Из самых известных можно отметить \"The quick brown fox jumps over the lazy dog\" для латинского алфавита. Благодаря тому, что эта панограмма содержит все 26 букв стандартного латинского алфавита, её очень удобно использовать, не только чтобы показать, как будет выглядеть шрифт и слова в нем, но еще и для тестирования печатного оборудования, а также практики \"слепой\" печати."),
+                text = AnnotatedString.fromHtml(
+                    "Представьте, что у вас есть задача проиллюстрировать читателю, как будет выглядеть тот или иной шрифт. Самое простое, что может прийти на ум это написать все 33 или 26 букв нужного вам алфавита в ряд - абвгдеёж.. или abcdefg.. И хоть такой пример может в целом продемонстрировать, как будут выглядеть буквы заданного шрифта, у читателя может совсем не появится понимание, как этот шрифт будет выглядеть в <i><u>реальном</u></i> тексте и насколько удобно будет читать, используя его. \n" +
+                            "И тут мы приходим к тому, что нам нужно продемонстрировать как будут выглядеть буквы и лигатуры шрифта и одновременно с этим показать, каков будет опыт пользователя, использующего этот шрифт. Для решения этой задачи человечество придумало <b>\"панограммы\"</b> - небольшой отрывок текста, содержащий все или как можно больше букв алфавита, призванный показать читателю, каково пользоваться этим шрифтом. \n" +
+                            "Из самых известных можно отметить \"The quick brown fox jumps over the lazy dog\" для латинского алфавита. Благодаря тому, что эта панограмма содержит все 26 букв стандартного латинского алфавита, её очень удобно использовать, не только чтобы показать, как будет выглядеть шрифт и слова в нем, но еще и для тестирования печатного оборудования, а также практики \"слепой\" печати."
+                ),
                 style = TextStyle(
                     lineHeight = (fontSize ?: originalFontSize ?: defaultFontSize).sp * animatedLineHeightFactor,
                     textAlign = textAlign,
