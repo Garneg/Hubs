@@ -52,6 +52,7 @@ object HubsDataStore {
 		
 		object ArticleScreen {
 			val FontSize = hubsFloatPreference("article_font_size", 16f)
+			val FontFamily = hubsStringPreference("article_font_family", "Merriweather")
 //			val LineHeightFactor = floatPreferencesKey("line_height_factor")
 //			val TextWrapMode = intPreferencesKey("article_text_wrap")
 //			val Indent = intPreferencesKey("article_indent")

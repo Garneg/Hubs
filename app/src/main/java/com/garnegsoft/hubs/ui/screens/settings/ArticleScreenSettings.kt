@@ -11,13 +11,19 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -25,15 +31,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.garnegsoft.hubs.GoogleFontProvider
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.HubsRow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlin.math.round
 
 
 class ArticleScreenSettingsScreenViewModel : ViewModel() {
@@ -44,10 +53,19 @@ class ArticleScreenSettingsScreenViewModel : ViewModel() {
                 .getValueFlow(this, HubsDataStore.Settings.ArticleScreen.FontSize)
     }
 
-    fun Context.setFontSize(size: Float) {
+    /**
+     * Sets font family in preferences. To set default system font family, set familyName to empty string
+     */
+    fun setFontFamily(context: Context, familyName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            HubsDataStore.Settings.edit(context, HubsDataStore.Settings.ArticleScreen.FontFamily, familyName)
+        }
+    }
+
+    fun setFontSize(context: Context, size: Float) {
         viewModelScope.launch(Dispatchers.IO) {
             HubsDataStore.Settings.edit(
-                this@setFontSize,
+                context,
                 HubsDataStore.Settings.ArticleScreen.FontSize,
                 size
             )
@@ -71,6 +89,10 @@ fun ArticleScreenSettingsScreen(
     var lineHeightFactor by remember { mutableStateOf(1.5f) }
     var justifyText by remember { mutableStateOf(false) }
     val state = rememberBottomSheetScaffoldState()
+
+    val fontFamilyPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontFamily)
+
+
     BottomSheetScaffold(
         scaffoldState = state,
         topBar = {
@@ -90,6 +112,16 @@ fun ArticleScreenSettingsScreen(
         sheetPeekHeight = 80.dp,
         sheetShape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
         sheetContent = {
+
+            val notoSerifGoogle = GoogleFont("Noto Serif")
+            val merriweatherGoogle = GoogleFont("Merriweather")
+            val ptSansGoogle = GoogleFont("PT Sans")
+
+            val defaultFontFamily = FontFamily.Default
+            val notoSerifFamily = FontFamily(Font(notoSerifGoogle, GoogleFontProvider))
+            val merriweatherFamily = FontFamily(Font(merriweatherGoogle, GoogleFontProvider))
+            val ptSansFamily = FontFamily(Font(ptSansGoogle, GoogleFontProvider))
+
             Column(modifier = Modifier.fillMaxHeight(0.6f)) {
                 Box(
                     modifier = Modifier
@@ -123,14 +155,34 @@ fun ArticleScreenSettingsScreen(
                             valueRange = 12f..32f,
                             steps = 9,
                             onValueChange = {
-                                fontSize = it
+                                if (round(it) % 2 == 0f) {
+                                    fontSize = round(it)
+                                }
                             },
                             onValueChangeFinished = {
-                                with(viewModel) { context.setFontSize(fontSize!!) }
+                                    viewModel.setFontSize(context, fontSize!!)
                             },
                             colors = ArticleScreenSettingsSliderColors
                         )
                     }
+
+                    val fontsList = remember {
+                        mapOf(
+                            "Системный" to "",
+                            notoSerifGoogle.name to notoSerifGoogle.name,
+                            merriweatherGoogle.name to merriweatherGoogle.name,
+                            ptSansGoogle.name to ptSansGoogle.name
+                        )
+                    }
+
+                    SettingsCardItemPicker(
+                        title = "Шрифт",
+                        items = fontsList.keys.toList(),
+                        pickedItemIndex = fontsList.values.indexOf(fontFamilyPreference).coerceIn(0, fontsList.size - 1),
+                        onItemPicked = {
+                            viewModel.setFontFamily(context, fontsList.values.elementAtOrNull(it) ?: "")
+                        }
+                    )
 
 //                    TitledColumn(
 //                        title = "Межстрочный интервал"
@@ -204,6 +256,21 @@ fun ArticleScreenSettingsScreen(
 
             }
         }) {
+
+        val googleFont = when (fontFamilyPreference) {
+            "" -> null
+            null -> null
+            else -> {
+                GoogleFont(fontFamilyPreference!!)
+            }
+        }
+
+        val fontFamily = googleFont?.let {
+            FontFamily(
+                Font(googleFont = googleFont, GoogleFontProvider),
+            )
+        } ?: FontFamily.Default
+
         Column(
             modifier = Modifier
                 .background(
@@ -221,7 +288,9 @@ fun ArticleScreenSettingsScreen(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AsyncImage(
-                    modifier = Modifier.size(34.dp).clip(RoundedCornerShape(8.dp)),
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(RoundedCornerShape(8.dp)),
                     model = "https://assets.habr.com/habr-web/img/avatars/012.png", contentDescription = null)
                 
                 Spacer(modifier = Modifier.width(4.dp))
@@ -234,8 +303,9 @@ fun ArticleScreenSettingsScreen(
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = "Пример публикации",
-                fontSize = ((fontSize ?: originalFontSize ?: defaultFontSize) + 4f).sp,
+                fontSize = animateFloatAsState((fontSize ?: originalFontSize ?: defaultFontSize) + 4f).value.sp,
                 fontWeight = FontWeight.W700,
+                fontFamily = fontFamily,
                 color = MaterialTheme.colors.onBackground
             )
             Spacer(modifier = Modifier.height(4.dp))
@@ -280,16 +350,17 @@ fun ArticleScreenSettingsScreen(
                 else
                     TextAlign.Left
             }
+
             Text(
-                text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras pulvinar mattis nunc sed blandit libero volutpat. Lacus sed viverra tellus in hac habitasse platea dictumst vestibulum. Et ligula ullamcorper malesuada proin libero nunc consequat. Vitae justo eget magna fermentum iaculis eu non diam phasellus. Quam adipiscing vitae proin sagittis nisl. Lacus sed viverra tellus in hac habitasse platea dictumst vestibulum. Elit duis tristique sollicitudin nibh. Nisl pretium fusce id velit ut tortor pretium. Mattis aliquam faucibus purus in. In vitae turpis massa sed elementum tempus egestas sed sed.\n" +
-                        "\n" +
-                        "Est lorem ipsum dolor sit amet consectetur adipiscing. Viverra accumsan in nisl nisi scelerisque eu ultrices. Diam maecenas sed enim ut sem viverra. Id volutpat lacus laoreet non curabitur. Aliquam vestibulum morbi blandit cursus risus. Ac tortor vitae purus faucibus ornare suspendisse sed nisi lacus. Nunc faucibus a pellentesque sit amet porttitor eget. Dolor sed viverra ipsum nunc aliquet bibendum enim facilisis gravida. Urna nec tincidunt praesent semper feugiat nibh sed pulvinar. Felis eget nunc lobortis mattis aliquam faucibus purus in. Tellus in metus vulputate eu. Quam id leo in vitae turpis. Porta non pulvinar neque laoreet suspendisse interdum consectetur libero id. Mauris augue neque gravida in fermentum et. Massa vitae tortor condimentum lacinia quis vel eros donec ac.",
+                text = AnnotatedString.fromHtml("Представьте, что у вас есть задача проиллюстрировать читателю, как будет выглядеть тот или иной шрифт. Самое простое, что может прийти на ум это написать все 33 или 26 букв нужного вам алфавита в ряд - абвгдеёж.. или abcdefg.. И хоть такой пример может в целом продемонстрировать, как будут выглядеть буквы заданного шрифта, у читателя может совсем не появится понимание, как этот шрифт будет выглядеть в <i><u>реальном</u></i> тексте и насколько удобно будет читать, используя его. \n" +
+                        "И тут мы приходим к тому, что нам нужно продемонстрировать как будут выглядеть буквы и лигатуры шрифта и одновременно с этим показать, каков будет опыт пользователя, использующего этот шрифт. Для решения этой задачи человечество придумало <b>\"панограммы\"</b> - небольшой отрывок текста, содержащий все или как можно больше букв алфавита, призванный показать читателю, каково пользоваться этим шрифтом. \n" +
+                        "Из самых известных можно отметить \"The quick brown fox jumps over the lazy dog\" для латинского алфавита. Благодаря тому, что эта панограмма содержит все 26 букв стандартного латинского алфавита, её очень удобно использовать, не только чтобы показать, как будет выглядеть шрифт и слова в нем, но еще и для тестирования печатного оборудования, а также практики \"слепой\" печати."),
                 style = TextStyle(
                     lineHeight = (fontSize ?: originalFontSize ?: defaultFontSize).sp * animatedLineHeightFactor,
                     textAlign = textAlign,
                 ),
-
-                fontSize = (fontSize ?: originalFontSize ?: defaultFontSize).sp,
+                fontFamily = fontFamily,
+                fontSize = animateFloatAsState(fontSize ?: originalFontSize ?: defaultFontSize).value.sp,
                 color = MaterialTheme.colors.onBackground
             )
 

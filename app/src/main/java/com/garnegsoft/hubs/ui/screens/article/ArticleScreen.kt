@@ -50,6 +50,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
@@ -360,11 +361,34 @@ fun ArticleScreen(
 //				Box(modifier = Modifier.fillMaxSize().background(Color.Red).pointerInput(Unit) {})
             }
         ) {
+            val googleProvider = GoogleFont.Provider(
+                providerAuthority = "com.google.android.gms.fonts",
+                providerPackage = "com.google.android.gms",
+                certificates = R.array.com_google_android_gms_fonts_certs
+            )
+
+            val fontFamilyPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontFamily)
+
+            val googleFont = when (fontFamilyPreference) {
+                "" -> null
+                null -> null
+                else -> {
+                    GoogleFont(fontFamilyPreference!!)
+                }
+            }
+
+            val fontFamily = googleFont?.let {
+                FontFamily(
+                    Font(googleFont = googleFont, googleProvider),
+                )
+            } ?: FontFamily.Default
+
             article?.let { article ->
                 val color = MaterialTheme.colors.onSurface
                 val spanStyle = remember(fontSize, color) {
                     SpanStyle(
-                        fontSize = fontSize?.sp ?: 16.sp
+                        fontSize = fontSize?.sp ?: 16.sp,
+                        fontFamily = fontFamily
                     )
                 }
 
