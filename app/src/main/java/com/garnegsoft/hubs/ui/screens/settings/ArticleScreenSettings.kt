@@ -5,7 +5,10 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -24,6 +27,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,6 +41,7 @@ import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.Article
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
+import com.garnegsoft.hubs.ui.common.BaseTitledDialog
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.screens.article.HubsRow
@@ -164,22 +170,79 @@ fun ArticleScreenSettingsScreen(
                         )
                     }
 
-                    val fontsList = remember {
+                    val fontsMap = remember {
                         mapOf(
                             "Системный" to "",
                             notoSerifGoogle.name to notoSerifGoogle.name,
                             merriweatherGoogle.name to merriweatherGoogle.name,
-                            ptSansGoogle.name to ptSansGoogle.name
+                            ptSansGoogle.name to ptSansGoogle.name,
+                            "Другой..." to ""
                         )
+                    }
+                    var showSetGoogleFontDialog by remember { mutableStateOf(false) }
+                    if (showSetGoogleFontDialog) {
+                        BaseTitledDialog(
+                            onDismiss = {
+                                showSetGoogleFontDialog = false
+                            },
+                            title = "Задать другой шрифт (бета)"
+                        ) {
+                            Column {
+                                Text(
+                                    text = "Вы можете указать любой шрифт из открытой библиотеки Google Fonts\n" +
+                                            "Имейте ввиду, что некоторые шрифты не поддерживают кириллический набор символов, " +
+                                            "в таком случае вместо указанного шрифта будет отображаться установленный в системе\n\n" +
+                                            "Просто скопируйте и вставьте название шрифта",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colors.onSurface.copy(0.5f),
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                var textFieldValue by remember { mutableStateOf(TextFieldValue(fontFamilyPreference ?: "")) }
+                                TextField(
+                                    value = textFieldValue,
+                                    onValueChange = {
+                                        textFieldValue = it
+                                    },
+                                    keyboardActions = KeyboardActions {
+                                        viewModel.setFontFamily(context, textFieldValue.text)
+                                        showSetGoogleFontDialog = false
+                                    },
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Box(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    contentAlignment = Alignment.CenterEnd
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            viewModel.setFontFamily(context, textFieldValue.text)
+                                            showSetGoogleFontDialog = false
+                                        },
+                                        elevation = null
+                                    ) {
+                                        Text(text = "Готово")
+                                    }
+                                }
+
+                            }
+                        }
                     }
 
                     SettingsCardItemPicker(
                         title = "Шрифт",
-                        items = fontsList.keys.toList(),
-                        pickedItemIndex = fontsList.values.indexOf(fontFamilyPreference)
-                            .coerceIn(0, fontsList.size - 1),
+                        items = fontsMap.keys.toList(),
+                        pickedItemIndex = if (fontsMap.values.contains(fontFamilyPreference)) {
+                            fontsMap.values.indexOf(fontFamilyPreference)
+                        } else {
+                            if (fontFamilyPreference?.length == 0) 0 else fontsMap.keys.size - 1
+                        },
                         onItemPicked = {
-                            viewModel.setFontFamily(context, fontsList.values.elementAtOrNull(it) ?: "")
+                            if (it != fontsMap.keys.size - 1) {
+                                viewModel.setFontFamily(context, fontsMap.values.elementAtOrNull(it) ?: "")
+                            } else {
+                                showSetGoogleFontDialog = true
+                            }
                         }
                     )
 
