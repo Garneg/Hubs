@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.common.feedCards.hub
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -29,7 +31,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.hub.list.HubSnippet
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.theme.DefaultRatingIndicatorColor
 import com.garnegsoft.hubs.ui.theme.HubSubscribedColor
 
@@ -75,6 +79,7 @@ fun HubCard(
         Row(
             verticalAlignment = if (style.showDescription) Alignment.Top else Alignment.CenterVertically
         ) {
+            if (hub.avatarUrl != null) {
             AsyncImage(
                 model = hub.avatarUrl,
                 contentDescription = "",
@@ -83,6 +88,22 @@ fun HubCard(
                     .clip(style.avatarShape)
                     .background(Color.White)
             )
+            } else {
+                Icon(
+                    modifier = Modifier
+                        .size(style.avatarSize)
+                        .border(
+                            width = 2.5.dp,
+                            color = placeholderColorLegacy(hub.alias),
+                            shape = style.avatarShape
+                        )
+                        .background(Color.White, shape = style.avatarShape)
+                        .padding(3.dp),
+                    painter = painterResource(id = R.drawable.company_avatar_placeholder),
+                    contentDescription = "",
+                    tint = placeholderColorLegacy(hub.alias)
+                )
+            }
             Spacer(modifier = Modifier.width(style.innerPadding))
             val onBackgroundColor = MaterialTheme.colors.onBackground
             Column(

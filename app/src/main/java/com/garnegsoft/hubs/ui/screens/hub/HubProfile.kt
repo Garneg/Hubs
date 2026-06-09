@@ -5,10 +5,12 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -28,9 +31,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.hub.Hub
 import com.garnegsoft.hubs.api.hub.HubController
 import com.garnegsoft.hubs.api.utils.formatLongNumbers
+import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
 import com.garnegsoft.hubs.ui.common.BasicTitledColumn
 import com.garnegsoft.hubs.ui.common.RefreshableContainer
 import com.garnegsoft.hubs.ui.common.SubscriptionButton
@@ -80,6 +85,7 @@ fun HubProfile(
 							.fillMaxWidth()
 							.padding(bottom = 12.dp)
                     ) {
+                        if (hub.avatarUrl != null) {
                         AsyncImage(
                             modifier = Modifier
 								.padding(top = 12.dp)
@@ -89,6 +95,28 @@ fun HubProfile(
                             model = hub.avatarUrl,
                             contentDescription = ""
                         )
+                        } else {
+                            Box {
+                                Icon(
+                                    modifier = Modifier
+                                        .size(65.dp)
+                                        .background(
+                                            color = Color.White,
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .border(
+                                            width = 4.dp,
+                                            color = placeholderColorLegacy(hub.alias),
+                                            shape = RoundedCornerShape(12.dp)
+                                        )
+                                        .align(Alignment.Center)
+                                        .padding(5.dp),
+                                    painter = painterResource(id = R.drawable.company_avatar_placeholder),
+                                    contentDescription = "",
+                                    tint = placeholderColorLegacy(hub.alias)
+                                )
+                            }
+                        }
 
                     }
                     Text(

@@ -19,7 +19,7 @@ class HubController {
                 var customJson = Json { ignoreUnknownKeys = true }
                 profile = customJson.decodeFromJsonElement(customJson.parseToJsonElement(it))
                 profile?.let {
-                    profile!!.imageUrl = "https:" + profile!!.imageUrl
+                    profile!!.imageUrl?.let { profile!!.imageUrl = "https:$it" }
                 }
             }
 
@@ -77,7 +77,7 @@ data class HubProfile (
     var titleHtml: String,
     val descriptionHtml: String,
     val fullDescriptionHtml: String,
-    var imageUrl: String,
+    var imageUrl: String?,
     var statistics: Statistics,
     var flow: Flow,
     var isProfiled: Boolean,
