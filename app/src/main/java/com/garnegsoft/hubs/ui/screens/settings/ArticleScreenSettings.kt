@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
+import android.content.Intent
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -13,11 +14,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
@@ -32,6 +36,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -197,7 +202,13 @@ fun ArticleScreenSettingsScreen(
                                     color = MaterialTheme.colors.onSurface.copy(0.5f),
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
-                                var textFieldValue by remember { mutableStateOf(TextFieldValue(fontFamilyPreference ?: "")) }
+                                var textFieldValue by remember {
+                                    mutableStateOf(
+                                        TextFieldValue(
+                                            fontFamilyPreference ?: ""
+                                        )
+                                    )
+                                }
                                 TextField(
                                     value = textFieldValue,
                                     onValueChange = {
@@ -210,20 +221,42 @@ fun ArticleScreenSettingsScreen(
                                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Box(
+
+                                OutlinedButton(
                                     modifier = Modifier.fillMaxWidth(),
-                                    contentAlignment = Alignment.CenterEnd
+                                    onClick = {
+                                        val intent = Intent(Intent.ACTION_VIEW, "https://fonts.google.com/?script=Cyrl".toUri())
+                                        context.startActivity(intent)
+                                    },
+                                    elevation = null,
+                                    contentPadding = PaddingValues(vertical = 8.dp),
                                 ) {
-                                    Button(
-                                        onClick = {
-                                            viewModel.setFontFamily(context, textFieldValue.text)
-                                            showSetGoogleFontDialog = false
-                                        },
-                                        elevation = null
-                                    ) {
-                                        Text(text = "Готово")
-                                    }
+                                    Icon(
+                                        painter = painterResource(R.drawable.google_fonts_icon_vectorized),
+                                        contentDescription = null,
+                                        tint = Color.Unspecified
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = "Google Fonts")
                                 }
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Button(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = {
+                                        viewModel.setFontFamily(context, textFieldValue.text)
+                                        showSetGoogleFontDialog = false
+                                    },
+                                    elevation = null,
+                                    contentPadding = PaddingValues(vertical = 8.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Done,
+                                        contentDescription = null,
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(text = "Готово")
+                                }
+
 
                             }
                         }
