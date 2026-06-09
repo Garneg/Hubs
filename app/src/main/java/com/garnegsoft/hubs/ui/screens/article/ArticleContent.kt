@@ -30,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
@@ -58,6 +59,7 @@ fun ArticleContent(
     onCompanyClick: (alias: String) -> Unit,
     onArticleClick: (id: Int) -> Unit,
     fontSize: TextUnit,
+    fontFamily: FontFamily,
     onViewImageRequest: (url: String) -> Unit,
     lazyListState: LazyListState
 ) {
@@ -227,7 +229,8 @@ fun ArticleContent(
                     text = article.title,
                     fontSize = (fontSize.value + 4f).sp,
                     fontWeight = FontWeight.W700,
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.colors.onBackground,
+                    fontFamily = fontFamily
                 )
 
                 DisableSelection {

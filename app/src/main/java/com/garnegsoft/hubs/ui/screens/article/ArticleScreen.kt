@@ -450,6 +450,7 @@ fun ArticleScreen(
                                 onViewImageRequest = onViewImageRequest,
                                 onArticleClick = onArticleClick,
                                 fontSize = fontSize!!.sp,
+                                fontFamily = fontFamily,
                                 lazyListState = lazyListState
                             )
                         }
