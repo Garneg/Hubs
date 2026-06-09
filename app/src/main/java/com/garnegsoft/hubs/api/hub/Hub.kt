@@ -4,7 +4,7 @@ class Hub(
     val alias: String,
     val title: String,
     val description: String,
-    val avatarUrl: String,
+    val avatarUrl: String?,
     val statistics: Statistics,
     val isProfiled: Boolean,
     val relatedData: RelatedData?

@@ -22,7 +22,7 @@ class HubsListController{
                 var customJson = Json { ignoreUnknownKeys = true }
                 result = customJson.decodeFromJsonElement(customJson.parseToJsonElement(response.body!!.string()))
                 result?.hubRefs?.forEach {
-                    it.value.imageUrl = "https:" + it.value.imageUrl
+                    it.value.imageUrl?.apply { it.value.imageUrl = "https:" + it.value.imageUrl }
                     it.value.titleHtml = Jsoup.parse(it.value.titleHtml).text()
                 }
             }
@@ -85,7 +85,7 @@ data class HubListItem (
     var id: String,
     var alias: String,
     var titleHtml: String,
-    var imageUrl: String,
+    var imageUrl: String?,
     var descriptionHtml: String,
     var statistics: Statistics,
     var commonTags: List<String>,
