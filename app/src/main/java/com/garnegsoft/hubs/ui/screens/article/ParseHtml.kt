@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImagePainter
@@ -75,38 +76,40 @@ fun RenderHtml(
 		),
 	elementSettings: ElementSettings
 ) {
-	val result = remember {
-		parseElement(
-			html = html,
-			spanStyle = spanStyle
-		)
-	}
-	val context = LocalContext.current
-	Column {
-		result.first?.let { text ->
-			if (text.isNotBlank()) {
-				ClickableText(
-					text = text,
-					style = LocalTextStyle.current.copy(
-						//lineHeight = LocalTextStyle.current.fontSize * 1.5f,
-						color = MaterialTheme.colors.onBackground
-					),
-					onClick = {
-						text.getStringAnnotations(it, it)
-							.find { it.tag == "url" }
-							?.let {
-								if (it.item.startsWith("http")) {
-									handleUrl(context, it.item)
-									
-								}
-							}
-					}
-				)
-			}
+	// TODO: Make it read line height preference from datastore
+	CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = 1.5.em)) {
+		val result = remember {
+			parseElement(
+				html = html,
+				spanStyle = spanStyle
+			)
 		}
-		result.second?.invoke(spanStyle, elementSettings)
+		val context = LocalContext.current
+		Column {
+			result.first?.let { text ->
+				if (text.isNotBlank()) {
+					ClickableText(
+						text = text,
+						style = LocalTextStyle.current.copy(
+							//lineHeight = LocalTextStyle.current.fontSize * 1.5f,
+							color = MaterialTheme.colors.onBackground
+						),
+						onClick = {
+							text.getStringAnnotations(it, it)
+								.find { it.tag == "url" }
+								?.let {
+									if (it.item.startsWith("http")) {
+										handleUrl(context, it.item)
+
+									}
+								}
+						}
+					)
+				}
+			}
+			result.second?.invoke(spanStyle, elementSettings)
+		}
 	}
-	
 }
 
 /**

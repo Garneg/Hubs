@@ -303,6 +303,7 @@ fun OfflineArticleScreen(
                     items(
                         items = parsedContent!!
                     ) {
+                        // TODO: Make it read line height preference from datastore
                         CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = 1.5.em)) {
                             it?.invoke(spanStyle, elementSettings)
                         }
