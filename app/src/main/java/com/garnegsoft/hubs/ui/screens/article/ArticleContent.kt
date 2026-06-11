@@ -19,6 +19,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -47,6 +48,8 @@ import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.utils.shimmerEffect
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
@@ -63,6 +66,7 @@ fun ArticleContent(
     onArticleClick: (id: Int) -> Unit,
     fontSize: TextUnit,
     fontFamily: FontFamily,
+    lineHeight: TextUnit,
     onViewImageRequest: (url: String) -> Unit,
     lazyListState: LazyListState
 ) {
@@ -71,6 +75,7 @@ fun ArticleContent(
     val viewModel = viewModel<ArticleScreenViewModel>()
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
+
 
     Box() {
         val contentNodes by viewModel.parsedArticleContent.observeAsState()
@@ -342,7 +347,7 @@ fun ArticleContent(
             }
             contentNodes?.let {
                 items(items = it) {
-                    CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = 1.5.em)) {
+                    CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = lineHeight)) {
                         it?.invoke(spanStyle, elementsSettings)
                     }
                 }
