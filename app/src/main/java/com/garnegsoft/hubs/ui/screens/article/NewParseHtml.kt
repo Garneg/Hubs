@@ -206,11 +206,7 @@ fun parseChildElements(
                         val focusManager = LocalFocusManager.current
                         ClickableText(
                             text = thisElementCurrentText,
-                            style = LocalTextStyle.current.copy(
-                                lineHeight = localSpanStyle.fontSize.times(
-                                    LINE_HEIGHT_FACTOR
-                                )
-                            ),
+                            style = LocalTextStyle.current,
                             onClick = {
                                 focusManager.clearFocus(true)
                                 thisElementCurrentText.getStringAnnotations(it, it)
@@ -252,11 +248,7 @@ fun parseChildElements(
             val focusManager = LocalFocusManager.current
             ClickableText(
                 text = currentText,
-                style = LocalTextStyle.current.copy(
-                    lineHeight = localSpanStyle.fontSize.times(
-                        LINE_HEIGHT_FACTOR
-                    )
-                ),
+                style = LocalTextStyle.current,
                 onClick = {
                     focusManager.clearFocus(true)
                     currentText.getStringAnnotations(it, it).find { it.tag == "url" }?.let {

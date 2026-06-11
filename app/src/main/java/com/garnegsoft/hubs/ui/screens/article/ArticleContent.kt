@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -30,10 +31,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -76,6 +79,7 @@ fun ArticleContent(
         val spanStyle = remember(fontSize, color) {
             SpanStyle(
                 //color = color,
+                fontFamily = fontFamily,
                 fontSize = fontSize
             )
         }
@@ -97,8 +101,6 @@ fun ArticleContent(
             if (article.editorVersion == EditorVersion.FirstVersion) {
                 item {
                     DisableSelection {
-
-
                         Row(
                             modifier = Modifier
 								.fillMaxWidth()
@@ -174,7 +176,6 @@ fun ArticleContent(
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colors.onBackground
                             )
-
                             Box(modifier = Modifier.size(38.dp))
 
 
@@ -341,7 +342,9 @@ fun ArticleContent(
             }
             contentNodes?.let {
                 items(items = it) {
-                    it?.invoke(spanStyle, elementsSettings)
+                    CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = 1.5.em)) {
+                        it?.invoke(spanStyle, elementsSettings)
+                    }
                 }
 
                 if (article.polls.size > 0) {

@@ -210,6 +210,7 @@ fun ArticleScreenSettingsScreen(
                                     )
                                 }
                                 TextField(
+                                    modifier = Modifier.clip(RoundedCornerShape(8.dp)),
                                     value = textFieldValue,
                                     onValueChange = {
                                         textFieldValue = it
@@ -218,7 +219,10 @@ fun ArticleScreenSettingsScreen(
                                         viewModel.setFontFamily(context, textFieldValue.text)
                                         showSetGoogleFontDialog = false
                                     },
-                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done)
+                                    textStyle = LocalTextStyle.current.copy(fontSize = 16.sp),
+                                    singleLine = true,
+                                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                                    shape = RoundedCornerShape(8.dp)
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
 

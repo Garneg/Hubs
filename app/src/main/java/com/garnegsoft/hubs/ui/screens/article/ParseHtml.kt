@@ -88,7 +88,7 @@ fun RenderHtml(
 				ClickableText(
 					text = text,
 					style = LocalTextStyle.current.copy(
-						lineHeight = LocalTextStyle.current.fontSize * 1.5f,
+						//lineHeight = LocalTextStyle.current.fontSize * 1.5f,
 						color = MaterialTheme.colors.onBackground
 					),
 					onClick = {
@@ -309,14 +309,7 @@ fun parseElement(
 						val focusManager = LocalFocusManager.current
 						ClickableText(
 							text = thisElementCurrentText,
-							style = LocalTextStyle.current.copy(
-								lineHeight = localSpanStyle.fontSize.times(
-									LINE_HEIGHT_FACTOR
-								),
-								color = MaterialTheme.colors.onBackground,
-								fontFamily = FontFamily()
-
-							),
+							style = LocalTextStyle.current,
 							onClick = {
 								focusManager.clearFocus(true)
 								thisElementCurrentText.getStringAnnotations(it, it)
@@ -324,7 +317,6 @@ fun parseElement(
 									?.let {
 										if (it.item.startsWith("http")) {
 											handleUrl(context, it.item)
-											
 										}
 									}
 							}
@@ -365,11 +357,8 @@ fun parseElement(
 		childrenComposables.add { localSpanStyle, settings ->
 			//Text(text = currentText)
 			val context = LocalContext.current
-			val style = TextStyle(
+			val style = LocalTextStyle.current.copy(
 				fontSize = localSpanStyle.fontSize,
-				lineHeight = localSpanStyle.fontSize.times(
-					LINE_HEIGHT_FACTOR
-				),
 				color = MaterialTheme.colors.onBackground
 			)
 			val focusManager = LocalFocusManager.current
@@ -435,7 +424,7 @@ fun parseElement(
 						.padding(bottom = 14.dp),
 					text = currentText,
 					style = LocalTextStyle.current.copy(
-						lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
+						//lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
 						textAlign = TextAlign.Center
 					),
 					onClick = {
@@ -673,11 +662,11 @@ fun parseElement(
 								.rotate(
 									animateFloatAsState(
 										targetValue =
-										if (!showDetails) {
-											-90f
-										} else {
-											0f
-										}
+											if (!showDetails) {
+												-90f
+											} else {
+												0f
+											}
 									).value
 
 								),
@@ -886,14 +875,13 @@ fun TextList(
 	nested: Boolean = false,
 	startNumber: Int = 1
 ) {
-	var itemNumber = startNumber
 	Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-		items.forEach {
+		items.forEachIndexed { index, it ->
 			
 			Row() {
 				DisableSelection {
 					if (ordered) {
-						Text(buildAnnotatedString { withStyle(spanStyle) { append("$itemNumber.") } })
+						Text(buildAnnotatedString { withStyle(spanStyle) { append("${startNumber + index}.") } })
 					} else
 						if (nested) {
 							Text(text = "◦", fontSize = spanStyle.fontSize)
@@ -904,7 +892,6 @@ fun TextList(
 				Spacer(modifier = Modifier.width(4.dp))
 				it(spanStyle, elementSettings)
 			}
-			itemNumber++
 		}
 	}
 }
