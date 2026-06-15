@@ -13,11 +13,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.DisableSelection
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -30,9 +32,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -43,6 +48,8 @@ import com.garnegsoft.hubs.api.EditorVersion
 import com.garnegsoft.hubs.api.PostType
 import com.garnegsoft.hubs.api.PublicationComplexity
 import com.garnegsoft.hubs.api.article.Article
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
+import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.utils.shimmerEffect
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.theme.TranslationLabelColor
@@ -58,6 +65,8 @@ fun ArticleContent(
     onCompanyClick: (alias: String) -> Unit,
     onArticleClick: (id: Int) -> Unit,
     fontSize: TextUnit,
+    fontFamily: FontFamily,
+    lineHeight: TextUnit,
     onViewImageRequest: (url: String) -> Unit,
     lazyListState: LazyListState
 ) {
@@ -67,13 +76,15 @@ fun ArticleContent(
     val statisticsColor = MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
     val mostReadingArticles by viewModel.mostReadingArticles.observeAsState()
 
+
     Box() {
         val contentNodes by viewModel.parsedArticleContent.observeAsState()
 
         val color = MaterialTheme.colors.onSurface
         val spanStyle = remember(fontSize, color) {
             SpanStyle(
-                color = color,
+                //color = color,
+                fontFamily = fontFamily,
                 fontSize = fontSize
             )
         }
@@ -95,8 +106,6 @@ fun ArticleContent(
             if (article.editorVersion == EditorVersion.FirstVersion) {
                 item {
                     DisableSelection {
-
-
                         Row(
                             modifier = Modifier
 								.fillMaxWidth()
@@ -172,7 +181,6 @@ fun ArticleContent(
                                 fontSize = 14.sp,
                                 color = MaterialTheme.colors.onBackground
                             )
-
                             Box(modifier = Modifier.size(38.dp))
 
 
@@ -227,7 +235,8 @@ fun ArticleContent(
                     text = article.title,
                     fontSize = (fontSize.value + 4f).sp,
                     fontWeight = FontWeight.W700,
-                    color = MaterialTheme.colors.onBackground
+                    color = MaterialTheme.colors.onBackground,
+                    fontFamily = fontFamily
                 )
 
                 DisableSelection {
@@ -338,7 +347,9 @@ fun ArticleContent(
             }
             contentNodes?.let {
                 items(items = it) {
-                    it?.invoke(spanStyle, elementsSettings)
+                    CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = lineHeight)) {
+                        it?.invoke(spanStyle, elementsSettings)
+                    }
                 }
 
                 if (article.polls.size > 0) {

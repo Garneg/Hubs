@@ -32,13 +32,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.AndroidFont
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.Typeface
 import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImagePainter
@@ -73,35 +76,40 @@ fun RenderHtml(
 		),
 	elementSettings: ElementSettings
 ) {
-	val result = remember {
-		parseElement(
-			html = html,
-			spanStyle = spanStyle
-		)
-	}
-	val context = LocalContext.current
-	Column {
-		result.first?.let { text ->
-			if (text.isNotBlank()) {
-				ClickableText(
-					text = text,
-					style = LocalTextStyle.current.copy(lineHeight = LocalTextStyle.current.fontSize * 1.5f),
-					onClick = {
-						text.getStringAnnotations(it, it)
-							.find { it.tag == "url" }
-							?.let {
-								if (it.item.startsWith("http")) {
-									handleUrl(context, it.item)
-									
-								}
-							}
-					}
-				)
-			}
+	// TODO: Make it read line height preference from datastore
+	CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(lineHeight = 1.5.em)) {
+		val result = remember {
+			parseElement(
+				html = html,
+				spanStyle = spanStyle
+			)
 		}
-		result.second?.invoke(spanStyle, elementSettings)
+		val context = LocalContext.current
+		Column {
+			result.first?.let { text ->
+				if (text.isNotBlank()) {
+					ClickableText(
+						text = text,
+						style = LocalTextStyle.current.copy(
+							//lineHeight = LocalTextStyle.current.fontSize * 1.5f,
+							color = MaterialTheme.colors.onBackground
+						),
+						onClick = {
+							text.getStringAnnotations(it, it)
+								.find { it.tag == "url" }
+								?.let {
+									if (it.item.startsWith("http")) {
+										handleUrl(context, it.item)
+
+									}
+								}
+						}
+					)
+				}
+			}
+			result.second?.invoke(spanStyle, elementSettings)
+		}
 	}
-	
 }
 
 /**
@@ -304,12 +312,7 @@ fun parseElement(
 						val focusManager = LocalFocusManager.current
 						ClickableText(
 							text = thisElementCurrentText,
-							style = LocalTextStyle.current.copy(
-								lineHeight = localSpanStyle.fontSize.times(
-									LINE_HEIGHT_FACTOR
-								),
-								color = localSpanStyle.color
-							),
+							style = LocalTextStyle.current,
 							onClick = {
 								focusManager.clearFocus(true)
 								thisElementCurrentText.getStringAnnotations(it, it)
@@ -317,7 +320,6 @@ fun parseElement(
 									?.let {
 										if (it.item.startsWith("http")) {
 											handleUrl(context, it.item)
-											
 										}
 									}
 							}
@@ -358,12 +360,9 @@ fun parseElement(
 		childrenComposables.add { localSpanStyle, settings ->
 			//Text(text = currentText)
 			val context = LocalContext.current
-			val style = TextStyle(
+			val style = LocalTextStyle.current.copy(
 				fontSize = localSpanStyle.fontSize,
-				lineHeight = localSpanStyle.fontSize.times(
-					LINE_HEIGHT_FACTOR
-				),
-				color = localSpanStyle.color
+				color = MaterialTheme.colors.onBackground
 			)
 			val focusManager = LocalFocusManager.current
 			ClickableText(
@@ -428,7 +427,7 @@ fun parseElement(
 						.padding(bottom = 14.dp),
 					text = currentText,
 					style = LocalTextStyle.current.copy(
-						lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
+						//lineHeight = ChildrenSpanStyle.fontSize.times(LINE_HEIGHT_FACTOR),
 						textAlign = TextAlign.Center
 					),
 					onClick = {
@@ -666,11 +665,11 @@ fun parseElement(
 								.rotate(
 									animateFloatAsState(
 										targetValue =
-										if (!showDetails) {
-											-90f
-										} else {
-											0f
-										}
+											if (!showDetails) {
+												-90f
+											} else {
+												0f
+											}
 									).value
 
 								),
@@ -879,14 +878,13 @@ fun TextList(
 	nested: Boolean = false,
 	startNumber: Int = 1
 ) {
-	var itemNumber = startNumber
 	Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-		items.forEach {
+		items.forEachIndexed { index, it ->
 			
 			Row() {
 				DisableSelection {
 					if (ordered) {
-						Text(buildAnnotatedString { withStyle(spanStyle) { append("$itemNumber.") } })
+						Text(buildAnnotatedString { withStyle(spanStyle) { append("${startNumber + index}.") } })
 					} else
 						if (nested) {
 							Text(text = "◦", fontSize = spanStyle.fontSize)
@@ -897,7 +895,6 @@ fun TextList(
 				Spacer(modifier = Modifier.width(4.dp))
 				it(spanStyle, elementSettings)
 			}
-			itemNumber++
 		}
 	}
 }

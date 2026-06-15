@@ -112,6 +112,8 @@ dependencies {
 
     implementation "androidx.profileinstaller:profileinstaller:1.4.1"
 
+    implementation "androidx.compose.ui:ui-text-google-fonts:1.11.1"
+
     //noinspection GradleDependency
     implementation "androidx.compose.runtime:runtime-livedata:$compose_ui_version"
 

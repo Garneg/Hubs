@@ -48,7 +48,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
 import androidx.compose.ui.text.*
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
@@ -62,6 +65,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import com.garnegsoft.hubs.GoogleFontProvider
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
@@ -119,6 +123,11 @@ fun ArticleScreen(
     val fontSizePreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontSize)
     var fontSize by rememberSaveable { mutableStateOf<Float?>(null) }
 
+    val lineHeightPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.LineHeight)
+    var lineHeight by rememberSaveable { mutableStateOf<Float?>(null) }
+    val fontFamilyPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontFamily)
+
+
     val viewModel = viewModel<ArticleScreenViewModel>(viewModelStoreOwner)
     val article by viewModel.article.observeAsState()
     val company by viewModel.company.observeAsState()
@@ -134,6 +143,7 @@ fun ArticleScreen(
 
     Log.i("LAZYLISTSTATE", firstVisibleItemIndex.toString())
 
+    // cache
     LifecycleEventEffect(event = Lifecycle.Event.ON_PAUSE) {
         firstVisibleItemIndex = lazyListState.firstVisibleItemIndex
         firstVisibleItemOffset = lazyListState.firstVisibleItemScrollOffset
@@ -170,10 +180,16 @@ fun ArticleScreen(
             viewModel.loadMostReading()
         }
     })
-
+    // cache
     LaunchedEffect(fontSizePreference) {
         if (fontSizePreference != null && fontSize != fontSizePreference) {
             fontSize = fontSizePreference
+        }
+    }
+    // cache :(
+    LaunchedEffect(lineHeightPreference) {
+        if (lineHeightPreference != null && lineHeight != lineHeightPreference) {
+            lineHeight = lineHeightPreference
         }
     }
 
@@ -344,6 +360,20 @@ fun ArticleScreen(
         val skeletonOffsetAnimated by animateDpAsState(
             if (hideContent) 0.dp else -16.dp
         )
+        val googleFont = when (fontFamilyPreference) {
+            "" -> null
+            null -> null
+            else -> {
+                GoogleFont(fontFamilyPreference!!)
+            }
+        }
+
+        val fontFamily = googleFont?.let {
+            FontFamily(
+                Font(googleFont = googleFont, GoogleFontProvider),
+            )
+        } ?: FontFamily.Default
+
         RevealContainer(
             hideContent = hideContent,
             overlappingContent = {
@@ -362,8 +392,8 @@ fun ArticleScreen(
                 val color = MaterialTheme.colors.onSurface
                 val spanStyle = remember(fontSize, color) {
                     SpanStyle(
-                        color = color,
-                        fontSize = fontSize?.sp ?: 16.sp
+                        fontSize = fontSize?.sp ?: 16.sp,
+                        fontFamily = fontFamily
                     )
                 }
 
@@ -393,6 +423,7 @@ fun ArticleScreen(
                     AnimatedVisibility(
                         visible = articleContentParsed &&
                                 fontSize != null &&
+                                lineHeight != null&&
 //                                (navigationTransition.currentState == EnterExitState.Visible ) &&
                                 !(article.isCorporative == true && company == null) &&
                                 revealArticleContent,
@@ -424,6 +455,8 @@ fun ArticleScreen(
                                 onViewImageRequest = onViewImageRequest,
                                 onArticleClick = onArticleClick,
                                 fontSize = fontSize!!.sp,
+                                fontFamily = fontFamily,
+                                lineHeight = lineHeight!!.em,
                                 lazyListState = lazyListState
                             )
                         }

@@ -51,8 +51,21 @@ object HubsDataStore {
 		}
 		
 		object ArticleScreen {
+			/**
+			 * Font size in 'sp' unit. Default value is 16sp
+			 */
 			val FontSize = hubsFloatPreference("article_font_size", 16f)
-//			val LineHeightFactor = floatPreferencesKey("line_height_factor")
+
+			/**
+			 * Font family name. Typically, should be resolved with Google Font resolver.
+			 * If empty string, the system default font family should be used to display text
+			 */
+			val FontFamily = hubsStringPreference("article_font_family", "")
+
+			/**
+			 * Line height in 'em' unit
+			 */
+			val LineHeight = hubsFloatPreference("article_line_height", 1.5f)
 //			val TextWrapMode = intPreferencesKey("article_text_wrap")
 //			val Indent = intPreferencesKey("article_indent")
 		}

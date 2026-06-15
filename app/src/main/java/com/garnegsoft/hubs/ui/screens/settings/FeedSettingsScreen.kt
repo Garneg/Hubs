@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.screens.settings
 
 import android.content.Context
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -20,6 +21,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -36,6 +38,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCardItem
 import kotlinx.coroutines.launch
+import kotlin.math.round
 
 
 class FeedSettingsScreenViewModel : ViewModel() {
@@ -91,6 +94,26 @@ fun FeedSettingsScreen(
 	val context = LocalContext.current
 	
 	val scaffoldState = rememberBottomSheetScaffoldState()
+
+	val titleFontSizePreference by HubsDataStore.Settings.getValueFlow(
+		LocalContext.current,
+		HubsDataStore.Settings.ArticleCard.TitleFontSize
+	).collectAsState(initial = null)
+
+	val snippetFontSize by HubsDataStore.Settings.getValueFlow(
+		LocalContext.current,
+		HubsDataStore.Settings.ArticleCard.TextSnippetFontSize
+	).collectAsState(initial = null)
+
+	val snippetMaxLines by HubsDataStore.Settings.getValueFlow(
+		LocalContext.current,
+		HubsDataStore.Settings.ArticleCard.TextSnippetMaxLines
+	).collectAsState(initial = null)
+
+	var titleFontSize by remember(titleFontSizePreference) { mutableStateOf(titleFontSizePreference) }
+	var textSnippetFontSize by remember(snippetFontSize) { mutableStateOf(snippetFontSize) }
+	var textSnippetMaxLines by remember(snippetMaxLines) { mutableStateOf(snippetMaxLines?.toFloat()) }
+
 	BottomSheetScaffold(
 		modifier = Modifier.imePadding(),
 		scaffoldState = scaffoldState,
@@ -166,24 +189,23 @@ fun FeedSettingsScreen(
 						
 					}
 					
-					val titleFontSize by HubsDataStore.Settings.getValueFlow(
-						LocalContext.current,
-						HubsDataStore.Settings.ArticleCard.TitleFontSize
-					).collectAsState(initial = null)
+
 					
 					titleFontSize?.let {
 						Column(modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)) {
-							var sliderValue by remember { mutableStateOf(it) }
-							Text(text = "Размер шрифта заголовка: ${"%.1f".format(sliderValue)}")
+
+							Text(text = "Размер шрифта заголовка: ${"%.1f".format(titleFontSize)}")
 							Slider(
-								value = sliderValue,
+								value = titleFontSize!!,
 								valueRange = 16f..28f,
 								steps = 5,
 								onValueChange = {
-									sliderValue = it
+									if (round(it) % 2 == 0f) {
+										titleFontSize = round(it)
+									}
 								},
 								onValueChangeFinished = {
-									viewModel.ChangeTitleFontSizeSetting(context, sliderValue)
+									viewModel.ChangeTitleFontSizeSetting(context, titleFontSize!!)
 								},
 								colors = ArticleScreenSettingsSliderColors
 							)
@@ -192,56 +214,53 @@ fun FeedSettingsScreen(
 						
 					}
 					
-					val snippetFontSize by HubsDataStore.Settings.getValueFlow(
-						LocalContext.current,
-						HubsDataStore.Settings.ArticleCard.TextSnippetFontSize
-					).collectAsState(initial = null)
+
 					
-					snippetFontSize?.let {
+					textSnippetFontSize?.let {
 						Column(
 							modifier = Modifier.padding(4.dp)
 						) {
-							var sliderValue by remember { mutableStateOf(it) }
-							
-							Text(text = "Размер шрифта начала статьи: ${"%.0f".format(sliderValue)}",)
+
+
+							Text(text = "Размер шрифта начала статьи: ${"%.0f".format(textSnippetFontSize)}",)
 							Slider(
-								value = sliderValue,
+								value = textSnippetFontSize!!,
 								enabled = showTextSnippet ?: false,
 								valueRange = 12f..24f,
 								steps = 5,
 								onValueChange = {
-									sliderValue = it
+									if (round(it) % 2 == 0f) {
+										textSnippetFontSize = round(it)
+									}
 								},
 								onValueChangeFinished = {
-									viewModel.ChangeSnippetFontSize(context, sliderValue)
+									viewModel.ChangeSnippetFontSize(context, textSnippetFontSize!!)
 								},
 								colors = ArticleScreenSettingsSliderColors
 							)
 						}
 					}
 					
-					val snippetMaxLines by HubsDataStore.Settings.getValueFlow(
-						LocalContext.current,
-						HubsDataStore.Settings.ArticleCard.TextSnippetMaxLines
-					).collectAsState(initial = null)
+
 					
-					snippetMaxLines?.let {
+					textSnippetMaxLines?.let {
 						Column(
 							modifier = Modifier.padding(4.dp)
 						) {
-							var sliderValue by remember { mutableStateOf(it.toFloat()) }
-							
-							Text(text = "Показывать строк начала статьи: ${"%.0f".format(sliderValue)}",)
+
+							Text(text = "Показывать строк начала статьи: ${"%.0f".format(textSnippetMaxLines)}",)
 							Slider(
-								value = sliderValue,
+								value = textSnippetMaxLines!!,
 								enabled = showTextSnippet ?: false,
 								valueRange = 2f..10f,
 								steps = 7,
 								onValueChange = {
-									sliderValue = it
+									if (round(it) % 2 == 0f) {
+										textSnippetMaxLines = round(it)
+									}
 								},
 								onValueChangeFinished = {
-									viewModel.ChangeSnippetMaxLinesSetting(context, sliderValue.toInt())
+									viewModel.ChangeSnippetMaxLinesSetting(context, textSnippetMaxLines!!.toInt())
 								},
 								colors = ArticleScreenSettingsSliderColors
 							)
@@ -273,7 +292,11 @@ fun FeedSettingsScreen(
 								onClick = { /*TODO*/ },
 								onAuthorClick = { /*TODO*/ },
 								onCommentsClick = { /*TODO*/ },
-								configuration = style
+								configuration = style.copy(
+									titleTextStyle = titleFontSize?.let { style.titleTextStyle.copy(fontSize = animateFloatAsState(titleFontSize!!).value.sp) } ?: style.titleTextStyle,
+									snippetMaxLines = textSnippetMaxLines?.toInt() ?: style.snippetMaxLines,
+									snippetTextStyle = textSnippetFontSize?.let { style.snippetTextStyle.copy(fontSize = animateFloatAsState(textSnippetFontSize!!).value.sp) } ?: style.snippetTextStyle,
+								),
 							)
 							Box(modifier = Modifier
 								.matchParentSize()

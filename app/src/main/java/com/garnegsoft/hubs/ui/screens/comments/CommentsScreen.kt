@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -569,25 +570,31 @@ fun CommentsScreen(
                                                         Column {
                                                             comment.let {
                                                                 SelectionContainer {
-                                                                    ((parseChildElements(
-                                                                        Jsoup.parse(it.message).body(),
-                                                                        SpanStyle(
-                                                                            fontSize = 16.sp,
-                                                                            color = MaterialTheme.colors.onSurface
-                                                                        ),
-                                                                        onViewImageRequest = onImageClick
-                                                                    ).second)?.let { it1 ->
-                                                                        it1.forEach {
-                                                                            it?.invoke(
-                                                                                SpanStyle(
-                                                                                    fontSize = 16.sp,
-                                                                                    color = MaterialTheme.colors.onSurface
-                                                                                ),
-                                                                                elementsSettings
-                                                                            )
-                                                                        }
+                                                                    CompositionLocalProvider(
+                                                                        LocalTextStyle provides LocalTextStyle.current.copy(
+                                                                            lineHeight = 1.5.em
+                                                                        )
+                                                                    ) {
+                                                                        ((parseChildElements(
+                                                                            Jsoup.parse(it.message).body(),
+                                                                            SpanStyle(
+                                                                                fontSize = 16.sp,
+                                                                                color = MaterialTheme.colors.onSurface
+                                                                            ),
+                                                                            onViewImageRequest = onImageClick
+                                                                        ).second)?.let { it1 ->
+                                                                            it1.forEach {
+                                                                                it?.invoke(
+                                                                                    SpanStyle(
+                                                                                        fontSize = 16.sp,
+                                                                                        color = MaterialTheme.colors.onSurface
+                                                                                    ),
+                                                                                    elementsSettings
+                                                                                )
+                                                                            }
 
-                                                                    })
+                                                                        })
+                                                                    }
                                                                 }
                                                             }
                                                         }
