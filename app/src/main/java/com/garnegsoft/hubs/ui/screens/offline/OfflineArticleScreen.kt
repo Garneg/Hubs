@@ -211,6 +211,7 @@ fun OfflineArticleScreen(
                             text = article!!.title,
                             fontSize = 22.sp,
                             fontWeight = FontWeight.W700,
+							fontFamily = fontFamily,
                             color = MaterialTheme.colors.onBackground
                         )
                     }
