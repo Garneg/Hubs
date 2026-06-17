@@ -1,7 +1,5 @@
 package com.garnegsoft.hubs.ui.screens.settings
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -31,24 +29,18 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
@@ -59,22 +51,17 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.FileProvider
-import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.BuildConfig
-import com.garnegsoft.hubs.MostReadingWidget
-import com.garnegsoft.hubs.MostReadingWidgetReceiver
 import com.garnegsoft.hubs.api.dataStore.HubsDataStore
-import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.ui.common.BaseMenuContainer
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.screens.settings.cards.AppearanceSettingsCard
 import com.garnegsoft.hubs.ui.screens.settings.cards.OtherSettingsCard
-import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCard
-import com.garnegsoft.hubs.ui.screens.settings.cards.SettingsCardItem
+import com.garnegsoft.hubs.ui.screens.settings.cards.TextToSpeechSettingsCard
+import com.garnegsoft.hubs.ui.screens.settings.cards.WidgetSettingsCard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -160,6 +147,7 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onArticleScreenSettings: () -> Unit,
     onFeedSettings: () -> Unit,
+    onTTSSettings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val viewModel = viewModel<SettingsScreenViewModel>()
@@ -197,63 +185,14 @@ fun SettingsScreen(
 
             WidgetSettingsCard()
 
+            TextToSpeechSettingsCard(
+                onVoicePickerScreen = onTTSSettings
+            )
 
             OtherSettingsCard(viewModel = viewModel)
         }
     }
 
-}
-
-@Composable
-fun WidgetSettingsCard(modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    SettingsCard(
-        title = "Виджет читают сейчас"
-    ) {
-        var showWidgetCard by rememberSaveable { mutableStateOf(false) }
-        val context = LocalContext.current
-        val coroutineScope = rememberCoroutineScope()
-
-        LaunchedEffect(Unit) {
-            showWidgetCard = GlanceAppWidgetManager(context).getGlanceIds(MostReadingWidget::class.java).size == 0
-        }
-        if (showWidgetCard) {
-            SettingsCardItem(
-                title = "Добавить виджет",
-                onClick = {
-                    val widgetManager = AppWidgetManager.getInstance(context)
-                    val widgetProvider = ComponentName(context, MostReadingWidgetReceiver::class.java)
-                    if (Build.VERSION.SDK_INT >= 26 && widgetManager.isRequestPinAppWidgetSupported) {
-                        widgetManager.requestPinAppWidget(widgetProvider, null, null)
-                    }
-                },
-                trailingIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null
-                    )
-                })
-        } else {
-            if (Build.VERSION.SDK_INT >= 31) {
-                val themeMode by collectPreferenceAsState(HubsDataStore.Settings.Widget.ThemeMode)
-                SettingsCardItemPicker(
-                    title = "Тема:",
-                    items = listOf("Адаптивная (Material You)", "Как в приложении"),
-                    pickedItemIndex = themeMode ?: 0,
-                    onItemPicked = {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            HubsDataStore.Settings.Widget.ThemeMode.edit(context = context, it)
-                            MostReadingWidgetReceiver().glanceAppWidget.updateAll(context)
-                        }
-                    }
-                )
-            }
-
-
-        }
-
-
-    }
 }
 
 @Composable

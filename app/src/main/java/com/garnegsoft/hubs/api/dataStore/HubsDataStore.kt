@@ -72,6 +72,10 @@ object HubsDataStore {
 
 		object TextToSpeech {
 			val SpeechRate = hubsFloatPreference("tts_speech_rate", 1f)
+
+			val Voice = hubsStringPreference("tts_voice_name", "")
+
+			val EnginePackageName = hubsStringPreference("tts_engine_package_name", "")
 		}
 		
 		object ArticleCard {

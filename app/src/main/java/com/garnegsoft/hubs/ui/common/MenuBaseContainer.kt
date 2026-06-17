@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.common
 
+import android.view.MenuItem
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.unit.dp
+import androidx.glance.appwidget.EnabledModifier
 
 
 @Composable
@@ -52,9 +54,31 @@ fun MenuItem(
 	onClick: () -> Unit,
 	modifier: Modifier = Modifier,
 ) {
+	MenuItem(
+		modifier = modifier,
+		icon = icon,
+		onClick = onClick,
+	) {
+		Text(
+			text = title,
+			color = MaterialTheme.colors.onSurface
+		)
+	}
+}
+
+
+@Composable
+fun MenuItem(
+	modifier: Modifier = Modifier,
+	onClick: () -> Unit,
+	enabled: Boolean = true,
+	icon: (@Composable () -> Unit)? = null,
+	trailingIcon: (@Composable () -> Unit)? = null,
+	content: @Composable () -> Unit
+) {
 	Row(
 		modifier = modifier
-			.clickable(onClick = onClick)
+			.clickable(onClick = onClick, enabled = enabled)
 			.padding(vertical = 14.dp, horizontal = 18.dp),
 		verticalAlignment = Alignment.CenterVertically
 	) {
@@ -62,14 +86,19 @@ fun MenuItem(
 			LocalContentColor provides MaterialTheme.colors.onSurface,
 			LocalContentAlpha provides 0.8f
 		) {
-			icon()
+			icon?.let {
+				it()
+				Spacer(modifier = Modifier.width(18.dp))
+			}
 		}
-		Spacer(modifier = Modifier.width(18.dp))
-		Text(
-			text = title,
-			color = MaterialTheme.colors.onSurface
-		)
-		Spacer(modifier = Modifier.width(18.dp))
+		content()
 		Spacer(modifier = Modifier.weight(1f))
+		Spacer(modifier = Modifier.width(18.dp))
+		CompositionLocalProvider(
+			LocalContentColor provides MaterialTheme.colors.onSurface,
+			LocalContentAlpha provides 0.8f
+		) {
+			trailingIcon?.invoke()
+		}
 	}
 }

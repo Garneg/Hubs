@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs.ui.screens.settings
+package com.garnegsoft.hubs.ui.screens.settings.screens
 
 import android.content.Context
 import androidx.compose.animation.animateContentSize

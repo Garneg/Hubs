@@ -19,7 +19,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
-import androidx.navigation.navOptions
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
@@ -47,9 +46,10 @@ import com.garnegsoft.hubs.ui.screens.main.UnauthorizedMenu
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticleScreen
 import com.garnegsoft.hubs.ui.screens.offline.OfflineArticlesListScreen
 import com.garnegsoft.hubs.ui.screens.search.SearchScreen
-import com.garnegsoft.hubs.ui.screens.settings.ArticleScreenSettingsScreen
-import com.garnegsoft.hubs.ui.screens.settings.FeedSettingsScreen
+import com.garnegsoft.hubs.ui.screens.settings.screens.ArticleScreenSettingsScreen
+import com.garnegsoft.hubs.ui.screens.settings.screens.FeedSettingsScreen
 import com.garnegsoft.hubs.ui.screens.settings.SettingsScreen
+import com.garnegsoft.hubs.ui.screens.settings.screens.TextToSpeechSettingsScreen
 import com.garnegsoft.hubs.ui.screens.subscriptions.SubscriptionManagementScreen
 import com.garnegsoft.hubs.ui.screens.user.LogoutConfirmDialog
 import com.garnegsoft.hubs.ui.screens.user.UserScreen
@@ -434,7 +434,18 @@ fun MainNavigationGraph(
                     },
                     onFeedSettings = {
                         navController.navigate("feed_settings")
+                    },
+                    onTTSSettings = {
+                        navController.navigate("tts_settings")
                     }
+                )
+            }
+
+            hubsComposable(
+                route = "tts_settings"
+            ) {
+                TextToSpeechSettingsScreen(
+                    onBack = { navController.navigateBack() },
                 )
             }
 
