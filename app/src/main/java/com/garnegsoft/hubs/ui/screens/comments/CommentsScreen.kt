@@ -94,19 +94,21 @@ class CommentsScreenViewModel : ViewModel() {
         }
     }
 
-    // TODO: Make them sync
-    fun loadComments(articleId: Int) {
+    fun loadData(articleId: Int) {
+        val mutex = Mutex(true)
         viewModelScope.launch(Dispatchers.IO) {
-            commentsData.value = CommentsListController.getComments(articleId)
-            commentsLoadedFlow.emit(true)
+            parentArticleSnippet.postValue(ArticleController.getSnippet(articleId))
+            mutex.unlock()
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            val comments = CommentsListController.getComments(articleId)
+            mutex.withLock {
+                commentsData.value = comments
+                commentsLoadedFlow.emit(true)
+            }
         }
     }
 
-    fun loadArticleSnippet(articleId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            parentArticleSnippet.postValue(ArticleController.getSnippet(articleId))
-        }
-    }
 }
 
 
@@ -147,18 +149,7 @@ fun CommentsScreen(
     LaunchedEffect(key1 = Unit) {
         val mutex = Mutex(locked = true)
         if (!commentsLoaded) {
-            launch(Dispatchers.IO) {
-                viewModel.parentArticleSnippet.postValue(ArticleController.getSnippet(parentArticleId))
-                mutex.unlock()
-            }
-            launch(Dispatchers.IO) {
-                CommentsListController.getComments(parentArticleId).let {
-                    mutex.withLock {
-                        viewModel.commentsData.value = it
-                        viewModel.commentsLoadedFlow.emit(true)
-                    }
-                }
-            }
+            viewModel.loadData(parentArticleId)
         }
     }
 
