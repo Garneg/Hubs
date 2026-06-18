@@ -12,7 +12,6 @@ import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -36,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onPlaced
@@ -44,6 +42,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
@@ -65,9 +64,8 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -75,8 +73,9 @@ import org.jsoup.Jsoup
 
 
 class CommentsScreenViewModel : ViewModel() {
-    var parentPostSnippet = MutableLiveData<ArticleSnippet>()
-    val commentsData = MutableLiveData<CommentsCollection>()
+    var parentArticleSnippet = MutableLiveData<ArticleSnippet>()
+    val commentsData = MutableStateFlow<CommentsCollection?>(null)
+    val commentsLoadedFlow = MutableStateFlow<Boolean>(false)
 
     fun comment(text: String, postId: Int, parentCommentId: Int? = null) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -87,10 +86,25 @@ class CommentsScreenViewModel : ViewModel() {
             )
 
             CommentsListController.getComments(postId)?.let {
-                commentsData.postValue(newAccess?.let { it1 ->
+                commentsData.value = newAccess?.let { it1 ->
                     CommentsCollection(it.comments, it.commentAccess, it.pinnedComments)
-                } ?: it)
+                } ?: it
+                commentsLoadedFlow.emit(true)
             }
+        }
+    }
+
+    // TODO: Make them sync
+    fun loadComments(articleId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            commentsData.value = CommentsListController.getComments(articleId)
+            commentsLoadedFlow.emit(true)
+        }
+    }
+
+    fun loadArticleSnippet(articleId: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            parentArticleSnippet.postValue(ArticleController.getSnippet(articleId))
         }
     }
 }
@@ -100,7 +114,7 @@ class CommentsScreenViewModel : ViewModel() {
 @Composable
 fun CommentsScreen(
     viewModelStoreOwner: ViewModelStoreOwner,
-    parentPostId: Int,
+    parentArticleId: Int,
     highlightedCommentId: Int?,
     showArticleSnippet: Boolean = true,
     allowDisplayFullContent: Boolean,
@@ -111,9 +125,10 @@ fun CommentsScreen(
 ) {
     var viewModel = viewModel<CommentsScreenViewModel>(viewModelStoreOwner)
 
-    val commentsData by viewModel.commentsData.observeAsState()
+    val commentsData by viewModel.commentsData.collectAsState()
+    val commentsLoaded by viewModel.commentsLoadedFlow.collectAsState(initial = false)
     val articleSnippet =
-        viewModel.parentPostSnippet.map { it?.toArticleCardData() }.observeAsState().value
+        viewModel.parentArticleSnippet.map { it?.toArticleCardData() }.observeAsState().value
     val lazyListState = rememberLazyListState()
 
     val screenState =
@@ -131,18 +146,18 @@ fun CommentsScreen(
 
     LaunchedEffect(key1 = Unit) {
         val mutex = Mutex(locked = true)
-        if (!viewModel.commentsData.isInitialized) {
+        if (!commentsLoaded) {
             launch(Dispatchers.IO) {
-                viewModel.parentPostSnippet.postValue(ArticleController.getSnippet(parentPostId))
+                viewModel.parentArticleSnippet.postValue(ArticleController.getSnippet(parentArticleId))
                 mutex.unlock()
             }
             launch(Dispatchers.IO) {
-                CommentsListController.getComments(parentPostId)?.let {
+                CommentsListController.getComments(parentArticleId).let {
                     mutex.withLock {
-                        viewModel.commentsData.postValue(it)
+                        viewModel.commentsData.value = it
+                        viewModel.commentsLoadedFlow.emit(true)
                     }
                 }
-
             }
         }
     }
@@ -153,7 +168,7 @@ fun CommentsScreen(
     val itemsCountIndicator by remember { derivedStateOf { lazyListState.layoutInfo.totalItemsCount > 2 } }
     LaunchedEffect(key1 = commentsData, key2 = itemsCountIndicator, block = {
         highlightedCommentId?.let { commId ->
-            if (viewModel.commentsData.isInitialized && lazyListState.layoutInfo.totalItemsCount > 2 && doScrollToComment) {
+            if (commentsLoaded && lazyListState.layoutInfo.totalItemsCount > 2 && doScrollToComment) {
                 commentsData?.comments?.indexOf(commentsData!!.comments.find { it.id == commId })
                     ?.let {
                         if (it > -1)
@@ -195,15 +210,21 @@ fun CommentsScreen(
                 title = {
                     Text("Комментарии")
                     var commentsCountSize by remember { mutableStateOf(IntSize.Zero) }
-                    val transition = updateTransition(viewModel.parentPostSnippet.isInitialized)
+                    val transition = updateTransition(viewModel.parentArticleSnippet.isInitialized)
                     val commentsCountOffset by transition.animateFloat(
                         transitionSpec = { tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad) }
-                    ) { if (it) { 0f } else { 0.25f } }
+                    ) {
+                        if (it) {
+                            0f
+                        } else {
+                            0.25f
+                        }
+                    }
                     val commentsCountAlpha by animateFloatAsState(
-                        if (viewModel.parentPostSnippet.isInitialized) 1f else 0f,
+                        if (viewModel.parentArticleSnippet.isInitialized) 1f else 0f,
                         animationSpec = tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad)
                     )
-                    viewModel.parentPostSnippet.value?.let {
+                    viewModel.parentArticleSnippet.value?.let {
                         Text(
                             modifier = Modifier
                                 .graphicsLayer {
@@ -319,7 +340,7 @@ fun CommentsScreen(
                         onSend = {
                             viewModel.comment(
                                 text = it,
-                                postId = parentPostId,
+                                postId = parentArticleId,
                                 parentCommentId = answeringComment?.id
                             )
                             commentTextFieldFocusRequester.freeFocus()
@@ -396,7 +417,25 @@ fun CommentsScreen(
 
                         }
 
-                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) ) {
+                        if (commentsData == null && commentsLoaded) {
+                            item {
+                                Box(
+                                    modifier = Modifier
+                                        .animateItem()
+                                        .padding(32.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Не удалось загрузить комментарии, попробуйте позже",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.W500,
+                                        textAlign = TextAlign.Center,
+                                    )
+                                }
+                            }
+                        }
+
+                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && commentsLoaded) {
                             itemsIndexed(
                                 items = commentsData?.pinnedComments ?: emptyList(),
                             ) { index, commentId ->
@@ -412,7 +451,7 @@ fun CommentsScreen(
                                         val intent = Intent(Intent.ACTION_SEND)
                                         intent.putExtra(
                                             Intent.EXTRA_TEXT,
-                                            "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
+                                            "https://habr.com/p/${parentArticleId}/comments/#comment_${comment.id}"
                                         )
                                         intent.setType("text/plain")
                                         context.startActivity(
@@ -542,7 +581,7 @@ fun CommentsScreen(
                                                             val intent = Intent(Intent.ACTION_SEND)
                                                             intent.putExtra(
                                                                 Intent.EXTRA_TEXT,
-                                                                "https://habr.com/p/${parentPostId}/comments/#comment_${comment.id}"
+                                                                "https://habr.com/p/${parentArticleId}/comments/#comment_${comment.id}"
                                                             )
                                                             intent.setType("text/plain")
                                                             context.startActivity(
@@ -606,10 +645,11 @@ fun CommentsScreen(
                                     }
                                 }
                             }
-                        } else if (commentsData == null) {
+                        }
+                        else if (!commentsLoaded) {
                             item {
                                 Box(
-                                    modifier = Modifier.fillMaxSize(),
+                                    modifier = Modifier.animateItem().padding(32.dp).fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator()

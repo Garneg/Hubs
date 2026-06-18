@@ -303,9 +303,10 @@ fun TextToSpeechSettingsScreen(
                                     tts.stop()
                                     tts.voice = voice
                                     coroutineScope.launch(Dispatchers.IO) {
-                                        HubsDataStore.Settings.TextToSpeech.Voice.edit(context, voice.name)
+                                         HubsDataStore.Settings.TextToSpeech.Voice.edit(context, voice.name)
                                     }
-                                }, icon = {
+                                },
+                                icon = {
                                     if (voice.isNetworkConnectionRequired) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.cloud), contentDescription = null

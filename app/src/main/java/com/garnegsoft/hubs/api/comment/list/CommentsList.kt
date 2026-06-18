@@ -75,7 +75,7 @@ class CommentsListController {
         }
 
         fun getComments(path: String, args: Map<String, String>? = null): CommentsCollection? {
-            var serializedData = get(path, args)
+            val serializedData = get(path, args) ?: return null
 
             var commentsList = ArrayList<Comment>()
 

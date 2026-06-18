@@ -480,7 +480,7 @@ fun MainNavigationGraph(
                 }
                 CommentsScreen(
                     viewModelStoreOwner = it,
-                    parentPostId = postId.toInt(),
+                    parentArticleId = postId.toInt(),
                     highlightedCommentId = commentId?.toInt(),
                     allowDisplayFullContent = showFullContent,
                     onBackClicked = {
