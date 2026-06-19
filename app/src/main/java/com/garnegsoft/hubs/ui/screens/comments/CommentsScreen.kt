@@ -191,8 +191,6 @@ fun CommentsScreen(
         )
     }
 
-
-
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {

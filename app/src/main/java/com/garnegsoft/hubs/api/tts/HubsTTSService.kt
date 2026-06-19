@@ -22,6 +22,7 @@ import android.provider.MediaStore
 import android.speech.tts.TextToSpeech
 import android.speech.tts.TextToSpeechService
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import android.util.Log
 import android.view.Surface
 import android.view.SurfaceHolder
@@ -80,12 +81,14 @@ import androidx.media3.session.SessionResult
 import com.garnegsoft.hubs.MainActivity
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.HabrDataParser
+import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.google.common.util.concurrent.Futures
 import com.google.common.util.concurrent.ListenableFuture
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
@@ -121,7 +124,15 @@ class HubsTTSService : MediaSessionService() {
         super.onCreate()
         setShowNotificationForIdlePlayer(SHOW_NOTIFICATION_FOR_IDLE_PLAYER_NEVER)
 
-        tts = TextToSpeech(applicationContext) { status ->
+        val preferredEngine = runBlocking {
+            HubsDataStore.Settings.TextToSpeech.EnginePackageName.getFlow(this@HubsTTSService).first()
+        }
+
+        val preferredVoice = runBlocking {
+            HubsDataStore.Settings.TextToSpeech.Voice.getFlow(this@HubsTTSService).first()
+        }
+
+        tts = TextToSpeech(applicationContext, { status ->
             if (status == TextToSpeech.SUCCESS) {
 
 
@@ -146,9 +157,15 @@ class HubsTTSService : MediaSessionService() {
                 Toast.makeText(this@HubsTTSService, "Service created!", Toast.LENGTH_SHORT).show()
                 tts?.let {
                     Log.i("TTS", "TTS is not null")
+                    val availableVoices = tts!!.voices
+                    val voice = availableVoices.find { it.name == preferredVoice }
+                    voice?.let {
+                        tts?.voice = voice
+                    }
                 }
+
             }
-        }
+        }, preferredEngine)
 
         Log.i("TTS", "TTS Initialized")
         ttsInitialized = true

@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.settings.screens
 
+import android.content.Intent
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -11,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,6 +82,7 @@ import kotlin.math.roundToInt
 @Composable
 fun TextToSpeechSettingsScreen(
     onBack: () -> Unit,
+    allowDisplayFullContent: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -212,112 +215,114 @@ fun TextToSpeechSettingsScreen(
             }
         }
     ) { scaffoldPadding ->
-        val density = LocalDensity.current
-        Column(
-            modifier = Modifier
-
-                .padding(bottom = (sheetIntHeight.toFloat() / density.density).dp)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "Text To Speech движки:", fontWeight = FontWeight.W600, fontSize = 20.sp
-            )
-            AnimatedVisibility(
-                visible = enginesList.isNotEmpty(), enter = fadeIn(), exit = fadeOut()
-            ) {
-                FlowRow(
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    enginesList.forEach { engine ->
-                        TTSChip(
-                            onClick = {
-                                tts.stop()
-                                coroutineScope.launch(Dispatchers.IO) {
-                                    HubsDataStore.Settings.TextToSpeech.EnginePackageName.edit(context, engine.name)
-                                }
-                            },
-                            leadingIcon = {
-                                val pm = remember(context) { context.packageManager }
-                                val iconBitmap =
-                                    remember(pm) { pm.getDrawable(engine.name, engine.icon, null)?.toBitmap() }
-                                iconBitmap?.let {
-                                    Icon(
-                                        bitmap = it.asImageBitmap(),
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .clip(RoundedCornerShape(4.dp)),
-                                        tint = Color.Unspecified
-                                    )
-                                }
-
-                            },
-                            trailingIcon = if ((preferredEngine.isNullOrBlank() && tts.defaultEngine == engine.name) || preferredEngine == engine.name) {
-                                {
-                                    Icon(imageVector = Icons.Default.Done, contentDescription = null)
-                                }
-                            } else {
-                                null
-                            }) {
-                            Text(
-                                text = engine.label,
-                                fontWeight = FontWeight.W500,
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
+        if (allowDisplayFullContent) {
             val density = LocalDensity.current
-
-            AnimatedVisibility(
-                visible = ttsVoicesList.isNotEmpty(),
-                enter = fadeIn() + slideInVertically { (-20 * density.density).roundToInt() },
-                exit = fadeOut()
+            Column(
+                modifier = Modifier
+                    .padding(bottom = (sheetIntHeight.toFloat() / density.density).dp)
+                    .padding(16.dp)
             ) {
-                Column {
-                    Text(
+                Text(
+                    text = "Text To Speech движки:", fontWeight = FontWeight.W600, fontSize = 20.sp
+                )
+                AnimatedVisibility(
+                    visible = enginesList.isNotEmpty(), enter = fadeIn(), exit = fadeOut()
+                ) {
+                    FlowRow(
                         modifier = Modifier.padding(vertical = 8.dp),
-                        text = "Голоса:",
-                        fontWeight = FontWeight.W600,
-                        fontSize = 20.sp
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colors.surface)
-                            .verticalScroll(rememberScrollState())
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        ttsVoicesList.forEach { voice ->
-
-                            MenuItem(
-                                title = if (preferredVoice != null && voice.name == preferredVoice)
-                                    voice.name + " (выбрано)"
-                                else
-                                    voice.name,
+                        enginesList.forEach { engine ->
+                            TTSChip(
                                 onClick = {
                                     tts.stop()
-                                    tts.voice = voice
                                     coroutineScope.launch(Dispatchers.IO) {
-                                         HubsDataStore.Settings.TextToSpeech.Voice.edit(context, voice.name)
+                                        HubsDataStore.Settings.TextToSpeech.EnginePackageName.edit(context, engine.name)
                                     }
                                 },
-                                icon = {
-                                    if (voice.isNetworkConnectionRequired) {
+                                leadingIcon = {
+                                    val pm = remember(context) { context.packageManager }
+                                    val iconBitmap =
+                                        remember(pm) { pm.getDrawable(engine.name, engine.icon, null)?.toBitmap() }
+                                    iconBitmap?.let {
                                         Icon(
-                                            painter = painterResource(id = R.drawable.cloud), contentDescription = null
-                                        )
-                                    } else {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.cloud_off),
-                                            contentDescription = null
+                                            bitmap = it.asImageBitmap(),
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .size(24.dp)
+                                                .clip(RoundedCornerShape(4.dp)),
+                                            tint = Color.Unspecified
                                         )
                                     }
-                                })
+
+                                },
+                                trailingIcon = if ((preferredEngine.isNullOrBlank() && tts.defaultEngine == engine.name) || preferredEngine == engine.name) {
+                                    {
+                                        Icon(imageVector = Icons.Default.Done, contentDescription = null)
+                                    }
+                                } else {
+                                    null
+                                }) {
+                                Text(
+                                    text = engine.label,
+                                    fontWeight = FontWeight.W500,
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                val density = LocalDensity.current
+
+                AnimatedVisibility(
+                    visible = ttsVoicesList.isNotEmpty(),
+                    enter = fadeIn() + slideInVertically { (-20 * density.density).roundToInt() },
+                    exit = fadeOut()
+                ) {
+                    Column {
+                        Text(
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            text = "Голоса:",
+                            fontWeight = FontWeight.W600,
+                            fontSize = 20.sp
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colors.surface)
+                                .verticalScroll(rememberScrollState())
+                        ) {
+                            ttsVoicesList.forEach { voice ->
+
+                                MenuItem(
+                                    title = if (preferredVoice != null && voice.name == preferredVoice)
+                                        voice.name + " (выбрано)"
+                                    else
+                                        voice.name,
+                                    onClick = {
+                                        tts.stop()
+                                        tts.voice = voice
+                                        coroutineScope.launch(Dispatchers.IO) {
+                                            HubsDataStore.Settings.TextToSpeech.Voice.edit(context, voice.name)
+                                        }
+                                    },
+                                    icon = {
+                                        if (voice.isNetworkConnectionRequired) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.cloud),
+                                                contentDescription = null
+                                            )
+                                        } else {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.cloud_off),
+                                                contentDescription = null
+                                            )
+                                        }
+                                    })
+                            }
                         }
                     }
                 }
@@ -332,6 +337,7 @@ fun TTSChip(
     modifier: Modifier = Modifier,
     leadingIcon: (@Composable () -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     Row(
@@ -340,7 +346,10 @@ fun TTSChip(
             .background(MaterialTheme.colors.surface)
             .animateContentSize()
             .heightIn(min = 36.dp)
-            .clickable(onClick = onClick)
+            .combinedClickable(
+                onLongClick = onLongClick,
+                onClick = onClick
+            )
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

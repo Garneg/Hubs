@@ -446,6 +446,7 @@ fun MainNavigationGraph(
             ) {
                 TextToSpeechSettingsScreen(
                     onBack = { navController.navigateBack() },
+                    allowDisplayFullContent = this.transition.currentState == EnterExitState.Visible
                 )
             }
 
