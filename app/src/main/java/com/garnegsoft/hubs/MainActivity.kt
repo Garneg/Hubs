@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -52,6 +53,9 @@ import java.util.concurrent.TimeUnit
 
 
 class MainActivity : ComponentActivity() {
+
+    val mediaController = mutableStateOf<MediaController?>(null)
+
 
     @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -117,7 +121,6 @@ class MainActivity : ComponentActivity() {
         Log.i("Runblocking", "before media controller builder: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
 
 
-        val mediaController = mutableStateOf<MediaController?>(null)
 
 
 
@@ -183,6 +186,12 @@ class MainActivity : ComponentActivity() {
 
         Log.e("ExternalLink", intent.data.toString())
 
+    }
+
+    override fun onDestroy() {
+        mediaController.value?.stop()
+        mediaController.value?.release()
+        super.onDestroy()
     }
 }
 

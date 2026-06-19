@@ -297,6 +297,12 @@ class HubsTTSService : MediaSessionService() {
 
     }
 
+    @OptIn(UnstableApi::class)
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        pauseAllPlayersAndStopSelf()
+        super.onTaskRemoved(rootIntent)
+    }
+
 
     fun filterText(text: String): String {
         return text.filter { it.category != CharCategory.SURROGATE }

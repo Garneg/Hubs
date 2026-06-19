@@ -129,7 +129,7 @@ fun TextToSpeechSettingsScreen(
     var ttsVoicesList by remember { mutableStateOf<List<Voice>>(emptyList()) }
     LaunchedEffect(ttsInitialized) {
         if (ttsInitialized) {
-            ttsRuVoicesList = tts.voices.filter { it.name.contains("ru") }
+            ttsRuVoicesList = tts.voices.filter { it.locale.language == "ru" }
             ttsVoicesList = tts.voices.toList()
             enginesList = tts.engines
 
