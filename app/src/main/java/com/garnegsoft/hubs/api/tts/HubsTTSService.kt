@@ -187,7 +187,6 @@ class HubsTTSService : MediaSessionService() {
         val mediaItem = MediaItem.fromUri(Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.silent.toString()).build())
 
 
-
         val activityPendingIntent = PendingIntent.getActivity(
             this, 676767,
             Intent(Intent.ACTION_VIEW).apply {

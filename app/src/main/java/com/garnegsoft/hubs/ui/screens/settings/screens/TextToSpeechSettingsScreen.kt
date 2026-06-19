@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,6 +41,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.PlayArrow
@@ -121,11 +124,13 @@ fun TextToSpeechSettingsScreen(
         }
     }
     var enginesList by remember() { mutableStateOf(emptyList<TextToSpeech.EngineInfo>()) }
-
+    var showAllVoices by remember { mutableStateOf(false) }
+    var ttsRuVoicesList by remember { mutableStateOf<List<Voice>>(emptyList()) }
     var ttsVoicesList by remember { mutableStateOf<List<Voice>>(emptyList()) }
     LaunchedEffect(ttsInitialized) {
         if (ttsInitialized) {
-            ttsVoicesList = tts.voices.filter { it.name.contains("ru") }
+            ttsRuVoicesList = tts.voices.filter { it.name.contains("ru") }
+            ttsVoicesList = tts.voices.toList()
             enginesList = tts.engines
 
         }
@@ -282,21 +287,44 @@ fun TextToSpeechSettingsScreen(
                     exit = fadeOut()
                 ) {
                     Column {
-                        Text(
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            text = "Голоса:",
-                            fontWeight = FontWeight.W600,
-                            fontSize = 20.sp
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                modifier = Modifier
+                                    .padding(vertical = 8.dp)
+                                    .weight(1f),
+                                text = "Голоса:",
+                                fontWeight = FontWeight.W600,
+                                fontSize = 20.sp
+                            )
 
-                        Column(
+                            TextButton(
+                                onClick = {
+                                    showAllVoices = !showAllVoices
+                                }
+                            ) {
+                                Text(
+                                    modifier = Modifier.animateContentSize(),
+                                    text = if (showAllVoices) {
+                                        "Показать только русские голоса"
+                                    } else {
+                                        "Показать голоса всех регионов"
+                                    }
+                                )
+                            }
+
+                        }
+
+
+                        LazyColumn(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colors.surface)
-                                .verticalScroll(rememberScrollState())
                         ) {
-                            ttsVoicesList.forEach { voice ->
-
+                            items(
+                                items = if (showAllVoices) ttsVoicesList else ttsRuVoicesList
+                            ) { voice ->
                                 MenuItem(
                                     title = if (preferredVoice != null && voice.name == preferredVoice)
                                         voice.name + " (выбрано)"
