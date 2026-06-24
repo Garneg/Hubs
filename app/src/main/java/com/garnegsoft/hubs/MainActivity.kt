@@ -44,6 +44,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.Player
 import com.garnegsoft.hubs.api.tts.setTTSSpeed
 import com.google.common.base.Stopwatch
+import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch

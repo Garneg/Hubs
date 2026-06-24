@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.common.feedCards.article
 
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateIntOffset
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,6 +32,7 @@ import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.article.offline.OfflineArticlesDatabase
+import com.garnegsoft.hubs.ui.navigation.Transitions.transitionDuration
 import kotlin.math.roundToInt
 
 
@@ -54,7 +56,7 @@ fun SaveArticlePopup(
 			layoutDirection: LayoutDirection,
 			popupContentSize: IntSize
 		): IntOffset {
-			return IntOffset(anchorBounds.left, anchorBounds.top - popupContentSize.height)
+			return IntOffset(anchorBounds.left - (2 * density).toInt(), anchorBounds.top - popupContentSize.height)
 		}
 		
 	}
@@ -64,8 +66,16 @@ fun SaveArticlePopup(
 		if (it) IntOffset.Zero
 		else IntOffset(0, (16f * density).roundToInt())
 	}
-	val animatedSize by transition.animateFloat {
-		if (it) 1f else 0.2f
+	val animatedSize by transition.animateFloat(
+		transitionSpec = { tween(150) },
+	) {
+		if (it) 1f else 0.8f
+	}
+
+	val animatedAlpha by transition.animateFloat(
+		transitionSpec = { tween(durationMillis = 100) }
+	) {
+		if (it) 1f else 0f
 	}
 	
 	if (show || transition.currentState) {
@@ -80,10 +90,10 @@ fun SaveArticlePopup(
 				modifier = Modifier
 					.offset { animatedOffset.copy() }
 					.graphicsLayer {
-						//scaleX = animatedSize
-						//scaleY = animatedSize
+						scaleX = animatedSize
+						scaleY = animatedSize
 						shape = cardStyle.innerElementsShape
-						alpha = animatedSize
+						alpha = animatedAlpha
 					}
 					.padding(2.dp)
 					.size((bounds.width / density).dp, (bounds.height / density).dp)

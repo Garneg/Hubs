@@ -96,6 +96,7 @@ fun TextToSpeechSettingsScreen(
     var isTTSSpeaking by remember { mutableStateOf(false) }
 
     var ttsInitialized by remember(preferredEngine) { mutableStateOf(false) }
+    
     val tts = remember(preferredEngine) {
         TextToSpeech(context, {
             if (it == TextToSpeech.SUCCESS) {

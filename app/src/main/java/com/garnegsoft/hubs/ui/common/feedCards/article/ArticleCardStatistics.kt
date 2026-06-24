@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.ui.common.feedCards.article
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.res.painterResource
@@ -42,6 +44,7 @@ fun ArticleStats(
 	bookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark),
 	filledBookmarkIconPainter: Painter = painterResource(id = R.drawable.bookmark_filled),
 	commentIconPainter: Painter = painterResource(id = R.drawable.comments_icon),
+	showSavingPopup: Boolean,
 ) {
 	//Stats
 	Row(
@@ -117,42 +120,54 @@ fun ArticleStats(
 
 		
 		//Added to bookmarks
-		Row(
-			verticalAlignment = Alignment.CenterVertically,
+		Box(
 			modifier = Modifier
 				.padding(vertical = style.innerPadding / 2f)
 				.weight(1f)
-				.clip(style.innerElementsShape)
-				.combinedClickable(
-					onClick = onAddToBookmarksClicked,
-					onLongClick = {
-						onShowSavingPopup()
-						
-					},
-					enabled = style.bookmarksButtonAllowedBeEnabled && bookmarksButtonEnabled,
-				)
-				.onGloballyPositioned {
-					bounds = it.size
-				}
-				.padding(vertical = style.innerPadding * 0.75f),
-			horizontalArrangement = Arrangement.Center
 		) {
-			Icon(
-				
-				painter =
-					if (addedToBookmarks)
-						filledBookmarkIconPainter
-					else
-						bookmarkIconPainter,
-				contentDescription = null,
-				modifier = Modifier.size(18.dp),
-				tint = style.statisticsColor
-			)
-			Spacer(modifier = Modifier.width(4.dp))
-			Text(
-				text = bookmarksCount.toString(),
-				style = style.statisticsTextStyle
-			)
+			val savingPopupIndicationAlpha by animateFloatAsState(if (showSavingPopup) 0.1f else 0f)
+			Row(
+				verticalAlignment = Alignment.CenterVertically,
+				modifier = Modifier
+					.fillMaxWidth()
+					.clip(style.innerElementsShape)
+					.drawBehind {
+						if (showSavingPopup) {
+							drawRect(color = style.statisticsColor.copy(savingPopupIndicationAlpha))
+						}
+					}
+					.combinedClickable(
+						onClick = onAddToBookmarksClicked,
+						onLongClick = {
+							onShowSavingPopup()
+
+						},
+						enabled = style.bookmarksButtonAllowedBeEnabled && bookmarksButtonEnabled,
+					)
+					.onGloballyPositioned {
+						bounds = it.size
+					}
+					.padding(vertical = style.innerPadding * 0.75f),
+				horizontalArrangement = Arrangement.Center
+			) {
+				Icon(
+
+					painter =
+						if (addedToBookmarks)
+							filledBookmarkIconPainter
+						else
+							bookmarkIconPainter,
+					contentDescription = null,
+					modifier = Modifier.size(18.dp),
+					tint = style.statisticsColor
+				)
+				Spacer(modifier = Modifier.width(4.dp))
+				Text(
+					text = bookmarksCount.toString(),
+					style = style.statisticsTextStyle
+				)
+
+			}
 			saveArticlePopup(bounds)
 		}
 		

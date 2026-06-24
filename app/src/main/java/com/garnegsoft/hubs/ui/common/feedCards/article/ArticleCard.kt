@@ -291,9 +291,10 @@ fun ArticleCard(
 			onShowSavingPopup = {
 				showPopup = true
 				hapticFeedback.performHapticFeedback(
-					HapticFeedbackType.LongPress
+					HapticFeedbackType.ContextClick
 				)
 			},
+			showSavingPopup = showPopup,
 			bookmarksButtonEnabled = configuration.commentsButtonEnabled && !bookmarkState.throttleButton && toggleBookmark != null,
 			style = configuration,
 			ratingIconPainter = ratingIconPainter,
