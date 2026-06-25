@@ -596,9 +596,10 @@ fun CommentsScreen(
                                                         ratingIconPainter = ratingIconPainter,
                                                         replyIconPainter = replyIconPainter
                                                     ) {
-                                                        Column {
+
                                                             comment.let {
                                                                 SelectionContainer {
+                                                                    Column {
                                                                     CompositionLocalProvider(
                                                                         LocalTextStyle provides LocalTextStyle.current.copy(
                                                                             lineHeight = 1.5.em
