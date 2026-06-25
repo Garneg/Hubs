@@ -462,26 +462,27 @@ fun CommentsScreen(
                                         }
                                     },
 
-                                    ) {
-                                    Column {
-                                        it.let {
-                                            SelectionContainer {
-                                                ((parseChildElements(
-                                                    Jsoup.parse(comment.message).body(), SpanStyle(
-                                                        fontSize = 16.sp,
-                                                        color = MaterialTheme.colors.onSurface
-                                                    ),
-                                                    onViewImageRequest = onImageClick
-                                                ).second)?.let { it1 ->
-                                                    it1.forEach {
-                                                        it?.invoke(
-                                                            SpanStyle(
-                                                                fontSize = 16.sp,
-                                                                color = MaterialTheme.colors.onSurface
-                                                            ),
-                                                            elementsSettings
-                                                        )
-                                                    }
+                                ) {
+
+                                it.let {
+                                    SelectionContainer {
+                                        Column {
+                                            ((parseChildElements(
+                                                Jsoup.parse(comment.message).body(), SpanStyle(
+                                                    fontSize = 16.sp,
+                                                    color = MaterialTheme.colors.onSurface
+                                                ),
+                                                onViewImageRequest = onImageClick
+                                            ).second)?.let { it1 ->
+                                                it1.forEach {
+                                                    it?.invoke(
+                                                        SpanStyle(
+                                                            fontSize = 16.sp,
+                                                            color = MaterialTheme.colors.onSurface
+                                                        ),
+                                                        elementsSettings
+                                                    )
+                                                }
 
                                                 })
                                             }
