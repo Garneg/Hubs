@@ -1,9 +1,8 @@
 package com.garnegsoft.hubs
 
-//import com.garnegsoft.hubs.api.utils.getArticleIdFromUrl
-
 import com.garnegsoft.hubs.api.FilterPeriod
 import com.garnegsoft.hubs.api.history.HistoryArticle
+import com.garnegsoft.hubs.api.utils.SearchUrlHandler.Companion.getArticleIdFromUrl
 //import com.garnegsoft.hubs.api.utils.getArticleIdFromUrl
 import com.garnegsoft.hubs.ui.screens.main.NewsFilter
 import kotlinx.coroutines.GlobalScope
