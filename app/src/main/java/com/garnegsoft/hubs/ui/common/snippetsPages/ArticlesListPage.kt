@@ -83,7 +83,8 @@ fun <F : Filter> ArticlesListPageWithFilter(
 	val translationIconPainter = painterResource(id = R.drawable.translation)
 	cardsStyle?.let { articleCardsStyle ->
 		CommonPageWithFilter(
-			listModel = listModel, filterDialog = filterDialog,
+			listModel = listModel,
+			filterDialog = filterDialog,
 			filter = filter,
 			doInitialLoading = doInitialLoading,
 			lazyListState = lazyListState,

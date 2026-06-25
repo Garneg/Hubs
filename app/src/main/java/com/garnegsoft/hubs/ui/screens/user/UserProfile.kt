@@ -401,7 +401,7 @@ internal fun UserProfile(
                                                                 ),
                                                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                                                             ) {
-                                                                it.forEach { Badge(title = it.title) }
+                                                                it.forEach { Badge(it) }
                                                             }
                                                         }
                                                     }
@@ -718,7 +718,7 @@ internal fun UserProfile(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(12.dp)
+                                    .padding(20.dp)
                             ) {
                                 Text(
                                     modifier = Modifier.align(Alignment.Center),

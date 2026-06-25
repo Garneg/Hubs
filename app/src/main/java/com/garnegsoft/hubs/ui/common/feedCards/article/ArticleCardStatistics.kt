@@ -147,7 +147,7 @@ fun ArticleStats(
 					.onGloballyPositioned {
 						bounds = it.size
 					}
-					.padding(vertical = style.innerPadding * 0.75f),
+					.padding(vertical = style.innerPadding * 0.8f),
 				horizontalArrangement = Arrangement.Center
 			) {
 				Icon(
