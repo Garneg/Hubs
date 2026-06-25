@@ -215,27 +215,28 @@ fun CommentsScreen(
                         val comment = answeringComment
                         Column {
                             Divider()
-                            Row(modifier = Modifier
-								.clickable {
-									val index =
-										commentsData?.comments?.indexOf(answeringComment) ?: 0
-									coroutineScope.launch {
-										lazyListState.animateScrollToItem(index)
-									}
-								}
-								.background(MaterialTheme.colors.surface)
-								.padding(4.dp)
-								.padding(start = 4.dp)
-								.height(IntrinsicSize.Min),
+                            Row(
+                                modifier = Modifier
+                                    .clickable {
+                                        val index =
+                                            commentsData?.comments?.indexOf(answeringComment) ?: 0
+                                        coroutineScope.launch {
+                                            lazyListState.animateScrollToItem(index)
+                                        }
+                                    }
+                                    .background(MaterialTheme.colors.surface)
+                                    .padding(4.dp)
+                                    .padding(start = 4.dp)
+                                    .height(IntrinsicSize.Min),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
                                 Spacer(
                                     modifier = Modifier
-										.width(4.dp)
-										.fillMaxHeight()
-										.clip(CircleShape)
-										.background(MaterialTheme.colors.secondary)
+                                        .width(4.dp)
+                                        .fillMaxHeight()
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colors.secondary)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
@@ -301,9 +302,11 @@ fun CommentsScreen(
 //				}
 //			})
 
-        Box(modifier = Modifier
-			.padding(it)
-			.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
             Column(
                 modifier = Modifier
 
@@ -347,7 +350,6 @@ fun CommentsScreen(
                             items = commentsData!!.pinnedComments,
                         ) { index, commentId ->
                             val comment = commentsData!!.comments.find { it.id == commentId }!!
-
                             CommentItem(
                                 comment = comment,
                                 onAuthorClick = { onUserClicked(comment.author.alias) },
@@ -380,9 +382,10 @@ fun CommentsScreen(
                                 },
 
                                 ) {
-                                Column {
-                                    it.let {
-                                        SelectionContainer {
+
+                                it.let {
+                                    SelectionContainer {
+                                        Column {
                                             ((parseChildElements(
                                                 Jsoup.parse(comment.message).body(), SpanStyle(
                                                     fontSize = 16.sp,
@@ -416,8 +419,8 @@ fun CommentsScreen(
                                 if (screenState.collapsedCommentsParents.contains(comment.id)) {
                                     CollapsedThreadHeaderComment(
                                         modifier = Modifier
-											.padding(start = 20.dp * comment.level.coerceAtMost(5))
-											.padding(bottom = 8.dp),
+                                            .padding(start = 20.dp * comment.level.coerceAtMost(5))
+                                            .padding(bottom = 8.dp),
                                         onExpandClick = { screenState.expandThread(comment.id) },
                                         comment = comment
                                     )
@@ -502,9 +505,9 @@ fun CommentsScreen(
                                                 ratingIconPainter = ratingIconPainter,
                                                 replyIconPainter = replyIconPainter
                                             ) {
-                                                Column {
-                                                    comment.let {
-                                                        SelectionContainer {
+                                                comment.let {
+                                                    SelectionContainer {
+                                                        Column {
                                                             ((parseChildElements(
                                                                 Jsoup.parse(it.message).body(),
                                                                 SpanStyle(
@@ -550,7 +553,7 @@ fun CommentsScreen(
             }
             val articleHeaderOffsetAnimation by animateFloatAsState(
                 targetValue =
-                if (showArticleHeader) 0f else 1f
+                    if (showArticleHeader) 0f else 1f
             )
             articleSnippet?.let {
                 Layout(
@@ -558,16 +561,16 @@ fun CommentsScreen(
                         Box {
                             Row(
                                 modifier = Modifier
-									.clickable {
-										coroutineScope.launch {
-											lazyListState.animateShortScrollToItem(0)
-										}
-									}
-									.background(MaterialTheme.colors.surface)
-									.fillMaxWidth()
+                                    .clickable {
+                                        coroutineScope.launch {
+                                            lazyListState.animateShortScrollToItem(0)
+                                        }
+                                    }
+                                    .background(MaterialTheme.colors.surface)
+                                    .fillMaxWidth()
 //                    .height(50.dp)
                                     .height(IntrinsicSize.Min)
-									.padding(8.dp),
+                                    .padding(8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
 
@@ -609,11 +612,12 @@ fun CommentsScreen(
 
             }
             screenState.newCommentsNavigationControlState?.let {
-                Box(modifier = Modifier
-					.align(Alignment.BottomCenter)
-					.pointerInput(Unit) {}
-					.padding(start = 16.dp, top = 16.dp, end = 16.dp)
-					.padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .pointerInput(Unit) {}
+                        .padding(start = 16.dp, top = 16.dp, end = 16.dp)
+                        .padding(bottom = if (commentsData?.commentAccess?.canComment == true) 16.dp else 48.dp)
                 ) {
 
                     NewCommentsControl(state = screenState.newCommentsNavigationControlState!!)
