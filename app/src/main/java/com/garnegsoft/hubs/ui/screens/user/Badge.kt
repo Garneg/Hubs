@@ -1,6 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.user
 
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathEffect
@@ -55,6 +57,7 @@ fun Badge(badge: User.WhoIs.Badge) {
     val badgeColor = MaterialTheme.colors.secondaryVariant
     var showDescriptionPopup by remember { mutableStateOf(false) }
     val popupTransition = updateTransition(targetState = showDescriptionPopup)
+    var popupPointerPosition by remember { mutableStateOf(0) }
     Box(
         modifier = Modifier
             .clip(MaterialTheme.shapes.small)
@@ -102,6 +105,8 @@ fun Badge(badge: User.WhoIs.Badge) {
                         layoutDirection: LayoutDirection,
                         popupContentSize: IntSize
                     ): IntOffset {
+                        popupPointerPosition = anchorBounds.width / 2
+                        Log.i("popupPointer", "anchorBounds: topCenter:${anchorBounds.topCenter}; topLeft:${anchorBounds.topLeft}")
                         return IntOffset(anchorBounds.left - (2 * density.density).toInt(), anchorBounds.top - popupContentSize.height + (6 * density.density).toInt())
                     }
                 }
@@ -122,7 +127,8 @@ fun Badge(badge: User.WhoIs.Badge) {
 
                         .drawWithCache {
                             val path = Path().apply {
-                                moveTo(12f * density.density, size.height)
+                                // TODO: Pointer sometimes is off center because popup sometimes clips to window size, should be noticed
+                                moveTo(popupPointerPosition.toFloat() - 10f * density.density, size.height - 2f)
                                 relativeLineTo(20f * density.density, 0f)
                                 relativeLineTo(-10f * density.density, 10f * density.density)
                                 this.close()

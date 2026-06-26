@@ -23,6 +23,7 @@ android {
         applicationId "com.garnegsoft.hubs"
         minSdk 23
         targetSdk 36
+        // TODO: Bump version
         versionCode 17
         versionName "2.7.0"
 
