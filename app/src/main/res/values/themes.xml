@@ -6,6 +6,7 @@
     </style>
     <style name="Theme.Hubs.Auth" parent="Theme.AppCompat.NoActionBar">
 
-        <item name="android:statusBarColor">#00000000</item>
+        <item name="android:statusBarColor">#FFFFFFFF</item>
+        <item name="android:colorBackground">#FFFFFFFF</item>
     </style>
 </resources>

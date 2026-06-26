@@ -5,11 +5,16 @@ import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.ViewGroup
+import android.view.WindowInsets
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updateLayoutParams
 
 class AuthActivity : AppCompatActivity() {
 
@@ -20,9 +25,24 @@ class AuthActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_auth)
 
-        val webView = findViewById<WebView>(R.id.abobaview)
+        val webView = findViewById<WebView>(R.id.authWebView)
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+
+            view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                this.setMargins(
+                    statusBarInsets.left,
+                    statusBarInsets.top,
+                    statusBarInsets.right,
+                    0
+                )
+            }
+
+            WindowInsetsCompat.CONSUMED
+        }
 
         webView.apply {
+
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.databaseEnabled = true
