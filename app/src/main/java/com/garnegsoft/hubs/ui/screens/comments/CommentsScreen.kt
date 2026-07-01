@@ -3,10 +3,15 @@ package com.garnegsoft.hubs.ui.screens.comments
 import ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOutQuad
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.animation.fadeIn
@@ -21,6 +26,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -33,7 +39,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
@@ -348,15 +356,30 @@ fun CommentsScreen(
             )
         }
 
-//		LaunchedEffect(
-//			key1 = remember { derivedStateOf { lazyListState.firstVisibleItemIndex } },
-//			block = {
-//				returnToCommentId?.let {
-//					if (lazyListState.firstVisibleItemIndex >= it + itemOffsetCount) {
-//						returnToCommentId = null
-//					}
-//				}
-//			})
+        var highlightedCommentMarkerOpacity by remember { mutableStateOf(0f) }
+
+        LaunchedEffect(screenState.highlightCommentId.value) {
+            var velocity = 0f
+
+            animate(
+                initialValue = 0f,
+                targetValue = 1f,
+                initialVelocity = 0f,
+                animationSpec = repeatable(3, tween(durationMillis = 800), RepeatMode.Reverse)
+            ) { value, remainedVelocity ->
+                highlightedCommentMarkerOpacity = value
+                velocity = remainedVelocity
+            }
+            animate(
+                initialValue = 1f,
+                targetValue = 0f,
+                initialVelocity = 0f,
+                animationSpec = tween<Float>(durationMillis = 450)
+            ) { value, _ ->
+                highlightedCommentMarkerOpacity = value
+            }
+            //screenState.highlightComment(-1)
+        }
 
         Box(
             modifier = Modifier
@@ -380,7 +403,7 @@ fun CommentsScreen(
                     LazyColumn(
                         state = lazyListState,
                         modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(8.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
                         item {
@@ -391,19 +414,20 @@ fun CommentsScreen(
                                 enter = fadeIn(tween(durationMillis = 250, easing = EaseInCubic)),
                                 exit = fadeOut()
                             ) {
-                                articleSnippet?.let {
-                                    ArticleCard(
-                                        cardData = articleSnippet,
-                                        onClick = onArticleClicked,
-                                        configuration = articleCardConfiguration,
-                                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-                                        onCommentsClick = { },
-                                    )
+                                Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+
+
+                                    articleSnippet?.let {
+                                        ArticleCard(
+                                            cardData = articleSnippet,
+                                            onClick = onArticleClicked,
+                                            configuration = articleCardConfiguration,
+                                            onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+                                            onCommentsClick = { },
+                                        )
+                                    }
                                 }
                             }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
                         }
 
                         if (commentsData == null && commentsLoaded) {
@@ -429,89 +453,113 @@ fun CommentsScreen(
                                 items = commentsData?.pinnedComments ?: emptyList(),
                             ) { index, commentId ->
                                 val comment = commentsData!!.comments.find { it.id == commentId }!!
-
-                                CommentItem(
-                                    modifier = Modifier.animateItem(),
-                                    comment = comment,
-                                    onAuthorClick = { onUserClicked(comment.author.alias) },
-                                    highlight = false,
-                                    showReplyButton = commentsData!!.commentAccess.canComment,
-                                    onShare = {
-                                        val intent = Intent(Intent.ACTION_SEND)
-                                        intent.putExtra(
-                                            Intent.EXTRA_TEXT,
-                                            "https://habr.com/p/${parentArticleId}/comments/#comment_${comment.id}"
-                                        )
-                                        intent.setType("text/plain")
-                                        context.startActivity(
-                                            Intent.createChooser(
-                                                intent,
-                                                null
-                                            )
-                                        )
-                                    },
-                                    onReplyClick = {},
-                                    isPinned = true,
-                                    onGoToPinnedComment = {
-                                        coroutineScope.launch {
-                                            lazyListState.animateScrollToItem(
-                                                commentsData!!.comments.indexOf(
-                                                    comment
-                                                ) + itemOffsetCount, (-articleHeaderOffset).toInt()
-                                            )
-                                        }
-                                    },
-
+                                Box(modifier = Modifier
+                                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    .animateItem()
                                 ) {
 
-                                it.let {
-                                    SelectionContainer {
-                                        Column {
-                                            ((parseChildElements(
-                                                Jsoup.parse(comment.message).body(), SpanStyle(
-                                                    fontSize = 16.sp,
-                                                    color = MaterialTheme.colors.onSurface
-                                                ),
-                                                onViewImageRequest = onImageClick
-                                            ).second)?.let { it1 ->
-                                                it1.forEach {
-                                                    it?.invoke(
-                                                        SpanStyle(
-                                                            fontSize = 16.sp,
-                                                            color = MaterialTheme.colors.onSurface
-                                                        ),
-                                                        elementsSettings
-                                                    )
-                                                }
 
-                                                })
+                                    CommentItem(
+                                        modifier = Modifier,
+                                        comment = comment,
+                                        onAuthorClick = { onUserClicked(comment.author.alias) },
+                                        highlight = false,
+                                        showReplyButton = commentsData!!.commentAccess.canComment,
+                                        onShare = {
+                                            val intent = Intent(Intent.ACTION_SEND)
+                                            intent.putExtra(
+                                                Intent.EXTRA_TEXT,
+                                                "https://habr.com/p/${parentArticleId}/comments/#comment_${comment.id}"
+                                            )
+                                            intent.setType("text/plain")
+                                            context.startActivity(
+                                                Intent.createChooser(
+                                                    intent,
+                                                    null
+                                                )
+                                            )
+                                        },
+                                        onReplyClick = {},
+                                        isPinned = true,
+                                        onGoToPinnedComment = {
+                                            coroutineScope.launch {
+                                                lazyListState.animateScrollToItem(
+                                                    commentsData!!.comments.indexOf(
+                                                        comment
+                                                    ) + itemOffsetCount, (-articleHeaderOffset).toInt()
+                                                )
+                                            }
+                                        },
+
+                                        ) {
+
+                                        it.let {
+                                            CompositionLocalProvider(
+                                                LocalTextStyle provides LocalTextStyle.current.copy(
+                                                    lineHeight = 1.5.em
+                                                )
+                                            ) {
+                                                SelectionContainer {
+                                                    Column {
+                                                        ((parseChildElements(
+                                                            Jsoup.parse(comment.message).body(), SpanStyle(
+                                                                fontSize = 16.sp,
+                                                                color = MaterialTheme.colors.onSurface
+                                                            ),
+                                                            onViewImageRequest = onImageClick
+                                                        ).second)?.let { it1 ->
+                                                            it1.forEach {
+                                                                it?.invoke(
+                                                                    SpanStyle(
+                                                                        fontSize = 16.sp,
+                                                                        color = MaterialTheme.colors.onSurface
+                                                                    ),
+                                                                    elementsSettings
+                                                                )
+                                                            }
+
+                                                        })
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
 
                             itemsIndexed(
                                 items = commentsData?.comments ?: emptyList(),
                                 key = { index, it -> it.id }
                             ) { index, comment ->
-                                Box(
-                                    modifier = Modifier
-                                        .animateItem(
-                                            tween(
-                                                durationMillis = 180,
-                                                delayMillis = index * 70,
-                                                easing = EaseInCubic
+                                val highlightingMarkerColor = MaterialTheme.colors.secondary
+                                if (!screenState.collapsedComments.contains(comment.id)) {
+                                    Box(
+                                        modifier = Modifier
+                                            .animateItem(
+                                                fadeInSpec = tween(
+                                                    durationMillis = 180,
+                                                    delayMillis = index * 70,
+                                                    easing = EaseInCubic
+                                                ),
+                                                placementSpec = snap()
                                             )
-                                        )
-                                ) {
-                                    if (!screenState.collapsedComments.contains(comment.id)) {
+                                            .drawBehind {
+                                                if (comment.id == screenState.highlightCommentId.value) {
+                                                    drawRect(
+                                                        highlightingMarkerColor.copy(
+                                                            highlightedCommentMarkerOpacity * 0.25f
+                                                        )
+                                                    )
+                                                }
+                                            }
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                                    ) {
+
+
                                         if (screenState.collapsedCommentsParents.contains(comment.id)) {
                                             CollapsedThreadHeaderComment(
                                                 modifier = Modifier
-                                                    .padding(start = 20.dp * comment.level.coerceAtMost(5))
-                                                    .padding(bottom = 8.dp),
+                                                    .padding(start = 20.dp * comment.level.coerceAtMost(5)),
                                                 onExpandClick = { screenState.expandThread(comment.id) },
                                                 comment = comment
                                             )
@@ -538,9 +586,7 @@ fun CommentsScreen(
                                                     CommentItem(
                                                         modifier = Modifier
                                                             .padding(
-                                                                start = 20.dp * comment.level.coerceAtMost(
-                                                                    5
-                                                                )
+                                                                start = 20.dp * comment.level.coerceAtMost(5)
                                                             ),
                                                         comment = comment,
                                                         onAuthorClick = { onUserClicked(comment.author.alias) },
@@ -548,7 +594,6 @@ fun CommentsScreen(
                                                         highlight = comment.id == highlightedCommentId,
                                                         showReplyButton = commentsData!!.commentAccess.canComment,
                                                         menu = {
-
                                                             CommentItemMenu(
                                                                 onCollapseCommentClick = {
                                                                     screenState.collapseComment(comment.id)
@@ -597,9 +642,9 @@ fun CommentsScreen(
                                                         replyIconPainter = replyIconPainter
                                                     ) {
 
-                                                            comment.let {
-                                                                SelectionContainer {
-                                                                    Column {
+                                                        comment.let {
+                                                            SelectionContainer {
+                                                                Column {
                                                                     CompositionLocalProvider(
                                                                         LocalTextStyle provides LocalTextStyle.current.copy(
                                                                             lineHeight = 1.5.em
@@ -630,17 +675,19 @@ fun CommentsScreen(
                                                         }
                                                     }
                                                 }
-                                                Spacer(modifier = Modifier.height(if (index != commentsData!!.comments.lastIndex) 8.dp else 0.dp))
+
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                        else if (!commentsLoaded) {
+                        } else if (!commentsLoaded) {
                             item {
                                 Box(
-                                    modifier = Modifier.animateItem().padding(32.dp).fillMaxSize(),
+                                    modifier = Modifier
+                                        .animateItem()
+                                        .padding(32.dp)
+                                        .fillMaxSize(),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     CircularProgressIndicator()

@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
@@ -38,9 +39,9 @@ fun NewCommentsControl(
 ) {
     Box(
         modifier = modifier
-			.shadow(5.dp, shape = CircleShape)
+			.shadow(3.dp, shape = CircleShape)
 			.clip(CircleShape)
-			.border(1.dp, MaterialTheme.colors.onSurface.copy(0.1f), CircleShape)
+			.border(1.dp, Color.LightGray, CircleShape)
 
 			.background(MaterialTheme.colors.surface),
         contentAlignment = Alignment.Center

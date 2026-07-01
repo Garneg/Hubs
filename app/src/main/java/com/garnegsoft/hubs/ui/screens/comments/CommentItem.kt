@@ -81,8 +81,9 @@ fun CommentItem(
 			) {
 				Text(
 					text = "Закреплённый комментарий",
-					fontSize = 14.sp,
-					color = MaterialTheme.colors.onSurface.copy(0.5f)
+					fontSize = 16.sp,
+					color = MaterialTheme.colors.onSurface.copy(0.5f),
+					fontWeight = FontWeight.W500
 				)
 				Spacer(modifier = Modifier.width(4.dp))
 				Icon(

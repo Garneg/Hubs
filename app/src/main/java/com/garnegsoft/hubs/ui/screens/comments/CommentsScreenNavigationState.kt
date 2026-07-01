@@ -1,5 +1,13 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
+import androidx.compose.animation.core.ArcAnimationSpec
+import androidx.compose.animation.core.DurationBasedAnimationSpec
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.RepeatableSpec
+import androidx.compose.animation.core.animate
+import androidx.compose.animation.core.repeatable
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.*
@@ -32,7 +40,14 @@ class CommentsScreenNavigationState(
 
     private var baseOffset: Int = 0
 
+    val highlightCommentId = mutableStateOf(-1)
+
+    fun highlightComment(commentId: Int) {
+        highlightCommentId.value = commentId
+    }
+
     suspend fun scrollToComment(commentId: Int, offset: Int = 0) {
+        highlightCommentId.value = commentId
         lazyListState.animateShortScrollToItem(
             calculateIndexOfComment(commentId),
             offset + baseOffset,
