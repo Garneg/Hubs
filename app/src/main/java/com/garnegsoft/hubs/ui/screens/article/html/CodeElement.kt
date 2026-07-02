@@ -157,22 +157,9 @@ fun CodeElement(
 	Column(Modifier.clip(RoundedCornerShape(8.dp))) {
 		val jetbrainsMonoFontFamily = FontFamily(
 			listOf(
-				Font(R.font.jetbrains_mono_regular_nl, FontWeight.Normal),
-				Font(R.font.jetbrains_mono_medium_nl, FontWeight.Medium),
-				Font(
-					R.font.jetbrains_mono_medium_nl_italic,
-					FontWeight.Medium,
-					FontStyle.Italic
-				),
-				Font(
-					R.font.jetbrains_mono_regular_nl_italic,
-					FontWeight.Normal,
-					FontStyle.Italic
-				)
+				Font(R.font.jetbrains_mono_variable, FontWeight.Normal),
 			)
 		)
-		val robotoMono = FontFamily(Font(R.font.roboto_mono_variable))
-		
 		Surface(
 			color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
 			modifier = Modifier.fillMaxWidth()

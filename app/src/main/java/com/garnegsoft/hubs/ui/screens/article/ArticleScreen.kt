@@ -74,7 +74,6 @@ import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.history.HistoryController
 import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.LocalMediaController
-import com.garnegsoft.hubs.api.tts.TTSBinder
 import com.garnegsoft.hubs.api.tts.toArticleMetadata
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
@@ -86,7 +85,6 @@ import com.garnegsoft.hubs.ui.common.TitledColumn
 import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.common.MenuItem
 import com.garnegsoft.hubs.ui.common.PlayerDialog
-import com.garnegsoft.hubs.ui.screens.article.tts.TtsTestDialog
 import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
 import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
 import com.google.common.util.concurrent.MoreExecutors
@@ -116,7 +114,6 @@ fun ArticleScreen(
 ) {
     val context = LocalContext.current
     var ttsMediaController by remember { mutableStateOf<MediaController?>(null) }
-    var ttsBinder by remember { mutableStateOf<TTSBinder?>(null) }
 
     val activity = LocalActivity.current
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
