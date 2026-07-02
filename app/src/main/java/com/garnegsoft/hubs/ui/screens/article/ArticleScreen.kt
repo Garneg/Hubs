@@ -306,7 +306,7 @@ fun ArticleScreen(
                                         MenuItem(
                                             title = "Загрузить",
                                             icon = {
-                                                Icon(painterResource(R.drawable.download), contentDescription = "")
+                                                Icon(painterResource(R.drawable.article_download), contentDescription = "download article")
                                             },
                                             onClick = {
                                                 viewModel.saveArticle(id = articleId, context = context)
