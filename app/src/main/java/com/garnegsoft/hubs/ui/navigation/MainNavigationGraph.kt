@@ -32,6 +32,7 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.me.MeController
 import com.garnegsoft.hubs.api.me.MeDataUpdateWorker
+import com.garnegsoft.hubs.api.tts.LocalMediaController
 import com.garnegsoft.hubs.ui.screens.AboutScreen
 import com.garnegsoft.hubs.ui.screens.article.ArticleScreen
 import com.garnegsoft.hubs.ui.screens.comments.CommentsScreen
@@ -56,6 +57,7 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreen
 import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 
 @Composable
@@ -100,7 +102,7 @@ fun MainNavigationGraph(
                                         `package` =
                                             BuildConfig.APPLICATION_ID
                                         data =
-                                            Uri.parse("https://habr.com/users/${it.getOrNull()?.alias}/bookmarks")
+                                            "https://habr.com/users/${it.getOrNull()?.alias}/bookmarks".toUri()
                                     }
                                 )
                                 .setIcon(
@@ -283,9 +285,7 @@ fun MainNavigationGraph(
                             ) +
                             fadeOut(
                         tween(200, easing = EaseInQuart),
-
                     )
-
                 },
             ) {
                 val id = it.arguments?.getString("id")?.toIntOrNull()
@@ -298,7 +298,6 @@ fun MainNavigationGraph(
                     }
                 }
 
-
                 DisposableEffect(key1 = id) {
                     onDispose {
                         clearLastArticle()
@@ -307,20 +306,6 @@ fun MainNavigationGraph(
 //                        }
                     }
                 }
-
-                // Old solution that blocks predictive back gesture handling by navigation
-                // But i feel that i need to leave it too in case DisposableEffect will be improper solution
-
-//                BackHandler(enabled = !imageViewerState.show) {
-//                    clearLastArticle()
-//                    if (navController.context.intent.data != null && navController.previousBackStackEntry == null) {
-//                        navController.context.finish()
-//                    } else {
-//                        navController.popBackStack()
-//                    }
-//                }
-
-
 
                 ArticleScreen(
                     articleId = id!!,
@@ -353,8 +338,6 @@ fun MainNavigationGraph(
                     navigationTransition = transition,
                     viewModelStoreOwner = it
                 )
-
-
             }
 
             hubsComposable(
@@ -444,6 +427,10 @@ fun MainNavigationGraph(
             hubsComposable(
                 route = "tts_settings"
             ) {
+                val mediaController = LocalMediaController.current
+                LaunchedEffect(Unit) {
+                    mediaController?.pause()
+                }
                 TextToSpeechSettingsScreen(
                     onBack = { navController.navigateBack() },
                     allowDisplayFullContent = this.transition.currentState == EnterExitState.Visible

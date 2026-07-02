@@ -36,14 +36,14 @@ import com.garnegsoft.hubs.ui.theme.HubsTheme
 @Preview(name = "aboba")
 @Composable
 fun CodeElementPreview() {
-	HubsTheme {
-		Column(
-			modifier = Modifier
+    HubsTheme {
+        Column(
+            modifier = Modifier
 				.verticalScroll(rememberScrollState())
 				.padding(16.dp)
-		) {
-			CodeElement(
-				code = """
+        ) {
+            CodeElement(
+                code = """
 package com.garnegsoft.hubs.ui.screens.article.html.code
 
 import androidx.compose.ui.text.AnnotatedString
@@ -114,139 +114,134 @@ class CycleBasedHighlightingPipeline(
 }
 
 		""".trimIndent().replace("\t", "   "),
-				//code = SqlHighlighting().keywords.sorted().joinToString("\n"),
-				language = "Kotlin", spanStyle = SpanStyle()
-			)
-		}// aboba
-	}
+                //code = SqlHighlighting().keywords.sorted().joinToString("\n"),
+                language = "Kotlin", spanStyle = SpanStyle()
+            )
+        }// aboba
+    }
 }
 
 
 @Composable
 fun CodeElement(
-	code: String,
-	language: String,
-	spanStyle: SpanStyle,
+    code: String,
+    language: String,
+    spanStyle: SpanStyle,
 ) {
-	var codeSpanStylesList by remember { mutableStateOf(listOf<AnnotatedString.Range<SpanStyle>>()) }
-	LaunchedEffect(key1 = MaterialTheme.colors.isLight, block = {
-		val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
-		val highlighting = when (language) {
-			"Go" -> GolangHighlighting()
-			"Python" -> PythonHighlighting()
-			"C++" -> CPPHighlighting()
-//			"C#" -> CPPHighlighting()
-			"JavaScript" -> JavaScriptHighlighting()
-			"JSON" -> JavaScriptHighlighting()
-			"SQL" -> SqlHighlighting()
-			"PostgreSQL" -> SqlHighlighting()
-			"Kotlin" -> KotlinHighlighting()
-			else -> null
-		}
-		highlighting?.let {
-			codeSpanStylesList = it.highlight(code)
-		}
-	})
+    var codeSpanStylesList by remember { mutableStateOf(listOf<AnnotatedString.Range<SpanStyle>>()) }
+    LaunchedEffect(key1 = MaterialTheme.colors.isLight, block = {
+        val spanStylesList = mutableListOf<AnnotatedString.Range<SpanStyle>>()
+        val highlighting = when (language) {
+            "Go" -> GolangHighlighting()
+            "Python" -> PythonHighlighting()
+            "C++" -> CPPHighlighting()
+            "C#" -> CPPHighlighting()
+            "JavaScript" -> JavaScriptHighlighting()
+            "JSON" -> JavaScriptHighlighting()
+            "SQL" -> SqlHighlighting()
+            "PostgreSQL" -> SqlHighlighting()
+            "Kotlin" -> KotlinHighlighting()
+            else -> null
+        }
+        highlighting?.let {
+            codeSpanStylesList = it.highlight(code)
+        }
+    })
 
-	val annotatedStringCode = remember(codeSpanStylesList) {
-		AnnotatedString(
-			text = code,
-			spanStyles = codeSpanStylesList
-		)
-	}
-	Column(Modifier.clip(RoundedCornerShape(8.dp))) {
-		val jetbrainsMonoFontFamily = FontFamily(
-			listOf(
-				Font(R.font.jetbrains_mono_variable, FontWeight.Normal),
-			)
-		)
-		Surface(
-			color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
-			modifier = Modifier.fillMaxWidth()
-		) {
-			DisableSelection {
-				Row(modifier = Modifier.padding(8.dp)) {
-					Text(
-						text = buildAnnotatedString { withStyle(spanStyle) { append(language) } },
-						fontWeight = FontWeight.W600,
-						fontFamily = FontFamily.SansSerif
-					)
-					Spacer(modifier = Modifier.width(6.dp))
-				}
-			}
-			
-			
-		}
-		val codeScrollState = rememberScrollState()
-		Surface(
-			color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
-			modifier = Modifier.fillMaxWidth()
-		) {
-			Row() {
-				Surface(
-					color = MaterialTheme.colors.onBackground.copy(0f),
-				) {
-					val dividerColor = MaterialTheme.colors.onBackground
-					Column(Modifier
-						.drawBehind {
-							val showDividerThreshold = 8.dp.toPx()
-							drawRect(
-								alpha = (codeScrollState.value / showDividerThreshold).coerceAtMost(
-									1f
-								) * 0.1f,
-								color = dividerColor,
-								topLeft = Offset(size.width - 3f, 0f),
-								size = Size(3f, size.height)
-							)
-						}
-						.padding(8.dp)
-					) {
-						var linesIndicator = String()
-						for (i in 1..code.count { it == "\n"[0] } + 1) {
-							linesIndicator += "$i\n"
-						}
-						linesIndicator = linesIndicator.take(linesIndicator.length - 1)
-						
-						DisableSelection {
-							Text(
-								text = buildAnnotatedString {
-									withStyle(
-										spanStyle.copy(
-											color = MaterialTheme.colors.onBackground.copy(
-												0.25f
-											)
-										)
-									) { append(linesIndicator) }
-								},
-								lineHeight = spanStyle.fontSize * 1.4f,
-								color = MaterialTheme.colors.onBackground.copy(0.25f),
-								fontFamily = jetbrainsMonoFontFamily,
-								textAlign = TextAlign.End
-							)
-						}
-					}
-				}
-				Row(
-					modifier = Modifier
+    val annotatedStringCode = remember(codeSpanStylesList) {
+        AnnotatedString(
+            text = code,
+            spanStyles = codeSpanStylesList
+        )
+    }
+    Column(Modifier.clip(RoundedCornerShape(8.dp))) {
+        val jetbrainsMonoFontFamily = FontFamily(
+            listOf(
+                Font(R.font.jetbrains_mono_variable, FontWeight.Normal),
+            )
+        )
+        Surface(
+            color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            DisableSelection {
+                Row(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = buildAnnotatedString { withStyle(spanStyle) { append(language) } },
+                        fontWeight = FontWeight.W600,
+                        fontFamily = FontFamily.SansSerif
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                }
+            }
+        }
+        val codeScrollState = rememberScrollState()
+        Surface(
+            color = MaterialTheme.colors.onBackground.copy(CODE_ALPHA_VALUE),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row() {
+                Surface(
+                    color = MaterialTheme.colors.onBackground.copy(0f),
+                ) {
+                    val dividerColor = MaterialTheme.colors.onBackground
+                    Column(
+                        Modifier
+							.drawBehind {
+								val showDividerThreshold = 8.dp.toPx()
+								drawRect(
+									alpha = (codeScrollState.value / showDividerThreshold).coerceAtMost(
+										1f
+									) * 0.1f,
+									color = dividerColor,
+									topLeft = Offset(size.width - 3f, 0f),
+									size = Size(3f, size.height)
+								)
+							}
+							.padding(8.dp)
+                    ) {
+                        var linesIndicator = String()
+                        for (i in 1..code.count { it == "\n"[0] } + 1) {
+                            linesIndicator += "$i\n"
+                        }
+                        linesIndicator = linesIndicator.take(linesIndicator.length - 1)
+
+                        DisableSelection {
+                            Text(
+                                text = buildAnnotatedString {
+                                    withStyle(
+                                        spanStyle.copy(
+                                            color = MaterialTheme.colors.onBackground.copy(0.25f)
+                                        )
+                                    ) { append(linesIndicator) }
+                                },
+                                lineHeight = spanStyle.fontSize * 1.4f,
+                                color = MaterialTheme.colors.onBackground.copy(0.25f),
+                                fontFamily = jetbrainsMonoFontFamily,
+                                textAlign = TextAlign.End
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
 						.horizontalScroll(codeScrollState)
 						.fillMaxWidth()
 						.padding(8.dp)
-				) {
-					
-					
-						SelectionContainer {
-							Text(
-								text = annotatedStringCode,
-								fontFamily = jetbrainsMonoFontFamily,
-								fontSize = spanStyle.fontSize,
-								fontWeight = FontWeight.Normal,
-								lineHeight = spanStyle.fontSize * 1.4f,
-								color = MaterialTheme.colors.onBackground
-							)
-						}
-					
-				}
-			}
-		}
-	}
+                ) {
+                    SelectionContainer {
+                        Text(
+                            text = annotatedStringCode,
+                            fontFamily = jetbrainsMonoFontFamily,
+                            fontSize = spanStyle.fontSize,
+                            fontWeight = FontWeight.Normal,
+                            lineHeight = spanStyle.fontSize * 1.4f,
+                            color = MaterialTheme.colors.onBackground
+                        )
+                    }
+
+                }
+            }
+        }
+    }
 }
