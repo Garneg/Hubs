@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -213,10 +214,15 @@ fun PlayerDialog(
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(8.dp))
                             .drawBehind {
-                                drawRect(palette?.let { Color(it.getVibrantColor(fallbackColor.toArgb())) } ?: fallbackColor)
+                                drawRect(palette?.let { Color(it.getVibrantColor(fallbackColor.toArgb())) }
+                                    ?: fallbackColor)
                                 drawRect(Color.Black.copy(0.25f))
                             }
-                            .border(width = 0.5.dp, color = MaterialTheme.colors.onSurface.copy(0.1f), shape = RoundedCornerShape(8.dp))
+                            .border(
+                                width = 0.5.dp,
+                                color = MaterialTheme.colors.onSurface.copy(0.1f),
+                                shape = RoundedCornerShape(8.dp)
+                            )
                             ,
                         model = mediaMetadata?.artworkUri,
                         contentDescription = null,
@@ -280,8 +286,21 @@ fun PlayerDialog(
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        IconButton(
+                            onClick = {
+                                mediaController?.seekBack()
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(28.dp),
+                                painter = painterResource(R.drawable.replay_text_block),
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.onSurface
+                            )
+                        }
 
                         PlayPauseButton(
                             mediaController
@@ -356,6 +375,19 @@ fun PlayerDialog(
                             }
 
                         }
+
+                        IconButton(
+                            onClick = {
+                                mediaController?.seekForward()
+                            }
+                        ) {
+                            Icon(
+                                modifier = Modifier.size(28.dp).graphicsLayer(rotationY = 180f),
+                                painter = painterResource(R.drawable.replay_text_block),
+                                contentDescription = null,
+                                tint = MaterialTheme.colors.onSurface
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -366,7 +398,8 @@ fun PlayerDialog(
                     Row(
                         modifier = Modifier
                             .clip(CircleShape)
-                            .background((palette?.getVibrantColor(fallbackColor.toArgb())?.let { Color(it) } ?: MaterialTheme.colors.onSurface).copy(0.15f)),
+                            .background((palette?.getVibrantColor(fallbackColor.toArgb())?.let { Color(it) }
+                                ?: MaterialTheme.colors.onSurface).copy(0.15f)),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {

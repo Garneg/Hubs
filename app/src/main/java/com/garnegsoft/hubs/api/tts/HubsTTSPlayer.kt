@@ -404,11 +404,12 @@ class TTSPlayer(
     }
 
     override fun seekTo(positionMs: Long) {
+        val wasPlaying = isPlaying
         Log.i("TTS_SERVICE", "seek to $positionMs command")
         tts.stop()
         currentChunkIndex = positionMs.toInt().coerceIn(0, chunks.lastIndex)
         listeners.forEach { it.onPositionDiscontinuity(Player.DISCONTINUITY_REASON_SEEK) }
-        play()
+        if (wasPlaying) play()
     }
 
     override fun seekTo(mediaItemIndex: Int, positionMs: Long) {
@@ -420,9 +421,10 @@ class TTSPlayer(
     }
 
     override fun seekBack() {
+        val wasPlaying = isPlaying
         pause()
         currentChunkIndex = (currentChunkIndex - 1).coerceAtLeast(0)
-        play()
+        if (wasPlaying) play()
     }
 
     override fun getSeekForwardIncrement(): Long {
@@ -430,9 +432,10 @@ class TTSPlayer(
     }
 
     override fun seekForward() {
+        val wasPlaying = isPlaying
         pause()
         currentChunkIndex = (currentChunkIndex + 1).coerceAtMost(chunks.lastIndex)
-        play()
+        if (wasPlaying) play()
     }
 
     override fun hasPreviousMediaItem(): Boolean {
