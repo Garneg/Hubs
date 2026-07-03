@@ -119,9 +119,8 @@ object HubsDataStore {
 	}
 
 	object LastRead : SingleDataStore(name = "last_read") {
-		
 		val LastArticleRead = hubsIntPreference("last_article", 0)
-		//val LastArticleReadPosition = intPreferencesKey("last_article_position")
+		val LastArticleReadPosition = hubsIntPreference("last_article_block_index", 0)
 		
 	}
 

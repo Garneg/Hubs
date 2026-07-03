@@ -1,7 +1,6 @@
 package com.garnegsoft.hubs.ui.navigation
 
 import android.content.Intent
-import android.net.Uri
 import android.webkit.CookieManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
@@ -58,6 +57,9 @@ import com.garnegsoft.hubs.ui.screens.user.UserScreenPages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import androidx.navigation.Navigator
+import androidx.navigation.navArgument
+import androidx.navigation.navOptions
 
 
 @Composable
@@ -161,11 +163,14 @@ fun MainNavigationGraph(
 
                 MainScreen(
                     viewModelStoreOwner = it,
-                    onSearchClicked = {
-                        navController.navigate("search")
-                    },
                     onArticleClicked = {
                         navController.navigate("article/$it")
+                    },
+                    onSubscriptionsClicked = {
+                        navController.navigate("subscriptionManagement")
+                    },
+                    onSearchClicked = {
+                        navController.navigate("search")
                     },
                     onCommentsClicked = {
                         navController.navigate("comments/$it")
@@ -182,69 +187,67 @@ fun MainNavigationGraph(
                     onSavedArticles = {
                         navController.navigate("savedArticles")
                     },
-                    onSubscriptionsClicked = {
-                        navController.navigate("subscriptionManagement")
+                    onLastReadArticle = {
+                        navController.navigate("article/$it?lastRead=true")
                     },
                     menu = {
-                        val context = LocalContext.current
-                        val isAuthorizedFlow = remember {
-                            HubsDataStore.Auth.getValueFlow(
-                                context,
-                                HubsDataStore.Auth.Authorized
-                            )
-                        }
-                        val showAuthorizedMenu by isAuthorizedFlow.collectAsState(
-                            initial = false
+                    val context = LocalContext.current
+                    val isAuthorizedFlow = remember {
+                        HubsDataStore.Auth.getValueFlow(
+                            context,
+                            HubsDataStore.Auth.Authorized
                         )
-                        val userAlias by HubsDataStore.Auth.getValueFlow(
-                            LocalContext.current,
-                            HubsDataStore.Auth.Alias
-                        ).collectAsState(initial = "initial")
-                        if (showAuthorizedMenu) {
-                            AuthorizedMenu(
-                                userAlias = userAlias,
-                                onProfileClick = { navController.navigate("user/${userAlias}") },
-                                onArticlesClick = { navController.navigate("user/${userAlias}?page=${UserScreenPages.Articles}") },
-                                onCommentsClick = { navController.navigate("user/${userAlias}?page=${UserScreenPages.Comments}") },
-                                onBookmarksClick = {
-                                    navController.navigate(
-                                        "user/${userAlias}?page=${UserScreenPages.Bookmarks}"
-                                    )
-                                },
-                                onSubscriptionsClick = { navController.navigate("subscriptionManagement") },
-                                onSavedArticlesClick = {
-                                    navController.navigate(
-                                        "savedArticles"
-                                    )
-                                },
-                                onHistoryClick = { navController.navigate("history") },
-                                onSettingsClick = { navController.navigate("settings") },
-                                onAboutClick = { navController.navigate("about") }
-                            )
-                        } else {
-
-
-
-                            UnauthorizedMenu(
-                                onLoginClick = {
-                                    authActivityLauncher.launch(Unit)
-                                },
-                                onSavedArticlesClick = {
-                                    navController.navigate(
-                                        "savedArticles"
-                                    )
-                                },
-                                onHistoryClick = { navController.navigate("history") },
-                                onSettingsClick = { navController.navigate("settings") },
-                                onAboutClick = { navController.navigate("about") }
-                            )
-                        }
                     }
-                )
+                    val showAuthorizedMenu by isAuthorizedFlow.collectAsState(
+                        initial = false
+                    )
+                    val userAlias by HubsDataStore.Auth.getValueFlow(
+                        LocalContext.current,
+                        HubsDataStore.Auth.Alias
+                    ).collectAsState(initial = "initial")
+                    if (showAuthorizedMenu) {
+                        AuthorizedMenu(
+                            userAlias = userAlias,
+                            onProfileClick = { navController.navigate("user/${userAlias}") },
+                            onArticlesClick = { navController.navigate("user/${userAlias}?page=${UserScreenPages.Articles}") },
+                            onCommentsClick = { navController.navigate("user/${userAlias}?page=${UserScreenPages.Comments}") },
+                            onBookmarksClick = {
+                                navController.navigate(
+                                    "user/${userAlias}?page=${UserScreenPages.Bookmarks}"
+                                )
+                            },
+                            onSubscriptionsClick = { navController.navigate("subscriptionManagement") },
+                            onSavedArticlesClick = {
+                                navController.navigate(
+                                    "savedArticles"
+                                )
+                            },
+                            onHistoryClick = { navController.navigate("history") },
+                            onSettingsClick = { navController.navigate("settings") },
+                            onAboutClick = { navController.navigate("about") }
+                        )
+                    } else {
+
+
+                        UnauthorizedMenu(
+                            onLoginClick = {
+                                authActivityLauncher.launch(Unit)
+                            },
+                            onSavedArticlesClick = {
+                                navController.navigate(
+                                    "savedArticles"
+                                )
+                            },
+                            onHistoryClick = { navController.navigate("history") },
+                            onSettingsClick = { navController.navigate("settings") },
+                            onAboutClick = { navController.navigate("about") }
+                        )
+                    }
+                })
             }
 
             hubsComposable(
-                route = "article/{id}?offline={offline}",
+                route = "article/{id}?offline={offline}&lastRead={lastRead}",
                 deepLinks = ArticleNavDeepLinks,
                 enterTransition = {
                     slideInVertically(
@@ -289,6 +292,7 @@ fun MainNavigationGraph(
                 },
             ) {
                 val id = it.arguments?.getString("id")?.toIntOrNull()
+                val lastRead = it.arguments?.getString("lastRead")?.toBoolean() ?: false
 
                 val clearLastArticle = remember {
                     {
@@ -336,7 +340,8 @@ fun MainNavigationGraph(
                         navController.navigate("article/$it")
                     },
                     navigationTransition = transition,
-                    viewModelStoreOwner = it
+                    viewModelStoreOwner = it,
+                    lastRead = lastRead
                 )
             }
 

@@ -56,7 +56,6 @@ import org.jsoup.nodes.TextNode
 
 val STRONG_FONT_WEIGHT = FontWeight.W600
 val HEADER_FONT_WEIGHT = FontWeight.W700
-val LINE_HEIGHT_FACTOR = 1.5F
 
 fun parseElement(
     html: String,

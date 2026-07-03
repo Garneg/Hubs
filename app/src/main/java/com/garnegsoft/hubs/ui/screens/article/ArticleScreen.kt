@@ -61,7 +61,11 @@ import kotlinx.coroutines.delay
 import com.garnegsoft.hubs.ui.common.BaseMenuContainer
 import com.garnegsoft.hubs.ui.common.MenuItem
 import com.garnegsoft.hubs.ui.common.PlayerDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.Dispatcher
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import kotlin.math.roundToInt
@@ -80,7 +84,8 @@ fun ArticleScreen(
     onViewImageRequest: (url: String) -> Unit,
     onArticleClick: (id: Int) -> Unit,
     navigationTransition: Transition<EnterExitState>,
-    viewModelStoreOwner: ViewModelStoreOwner
+    viewModelStoreOwner: ViewModelStoreOwner,
+    lastRead: Boolean = false
 ) {
     val context = LocalContext.current
     var ttsMediaController by remember { mutableStateOf<MediaController?>(null) }
@@ -89,6 +94,8 @@ fun ArticleScreen(
     val userAuthenticated by AuthDataController.isAuthorizedFlow(context).collectAsState(false)
     val fontSizePreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontSize)
     var fontSize by rememberSaveable { mutableStateOf<Float?>(null) }
+
+    val lastReadArticlePosition by collectPreferenceAsState(HubsDataStore.LastRead.LastArticleReadPosition)
 
     val lineHeightPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.LineHeightFactor)
     var lineHeight by rememberSaveable { mutableStateOf<Float?>(null) }
@@ -120,6 +127,20 @@ fun ArticleScreen(
         if (lazyListState.layoutInfo.totalItemsCount > 0 && lazyListState.firstVisibleItemIndex == 0 && firstVisibleItemIndex > 0) {
             lazyListState.scrollToItem(firstVisibleItemIndex, firstVisibleItemOffset)
             revealArticleContent = true
+        }
+    }
+
+    LaunchedEffect(lazyListState.firstVisibleItemIndex) {
+        val position = lazyListState.firstVisibleItemIndex
+        withContext(Dispatchers.IO) {
+            delay(4000)
+            if (position != lazyListState.firstVisibleItemIndex || position == lastReadArticlePosition) {
+                Log.e("LAZYLISTSTATE", "Cancel coroutine scope jobs because value changed witin 700ms or it's been already wrote")
+                this.cancel()
+
+            }
+            Log.i("lazyliststate", "Wrote a current position to memory: ${lazyListState.firstVisibleItemIndex}")
+            HubsDataStore.LastRead.LastArticleReadPosition.edit(context, lazyListState.firstVisibleItemIndex)
         }
     }
 
@@ -382,6 +403,11 @@ fun ArticleScreen(
                             ).second
                         )
                         articleContentParsed = true
+                    }
+                    if (lastRead) {
+                        delay(500)
+                        Log.e("Lazylist", "last article position $lastReadArticlePosition")
+                        lazyListState.scrollToItem(lastReadArticlePosition ?: 0)
                     }
                 })
                 val density = LocalDensity.current
