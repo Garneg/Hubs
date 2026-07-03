@@ -65,7 +65,7 @@ object HubsDataStore {
 			/**
 			 * Line height in 'em' unit
 			 */
-			val LineHeight = hubsFloatPreference("article_line_height", 1.5f)
+			val LineHeightFactor = hubsFloatPreference("article_line_height", 1.5f)
 //			val TextWrapMode = intPreferencesKey("article_text_wrap")
 //			val Indent = intPreferencesKey("article_indent")
 		}

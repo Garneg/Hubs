@@ -5,12 +5,16 @@ import org.jsoup.Jsoup
 
 fun htmlBlocksToText(html: String): String {
 	val stringBuilder = StringBuilder()
-	Jsoup.parse(html).body().children()[0].children().forEach {
+	val document = Jsoup.parse(html)
+	document.body().children()[0].children().forEach {
 		when(it.tagName()) {
 			"blockquote" ->  stringBuilder.append("*Цитата* ")
 			"img" -> stringBuilder.append("*Изображение* ")
 			else -> stringBuilder.append(it.text())
 		}
+	}
+	if (stringBuilder.isEmpty()) {
+		stringBuilder.append(document.body().text())
 	}
 	return stringBuilder.toString()
 }

@@ -82,6 +82,16 @@ class ArticleScreenSettingsScreenViewModel : ViewModel() {
         }
     }
 
+    fun setLineHeightFactor(context: Context, size: Float) {
+        viewModelScope.launch(Dispatchers.IO) {
+            HubsDataStore.Settings.edit(
+                context,
+                HubsDataStore.Settings.ArticleScreen.LineHeightFactor,
+                size
+            )
+        }
+    }
+
 }
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -101,6 +111,7 @@ fun ArticleScreenSettingsScreen(
     val state = rememberBottomSheetScaffoldState()
 
     val fontFamilyPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontFamily)
+    val preferredLineHeightFactor by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.LineHeightFactor)
 
 
     BottomSheetScaffold(
@@ -282,78 +293,27 @@ fun ArticleScreenSettingsScreen(
                         }
                     )
 
-//                    TitledColumn(
-//                        title = "Межстрочный интервал"
-//                    ) {
-//                        Row(
-//                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-//                        ) {
-//                            HubsFilterChip(
-//                                modifier = Modifier.weight(1f),
-//                                selected = lineHeightFactor == 1.15f,
-//                                onClick = { lineHeightFactor = 1.15f }
-//                            ) {
-//                                Box(
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentAlignment = Alignment.Center
-//                                ) {
-//                                    Text(text = "1.15")
-//                                }
-//                            }
-//
-//                            HubsFilterChip(
-//                                modifier = Modifier.weight(1f),
-//                                selected = lineHeightFactor == 1.5f,
-//                                onClick = { lineHeightFactor = 1.5f }
-//                            ) {
-//                                Box(
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentAlignment = Alignment.Center
-//                                ) {
-//                                    Text(text = "1.5")
-//                                }
-//                            }
-//
-//                            HubsFilterChip(
-//                                modifier = Modifier.weight(1f),
-//                                selected = lineHeightFactor == 1.75f,
-//                                onClick = { lineHeightFactor = 1.75f }
-//                            ) {
-//                                Box(
-//                                    modifier = Modifier.fillMaxSize(),
-//                                    contentAlignment = Alignment.Center
-//                                ) {
-//                                    Text(text = "1.75")
-//                                }
-//                            }
-//
-//                        }
-//                    }
-//                    Row(
-//                        modifier = Modifier
-//                            .fillMaxWidth()
-//                            .clip(RoundedCornerShape(8.dp))
-//                            .clickable {
-//                                justifyText = !justifyText
-//                            }
-//                            .padding(start = 4.dp),
-//                        verticalAlignment = Alignment.CenterVertically
-//                    ) {
-//                        Text(
-//                            modifier = Modifier
-//                                .weight(1f)
-//                                .padding(end = 4.dp),
-//                            text = "Выровнять текст по ширине экрана"
-//                        )
-//                        Checkbox(checked = justifyText, onCheckedChange = {
-//                            justifyText = it
-//                        })
-//                    }
 
+                    preferredLineHeightFactor?.let {
+                        val lineHeightFactors = remember {
+                            mapOf("1.3" to 1.3f, "1.5" to 1.5f, "1.7" to 1.7f)
+                        }
+                        SettingsCardItemPicker(
+                            title = "Межстрочный интервал",
+                            items = lineHeightFactors.keys.toList(),
+                            pickedItemIndex = lineHeightFactors.values.indexOf(preferredLineHeightFactor),
+                            onItemPicked = {
+                                lineHeightFactors.values.elementAtOrNull(it)?.let {
+                                    viewModel.setLineHeightFactor(context, it)
+                                }
+                            }
+                        )
+                    }
                 }
 
             }
-        }) {
+        }
+    ) {
 
         val googleFont = when (fontFamilyPreference) {
             "" -> null
@@ -442,7 +402,7 @@ fun ArticleScreenSettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val animatedLineHeightFactor by animateFloatAsState(targetValue = lineHeightFactor)
+            val animatedLineHeightFactor by animateFloatAsState(targetValue = preferredLineHeightFactor ?: 1.5f)
             val textAlign = remember(justifyText) {
                 if (justifyText)
                     TextAlign.Justify

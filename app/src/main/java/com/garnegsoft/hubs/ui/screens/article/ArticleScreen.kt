@@ -1,21 +1,10 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import android.content.ComponentName
-import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
-import android.os.Build
-import android.os.IBinder
-import android.speech.tts.TextToSpeech
-import android.speech.tts.TextToSpeechService
 import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.EaseInOutSine
 import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.EaseOutBack
-import androidx.compose.animation.core.EaseOutQuad
-import androidx.compose.animation.core.EaseOutQuint
 import androidx.compose.animation.core.Transition
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.animateDpAsState
@@ -47,24 +36,17 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
-import androidx.compose.ui.text.*
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
 import androidx.compose.ui.unit.*
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
 import com.garnegsoft.hubs.GoogleFontProvider
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
@@ -72,28 +54,16 @@ import com.garnegsoft.hubs.api.dataStore.HubsDataStore
 import com.garnegsoft.hubs.api.dataStore.LastReadArticleController
 import com.garnegsoft.hubs.api.dataStore.collectPreferenceAsState
 import com.garnegsoft.hubs.api.history.HistoryController
-import com.garnegsoft.hubs.api.tts.HubsTTSService
 import com.garnegsoft.hubs.api.tts.LocalMediaController
 import com.garnegsoft.hubs.api.tts.toArticleMetadata
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import kotlinx.coroutines.delay
-import com.garnegsoft.hubs.api.utils.formatLongNumbers
-import com.garnegsoft.hubs.api.utils.placeholderColorLegacy
-import com.garnegsoft.hubs.api.utils.formatTime
 import com.garnegsoft.hubs.ui.common.BaseMenuContainer
-import com.garnegsoft.hubs.ui.common.TitledColumn
-import com.garnegsoft.hubs.ui.common.HubChip
 import com.garnegsoft.hubs.ui.common.MenuItem
 import com.garnegsoft.hubs.ui.common.PlayerDialog
-import com.garnegsoft.hubs.ui.theme.RatingNegativeColor
-import com.garnegsoft.hubs.ui.theme.RatingPositiveColor
-import com.google.common.util.concurrent.MoreExecutors
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
-import java.util.concurrent.Executor
-import java.util.concurrent.Executors
 import kotlin.math.roundToInt
 
 
@@ -120,7 +90,7 @@ fun ArticleScreen(
     val fontSizePreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontSize)
     var fontSize by rememberSaveable { mutableStateOf<Float?>(null) }
 
-    val lineHeightPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.LineHeight)
+    val lineHeightPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.LineHeightFactor)
     var lineHeight by rememberSaveable { mutableStateOf<Float?>(null) }
     val fontFamilyPreference by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontFamily)
 

@@ -91,7 +91,7 @@ fun ArticleContent(
         val elementsSettings = remember {
             ElementSettings(
                 fontSize = fontSize,
-                lineHeight = 16.sp,
+                lineHeight = 1.5.em,
                 fitScreenWidth = false
             )
         }
