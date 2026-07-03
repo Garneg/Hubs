@@ -70,6 +70,7 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
+import com.garnegsoft.hubs.ui.screens.article.RenderHtml
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -650,25 +651,39 @@ fun CommentsScreen(
                                                                             lineHeight = 1.5.em
                                                                         )
                                                                     ) {
-                                                                        ((parseChildElements(
-                                                                            Jsoup.parse(it.message).body(),
+                                                                        val document = remember { Jsoup.parse(it.message) }
+                                                                        val textColor = MaterialTheme.colors.onSurface
+                                                                        val parsedHtml = remember { parseChildElements(
+                                                                            element = if (document.body().childrenSize() > 0) document.body() else document,
                                                                             SpanStyle(
                                                                                 fontSize = 16.sp,
-                                                                                color = MaterialTheme.colors.onSurface
+                                                                                color = textColor
                                                                             ),
                                                                             onViewImageRequest = onImageClick
-                                                                        ).second)?.let { it1 ->
-                                                                            it1.forEach {
-                                                                                it?.invoke(
-                                                                                    SpanStyle(
-                                                                                        fontSize = 16.sp,
-                                                                                        color = MaterialTheme.colors.onSurface
-                                                                                    ),
-                                                                                    elementsSettings
-                                                                                )
-                                                                            }
+                                                                        ) }
+                                                                        RenderHtml(html = it.message, elementSettings = elementsSettings, spanStyle =  SpanStyle(
+                                                                            fontSize = 16.sp,
+                                                                            color = textColor
+                                                                        ))
 
-                                                                        })
+//                                                                        parsedHtml.first?.let { annotatedText ->
+//                                                                            RenderHtml(html = it.message, elementSettings = elementsSettings, spanStyle =  SpanStyle(
+//                                                                                fontSize = 16.sp,
+//                                                                                color = textColor
+//                                                                            ))
+//                                                                        }
+//                                                                        parsedHtml.second.let { it1 ->
+//                                                                            it1.forEach {
+//                                                                                it?.invoke(
+//                                                                                    SpanStyle(
+//                                                                                        fontSize = 16.sp,
+//                                                                                        color = MaterialTheme.colors.onSurface
+//                                                                                    ),
+//                                                                                    elementsSettings
+//                                                                                )
+//                                                                            }
+//
+//                                                                        }
                                                                     }
                                                                 }
                                                             }
