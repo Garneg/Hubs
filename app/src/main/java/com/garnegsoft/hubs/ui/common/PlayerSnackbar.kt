@@ -116,7 +116,7 @@ fun PlayerSnackbar(
                         drawRoundRect(
                             color = progressIndicatorColor,
                             topLeft = Offset(x = 0f, y = size.height - (4 * density)),
-                            size = size.copy(size.width * progressState, height = 3 * density),
+                            size = size.copy((size.width * progressState).coerceAtLeast(3f * 2f * density), height = 3 * density),
                             cornerRadius = CornerRadius(3 * density, y = 3 * density)
                         )
                     },
