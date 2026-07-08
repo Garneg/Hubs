@@ -67,6 +67,7 @@ import com.garnegsoft.hubs.api.utils.checkAppCanOpenLinks
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.PlayerDialog
+import com.garnegsoft.hubs.ui.common.PlayerSnackbar
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
@@ -267,9 +268,9 @@ fun MainScreen(
                 article = null
             )
 
-            if (showPlaybackSnackElement) {
+            if (showPlaybackSnackElement && mediaController != null) {
 
-                Box(
+                PlayerSnackbar(
                     modifier = Modifier
                         .pointerInput(Unit) { }
                         .drawBehind {
@@ -277,88 +278,13 @@ fun MainScreen(
                                 brush = Brush.verticalGradient(0f to Color.Transparent, 1f to Color.Black.copy(0.33f)),
                             )
                         }
-                        .navigationBarsPadding()
-                        .padding(12.dp)
-                        .fillMaxWidth()
-                        .widthIn(max = 550.dp)
-                        .shadow(4.dp, shape = RoundedCornerShape(12.dp))
-                        .clip(RoundedCornerShape(8.dp))
-                        .clickable {
-//                            mediaController?.mediaMetadata?.extras?.getInt("articleId")?.let {
-//                                if (it != 0) {
-//                                    onArticleClicked(it)
-//                                }
-//                            }
-                            showPlayerDialog = true
-                        }
-                        .background(MaterialTheme.colors.surface.run {
-                            if (MaterialTheme.colors.isLight)
-                                copy(1f, red * 0.95f, green * 0.95f, blue * 0.95f)
-                            else
-                                copy(1f, red * 1.75f, green * 1.83f, blue * 1.9f)
-                        })
-                        .padding(8.dp),
-                ) {
-                    Row {
-                        AsyncImage(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .border(
-                                    width = 0.5.dp,
-                                    color = MaterialTheme.colors.onSurface.copy(0.1f),
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                                .clip(RoundedCornerShape(4.dp)),
-                            model = mediaController?.mediaMetadata?.artworkUri,
-                            contentDescription = "article artwork",
-                            contentScale = ContentScale.Crop,
-                            placeholder = painterResource(R.drawable.article)
-                        )
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                modifier = Modifier.basicMarquee(3),
-                                text = mediaController?.mediaMetadata?.title?.toString() ?: "Проигрывается статья",
-                                fontWeight = FontWeight.W700,
-                                maxLines = 1,
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = mediaController?.mediaMetadata?.artist?.toString() ?: "Неизвестный автор",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.W500,
-                                color = MaterialTheme.colors.onSurface.copy(0.5f)
-                            )
-                        }
-
-
-                        Spacer(modifier = Modifier.width(8.dp))
-
-                        IconButton(
-
-                            onClick = {
-                                playPauseButtonState.onClick()
-                            }
-                        ) {
-                            if (playPauseButtonState.showPlay) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = "play",
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.pause_icon),
-                                    contentDescription = "pause"
-                                )
-                            }
-                        }
+                        .navigationBarsPadding(),
+                    playPauseButtonState = playPauseButtonState,
+                    mediaController = mediaController,
+                    onClick = {
+                        showPlayerDialog = true
                     }
-                }
+                )
 
             } else {
                 SnackbarHost(

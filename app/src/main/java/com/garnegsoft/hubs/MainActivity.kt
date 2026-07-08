@@ -1,4 +1,4 @@
-package com.garnegsoft.hubs
+  package com.garnegsoft.hubs
 
 import android.content.ComponentName
 import android.content.Intent
@@ -62,6 +62,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         val stopwatch = Stopwatch.createStarted()
         super.onCreate(savedInstanceState)
+            // todo: remove before release
         Log.i("Runblocking", "after onCreate: " + stopwatch.elapsed(TimeUnit.MILLISECONDS).toString())
 
         enableEdgeToEdge()
