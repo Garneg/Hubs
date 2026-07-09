@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,12 +59,11 @@ import kotlinx.coroutines.flow.flow
 @Composable
 fun PlayerSnackbar(
     onClick: () -> Unit,
-    mediaController: MediaController,
+    mediaController: MediaController?,
     playPauseButtonState: PlayPauseButtonState,
     modifier: Modifier = Modifier,
+    additionalButton: @Composable (() -> Unit)? = null,
 ) {
-    mediaController.currentPosition / mediaController.duration
-
     Box(
         modifier = modifier
             .padding(12.dp)
@@ -98,13 +98,19 @@ fun PlayerSnackbar(
                 placeholder = painterResource(R.drawable.article)
             )
 
-            val progressState by remember { flow { while (true) { emit(mediaController.currentPosition.toFloat() / mediaController.duration.toFloat()); delay(1000)
-            } } }.collectAsState(0f)
+            val progressState by produceState(initialValue = mediaController?.run { currentPosition.toFloat() / duration.toFloat() } ?: 0f) {
+                while (true) {
+                    value = mediaController?.run { currentPosition.toFloat() / duration.toFloat() } ?: 0f
+                    delay(1000)
+                }
+            }
 
             Spacer(modifier = Modifier.width(8.dp))
             val progressIndicatorColor = MaterialTheme.colors.secondary.copy(0.7f)
             Column(
-                modifier = Modifier.weight(1f).fillMaxHeight()
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
                     .padding(top = 2.dp)
                     .drawBehind {
                         drawRoundRect(
@@ -116,7 +122,10 @@ fun PlayerSnackbar(
                         drawRoundRect(
                             color = progressIndicatorColor,
                             topLeft = Offset(x = 0f, y = size.height - (4 * density)),
-                            size = size.copy((size.width * progressState).coerceAtLeast(3f * 2f * density), height = 3 * density),
+                            size = size.copy(
+                                (size.width * progressState).coerceAtLeast(3f * 2f * density),
+                                height = 3 * density
+                            ),
                             cornerRadius = CornerRadius(3 * density, y = 3 * density)
                         )
                     },
@@ -142,8 +151,12 @@ fun PlayerSnackbar(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            IconButton(
+            additionalButton?.let {
+                it.invoke()
+                Spacer(modifier = Modifier.width(4.dp))
+            }
 
+            IconButton(
                 onClick = {
                     playPauseButtonState.onClick()
                 }

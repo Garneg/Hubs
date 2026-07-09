@@ -241,7 +241,7 @@ fun MainScreen(
                 mediaController?.addListener(
                     object : Player.Listener {
                         override fun onPlaybackStateChanged(playbackState: Int) {
-                            showPlaybackSnackElement = playbackState == Player.STATE_READY
+                            showPlaybackSnackElement = playbackState != Player.STATE_IDLE
                             super.onPlaybackStateChanged(playbackState)
                         }
                     }
@@ -268,7 +268,7 @@ fun MainScreen(
                 article = null
             )
 
-            if (showPlaybackSnackElement && mediaController != null) {
+            if (showPlaybackSnackElement) {
 
                 PlayerSnackbar(
                     modifier = Modifier
