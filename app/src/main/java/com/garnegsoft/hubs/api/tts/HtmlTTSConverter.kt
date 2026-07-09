@@ -39,6 +39,16 @@ class HtmlTTSConverter {
                             element.childrenSize() == 1 &&
                             element.child(0).className() == "table" ->
                         add("Таблица пропущена")
+                    element.tagName() == "summary" -> add("Спойлер пропущен")
+                    element.tagName() == "figure" && element.className() == "full-width" -> {
+                        val figcapture = element.children().toList().find { it.tagName() == "figcapture" }
+                        if (figcapture != null) {
+                            add("Изображение с подписью:  ${figcapture.text()}")
+                        } else {
+                            add("Изображение пропущено")
+                        }
+                    }
+
                 }
             }
             return chunks
