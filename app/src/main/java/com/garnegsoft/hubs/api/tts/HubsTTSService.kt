@@ -184,7 +184,9 @@ class HubsTTSService : MediaSessionService() {
             .setName("silent")
             .build()
 
-        val mediaItem = MediaItem.fromUri(Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.silent.toString()).build())
+        val mediaItem = MediaItem.fromUri(
+            Uri.Builder().scheme(ContentResolver.SCHEME_ANDROID_RESOURCE).path(R.raw.silent.toString()).build()
+        )
 
 
         val activityPendingIntent = PendingIntent.getActivity(
@@ -230,7 +232,6 @@ class HubsTTSService : MediaSessionService() {
                     }
 
 
-
                     override fun onCustomCommand(
                         session: MediaSession,
                         controller: MediaSession.ControllerInfo,
@@ -246,26 +247,28 @@ class HubsTTSService : MediaSessionService() {
                                     article?.let {
                                         val articleText = buildList {
                                             add(article.title)
+                                            addAll(HtmlTTSConverter().convert(Jsoup.parse(filterText(Jsoup.parse(article.contentHtml).html())).body()
+                                                .child(0)))
 
 
-
-                                            Jsoup.parse(filterText(Jsoup.parse(article.contentHtml).html())).body()
-                                                .child(0)
-                                                .children()
-                                                .forEach {
-                                                    when {
-                                                        it.tagName() == "p" -> add(it.text())
-                                                        it.tagName().startsWith("h") && it.tagName().length == 2 -> add(
-                                                            it.text()
-                                                        )
-
-                                                        it.tagName() == "ol" -> add(it.text())
-                                                        it.tagName() == "ul" -> add(it.text())
-                                                        it.tagName() == "blockquote" -> add("Цитата — " + it.text())
-                                                        it.tagName() == "div" && it.childrenSize() == 1 && it.child(0)
-                                                            .className() == "table" -> add("Таблица пропущена")
-                                                    }
-                                                }
+//                                            Jsoup.parse(filterText(Jsoup.parse(article.contentHtml).html())).body()
+//                                                .child(0)
+//                                                .children()
+//                                                .forEach {
+//                                                    when {
+//                                                        it.tagName() == "p" -> add(it.text())
+//                                                        it.tagName().startsWith("h") &&
+//                                                                it.tagName().length == 2 -> add(it.text())
+//
+//                                                        it.tagName() == "ol" -> add(it.text())
+//                                                        it.tagName() == "ul" -> add(it.text())
+//                                                        it.tagName() == "blockquote" -> add("Цитата — " + it.text())
+//                                                        it.tagName() == "div" &&
+//                                                                it.childrenSize() == 1 &&
+//                                                                it.child(0).className() == "table" ->
+//                                                                    add("Таблица пропущена")
+//                                                    }
+//                                                }
                                         }
                                         player?.loadChunks(articleText)
                                         player?.setMediaMetadata(

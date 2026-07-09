@@ -46,7 +46,9 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
+import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import com.garnegsoft.hubs.GoogleFontProvider
 import com.garnegsoft.hubs.R
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
@@ -61,11 +63,11 @@ import kotlinx.coroutines.delay
 import com.garnegsoft.hubs.ui.common.BaseMenuContainer
 import com.garnegsoft.hubs.ui.common.MenuItem
 import com.garnegsoft.hubs.ui.common.PlayerDialog
+import com.garnegsoft.hubs.ui.common.PlayerSnackbar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Dispatcher
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import kotlin.math.roundToInt
@@ -144,14 +146,14 @@ fun ArticleScreen(
         }
     }
 
-    var showTtsDialog by remember { mutableStateOf(false) }
+    var showPlayerDialog by remember { mutableStateOf(false) }
 //    TtsTestDialog(showTtsDialog, {showTtsDialog = false}, binder = ttsBinder, mediaController = LocalMediaController.current)
 
     val mediaController = LocalMediaController.current
     mediaController?.let {
         PlayerDialog(
-            show = showTtsDialog,
-            onDismissRequest = { showTtsDialog = false },
+            show = showPlayerDialog,
+            onDismissRequest = { showPlayerDialog = false },
             mediaController = mediaController,
             onTitleClick = {},
             onAuthorClick = { onAuthorClick(mediaController.mediaMetadata.toArticleMetadata().author)},
@@ -309,7 +311,7 @@ fun ArticleScreen(
                                             Icon(painterResource(id = R.drawable.headphones), contentDescription = "")
                                         },
                                         onClick = {
-                                            showTtsDialog = true
+                                            showPlayerDialog = true
                                             showMoreMenu = false
                                         }
                                     )
@@ -321,6 +323,29 @@ fun ArticleScreen(
                 })
         },
         backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
+        snackbarHost = {
+            val mediaController = LocalMediaController.current
+            var showPlayerSnackBar by remember { mutableStateOf(mediaController?.run { playbackState != Player.STATE_IDLE} ?: false) }
+            val playPauseButtonState = rememberPlayPauseButtonState(mediaController)
+
+            LaunchedEffect(mediaController) {
+                mediaController?.addListener(object : Player.Listener {
+                    override fun onPlaybackStateChanged(playbackState: Int) {
+                        showPlayerSnackBar = playbackState != Player.STATE_IDLE
+                        super.onPlaybackStateChanged(playbackState)
+                    }
+                })
+            }
+
+            if (showPlayerSnackBar) {
+                PlayerSnackbar(
+                    mediaController = mediaController,
+                    playPauseButtonState = playPauseButtonState,
+                    onClick = { showPlayerDialog = true }
+                )
+            }
+
+        },
         bottomBar = {
             article?.let { article ->
                 AnimatedVisibility(

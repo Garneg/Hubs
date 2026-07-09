@@ -1,6 +1,9 @@
 package com.garnegsoft.hubs.ui.common
 
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.border
@@ -43,6 +46,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -58,10 +62,11 @@ import kotlinx.coroutines.flow.flow
 @OptIn(UnstableApi::class)
 @Composable
 fun PlayerSnackbar(
-    onClick: () -> Unit,
     mediaController: MediaController?,
     playPauseButtonState: PlayPauseButtonState,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    elevation: Dp = 4.dp,
     additionalButton: @Composable (() -> Unit)? = null,
 ) {
     Box(
@@ -69,9 +74,11 @@ fun PlayerSnackbar(
             .padding(12.dp)
             .fillMaxWidth()
             .widthIn(max = 550.dp)
-            .shadow(4.dp, shape = RoundedCornerShape(12.dp))
+            .shadow(elevation, shape = RoundedCornerShape(12.dp))
             .clip(RoundedCornerShape(8.dp))
-            .clickable(onClick = onClick)
+            .clickable(enabled = onClick != null) {
+                onClick?.invoke()
+            }
             .background(MaterialTheme.colors.surface.run {
                 if (MaterialTheme.colors.isLight)
                     copy(1f, red * 0.95f, green * 0.95f, blue * 0.95f)
@@ -105,6 +112,8 @@ fun PlayerSnackbar(
                 }
             }
 
+            val animatedProgress by animateFloatAsState(progressState, animationSpec = tween(durationMillis = 2000, easing = EaseOut))
+
             Spacer(modifier = Modifier.width(8.dp))
             val progressIndicatorColor = MaterialTheme.colors.secondary.copy(0.7f)
             Column(
@@ -123,7 +132,7 @@ fun PlayerSnackbar(
                             color = progressIndicatorColor,
                             topLeft = Offset(x = 0f, y = size.height - (4 * density)),
                             size = size.copy(
-                                (size.width * progressState).coerceAtLeast(3f * 2f * density),
+                                (size.width * animatedProgress).coerceAtLeast(3f * 2f * density),
                                 height = 3 * density
                             ),
                             cornerRadius = CornerRadius(3 * density, y = 3 * density)
