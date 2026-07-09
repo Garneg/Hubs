@@ -22,9 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -78,7 +82,7 @@ fun SearchScreen(
     var copiedLinkSuggestSnippetDataIdentifier by rememberSaveable {
         mutableStateOf("")
     }
-
+    val surfaceColor = MaterialTheme.colors.surface
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -90,8 +94,9 @@ fun SearchScreen(
                         Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "")
                     }
                 })
-        }
+        },
     ) {
+
         Column(modifier = Modifier.padding(it)) {
             var searchTextValue by rememberSaveable { mutableStateOf("") }
             val queryIsUrlToHabr by remember {
@@ -248,211 +253,217 @@ fun SearchScreen(
                 )
             }
 
-    val pagerState = rememberPagerState { 4 }
-    if (showPages) {
-        val tabs = remember {
-            listOf(
-                "Публикации",
-                "Хабы",
-                "Компании",
-                "Пользователи"
-            )
-        }
-
-        HabrScrollableTabRow(
-            pagerState = pagerState, tabs = tabs
-        ) { index, title ->
-            when {
-                title.startsWith("Публикации") -> {
-                    articlesFilterContentState.show()
-                    ScrollUpMethods.scrollLazyList(articlesLazyListState)
-                }
-
-                title.startsWith("Хабы") -> {
-                    ScrollUpMethods.scrollLazyList(hubsLazyListState)
-                }
-
-                title.startsWith("Компании") -> {
-                    ScrollUpMethods.scrollLazyList(companiesLazyListState)
-                }
-
-                title.startsWith("Пользователи") -> {
-                    ScrollUpMethods.scrollLazyList(usersLazyListState)
-                }
-
-            }
-        }
-        HorizontalPager(state = pagerState) {
-            when (it) {
-                0 -> {
-
-                    ArticlesListPageWithFilter(
-                        listModel = viewModel.articlesListModel,
-                        lazyListState = articlesLazyListState,
-                        collapsingContentState = articlesFilterContentState,
-                        onArticleSnippetClick = onArticleClicked,
-                        onArticleAuthorClick = onUserClicked,
-                        onArticleCommentsClick = onCommentsClicked,
-                        doInitialLoading = false
-                    ) { defaultValues, onDismiss, onDone ->
-                        ArticlesSearchFilter(
-                            defaultValues = defaultValues,
-                            onDismiss = onDismiss,
-                            onDone = onDone
-                        )
-                    }
-
-                }
-
-                1 -> {
-                    val hubs by viewModel.hubs.observeAsState()
-                    if (hubs != null) {
-
-                        PagedHabrSnippetsColumn(
-                            modifier = Modifier.fillMaxHeight(),
-                            data = hubs!!,
-                            lazyListState = hubsLazyListState,
-                            contentPadding = PaddingValues(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalAlignment = Alignment.Start,
-                            onNextPageLoad = { viewModel.loadHubs(currentQuery, it) }
-                        ) {
-                            HubCard(hub = it, onClick = { onHubClicked(it.alias) })
-                        }
-                    }
-                    LaunchedEffect(key1 = currentQuery, block = {
-                        viewModel.loadHubs(currentQuery, 1)
-                    })
-                }
-
-                2 -> {
-                    val companies by viewModel.companies.observeAsState()
-
-                    if (companies != null) {
-                        PagedHabrSnippetsColumn(
-                            modifier = Modifier.fillMaxHeight(),
-                            data = companies!!,
-                            lazyListState = companiesLazyListState,
-                            onNextPageLoad = {
-                                viewModel.loadCompanies(currentQuery, it)
-                            }
-                        ) {
-                            CompanyCard(
-                                company = it,
-                                onClick = { onCompanyClicked(it.alias) })
-                        }
-
-                    }
-                    LaunchedEffect(key1 = currentQuery, block = {
-                        viewModel.loadCompanies(currentQuery, 1)
-                    })
-                }
-
-                3 -> {
-                    val users by viewModel.users.observeAsState()
-
-                    if (users != null) {
-                        PagedHabrSnippetsColumn(
-                            lazyListState = usersLazyListState,
-                            data = users!!,
-                            onNextPageLoad = {
-                                viewModel.loadUsers(currentQuery, it)
-                            }
-                        ) {
-                            UserCard(user = it, onClick = { onUserClicked(it.alias) })
-                        }
-                    }
-                    LaunchedEffect(key1 = currentQuery, block = {
-                        viewModel.loadUsers(currentQuery, 1)
-                    })
-
-                }
-
-            }
-        }
-
-    } else {
-
-
-        var firstCardHeight by remember() { mutableIntStateOf(0) }
-        BoxWithConstraints(
-            modifier = Modifier
-                .imePadding()
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-        ) {
-            Box {
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = showCopiedLinkSuggestSnippet,
-                    enter = slideInVertically { -it }
-                ) {
-                    ClipboardLinkSnippet(
-                        data = copiedLinkSuggestSnippetData,
-                        onClick = {
-                            copiedLinkSuggestSnippetData?.let { data ->
-                                when (copiedLinkSuggestSnippetData?.type) {
-                                    SearchUrlHandler.UrlDataType.Article -> onArticleClicked(
-                                        copiedLinkSuggestSnippetDataIdentifier.toInt()
-                                    )
-
-                                    SearchUrlHandler.UrlDataType.User -> onUserClicked(
-                                        copiedLinkSuggestSnippetDataIdentifier
-                                    )
-
-                                    SearchUrlHandler.UrlDataType.Hub -> onHubClicked(
-                                        copiedLinkSuggestSnippetDataIdentifier
-                                    )
-
-                                    SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(
-                                        copiedLinkSuggestSnippetDataIdentifier
-                                    )
-
-                                    else -> {}
-                                }
-                            }
-
-                        }
+            val pagerState = rememberPagerState { 4 }
+            if (showPages) {
+                val tabs = remember {
+                    listOf(
+                        "Публикации",
+                        "Хабы",
+                        "Компании",
+                        "Пользователи"
                     )
                 }
 
-            }
+                HabrScrollableTabRow(
+                    pagerState = pagerState, tabs = tabs
+                ) { index, title ->
+                    when {
+                        title.startsWith("Публикации") -> {
+                            articlesFilterContentState.show()
+                            ScrollUpMethods.scrollLazyList(articlesLazyListState)
+                        }
 
-            androidx.compose.animation.AnimatedVisibility(
-                visible = mostReadingArticles != null,
-                enter = slideInVertically { it / 2 }
-            ) {
-                Box(
-                    modifier = Modifier.padding(top = with(LocalDensity.current) {
-                        (this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp).coerceAtLeast(
-                            0.dp
-                        ) // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
-                    })
-                ) {
-                    TitledColumn(
-                        title = "Читают сейчас",
-                        titleStyle = MaterialTheme.typography.subtitle2.copy(
-                            color = MaterialTheme.colors.onBackground.copy(
-                                0.5f
-                            )
-                        ),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    ) {
-                        mostReadingArticles?.let { mostReading ->
-                            mostReading.forEachIndexed() { index, it ->
-                                Box(
-                                    modifier = if (index == 0) Modifier
-                                        .onGloballyPositioned {
-                                            firstCardHeight = it.size.height
-                                        } else Modifier
+                        title.startsWith("Хабы") -> {
+                            ScrollUpMethods.scrollLazyList(hubsLazyListState)
+                        }
+
+                        title.startsWith("Компании") -> {
+                            ScrollUpMethods.scrollLazyList(companiesLazyListState)
+                        }
+
+                        title.startsWith("Пользователи") -> {
+                            ScrollUpMethods.scrollLazyList(usersLazyListState)
+                        }
+
+                    }
+                }
+                HorizontalPager(state = pagerState) {
+                    when (it) {
+                        0 -> {
+
+                            ArticlesListPageWithFilter(
+                                listModel = viewModel.articlesListModel,
+                                lazyListState = articlesLazyListState,
+                                collapsingContentState = articlesFilterContentState,
+                                onArticleSnippetClick = onArticleClicked,
+                                onArticleAuthorClick = onUserClicked,
+                                onArticleCommentsClick = onCommentsClicked,
+                                doInitialLoading = false
+                            ) { defaultValues, onDismiss, onDone ->
+                                ArticlesSearchFilter(
+                                    defaultValues = defaultValues,
+                                    onDismiss = onDismiss,
+                                    onDone = onDone
+                                )
+                            }
+
+                        }
+
+                        1 -> {
+                            val hubs by viewModel.hubs.observeAsState()
+                            if (hubs != null) {
+
+                                PagedHabrSnippetsColumn(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    data = hubs!!,
+                                    lazyListState = hubsLazyListState,
+                                    contentPadding = PaddingValues(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                                    horizontalAlignment = Alignment.Start,
+                                    onNextPageLoad = { viewModel.loadHubs(currentQuery, it) }
                                 ) {
-                                    ArticleShort(
-                                        article = it,
-                                        onClick = {
-                                            onArticleClicked(it.id)
+                                    HubCard(hub = it, onClick = { onHubClicked(it.alias) })
+                                }
+                            }
+                            LaunchedEffect(key1 = currentQuery, block = {
+                                viewModel.loadHubs(currentQuery, 1)
+                            })
+                        }
+
+                        2 -> {
+                            val companies by viewModel.companies.observeAsState()
+
+                            if (companies != null) {
+                                PagedHabrSnippetsColumn(
+                                    modifier = Modifier.fillMaxHeight(),
+                                    data = companies!!,
+                                    lazyListState = companiesLazyListState,
+                                    onNextPageLoad = {
+                                        viewModel.loadCompanies(currentQuery, it)
+                                    }
+                                ) {
+                                    CompanyCard(
+                                        company = it,
+                                        onClick = { onCompanyClicked(it.alias) })
+                                }
+
+                            }
+                            LaunchedEffect(key1 = currentQuery, block = {
+                                viewModel.loadCompanies(currentQuery, 1)
+                            })
+                        }
+
+                        3 -> {
+                            val users by viewModel.users.observeAsState()
+
+                            if (users != null) {
+                                PagedHabrSnippetsColumn(
+                                    lazyListState = usersLazyListState,
+                                    data = users!!,
+                                    onNextPageLoad = {
+                                        viewModel.loadUsers(currentQuery, it)
+                                    }
+                                ) {
+                                    UserCard(user = it, onClick = { onUserClicked(it.alias) })
+                                }
+                            }
+                            LaunchedEffect(key1 = currentQuery, block = {
+                                viewModel.loadUsers(currentQuery, 1)
+                            })
+
+                        }
+
+                    }
+                }
+
+            } else {
+
+
+                var firstCardHeight by remember() { mutableIntStateOf(0) }
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .imePadding()
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 12.dp)
+                ) {
+                    Box {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = showCopiedLinkSuggestSnippet,
+                            enter = slideInVertically { -it }
+                        ) {
+                            ClipboardLinkSnippet(
+                                data = copiedLinkSuggestSnippetData,
+                                onClick = {
+                                    copiedLinkSuggestSnippetData?.let { data ->
+                                        when (copiedLinkSuggestSnippetData?.type) {
+                                            SearchUrlHandler.UrlDataType.Article -> onArticleClicked(
+                                                copiedLinkSuggestSnippetDataIdentifier.toInt()
+                                            )
+
+                                            SearchUrlHandler.UrlDataType.User -> onUserClicked(
+                                                copiedLinkSuggestSnippetDataIdentifier
+                                            )
+
+                                            SearchUrlHandler.UrlDataType.Hub -> onHubClicked(
+                                                copiedLinkSuggestSnippetDataIdentifier
+                                            )
+
+                                            SearchUrlHandler.UrlDataType.Company -> onCompanyClicked(
+                                                copiedLinkSuggestSnippetDataIdentifier
+                                            )
+
+                                            else -> {}
                                         }
+                                    }
+
+                                }
+                            )
+                        }
+
+                    }
+
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = mostReadingArticles != null,
+                        enter = slideInVertically { it / 2 }
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(top = with(LocalDensity.current) {
+                                (this@BoxWithConstraints.minHeight - firstCardHeight.toDp() - 8.dp - 12.dp - 26.dp - WindowInsets.navigationBars.getBottom(
+                                    this
+                                ).toDp()).coerceAtLeast(
+                                    0.dp
+                                ) // these values are paddings for arrangement(8.dp), top of card(12.dp), and size of title(~26.dp)
+                            })
+                        ) {
+                            TitledColumn(
+                                title = "Читают сейчас",
+                                titleStyle = MaterialTheme.typography.subtitle2.copy(
+                                    color = MaterialTheme.colors.onBackground.copy(
+                                        0.5f
                                     )
+                                ),
+                                verticalArrangement = Arrangement.spacedBy(8.dp),
+                                modifier = Modifier
+                                    .padding(bottom = 16.dp)
+                                    .navigationBarsPadding()
+                            ) {
+                                mostReadingArticles?.let { mostReading ->
+                                    mostReading.forEachIndexed() { index, it ->
+                                        Box(
+                                            modifier = if (index == 0) Modifier
+                                                .onGloballyPositioned {
+                                                    firstCardHeight = it.size.height
+                                                } else Modifier
+                                        ) {
+                                            ArticleShort(
+                                                article = it,
+                                                onClick = {
+                                                    onArticleClicked(it.id)
+                                                }
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -460,9 +471,18 @@ fun SearchScreen(
                 }
             }
         }
-    }
-}
+        Box(modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomStart) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding() + 16.dp)
+                    .drawBehind {
+                        drawRect(brush = Brush.linearGradient(listOf(surfaceColor.copy(0.1f), surfaceColor), end = Offset(0f, size.height)))
+                    },
+            )
+        }
 
-}
+    }
 
 }
