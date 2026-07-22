@@ -1,3 +1,5 @@
+package com.garnegsoft.hubs.api.article
+
 import com.garnegsoft.hubs.api.*
 import com.garnegsoft.hubs.api.article.list.ArticleSnippet
 import com.garnegsoft.hubs.api.article.offline.HubsList
@@ -75,18 +77,18 @@ class ArticleController {
                     hubs = HubsList(it.hubs.map { it.title }),
                     readingTime = it.readingTime,
                     isTranslation = it.postLabels?.find { it.type == "translation" } != null,
-                    thumbnailUrl = if (
-                        it.leadData.imageUrl == null &&
-                        it.leadData.textHtml.contains("<img")
+                    thumbnailUrl = it.leadData?.let { if (
+                        it.imageUrl == null &&
+                        it.textHtml.contains("<img")
                     ) {
-                        Jsoup.parse(it.leadData.textHtml)
+                        Jsoup.parse(it.textHtml)
                             .getElementsByTag("img")[0]?.attr("src")
-                    } else if (it.leadData.imageUrl == null && it.leadData.image?.url != null) {
-                        it.leadData.image?.url
+                    } else if (it.imageUrl == null && it.image?.url != null) {
+                        it.image?.url
                     } else {
-                        it.leadData.imageUrl
-                    },
-                    textSnippet = it.leadData.textHtml
+                        it.imageUrl
+                    } },
+                    textSnippet = it.leadData?.textHtml ?: ""
                 )
             }
         }
@@ -109,7 +111,7 @@ class ArticleController {
 
             return raw?.let {
                 val it = articleFormat(it)
-                com.garnegsoft.hubs.api.article.Article(
+                Article(
                     id = it.id.toInt(),
                     title = Jsoup.parse(it.titleHtml).text(),
                     timePublished = it.timePublished,
@@ -226,19 +228,19 @@ class ArticleController {
                         votesCountMinus = formatted.statistics.votesCountMinus,
                         votesCountPlus = formatted.statistics.votesCountPlus
                     ),
-                    imageUrl = if (
-                        formatted.leadData.imageUrl == null &&
-                        formatted.leadData.textHtml.contains("<img")
+                    imageUrl = formatted.leadData?.let { leadData ->  if (
+                        leadData.imageUrl == null &&
+                        leadData.textHtml.contains("<img")
                     ) {
-                        Jsoup.parse(formatted.leadData.textHtml)
+                        Jsoup.parse(leadData.textHtml)
                             .getElementsByTag("img")[0]?.attr("src")
-                    } else if (formatted.leadData.imageUrl == null && formatted.leadData.image?.url != null) {
-                        formatted.leadData.image?.url
+                    } else if (leadData.imageUrl == null && leadData.image?.url != null) {
+                        leadData.image?.url
                     } else {
-                        formatted.leadData.imageUrl
-                    },
+                        leadData.imageUrl
+                    }},
                     format = formatted.format?.let { ArticleFormat.fromString(formatted.format!!) },
-                    textSnippet = formatted.leadData.textHtml,
+                    textSnippet = formatted.leadData?.textHtml ?: "",
                     hubs = formatted.hubs.map {
                         com.garnegsoft.hubs.api.article.Article.Hub(
                             alias = it.alias,
@@ -368,7 +370,7 @@ class ArticleController {
         var isCorporative: Boolean,
         var lang: String,
         var titleHtml: String,
-        var leadData: ArticleLeadData,
+        var leadData: ArticleLeadData? = null,
         var editorVersion: String,
         var postType: String,
         var postLabels: List<ArticlePostLabel>? = null,

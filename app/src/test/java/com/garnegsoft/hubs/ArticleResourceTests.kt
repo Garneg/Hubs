@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import com.garnegsoft.hubs.api.HabrApi
 import okhttp3.OkHttpClient
 import org.jsoup.Jsoup
