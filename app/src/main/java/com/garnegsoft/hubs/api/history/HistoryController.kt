@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.api.history
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

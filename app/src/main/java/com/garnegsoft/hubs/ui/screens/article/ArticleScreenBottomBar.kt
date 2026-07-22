@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource

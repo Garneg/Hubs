@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.article
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import ArticlesListController
 import android.content.Context
 import android.util.Log

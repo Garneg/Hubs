@@ -1,6 +1,5 @@
 package com.garnegsoft.hubs.api.article
 
-import ArticleController
 import ArticlesListController
 import com.garnegsoft.hubs.api.Filter
 import com.garnegsoft.hubs.api.HabrList

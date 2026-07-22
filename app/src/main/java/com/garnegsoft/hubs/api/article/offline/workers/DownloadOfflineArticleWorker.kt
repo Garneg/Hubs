@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.api.article.offline.workers
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
