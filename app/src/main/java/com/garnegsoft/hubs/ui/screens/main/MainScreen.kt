@@ -1,7 +1,7 @@
 package com.garnegsoft.hubs.ui.screens.main
 
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import android.content.Context
 import android.net.ConnectivityManager
 import androidx.compose.foundation.ExperimentalFoundationApi

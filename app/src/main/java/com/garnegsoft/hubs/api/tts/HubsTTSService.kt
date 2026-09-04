@@ -1,5 +1,6 @@
 package com.garnegsoft.hubs.api.tts
 
+import com.garnegsoft.hubs.api.article.ArticleController
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent

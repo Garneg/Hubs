@@ -1,6 +1,6 @@
 package com.garnegsoft.hubs.ui.screens.comments
 
-import ArticleController
+import com.garnegsoft.hubs.api.article.ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
  import androidx.compose.animation.animateColorAsState
