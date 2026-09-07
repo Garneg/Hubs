@@ -69,9 +69,7 @@ fun CommentCard(
                     top = style.padding.calculateTopPadding(),
                     start = style.padding.calculateStartPadding(LayoutDirection.Ltr),
                     end = style.padding.calculateEndPadding(LayoutDirection.Ltr),
-                    bottom = style.padding
-                        .calculateBottomPadding()
-                        .div(2)
+                    bottom = style.padding.calculateBottomPadding() / 1.5f
                 )
         ) {
             Text(
@@ -86,11 +84,9 @@ fun CommentCard(
         Column(
             modifier = Modifier
                 .padding(
-                    top = style.padding
-                        .calculateTopPadding()
-                        .div(2),
+                    top = style.padding.calculateTopPadding() / 1.5f,
                     start = style.padding.calculateStartPadding(LayoutDirection.Ltr),
-                    bottom = style.padding.calculateBottomPadding(),
+                    bottom = style.padding.calculateBottomPadding() - 12.dp,
                     end = style.padding.calculateEndPadding(LayoutDirection.Ltr)
                 )
         ) {
@@ -163,7 +159,6 @@ fun CommentCard(
             Spacer(modifier = Modifier.height(style.padding.calculateBottomPadding()))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(
-                    modifier = Modifier.padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
