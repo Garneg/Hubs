@@ -3,7 +3,7 @@ package com.garnegsoft.hubs.ui.screens.comments
 import com.garnegsoft.hubs.api.article.ArticleController
 import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
- import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.RepeatMode
@@ -210,7 +210,13 @@ fun CommentsScreen(
                     var commentsCountSize by remember { mutableStateOf(IntSize.Zero) }
                     val transition = updateTransition(viewModel.parentArticleSnippet.isInitialized)
                     val commentsCountOffset by transition.animateFloat(
-                        transitionSpec = { tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad) }
+                        transitionSpec = {
+                            tween(
+                                durationMillis = 300,
+                                delayMillis = 100,
+                                easing = EaseOutQuad
+                            )
+                        }
                     ) {
                         if (it) {
                             0f
@@ -220,14 +226,19 @@ fun CommentsScreen(
                     }
                     val commentsCountAlpha by animateFloatAsState(
                         if (viewModel.parentArticleSnippet.isInitialized) 1f else 0f,
-                        animationSpec = tween(durationMillis = 300, delayMillis = 100, easing = EaseOutQuad)
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            delayMillis = 100,
+                            easing = EaseOutQuad
+                        )
                     )
                     viewModel.parentArticleSnippet.value?.let {
                         Text(
                             modifier = Modifier
                                 .graphicsLayer {
                                     alpha = commentsCountAlpha
-                                    translationX = commentsCountOffset * commentsCountSize.width.toFloat()
+                                    translationX =
+                                        commentsCountOffset * commentsCountSize.width.toFloat()
                                 }
                                 .onPlaced {
                                     commentsCountSize = it.size
@@ -415,7 +426,12 @@ fun CommentsScreen(
                                 enter = fadeIn(tween(durationMillis = 250, easing = EaseInCubic)),
                                 exit = fadeOut()
                             ) {
-                                Box(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                                Box(
+                                    modifier = Modifier.padding(
+                                        horizontal = 8.dp,
+                                        vertical = 4.dp
+                                    )
+                                ) {
 
 
                                     articleSnippet?.let {
@@ -454,9 +470,10 @@ fun CommentsScreen(
                                 items = commentsData?.pinnedComments ?: emptyList(),
                             ) { index, commentId ->
                                 val comment = commentsData!!.comments.find { it.id == commentId }!!
-                                Box(modifier = Modifier
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                                    .animateItem()
+                                Box(
+                                    modifier = Modifier
+                                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                                        .animateItem()
                                 ) {
 
 
@@ -487,7 +504,8 @@ fun CommentsScreen(
                                                 lazyListState.animateScrollToItem(
                                                     commentsData!!.comments.indexOf(
                                                         comment
-                                                    ) + itemOffsetCount, (-articleHeaderOffset).toInt()
+                                                    ) + itemOffsetCount,
+                                                    (-articleHeaderOffset).toInt()
                                                 )
                                             }
                                         },
@@ -503,7 +521,8 @@ fun CommentsScreen(
                                                 SelectionContainer {
                                                     Column {
                                                         ((parseChildElements(
-                                                            Jsoup.parse(comment.message).body(), SpanStyle(
+                                                            Jsoup.parse(comment.message).body(),
+                                                            SpanStyle(
                                                                 fontSize = 16.sp,
                                                                 color = MaterialTheme.colors.onSurface
                                                             ),
@@ -560,7 +579,11 @@ fun CommentsScreen(
                                         if (screenState.collapsedCommentsParents.contains(comment.id)) {
                                             CollapsedThreadHeaderComment(
                                                 modifier = Modifier
-                                                    .padding(start = 20.dp * comment.level.coerceAtMost(5)),
+                                                    .padding(
+                                                        start = 20.dp * comment.level.coerceAtMost(
+                                                            5
+                                                        )
+                                                    ),
                                                 onExpandClick = { screenState.expandThread(comment.id) },
                                                 comment = comment
                                             )
@@ -587,7 +610,9 @@ fun CommentsScreen(
                                                     CommentItem(
                                                         modifier = Modifier
                                                             .padding(
-                                                                start = 20.dp * comment.level.coerceAtMost(5)
+                                                                start = 20.dp * comment.level.coerceAtMost(
+                                                                    5
+                                                                )
                                                             ),
                                                         comment = comment,
                                                         onAuthorClick = { onUserClicked(comment.author.alias) },
@@ -597,7 +622,9 @@ fun CommentsScreen(
                                                         menu = {
                                                             CommentItemMenu(
                                                                 onCollapseCommentClick = {
-                                                                    screenState.collapseComment(comment.id)
+                                                                    screenState.collapseComment(
+                                                                        comment.id
+                                                                    )
                                                                     showMenu = false
                                                                 },
                                                                 onCollapseThreadClick = {
@@ -651,20 +678,33 @@ fun CommentsScreen(
                                                                             lineHeight = 1.5.em
                                                                         )
                                                                     ) {
-                                                                        val document = remember { Jsoup.parse(it.message) }
-                                                                        val textColor = MaterialTheme.colors.onSurface
-                                                                        val parsedHtml = remember { parseChildElements(
-                                                                            element = if (document.body().childrenSize() > 0) document.body() else document,
-                                                                            SpanStyle(
+                                                                        val document = remember {
+                                                                            Jsoup.parse(it.message)
+                                                                        }
+                                                                        val textColor =
+                                                                            MaterialTheme.colors.onSurface
+                                                                        val parsedHtml = remember {
+                                                                            parseChildElements(
+                                                                                element = if (document.body()
+                                                                                        .childrenSize() > 0
+                                                                                ) document.body() else document,
+                                                                                SpanStyle(
+                                                                                    fontSize = 16.sp,
+                                                                                    color = textColor
+                                                                                ),
+                                                                                onViewImageRequest = onImageClick
+                                                                            )
+                                                                        }
+                                                                        RenderHtml(
+                                                                            html = it.message,
+                                                                            elementSettings = elementsSettings,
+                                                                            spanStyle = SpanStyle(
                                                                                 fontSize = 16.sp,
-                                                                                color = textColor
-                                                                            ),
+                                                                                color = textColor,
+
+                                                                                ),
                                                                             onViewImageRequest = onImageClick
-                                                                        ) }
-                                                                        RenderHtml(html = it.message, elementSettings = elementsSettings, spanStyle =  SpanStyle(
-                                                                            fontSize = 16.sp,
-                                                                            color = textColor
-                                                                        ))
+                                                                        )
 
 //                                                                        parsedHtml.first?.let { annotatedText ->
 //                                                                            RenderHtml(html = it.message, elementSettings = elementsSettings, spanStyle =  SpanStyle(

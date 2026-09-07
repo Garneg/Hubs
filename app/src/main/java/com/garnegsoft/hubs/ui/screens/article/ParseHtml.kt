@@ -73,7 +73,8 @@ fun RenderHtml(
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.body1.fontSize
         ),
-    elementSettings: ElementSettings
+    elementSettings: ElementSettings,
+    onViewImageRequest: ((imageUrl: String) -> Unit)? = null
 ) {
 //	val preferredLineHeight by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.LineHeightFactor)
     // TODO: Make it read line height preference from datastore
@@ -81,7 +82,8 @@ fun RenderHtml(
     val parsedHtml = remember {
         parseElement(
             html = html,
-            spanStyle = spanStyle
+            spanStyle = spanStyle,
+            onViewImageRequest
         )
     }
     val context = LocalContext.current
