@@ -14,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
-class MostReadingWidget : GlanceAppWidget() {
+class  MostReadingWidget : GlanceAppWidget() {
 	var articles: List<Pair<String, Int>> = emptyList()
 	override suspend fun provideGlance(context: Context, id: GlanceId) {
 		Log.i("most_reading_widget", "Articles before update: ${articles.size}")

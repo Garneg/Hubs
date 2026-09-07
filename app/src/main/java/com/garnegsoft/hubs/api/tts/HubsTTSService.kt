@@ -95,10 +95,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.withContext
 import org.jsoup.Jsoup
-import java.io.FileDescriptor
-import java.util.Date
-import java.util.Locale
-import java.util.concurrent.FutureTask
 
 
 data object TTSServiceCommands {

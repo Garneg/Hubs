@@ -20,7 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.garnegsoft.hubs.api.history.HistoryDatabase
 import com.garnegsoft.hubs.api.history.HistoryEntityListModel
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
-
+import com.garnegsoft.hubs.ui.common.feedBottomGradient
 
 
 class HistoryScreenViewModel(context: Context) : ViewModel() {
@@ -55,7 +55,7 @@ fun HistoryScreen(
 			)
 		}
 	) {
-		Box(modifier = Modifier.padding(it)) {
+		Box(modifier = Modifier.padding(it).feedBottomGradient()) {
 			HistoryLazyColumn(model = viewModel.model, onArticleClick = onArticleClick)
 		}
 	}

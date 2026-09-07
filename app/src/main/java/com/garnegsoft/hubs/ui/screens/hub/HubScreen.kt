@@ -30,6 +30,7 @@ import com.garnegsoft.hubs.api.hub.HubController
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
+import com.garnegsoft.hubs.ui.common.feedBottomGradient
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.UsersListPage
@@ -107,7 +108,10 @@ fun HubScreen(
                 }
             }
             val hub by viewModel.hub.observeAsState()
-            HorizontalPager(state = pagerState) {
+            HorizontalPager(
+                modifier = Modifier.feedBottomGradient(),
+                state = pagerState
+            ) {
                 when (it) {
                     0 -> {
                         HubProfile(

@@ -35,6 +35,7 @@ import com.garnegsoft.hubs.api.utils.formatLongNumbers
 import com.garnegsoft.hubs.ui.common.HabrScrollableTabRow
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
+import com.garnegsoft.hubs.ui.common.feedBottomGradient
 import com.garnegsoft.hubs.ui.common.feedCards.comment.CommentCard
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CommentsListPage
@@ -334,6 +335,7 @@ fun UserScreen(
                 }
 
                 HorizontalPager(
+                    modifier = Modifier.feedBottomGradient(),
                     state = pagerState
                 ) { pageIndex ->
                     pagesMap.values

@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -39,7 +40,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -47,6 +50,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelStoreOwner
@@ -69,6 +73,7 @@ import com.garnegsoft.hubs.ui.common.HubsTopAppBar
 import com.garnegsoft.hubs.ui.common.PlayerDialog
 import com.garnegsoft.hubs.ui.common.PlayerSnackbar
 import com.garnegsoft.hubs.ui.common.ScrollUpMethods
+import com.garnegsoft.hubs.ui.common.feedBottomGradient
 import com.garnegsoft.hubs.ui.common.snippetsPages.ArticlesListPageWithFilter
 import com.garnegsoft.hubs.ui.common.snippetsPages.CompaniesListPage
 import com.garnegsoft.hubs.ui.common.snippetsPages.HubsListPage
@@ -296,6 +301,7 @@ fun MainScreen(
             }
         }
     ) {
+
         if (isAuthorized != null)
             Column(
                 Modifier
@@ -303,6 +309,7 @@ fun MainScreen(
                     .padding(
                         WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal).asPaddingValues(),
                     )
+                    .feedBottomGradient()
             ) {
 
                 val myFeedLazyListState = rememberLazyListState()

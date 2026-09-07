@@ -287,7 +287,10 @@ fun SearchScreen(
 
                     }
                 }
-                HorizontalPager(state = pagerState) {
+                HorizontalPager(
+                    modifier = Modifier.feedBottomGradient(),
+                    state = pagerState
+                ) {
                     when (it) {
                         0 -> {
 

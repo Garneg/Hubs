@@ -59,42 +59,42 @@ fun HubProfile(
 
     RefreshableContainer(onRefresh = viewModel::refresh, refreshing = refreshing) {
         hub?.let { hub ->
-        Column(
-            modifier = Modifier
-				.graphicsLayer {
-					alpha = hubAlphaAnimated
-					translationY = hubOffsetAnimated.toPx()
-				}
-				.fillMaxSize()
-				.verticalScroll(scrollState)
-				.navigationBarsPadding()
-				.padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+            Column(
+                modifier = Modifier
+                    .graphicsLayer {
+                        alpha = hubAlphaAnimated
+                        translationY = hubOffsetAnimated.toPx()
+                    }
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .navigationBarsPadding()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
 
                 Column(
                     modifier = Modifier
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(26.dp))
-						.background(MaterialTheme.colors.surface)
-						.padding(12.dp),
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(MaterialTheme.colors.surface)
+                        .padding(12.dp),
                 ) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier
-							.fillMaxWidth()
-							.padding(bottom = 12.dp)
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
                     ) {
                         if (hub.avatarUrl != null) {
-                        AsyncImage(
-                            modifier = Modifier
-								.padding(top = 12.dp)
-								.size(65.dp)
-								.clip(RoundedCornerShape(12.dp))
-								.background(Color.White),
-                            model = hub.avatarUrl,
-                            contentDescription = ""
-                        )
+                            AsyncImage(
+                                modifier = Modifier
+                                    .padding(top = 12.dp)
+                                    .size(65.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White),
+                                model = hub.avatarUrl,
+                                contentDescription = ""
+                            )
                         } else {
                             Box {
                                 Icon(
@@ -139,15 +139,15 @@ fun HubProfile(
                         color = MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
                         text = hub.description,
                         modifier = Modifier
-							.fillMaxWidth()
-							.padding(8.dp),
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         textAlign = TextAlign.Center
                     )
 
                     Row(
                         modifier = Modifier
-							.fillMaxWidth()
-							.padding(8.dp),
+                            .fillMaxWidth()
+                            .padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
                         Column(
@@ -189,20 +189,26 @@ fun HubProfile(
 
                 Column(
                     modifier = Modifier
-						.fillMaxWidth()
-						.clip(RoundedCornerShape(26.dp))
-						.background(MaterialTheme.colors.surface)
-						.padding(8.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(MaterialTheme.colors.surface)
+                        .padding(8.dp)
                 ) {
 
-                    BasicTitledColumn(title = {
-                        Text(
-                            modifier = Modifier.padding(12.dp),
-                            text = "Статистика", style = MaterialTheme.typography.subtitle1
-                        )
-                    }, divider = {
+                    BasicTitledColumn(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                alpha = hubAlphaAnimated
+                                translationY = hubOffsetAnimated.toPx()
+                            },
+                        title = {
+                            Text(
+                                modifier = Modifier.padding(12.dp),
+                                text = "Статистика", style = MaterialTheme.typography.subtitle1
+                            )
+                        }, divider = {
 //                    Divider()
-                    }) {
+                        }) {
                         Column(
                             modifier = Modifier.padding(
                                 start = 12.dp,
