@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -13,8 +14,14 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -61,6 +68,7 @@ fun ArticleCard(
 			)
 			.background(configuration.backgroundColor)
 	) {
+
 		val authorInteractionSource = remember { MutableInteractionSource() }
 		//Author and published time
 		Row(
@@ -71,30 +79,36 @@ fun ArticleCard(
 					indication = null,
 					onClick = onAuthorClick
 				)
-				.absolutePadding(
-					left = configuration.innerPadding,
-					top = configuration.innerPadding,
-					right = configuration.innerPadding
+				.padding(
+					start = configuration.innerPadding / 2,
+					top = configuration.innerPadding / 2,
+					end = configuration.innerPadding
 				)
 		) {
 			Row(
 				modifier = Modifier
-					.height(configuration.authorAvatarSize)
+
 					.weight(1f)
 			) {
 				cardData.author?.let {
 					Row(
 						verticalAlignment = Alignment.CenterVertically,
 						modifier = Modifier
-							.clip(configuration.innerElementsShape)
+							.clip(RoundedCornerShape(18.dp))
 							.clickable(
 								onClick = onAuthorClick
+							)
+							.padding(
+								top = configuration.innerPadding / 2,
+								start = configuration.innerPadding / 2,
+								bottom = configuration.innerPadding / 2,
 							)
 					) {
 						
 						AsyncImage(
 							modifier = Modifier
 								.size(configuration.authorAvatarSize)
+
 								.clip(configuration.innerElementsShape)
 								// I set shape here because it works better and white rounded corners are
 								// less visible. Although, it's still noticeable :(
@@ -105,7 +119,7 @@ fun ArticleCard(
 							model = it.avatarUrl,
 							contentDescription = "avatar",
 							onState = { })
-						
+
 						Spacer(modifier = Modifier.width(8.dp))
 						Text(
 							modifier = Modifier.weight(1f),
@@ -129,7 +143,7 @@ fun ArticleCard(
 			)
 		}
 		
-		Spacer(modifier = Modifier.height(configuration.innerPadding / 2))
+//		Spacer(modifier = Modifier.height(4.dp))
 		// Title
 		Text(
 			modifier = Modifier.padding(horizontal = configuration.innerPadding),
@@ -223,24 +237,50 @@ fun ArticleCard(
 				style = configuration.snippetTextStyle
 			)
 		}
+
 		// Image to draw attention (a.k.a. KDPV)
 		if (configuration.showImage && !cardData.articleImageUrl.isNullOrBlank()) {
-			Spacer(modifier = Modifier.height(6.dp))
-			AsyncImage(
-				modifier = Modifier
-					.padding(horizontal = configuration.innerPadding)
-					.fillMaxWidth()
-					.clip(configuration.innerElementsShape)
-					.aspectRatio(1.8f)
-					.background(MaterialTheme.colors.onSurface.copy(0.1f)),
-				model = ImageRequest.Builder(LocalContext.current)
-					.crossfade(true)
-					.data(cardData.articleImageUrl).build(),
-				contentScale = ContentScale.Crop,
-				contentDescription = "",
-			)
-			
+			Spacer(modifier = Modifier.height(configuration.innerPadding - 10.dp))
+			Box(modifier = Modifier
+				.padding(horizontal = configuration.innerPadding - 2.dp)
+				.fillMaxWidth()
+				.clip(RoundedCornerShape(14.dp))
+			) {
+				AsyncImage(
+					modifier = Modifier
+						.aspectRatio(1.8f)
+						.background(MaterialTheme.colors.onSurface.copy(0.1f)),
+					model = ImageRequest.Builder(LocalContext.current)
+						.crossfade(true)
+						.data(cardData.articleImageUrl).build(),
+					contentScale = ContentScale.Crop,
+					contentDescription = "",
+				)
+//				Box(modifier = Modifier.matchParentSize().blur(12.dp).drawBehind {
+//					this.withTransform(
+//						transformBlock = {
+//							this.scale(size.width / size.height, 1f, pivot = Offset.Zero)
+//						}
+//					) {
+//						drawRect(
+//							brush = Brush.radialGradient(listOf(Color.Black.copy(0f), Color.Black.copy(0.5f)), center = Offset.Zero, radius = size.height),
+//							size = Size(size.height, size.height)
+//						)
+//					}
+//					drawRect(
+//						brush = Brush.linearGradient(listOf(Color.Black.copy(0.0f), Color.Black.copy(0.5f)), end = Offset(0f, size.height))
+//					)
+//				})
+//				Text(
+//					modifier = Modifier.padding(12.dp).align(Alignment.BottomStart),
+//					text = cardData.articleTitle,
+//					color = Color.White,
+//					style = configuration.titleTextStyle,
+//				)
+			}
+
 		}
+
 		var addedToBookmarks by remember {
 			mutableStateOf(cardData.articleBookmarked)
 		}
