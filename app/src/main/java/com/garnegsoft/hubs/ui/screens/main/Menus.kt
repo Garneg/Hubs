@@ -96,7 +96,7 @@ fun AuthorizedMenu(
     }
 
     val roundedCornersRadiusAnimatedValue by menuTransition.animateDp {
-        if (it) 12.dp else 48.dp
+        if (it) 12.dp else 24.dp
     }
 
     if (menuTransition.targetState || expanded || menuTransition.currentState) {
@@ -108,8 +108,8 @@ fun AuthorizedMenu(
                     layoutDirection: LayoutDirection,
                     popupContentSize: IntSize
                 ): IntOffset {
-                    val shit = anchorBounds.right
-                    return IntOffset(shit - popupContentSize.width, anchorBounds.bottom)
+                    val rightSide = anchorBounds.right
+                    return IntOffset(rightSide - popupContentSize.width, anchorBounds.bottom)
                 }
 
             },
