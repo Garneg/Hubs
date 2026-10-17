@@ -16,14 +16,14 @@ static def getDate() {
 
 android {
     namespace "com.garnegsoft.hubs"
-    compileSdk 35
+    compileSdk 36
 
     defaultConfig {
         applicationId "com.garnegsoft.hubs"
         minSdk 23
-        targetSdk 34
-        versionCode 18
-        versionName "2.7.1"
+        targetSdk 36
+        versionCode 19
+        versionName "2.7.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -28,8 +28,8 @@ class CompanyController {
                 result.settings.branding?.imageUrl?.let {
                     result.settings.branding?.imageUrl = "https:$it"
                 }
-                result.registrationDate =
-                    result.registrationDate?.let { it1 -> formatTime(it1).split(' ').run { "${this[0]} ${this[1]} ${this[2]}" } }
+                result.habrRegistrationDate =
+                    result.habrRegistrationDate?.let { it1 -> formatTime(it1).split(' ').run { "${this[0]} ${this[1]} ${this[2]}" } }
                 result.descriptionHtml?.let { it1 -> result.descriptionHtml = Jsoup.parse(it1).text() }
                 return result
             }
@@ -45,7 +45,7 @@ class CompanyController {
                     avatarUrl = it.imageUrl,
                     title = it.titleHtml,
                     description = it.descriptionHtml,
-                    registrationDate = it.registrationDate,
+                    registrationDate = it.habrRegistrationDate,
                     foundationDate = it.foundationDate?.run { formatFoundationDate(day, month, year) },
                     siteUrl = it.siteUrl,
                     staffNumber = it.staffNumber,
@@ -108,22 +108,22 @@ class CompanyController {
     @Serializable
     private data class CompanyProfile (
         var alias: String,
-        var imageUrl: String?,
+        var imageUrl: String? = null,
         var titleHtml: String,
-        var descriptionHtml: String?,
+        var descriptionHtml: String? = null,
         var relatedData: RelatedData? = null,
         var statistics: CompanyStatistics,
-        var foundationDate: FoundationDate?,
-        var location: Location?,
-        var siteUrl: String?,
-        var staffNumber: String?,
-        var registrationDate: String?,
+        var foundationDate: FoundationDate? = null,
+        var location: Location? = null,
+        var siteUrl: String? = null,
+        var staffNumber: String? = null,
+        var habrRegistrationDate: String? = null,
 //        var representativeUser: RepresentativeUser?,
         var contacts: List<Contact>,
         var settings: Settings,
         var metadata: Metadata,
 //  var al aDeskSettings: Any? = null,
-        var careerAlias: String?
+        var careerAlias: String? = null
     ) {
 
         @Serializable
