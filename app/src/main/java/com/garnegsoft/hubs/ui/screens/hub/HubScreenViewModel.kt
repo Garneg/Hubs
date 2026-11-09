@@ -33,7 +33,7 @@ class HubScreenViewModel(val alias: String) : ViewModel() {
 	val articlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("hub" to alias, "sort" to "all"),
+		baseArgs = arrayOf("queryType" to "hubs", "hub" to alias, "sort" to "all"),
 		initialFilter = HubArticlesFilter(
 			showLast = true,
 			minRating = -1,
@@ -42,16 +42,16 @@ class HubScreenViewModel(val alias: String) : ViewModel() {
 		)
 	)
 	
-	val newsListModel = ArticlesListModel(
-		path = "articles",
-		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("hub" to alias, "news" to "true"),
-		initialFilter = HubsNewsFilter(
-			showLast = true,
-			minRating = -1,
-			period = FilterPeriod.Day
-		)
-	)
+//	val newsListModel = ArticlesListModel(
+//		path = "articles",
+//		coroutineScope = viewModelScope,
+//		baseArgs = arrayOf("hub" to alias, "news" to "true"),
+//		initialFilter = HubsNewsFilter(
+//			showLast = true,
+//			minRating = -1,
+//			period = FilterPeriod.Day
+//		)
+//	)
 	
 	val authorsListModel = UsersListModel(
 		path = "hubs/$alias/authors",

@@ -42,9 +42,8 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	val articlesModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("user" to userAlias),
+		baseArgs = arrayOf("queryType" to "users", "user" to userAlias),
 		initialFilter = UserArticlesFilter(false),
-		
 		)
 	
 	val commentsModel = CommentsListModel(
@@ -58,7 +57,7 @@ class UserScreenViewModel(val userAlias: String) : ViewModel() {
 	val bookmarksModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("user" to userAlias),
+		baseArgs = arrayOf("queryType" to "bookmarks", "user" to userAlias),
 		initialFilter = bookmarksFilter.value
 	)
 	val commentsBookmarksModel = CommentsListModel(

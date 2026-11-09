@@ -130,17 +130,17 @@ fun CompanyScreen(
 							}
 						}
 					}
-					if (companyProfile.statistics.newsCount > 0) {
-						map += "Новости ${formatLongNumbers(companyProfile.statistics.newsCount)}" to {
-							ArticlesListPage(
-								listModel = viewModel.blogNewsListModel,
-								lazyListState = newsLazyListState,
-								onArticleSnippetClick = onArticleClick,
-								onArticleAuthorClick = onUserClick,
-								onArticleCommentsClick = onCommentsClick
-							)
-						}
-					}
+//					if (companyProfile.statistics.newsCount > 0) {
+//						map += "Новости ${formatLongNumbers(companyProfile.statistics.newsCount)}" to {
+//							ArticlesListPage(
+//								listModel = viewModel.blogNewsListModel,
+//								lazyListState = newsLazyListState,
+//								onArticleSnippetClick = onArticleClick,
+//								onArticleAuthorClick = onUserClick,
+//								onArticleCommentsClick = onCommentsClick
+//							)
+//						}
+//					}
 					if (companyProfile.statistics.subscribersCount > 0) {
 						map += "Подписчики ${formatLongNumbers(companyProfile.statistics.subscribersCount)}" to {
 							UsersListPage(

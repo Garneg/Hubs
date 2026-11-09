@@ -259,28 +259,28 @@ fun MainScreen(
                                 }
                             )
                         })
-                        put("Новости", {
-                            ArticlesListPageWithFilter(
-                                listModel = viewModel.newsListModel,
-                                lazyListState = newsLazyListState,
-                                collapsingContentState = newsListFilterContentState,
-                                onArticleSnippetClick = onArticleClicked,
-                                onArticleAuthorClick = onUserClicked,
-                                onArticleCommentsClick = onCommentsClicked,
-                                filterDialog = { defVals, onDismiss, onDone ->
-                                    NewsFilterDialog(
-                                        defaultValues = defVals,
-                                        onDismiss = onDismiss,
-                                        onDone = {
-                                            coroutineScope.launch(Dispatchers.IO) {
-                                                FilterSavingController.saveNewsFilter(context, it)
-                                            }
-                                            onDone(it)
-                                        }
-                                    )
-                                }
-                            )
-                        })
+//                        put("Новости", {
+//                            ArticlesListPageWithFilter(
+//                                listModel = viewModel.newsListModel,
+//                                lazyListState = newsLazyListState,
+//                                collapsingContentState = newsListFilterContentState,
+//                                onArticleSnippetClick = onArticleClicked,
+//                                onArticleAuthorClick = onUserClicked,
+//                                onArticleCommentsClick = onCommentsClicked,
+//                                filterDialog = { defVals, onDismiss, onDone ->
+//                                    NewsFilterDialog(
+//                                        defaultValues = defVals,
+//                                        onDismiss = onDismiss,
+//                                        onDone = {
+//                                            coroutineScope.launch(Dispatchers.IO) {
+//                                                FilterSavingController.saveNewsFilter(context, it)
+//                                            }
+//                                            onDone(it)
+//                                        }
+//                                    )
+//                                }
+//                            )
+//                        })
                         put("Хабы", {
                             HubsListPage(
                                 listModel = viewModel.hubsListModel,
