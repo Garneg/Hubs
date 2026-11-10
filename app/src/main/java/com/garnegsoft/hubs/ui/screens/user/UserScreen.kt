@@ -150,8 +150,8 @@ fun UserScreen(
                                 onArticleSnippetClick = onArticleClicked,
                                 onArticleAuthorClick = onUserClicked,
                                 onArticleCommentsClick = onCommentsClicked,
-                                ignoreBlackList = true
-                            ) { defaultValues, onDismiss, onDone ->
+                                ignoreBlackList = true,
+                            filter = { /* TODO: Implement filters */ }) { defaultValues, onDismiss, onDone ->
                                 UserArticlesFilter(
                                     defaultValues = defaultValues,
                                     onDismiss = onDismiss,
@@ -186,7 +186,8 @@ fun UserScreen(
                                             collapsingContentState = bookmarksFilterContentState,
                                             onArticleSnippetClick = onArticleClicked,
                                             onArticleAuthorClick = onUserClicked,
-                                            onArticleCommentsClick = onCommentsClicked
+                                            onArticleCommentsClick = onCommentsClicked,
+									filter = {}
                                         ) { defaultValues, onDismiss, onDone ->
                                             UserBookmarksFilter(
                                                 defaultValues = defaultValues,
@@ -345,6 +346,5 @@ fun UserScreen(
             }
         }
     }
-
 
 }

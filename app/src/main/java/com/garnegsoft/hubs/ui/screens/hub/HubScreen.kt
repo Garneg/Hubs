@@ -86,7 +86,7 @@ fun HubScreen(
                 listOf(
                     "Профиль",
                     "Статьи",
-                    "Новости",
+                    //"Новости",
                     "Авторы",
                     "Компании"
                 )
@@ -97,14 +97,14 @@ fun HubScreen(
             val authorsLazyListState = rememberLazyListState()
             val companiesLazyListState = rememberLazyListState()
 
-            val pagerState = rememberPagerState { 5 }
+            val pagerState = rememberPagerState { 4 }
             HabrScrollableTabRow(pagerState = pagerState, tabs = tabs) { index, title ->
                 when (index) {
                     0 -> ScrollUpMethods.scrollNormalList(profilePageScrollState)
                     1 -> ScrollUpMethods.scrollLazyList(articlesLazyListState)
-                    2 -> ScrollUpMethods.scrollLazyList(newsLazyListState)
-                    3 -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
-                    4 -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
+                    -1 -> ScrollUpMethods.scrollLazyList(newsLazyListState)
+                    2 -> ScrollUpMethods.scrollLazyList(authorsLazyListState)
+                    3 -> ScrollUpMethods.scrollLazyList(companiesLazyListState)
                 }
             }
             val hub by viewModel.hub.observeAsState()
@@ -137,23 +137,23 @@ fun HubScreen(
                         }
                     }
                     // news
-                    2 -> {
-                        ArticlesListPageWithFilter(
-                            listModel = viewModel.newsListModel,
-                            lazyListState = newsLazyListState,
-                            onArticleSnippetClick = onArticleClick,
-                            onArticleAuthorClick = onUserClick,
-                            onArticleCommentsClick = onCommentsClick
-                        ) { defaultValues, onDismiss, onDone ->
-                            HubsNewsFilterDialog(
-                                defaultValues = defaultValues,
-                                onDismiss = onDismiss,
-                                onDone = onDone
-                            )
-                        }
-                    }
+//                    2 -> {
+//                        ArticlesListPageWithFilter(
+//                            listModel = viewModel.newsListModel,
+//                            lazyListState = newsLazyListState,
+//                            onArticleSnippetClick = onArticleClick,
+//                            onArticleAuthorClick = onUserClick,
+//                            onArticleCommentsClick = onCommentsClick
+//                        ) { defaultValues, onDismiss, onDone ->
+//                            HubsNewsFilterDialog(
+//                                defaultValues = defaultValues,
+//                                onDismiss = onDismiss,
+//                                onDone = onDone
+//                            )
+//                        }
+//                    }
                     // authors
-                    3 -> {
+                    2 -> {
                         UsersListPage(
                             listModel = viewModel.authorsListModel,
                             lazyListState = authorsLazyListState,
@@ -168,7 +168,7 @@ fun HubScreen(
                         )
                     }
                     // companies
-                    4 -> {
+                    3 -> {
                         CompaniesListPage(
                             listModel = viewModel.companiesListModel,
                             lazyListState = companiesLazyListState,

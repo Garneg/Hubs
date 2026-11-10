@@ -18,13 +18,14 @@ static def getDate() {
 android {
     namespace "com.garnegsoft.hubs"
     compileSdk = 37
+    compileSdk 37
 
     defaultConfig {
         applicationId "com.garnegsoft.hubs"
         minSdk 23
         targetSdk 37
         // TODO: Bump version
-        versionCode 19
+        versionCode 21
         versionName "3.0.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

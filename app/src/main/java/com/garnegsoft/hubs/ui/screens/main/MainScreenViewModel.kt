@@ -16,16 +16,18 @@ class MainScreenViewModel(
 	val myFeedArticlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
-		baseArgs = arrayOf("myFeed" to "true"),
+		baseArgs = arrayOf("queryType" to "feed"),
 		initialFilter = myFeedFilterInitialValue
 	)
 	
 	val articlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
+		baseArgs = arrayOf("queryType" to "articles"),
 		initialFilter = articlesFilterInitialValue
 	)
-	
+
+	// TODO: To look up for news in the website api
 	val newsListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
