@@ -11,10 +11,14 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.updateTransition
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
@@ -26,7 +30,9 @@ import androidx.compose.material.icons.outlined.Share
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -137,12 +143,21 @@ fun ArticleScreen(
         withContext(Dispatchers.IO) {
             delay(4000)
             if (position != lazyListState.firstVisibleItemIndex || position == lastReadArticlePosition) {
-                Log.e("LAZYLISTSTATE", "Cancel coroutine scope jobs because value changed witin 700ms or it's been already wrote")
+                Log.e(
+                    "LAZYLISTSTATE",
+                    "Cancel coroutine scope jobs because value changed witin 700ms or it's been already wrote"
+                )
                 this.cancel()
 
             }
-            Log.i("lazyliststate", "Wrote a current position to memory: ${lazyListState.firstVisibleItemIndex}")
-            HubsDataStore.LastRead.LastArticleReadPosition.edit(context, lazyListState.firstVisibleItemIndex)
+            Log.i(
+                "lazyliststate",
+                "Wrote a current position to memory: ${lazyListState.firstVisibleItemIndex}"
+            )
+            HubsDataStore.LastRead.LastArticleReadPosition.edit(
+                context,
+                lazyListState.firstVisibleItemIndex
+            )
         }
     }
 
@@ -156,7 +171,7 @@ fun ArticleScreen(
             onDismissRequest = { showPlayerDialog = false },
             mediaController = mediaController,
             onTitleClick = {},
-            onAuthorClick = { onAuthorClick(mediaController.mediaMetadata.toArticleMetadata().author)},
+            onAuthorClick = { onAuthorClick(mediaController.mediaMetadata.toArticleMetadata().author) },
             article = article,
             onCurrentPlayingClick = { onArticleClick(mediaController.mediaMetadata.toArticleMetadata().articleId) }
         )
@@ -194,7 +209,8 @@ fun ArticleScreen(
         sendIntent.setType("text/plain")
         Intent.createChooser(sendIntent, null)
     }
-    val articleSaved by viewModel.articleExists(LocalContext.current, articleId).collectAsState(false)
+    val articleSaved by viewModel.articleExists(LocalContext.current, articleId)
+        .collectAsState(false)
     var articleContentParsed by rememberSaveable {
         mutableStateOf(false)
     }
@@ -251,7 +267,10 @@ fun ArticleScreen(
                                         layoutDirection: LayoutDirection,
                                         popupContentSize: IntSize
                                     ): IntOffset {
-                                        return IntOffset(x = anchorBounds.right, y = anchorBounds.bottom)
+                                        return IntOffset(
+                                            x = anchorBounds.right,
+                                            y = anchorBounds.bottom
+                                        )
                                     }
 
                                 },
@@ -262,7 +281,8 @@ fun ArticleScreen(
                                         .graphicsLayer {
                                             alpha = showMoreMenuAlphaAnimated
 //                                            translationX = (((1f - showMoreMenuScaleAnimated) * size.width))
-                                            translationY = showMoreMenuOffsetAnimated.toPx() - (((1f - showMoreMenuScaleAnimated) * size.height))
+                                            translationY =
+                                                showMoreMenuOffsetAnimated.toPx() - (((1f - showMoreMenuScaleAnimated) * size.height))
                                             scaleY = showMoreMenuScaleAnimated
 //                                            scaleX = showMoreMenuScaleAnimated
                                         }
@@ -296,10 +316,16 @@ fun ArticleScreen(
                                         MenuItem(
                                             title = "Загрузить",
                                             icon = {
-                                                Icon(painterResource(R.drawable.article_download), contentDescription = "download article")
+                                                Icon(
+                                                    painterResource(R.drawable.article_download),
+                                                    contentDescription = "download article"
+                                                )
                                             },
                                             onClick = {
-                                                viewModel.saveArticle(id = articleId, context = context)
+                                                viewModel.saveArticle(
+                                                    id = articleId,
+                                                    context = context
+                                                )
                                                 showMoreMenu = false
                                             }
                                         )
@@ -308,7 +334,10 @@ fun ArticleScreen(
                                     MenuItem(
                                         title = "Послушать",
                                         icon = {
-                                            Icon(painterResource(id = R.drawable.headphones), contentDescription = "")
+                                            Icon(
+                                                painterResource(id = R.drawable.headphones),
+                                                contentDescription = ""
+                                            )
                                         },
                                         onClick = {
                                             showPlayerDialog = true
@@ -325,7 +354,9 @@ fun ArticleScreen(
         backgroundColor = if (MaterialTheme.colors.isLight) MaterialTheme.colors.surface else MaterialTheme.colors.background,
         snackbarHost = {
             val mediaController = LocalMediaController.current
-            var showPlayerSnackBar by remember { mutableStateOf(mediaController?.run { playbackState != Player.STATE_IDLE} ?: false) }
+            var showPlayerSnackBar by remember {
+                mutableStateOf(mediaController?.run { playbackState != Player.STATE_IDLE } ?: false)
+            }
             val playPauseButtonState = rememberPlayPauseButtonState(mediaController)
 
             LaunchedEffect(mediaController) {
@@ -348,15 +379,18 @@ fun ArticleScreen(
         },
         bottomBar = {
             article?.let { article ->
-                AnimatedVisibility(
-                    visible = revealArticleContent && articleContentParsed,
-                    enter = slideInVertically { it } + fadeIn()
-                ) {
-                    ArticleScreenBottomBar(
-                        article = article,
-                        enableBookmarkButton = userAuthenticated,
-                        onCommentsClick = onCommentsClick
-                    )
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    AnimatedVisibility(
+                        modifier = Modifier.widthIn(max = 600.dp).align(Alignment.CenterEnd),
+                        visible = revealArticleContent && articleContentParsed,
+                        enter = slideInVertically { it } + fadeIn()
+                    ) {
+                        ArticleScreenBottomBar(
+                            article = article,
+                            enableBookmarkButton = userAuthenticated,
+                            onCommentsClick = onCommentsClick
+                        )
+                    }
                 }
 
             }
@@ -396,7 +430,8 @@ fun ArticleScreen(
                             translationY = skeletonOffsetAnimated.toPx()
                         }
                         .fillMaxSize()
-                        .then(if (revealArticleContent) Modifier else Modifier.pointerInput(Unit) {}), articleId
+                        .then(if (revealArticleContent) Modifier else Modifier.pointerInput(Unit) {}),
+                    articleId
                 )
 //				Box(modifier = Modifier.fillMaxSize().background(Color.Red).pointerInput(Unit) {})
             }
@@ -437,25 +472,28 @@ fun ArticleScreen(
                 })
                 val density = LocalDensity.current
 
-                Box(modifier = Modifier.padding(it)) {
+                Box(modifier = Modifier
+                    .padding(it)
+                    .fillMaxSize()
+                    .pointerInput(Unit) {
+                        this.detectVerticalDragGestures { change, dragAmount ->
+                            lazyListState.dispatchRawDelta(
+                                change.scrollDelta.y
+                            )
+                        }
+                    }) {
                     AnimatedVisibility(
+                        modifier = Modifier.align(Alignment.TopCenter),
                         visible = articleContentParsed &&
                                 fontSize != null &&
-                                lineHeight != null&&
+                                lineHeight != null &&
 //                                (navigationTransition.currentState == EnterExitState.Visible ) &&
                                 !(article.isCorporative == true && company == null) &&
                                 revealArticleContent,
                         enter =
                             fadeIn(
-                            animationSpec = tween(durationMillis = 200, easing = EaseOut)
-                        ) +
-//                                    scaleIn(
-//                                        initialScale = 0.95f,
-//                                        animationSpec = tween(
-//                                            durationMillis = 200,
-//                                            easing = EaseOutQuad
-//                                        )
-//                                    ) +
+                                animationSpec = tween(durationMillis = 200, easing = EaseOut)
+                            ) +
                                     slideInVertically(
                                         animationSpec = tween(
                                             durationMillis = 250,
@@ -464,7 +502,7 @@ fun ArticleScreen(
                                     ) { (density.density * 32f).roundToInt() }
                     ) {
 
-                        SelectionContainer {
+                        SelectionContainer(modifier = Modifier.widthIn(max = 632.dp)) {
                             ArticleContent(
                                 article = article,
                                 onAuthorClicked = { onAuthorClick(article.author!!.alias) },
