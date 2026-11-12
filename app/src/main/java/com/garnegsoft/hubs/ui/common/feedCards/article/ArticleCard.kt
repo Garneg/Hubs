@@ -296,7 +296,7 @@ fun ArticleCard(
 			mutableStateOf(false)
 		}
 		
-		val hapticFeedback = LocalHapticFeedback.current
+
 		val bookmarkState = rememberBookmarkState(cardData.articleStatistics.bookmarks, cardData.articleBookmarked)
 
 		ArticleStats(
@@ -330,9 +330,7 @@ fun ArticleCard(
 			},
 			onShowSavingPopup = {
 				showPopup = true
-				hapticFeedback.performHapticFeedback(
-					HapticFeedbackType.ContextClick
-				)
+
 			},
 			showSavingPopup = showPopup,
 			bookmarksButtonEnabled = configuration.commentsButtonEnabled && !bookmarkState.throttleButton && toggleBookmark != null,

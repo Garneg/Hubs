@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -22,10 +25,17 @@ fun HubsTopAppBar(
     TopAppBar(
         title,
         WindowInsets.statusBars.union(WindowInsets.displayCutout),
-        modifier,
+        modifier.drawBehind {
+            drawRect(
+                brush = Brush.linearGradient(0f to backgroundColor.run { Color(red * 0.8f, green * 0.85f, blue * 0.85f) },
+                    1f to backgroundColor,
+                    end = Offset(0f, size.height)
+                    )
+            )
+        },
         navigationIcon,
         actions,
-        backgroundColor,
+        Color.Transparent,
         contentColor,
         elevation
     )

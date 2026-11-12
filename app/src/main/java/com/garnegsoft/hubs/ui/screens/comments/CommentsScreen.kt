@@ -2,8 +2,10 @@ package com.garnegsoft.hubs.ui.screens.comments
 
 import com.garnegsoft.hubs.api.article.ArticleController
 import android.content.Intent
+import android.view.animation.Animation
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.EaseInCubic
 import androidx.compose.animation.core.EaseOutQuad
 import androidx.compose.animation.core.RepeatMode
@@ -72,7 +74,9 @@ import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
 import com.garnegsoft.hubs.ui.screens.article.ElementSettings
 import com.garnegsoft.hubs.ui.screens.article.RenderHtml
 import com.garnegsoft.hubs.ui.screens.article.parseChildElements
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -409,6 +413,24 @@ fun CommentsScreen(
                         bookmarksButtonAllowedBeEnabled = userAuthenticated
                     )
 
+                val articleSnippetAnimatedAlpha = remember { Animatable(0f) }
+
+                LaunchedEffect(articleSnippet, allowDisplayFullContent) {
+                    if (allowDisplayFullContent && articleSnippet != null && articleSnippetAnimatedAlpha.value == 0f) {
+                        val anim = async(start = CoroutineStart.LAZY) {
+                            articleSnippetAnimatedAlpha.animateTo(
+                                targetValue = 1f,
+                                animationSpec = tween(durationMillis = 150, easing = EaseInCubic)
+                            )
+
+                        }
+                        withFrameMillis {
+                            anim.start()
+                        }
+
+                    }
+                }
+
                 val ratingIconPainter = painterResource(id = R.drawable.rating)
                 val replyIconPainter = painterResource(id = R.drawable.reply)
                 if (articleCardConfiguration != null) {
@@ -419,32 +441,30 @@ fun CommentsScreen(
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
                         item {
+                            val animatedAlpha by animateFloatAsState(if (allowDisplayFullContent && articleSnippet != null) 1f else 0f)//articleSnippetAnimatedAlpha.asState()
 
-
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = articleSnippet != null,
-                                enter = fadeIn(tween(durationMillis = 250, easing = EaseInCubic)),
-                                exit = fadeOut()
-                            ) {
-                                Box(
-                                    modifier = Modifier.padding(
-                                        horizontal = 8.dp,
-                                        vertical = 4.dp
-                                    )
-                                ) {
-
-
-                                    articleSnippet?.let {
-                                        ArticleCard(
-                                            cardData = articleSnippet,
-                                            onClick = onArticleClicked,
-                                            configuration = articleCardConfiguration,
-                                            onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
-                                            onCommentsClick = { },
-                                        )
+                            Box(
+                                modifier = Modifier
+                                    .graphicsLayer {
+                                        translationY = -20f + (20 * animatedAlpha)
+                                        alpha = animatedAlpha
                                     }
+                                    .padding(
+                                    horizontal = 8.dp,
+                                    vertical = 4.dp
+                                )
+                            ) {
+                                articleSnippet?.let {
+                                    ArticleCard(
+                                        cardData = articleSnippet,
+                                        onClick = onArticleClicked,
+                                        configuration = articleCardConfiguration,
+                                        onAuthorClick = { onUserClicked(articleSnippet.author!!.alias) },
+                                        onCommentsClick = { },
+                                    )
                                 }
                             }
+
                         }
 
                         if (commentsData == null && commentsLoaded) {
@@ -465,7 +485,7 @@ fun CommentsScreen(
                             }
                         }
 
-                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && commentsLoaded) {
+                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && commentsLoaded && articleSnippetAnimatedAlpha.value > 0.3f) {
                             itemsIndexed(
                                 items = commentsData?.pinnedComments ?: emptyList(),
                             ) { index, commentId ->
