@@ -434,7 +434,7 @@ fun MainNavigationGraph(
             ) {
                 val mediaController = LocalMediaController.current
                 LaunchedEffect(Unit) {
-                    mediaController?.pause()
+                    mediaController.value?.pause()
                 }
                 TextToSpeechSettingsScreen(
                     onBack = { navController.navigateBack() },

@@ -1,13 +1,14 @@
 package com.garnegsoft.hubs.api.tts
 
 import android.os.Bundle
+import androidx.compose.runtime.State
 import androidx.compose.runtime.compositionLocalOf
 import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionCommand
 
 
-val LocalMediaController = compositionLocalOf<MediaController?> { error("Media controller not provided")  }
+val LocalMediaController = compositionLocalOf<State<MediaController?>> { error("Media controller not provided")  }
 
 fun MediaController.loadArticle(articleId: Int) {
     sendCustomCommand(

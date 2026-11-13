@@ -240,10 +240,10 @@ fun MainScreen(
         snackbarHost = {
 
             var showPlaybackSnackElement by rememberSaveable { mutableStateOf(false) }
-            val playPauseButtonState = rememberPlayPauseButtonState(mediaController)
+            val playPauseButtonState = rememberPlayPauseButtonState(mediaController.value)
 
             LaunchedEffect(mediaController) {
-                mediaController?.addListener(
+                mediaController.value?.addListener(
                     object : Player.Listener {
                         override fun onPlaybackStateChanged(playbackState: Int) {
                             showPlaybackSnackElement = playbackState != Player.STATE_IDLE
@@ -257,14 +257,14 @@ fun MainScreen(
             PlayerDialog(
                 show = showPlayerDialog,
                 onDismissRequest = { showPlayerDialog = false },
-                mediaController = mediaController,
+                mediaController = mediaController.value,
                 onAuthorClick = {
-                    mediaController?.mediaMetadata?.author?.let {
+                    mediaController.value?.mediaMetadata?.author?.let {
                         onUserClicked(it.drop(1).toString())
                     }
                 },
                 onTitleClick = {
-                    mediaController?.mediaMetadata?.extras?.getInt("articleId")?.let {
+                    mediaController.value?.mediaMetadata?.extras?.getInt("articleId")?.let {
                                 if (it != 0) {
                                     onArticleClicked(it)
                                 }
@@ -285,7 +285,7 @@ fun MainScreen(
                         }
                         .navigationBarsPadding(),
                     playPauseButtonState = playPauseButtonState,
-                    mediaController = mediaController,
+                    mediaController = mediaController.value,
                     onClick = {
                         showPlayerDialog = true
                     }

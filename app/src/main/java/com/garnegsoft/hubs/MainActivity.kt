@@ -134,7 +134,7 @@ class MainActivity : ComponentActivity() {
             val cookies by cookiesFlow.collectAsState(initial = "")
 
             CompositionLocalProvider(
-                LocalMediaController provides mediaController.value,
+                LocalMediaController provides mediaController,
             ) {
 
                 key(cookies) {

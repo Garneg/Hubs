@@ -53,6 +53,7 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.state.rememberPlayPauseButtonState
 import com.garnegsoft.hubs.GoogleFontProvider
@@ -79,6 +80,7 @@ import org.jsoup.nodes.Element
 import kotlin.math.roundToInt
 
 
+@androidx.annotation.OptIn(UnstableApi::class)
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ArticleScreen(
@@ -169,11 +171,11 @@ fun ArticleScreen(
         PlayerDialog(
             show = showPlayerDialog,
             onDismissRequest = { showPlayerDialog = false },
-            mediaController = mediaController,
+            mediaController = mediaController.value,
             onTitleClick = {},
-            onAuthorClick = { onAuthorClick(mediaController.mediaMetadata.toArticleMetadata().author) },
+            onAuthorClick = { onAuthorClick(mediaController.value!!.mediaMetadata.toArticleMetadata().author) },
             article = article,
-            onCurrentPlayingClick = { onArticleClick(mediaController.mediaMetadata.toArticleMetadata().articleId) }
+            onCurrentPlayingClick = { onArticleClick(mediaController.value!!.mediaMetadata.toArticleMetadata().articleId) }
         )
     }
 
@@ -355,12 +357,12 @@ fun ArticleScreen(
         snackbarHost = {
             val mediaController = LocalMediaController.current
             var showPlayerSnackBar by remember {
-                mutableStateOf(mediaController?.run { playbackState != Player.STATE_IDLE } ?: false)
+                mutableStateOf(mediaController.value?.run { playbackState != Player.STATE_IDLE } ?: false)
             }
-            val playPauseButtonState = rememberPlayPauseButtonState(mediaController)
+            val playPauseButtonState = rememberPlayPauseButtonState(mediaController.value)
 
             LaunchedEffect(mediaController) {
-                mediaController?.addListener(object : Player.Listener {
+                mediaController.value?.addListener(object : Player.Listener {
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         showPlayerSnackBar = playbackState != Player.STATE_IDLE
                         super.onPlaybackStateChanged(playbackState)
@@ -370,7 +372,7 @@ fun ArticleScreen(
 
             if (showPlayerSnackBar) {
                 PlayerSnackbar(
-                    mediaController = mediaController,
+                    mediaController = mediaController.value,
                     playPauseButtonState = playPauseButtonState,
                     onClick = { showPlayerDialog = true }
                 )
