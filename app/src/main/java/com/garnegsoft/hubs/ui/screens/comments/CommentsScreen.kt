@@ -55,6 +55,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -68,6 +69,7 @@ import com.garnegsoft.hubs.api.comment.list.CommentsListController
 import com.garnegsoft.hubs.api.dataStore.AuthDataController
 import com.garnegsoft.hubs.api.utils.animateShortScrollToItem
 import com.garnegsoft.hubs.ui.common.HubsTopAppBar
+import com.garnegsoft.hubs.ui.common.combine
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCard
 import com.garnegsoft.hubs.ui.common.feedCards.article.ArticleCardConfiguration
 import com.garnegsoft.hubs.ui.common.feedCards.article.toArticleCardData
@@ -430,18 +432,21 @@ fun CommentsScreen(
 
                     }
                 }
-
+                var articleSnippetAnimated by rememberSaveable { mutableStateOf(false) }
                 val ratingIconPainter = painterResource(id = R.drawable.rating)
                 val replyIconPainter = painterResource(id = R.drawable.reply)
                 if (articleCardConfiguration != null) {
                     LazyColumn(
                         state = lazyListState,
                         modifier = Modifier.weight(1f),
-                        contentPadding = PaddingValues(vertical = 4.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp).combine(WindowInsets.navigationBars.asPaddingValues(),
+                            LayoutDirection.Ltr),
                         verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
                         item {
-                            val animatedAlpha by animateFloatAsState(if (allowDisplayFullContent && articleSnippet != null) 1f else 0f)//articleSnippetAnimatedAlpha.asState()
+                            val animatedAlpha by animateFloatAsState(if (allowDisplayFullContent && articleSnippet != null) 1f else 0f) {
+                                articleSnippetAnimated = true
+                            }
 
                             Box(
                                 modifier = Modifier
@@ -485,7 +490,7 @@ fun CommentsScreen(
                             }
                         }
 
-                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && commentsLoaded && articleSnippetAnimatedAlpha.value > 0.3f) {
+                        if (allowDisplayFullContent && (articleSnippet != null || !showArticleSnippet) && articleSnippetAnimated) {
                             itemsIndexed(
                                 items = commentsData?.pinnedComments ?: emptyList(),
                             ) { index, commentId ->
@@ -495,8 +500,6 @@ fun CommentsScreen(
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                         .animateItem()
                                 ) {
-
-
                                     CommentItem(
                                         modifier = Modifier,
                                         comment = comment,
