@@ -521,12 +521,7 @@ fun CommentsScreen(
                                         isPinned = true,
                                         onGoToPinnedComment = {
                                             coroutineScope.launch {
-                                                lazyListState.animateScrollToItem(
-                                                    commentsData!!.comments.indexOf(
-                                                        comment
-                                                    ) + itemOffsetCount,
-                                                    (-articleHeaderOffset).toInt()
-                                                )
+                                                screenState.scrollToComment(comment.id)
                                             }
                                         },
 
