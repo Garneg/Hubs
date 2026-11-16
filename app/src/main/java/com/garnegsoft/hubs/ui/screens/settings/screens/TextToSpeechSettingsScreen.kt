@@ -7,6 +7,7 @@ import android.speech.tts.UtteranceProgressListener
 import android.speech.tts.Voice
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
@@ -96,7 +97,7 @@ fun TextToSpeechSettingsScreen(
     var isTTSSpeaking by remember { mutableStateOf(false) }
 
     var ttsInitialized by remember(preferredEngine) { mutableStateOf(false) }
-    
+
     val tts = remember(preferredEngine) {
         TextToSpeech(context, {
             if (it == TextToSpeech.SUCCESS) {
@@ -169,11 +170,12 @@ fun TextToSpeechSettingsScreen(
                     .fillMaxWidth(),
             ) {
                 val preferredFontFamily by collectPreferenceAsState(HubsDataStore.Settings.ArticleScreen.FontFamily)
-                val fontFamily = preferredFontFamily?.let {
-
+                val fontFamily = if (preferredFontFamily.isNullOrBlank()) {
+                    FontFamily.Default
+                } else {
                     val googleFont = GoogleFont(preferredFontFamily!!)
                     FontFamily(Font(googleFont, GoogleFontProvider))
-                } ?: FontFamily.Default
+                }
 
                 Text(
                     text = "Это тест озвучки статей, послушайте, подходят ли вам эти настройки",
@@ -244,13 +246,22 @@ fun TextToSpeechSettingsScreen(
                                 onClick = {
                                     tts.stop()
                                     coroutineScope.launch(Dispatchers.IO) {
-                                        HubsDataStore.Settings.TextToSpeech.EnginePackageName.edit(context, engine.name)
+                                        HubsDataStore.Settings.TextToSpeech.EnginePackageName.edit(
+                                            context,
+                                            engine.name
+                                        )
                                     }
                                 },
                                 leadingIcon = {
                                     val pm = remember(context) { context.packageManager }
                                     val iconBitmap =
-                                        remember(pm) { pm.getDrawable(engine.name, engine.icon, null)?.toBitmap() }
+                                        remember(pm) {
+                                            pm.getDrawable(
+                                                engine.name,
+                                                engine.icon,
+                                                null
+                                            )?.toBitmap()
+                                        }
                                     iconBitmap?.let {
                                         Icon(
                                             bitmap = it.asImageBitmap(),
@@ -265,7 +276,10 @@ fun TextToSpeechSettingsScreen(
                                 },
                                 trailingIcon = if ((preferredEngine.isNullOrBlank() && tts.defaultEngine == engine.name) || preferredEngine == engine.name) {
                                     {
-                                        Icon(imageVector = Icons.Default.Done, contentDescription = null)
+                                        Icon(
+                                            imageVector = Icons.Default.Done,
+                                            contentDescription = null
+                                        )
                                     }
                                 } else {
                                     null
@@ -327,15 +341,14 @@ fun TextToSpeechSettingsScreen(
                                 items = if (showAllVoices) ttsVoicesList else ttsRuVoicesList
                             ) { voice ->
                                 MenuItem(
-                                    title = if (preferredVoice != null && voice.name == preferredVoice)
-                                        voice.name + " (выбрано)"
-                                    else
-                                        voice.name,
                                     onClick = {
                                         tts.stop()
                                         tts.voice = voice
                                         coroutineScope.launch(Dispatchers.IO) {
-                                            HubsDataStore.Settings.TextToSpeech.Voice.edit(context, voice.name)
+                                            HubsDataStore.Settings.TextToSpeech.Voice.edit(
+                                                context,
+                                                voice.name
+                                            )
                                         }
                                     },
                                     icon = {
@@ -350,7 +363,49 @@ fun TextToSpeechSettingsScreen(
                                                 contentDescription = null
                                             )
                                         }
-                                    })
+                                    },
+                                    trailingIcon = {
+                                        if (preferredVoice != null && voice.name == preferredVoice) {
+                                            Icon(
+                                                imageVector = Icons.Default.Done,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+                                ) {
+                                    Text(
+                                        text = voice.name,
+                                        fontWeight = FontWeight(animateIntAsState(if (preferredVoice != null && voice.name == preferredVoice) 600 else 400).value) //if (preferredVoice != null && voice.name == preferredVoice) FontWeight.W600 else FontWeight.W400
+                                    )
+                                }
+//                                MenuItem(
+//                                    title = if (preferredVoice != null && voice.name == preferredVoice)
+//                                        voice.name + " (выбрано)"
+//                                    else
+//                                        voice.name,
+//                                    onClick = {
+//                                        tts.stop()
+//                                        tts.voice = voice
+//                                        coroutineScope.launch(Dispatchers.IO) {
+//                                            HubsDataStore.Settings.TextToSpeech.Voice.edit(
+//                                                context,
+//                                                voice.name
+//                                            )
+//                                        }
+//                                    },
+//                                    icon = {
+//                                        if (voice.isNetworkConnectionRequired) {
+//                                            Icon(
+//                                                painter = painterResource(id = R.drawable.cloud),
+//                                                contentDescription = null
+//                                            )
+//                                        } else {
+//                                            Icon(
+//                                                painter = painterResource(id = R.drawable.cloud_off),
+//                                                contentDescription = null
+//                                            )
+//                                        }
+//                                    })
                             }
                         }
                     }

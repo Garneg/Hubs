@@ -14,7 +14,7 @@ class MainScreenViewModel(
 ) : ViewModel() {
 	
 	val myFeedArticlesListModel = ArticlesListModel(
-		path = "articles",
+		path = "articles/",
 		coroutineScope = viewModelScope,
 		baseArgs = arrayOf("queryType" to "feed"),
 		initialFilter = myFeedFilterInitialValue

@@ -2,6 +2,7 @@ package com.garnegsoft.hubs.ui.navigation
 
 import android.content.Intent
 import android.webkit.CookieManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -310,9 +311,11 @@ fun MainNavigationGraph(
 //                        }
                     }
                 }
-
+                if (id == null) {
+                    Toast.makeText(context, "Не удается открыть статью, id некорректен", Toast.LENGTH_LONG).show()
+                }
                 ArticleScreen(
-                    articleId = id!!,
+                    articleId = id ?: 0,
                     onBackButtonClicked = {
                         clearLastArticle()
                         navController.navigateBack()

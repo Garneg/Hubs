@@ -103,7 +103,7 @@ class ArticlesListController {
 			path: String,
 			args: Map<String, String>? = null
 		): HabrList<ArticleSnippet>? {
-			var raw = get(path, args)
+			var raw = get(path, args, CacheControl.FORCE_NETWORK)
 			
 			var result: HabrList<ArticleSnippet>? = null
 			

@@ -32,14 +32,6 @@ data class MyFeedFilter(
 ) : Filter {
 	override fun toArgsMap(): Map<String, String> {
 		return mutableMapOf<String, String>().apply {
-			var argsCount = 0
-			if (showArticles) {
-				this.put("types[0]", "articles")
-				argsCount++
-			}
-			if (showNews)
-				this.put("types[$argsCount]", "news")
-			
 			put(
 				"complexity", when (complexity) {
 					PublicationComplexity.None -> "all"
