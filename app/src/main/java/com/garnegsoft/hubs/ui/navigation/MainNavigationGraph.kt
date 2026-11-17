@@ -61,6 +61,7 @@ import androidx.core.net.toUri
 import androidx.navigation.Navigator
 import androidx.navigation.navArgument
 import androidx.navigation.navOptions
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 
 @Composable
@@ -79,11 +80,17 @@ fun MainNavigationGraph(
             CookieManager.getInstance().removeAllCookies(null)
             (activity as ComponentActivity).lifecycleScope.launch {
                 it?.let { result ->
+                    if (result.split("; ")
+                        .find { it.startsWith("habr_web_sid") } == null) {
+                        Toast.makeText(activity, "Не удалось получить данные для авторизации, обратитесь к разработчику", Toast.LENGTH_SHORT).show()
+                        FirebaseCrashlytics.getInstance().log("Session id cannot be found")
+                    }
+
                     HubsDataStore.Auth.edit(
                         context = navController.context,
                         pref = HubsDataStore.Auth.Cookies,
                         value = result.split("; ")
-                            .find { it.startsWith("connect_sid") }!!
+                            .find { it.startsWith("habr_web_sid") }!!
                     )
 
                     HubsDataStore.Auth.edit(
