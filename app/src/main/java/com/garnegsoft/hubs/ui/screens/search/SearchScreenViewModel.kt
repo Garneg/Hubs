@@ -28,6 +28,7 @@ class SearchScreenViewModel : ViewModel() {
 	val articlesListModel = ArticlesListModel(
 		path = "articles",
 		coroutineScope = viewModelScope,
+		baseArgs = arrayOf("queryType" to "search"),
 		initialFilter = ArticlesSearchFilter(
 			order = ArticlesSearchFilter.SearchFilterOrder.Relevance,
 			query = ""
