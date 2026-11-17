@@ -3,6 +3,7 @@ package com.garnegsoft.hubs.ui.navigation
 import android.content.Intent
 import android.net.Uri
 import android.webkit.CookieManager
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -73,51 +74,57 @@ fun MainNavigationGraph(
             CookieManager.getInstance().removeAllCookies(null)
             (activity as ComponentActivity).lifecycleScope.launch {
                 it?.let { result ->
-                    HubsDataStore.Auth.edit(
-                        context = navController.context,
-                        pref = HubsDataStore.Auth.Cookies,
-                        value = result.split("; ")
-                            .find { it.startsWith("connect_sid") }!!
-                    )
+                    if (result.split("; ")
+                            .find { it.startsWith("habr_web_sid") } == null) {
+                        Toast.makeText(activity, "Не удалось получить данные для авторизации", Toast.LENGTH_SHORT).show()
+                    } else {
+                        HubsDataStore.Auth.edit(
+                            context = navController.context,
+                            pref = HubsDataStore.Auth.Cookies,
+                            value = result.split("; ")
+                                .find { it.startsWith("habr_web_sid") }!!
+                        )
 
-                    HubsDataStore.Auth.edit(
-                        context = navController.context,
-                        pref = HubsDataStore.Auth.Authorized,
-                        value = true
-                    )
-                    HabrApi.initializeWithCookies(navController.context, result)
-                    val updateMeDataRequest = OneTimeWorkRequestBuilder<MeDataUpdateWorker>().build()
-                    WorkManager.getInstance(context).enqueue(updateMeDataRequest)
-                    launch(Dispatchers.IO) {
-                        MeController.getMe()?.let {
-                            val shortcut = ShortcutInfoCompat.Builder(
-                                navController.context,
-                                "bookmarks_shortcut"
-                            )
-                                .setIntent(
-                                    Intent(Intent.ACTION_VIEW).apply {
-                                        `package` =
-                                            BuildConfig.APPLICATION_ID
-                                        data =
-                                            Uri.parse("https://habr.com/users/${it.getOrNull()?.alias}/bookmarks")
-                                    }
+                        HubsDataStore.Auth.edit(
+                            context = navController.context,
+                            pref = HubsDataStore.Auth.Authorized,
+                            value = true
+                        )
+                        HabrApi.initializeWithCookies(navController.context, result)
+                        val updateMeDataRequest =
+                            OneTimeWorkRequestBuilder<MeDataUpdateWorker>().build()
+                        WorkManager.getInstance(context).enqueue(updateMeDataRequest)
+                        launch(Dispatchers.IO) {
+                            MeController.getMe()?.let {
+                                val shortcut = ShortcutInfoCompat.Builder(
+                                    navController.context,
+                                    "bookmarks_shortcut"
                                 )
-                                .setIcon(
-                                    IconCompat.createWithResource(
-                                        navController.context,
-                                        R.drawable.bookmarks_shortcut_icon
+                                    .setIntent(
+                                        Intent(Intent.ACTION_VIEW).apply {
+                                            `package` =
+                                                BuildConfig.APPLICATION_ID
+                                            data =
+                                                Uri.parse("https://habr.com/users/${it.getOrNull()?.alias}/bookmarks")
+                                        }
                                     )
+                                    .setIcon(
+                                        IconCompat.createWithResource(
+                                            navController.context,
+                                            R.drawable.bookmarks_shortcut_icon
+                                        )
+                                    )
+                                    .setShortLabel("Закладки")
+                                    .setLongLabel("Закладки")
+                                    .build()
+                                ShortcutManagerCompat.pushDynamicShortcut(
+                                    navController.context,
+                                    shortcut
                                 )
-                                .setShortLabel("Закладки")
-                                .setLongLabel("Закладки")
-                                .build()
-                            ShortcutManagerCompat.pushDynamicShortcut(
-                                navController.context,
-                                shortcut
-                            )
+
+                            }
 
                         }
-
                     }
                 }
             }
