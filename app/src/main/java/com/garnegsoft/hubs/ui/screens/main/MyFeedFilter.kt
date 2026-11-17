@@ -130,23 +130,23 @@ fun MyFeedFilter(
 		Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 			
 			
-			TitledColumn(title = "Тип публикации") {
-				Row(
-					modifier = Modifier.horizontalScroll(rememberScrollState()),
-					horizontalArrangement = Arrangement.spacedBy(8.dp)
-				) {
-					HubsFilterChip(
-						selected = showArticles,
-						onClick = { showArticles = !showArticles }) {
-						Text(text = "Статьи")
-					}
-					HubsFilterChip(
-						selected = showNews,
-						onClick = { showNews = !showNews }) {
-						Text(text = "Новости")
-					}
-				}
-			}
+//			TitledColumn(title = "Тип публикации") {
+//				Row(
+//					modifier = Modifier.horizontalScroll(rememberScrollState()),
+//					horizontalArrangement = Arrangement.spacedBy(8.dp)
+//				) {
+//					HubsFilterChip(
+//						selected = showArticles,
+//						onClick = { showArticles = !showArticles }) {
+//						Text(text = "Статьи")
+//					}
+//					HubsFilterChip(
+//						selected = showNews,
+//						onClick = { showNews = !showNews }) {
+//						Text(text = "Новости")
+//					}
+//				}
+//			}
 			
 			TitledColumn(title = "Порог рейтинга") {
 				Row(
